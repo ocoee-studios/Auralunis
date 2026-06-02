@@ -1,0 +1,75 @@
+{
+  "expo": {
+    "name": "Chronaura",
+    "slug": "chronaura",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "chronaura",
+    "userInterfaceStyle": "dark",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.ocoee.chronaura",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Chronaura uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view.",
+        "NSLocationWhenInUseUsageDescription": "Chronaura uses your location to calculate the sky, moon, planets, and visible events above you.",
+        "NSPhotoLibraryAddUsageDescription": "Chronaura saves sky captures and cosmic time-lapse exports only when you choose to save them.",
+        "NSMotionUsageDescription": "Chronaura uses motion sensors to align the sky lens with the direction your phone is pointing.",
+        "NSHealthShareUsageDescription": "Chronaura can optionally use Apple Watch heart-rate data to pulse ambient visuals during wind-down experiences."
+      }
+    },
+    "android": {
+      "package": "com.ocoee.chronaura",
+      "permissions": [
+        "CAMERA",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "BODY_SENSORS"
+      ],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo/chronaura-adaptive-foreground.png",
+        "backgroundColor": "#050B14"
+      }
+    },
+    "plugins": [
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Chronaura uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view."
+        }
+      ],
+      [
+        "expo-location",
+        {
+          "locationAlwaysAndWhenInUsePermission": "Chronaura uses your location to calculate the sky, moon, planets, and visible events above you."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "savePhotosPermission": "Chronaura saves sky captures and cosmic time-lapse exports only when you choose to save them."
+        }
+      ],
+      [
+        "expo-sensors",
+        {
+          "motionPermission": "Chronaura uses motion sensors to align Sky Lens with the direction your phone is pointing."
+        }
+      ],
+      "expo-notifications"
+    ],
+    "icon": "./assets/logo/chronaura-app-icon.png",
+    "splash": {
+      "image": "./assets/logo/chronaura-splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#050B14"
+    },
+    "extra": {
+      "revenueCatIosApiKey": "REPLACE_WITH_REVENUECAT_PUBLIC_IOS_API_KEY",
+      "revenueCatAndroidApiKey": "REPLACE_WITH_REVENUECAT_PUBLIC_ANDROID_API_KEY",
+      "openWeatherMapApiKey": "REPLACE_WITH_OPENWEATHERMAP_API_KEY"
+    }
+  }
+}

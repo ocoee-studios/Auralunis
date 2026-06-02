@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Chronaura Premium React Native Preview</title>
+<style>
+:root{
+  --bg:#05070D;--deep:#080B13;--panel:rgba(15,20,33,.74);--panel2:rgba(11,16,28,.88);
+  --gold:#C7A66A;--gold2:#F3D99B;--text:#F8F4EA;--muted:#A8AFBF;--faint:#747D90;
+  --border:rgba(199,166,106,.34);--silver:#D8DCE7;--blue:#78C8FF;
+}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:
+radial-gradient(circle at 18% 0%,rgba(199,166,106,.18),transparent 32%),
+radial-gradient(circle at 86% 18%,rgba(120,200,255,.10),transparent 38%),
+linear-gradient(180deg,#02040a,#080b13 58%,#02040a);color:var(--text)}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.22;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.5px);background-size:72px 72px}
+.page{display:grid;grid-template-columns:minmax(240px,330px) minmax(320px,1fr);gap:24px;width:min(1340px,calc(100% - 28px));margin:auto;padding:24px 0}
+aside{position:sticky;top:24px;align-self:start;border:1px solid rgba(199,166,106,.18);border-radius:32px;padding:22px;background:rgba(6,9,17,.76);backdrop-filter:blur(20px);max-height:calc(100vh - 48px);overflow:auto}
+.brand{text-align:center;border:1px solid rgba(199,166,106,.18);border-radius:28px;padding:20px 12px;background:rgba(199,166,106,.06)}
+.logo{width:92px;height:92px;border-radius:50%;border:2px solid rgba(199,166,106,.78);margin:auto;position:relative;box-shadow:0 0 44px rgba(199,166,106,.18)}
+.logo:before{content:"";position:absolute;inset:18px;border:1px solid rgba(216,220,231,.40);border-radius:50%}
+.logo:after{content:"";position:absolute;left:50%;top:50%;width:24px;height:24px;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,#fff7d7,var(--gold));box-shadow:0 0 28px rgba(199,166,106,.9)}
+.word{margin-top:14px;color:var(--gold2);font-family:Georgia,serif;letter-spacing:.22em;font-size:26px}.slogan{font-style:italic;color:var(--silver);margin-top:7px;font-size:13px}.descriptor{font-size:9px;letter-spacing:.22em;color:var(--faint);text-transform:uppercase;margin-top:8px}
+.sideTitle{margin:22px 0 8px;color:#fff;font-size:35px;line-height:.95;letter-spacing:-.06em}.sideTitle span{font-family:Georgia,serif;color:var(--gold2);font-style:italic;font-weight:500}
+.small{color:var(--muted);font-size:13px;line-height:1.52}.status{display:inline-flex;padding:8px 10px;border-radius:999px;border:1px solid var(--border);background:rgba(199,166,106,.11);color:var(--gold2);font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase;margin-top:14px}
+.steps{display:grid;gap:7px;margin-top:16px}.step{display:flex;justify-content:space-between;border-bottom:1px solid rgba(255,255,255,.07);padding:9px 0;color:var(--muted);font-size:12px}.step strong{color:var(--gold2)}
+.phoneWrap{display:flex;justify-content:center}
+.phone{position:relative;width:min(100%,510px);height:calc(100vh - 48px);min-height:720px;border-radius:40px;border:1px solid rgba(216,220,231,.15);background:rgba(4,6,13,.86);overflow:hidden;box-shadow:0 32px 100px rgba(0,0,0,.55)}
+.phone:before{content:"";position:absolute;inset:0;pointer-events:none;opacity:.22;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.3px);background-size:54px 54px}
+.topbar{position:absolute;top:0;left:0;right:0;height:62px;z-index:20;display:flex;justify-content:space-between;align-items:center;padding:15px 17px;background:rgba(4,7,14,.80);border-bottom:1px solid rgba(199,166,106,.14);backdrop-filter:blur(18px)}
+.miniBrand{font-size:13px;letter-spacing:.18em;font-weight:900;color:#fff}.miniSub{font-size:10px;color:var(--muted);margin-top:3px}.badge{font-size:9px;letter-spacing:.12em;color:var(--gold2);padding:7px 8px;border:1px solid rgba(199,166,106,.25);border-radius:999px;background:rgba(199,166,106,.08)}
+.stage{position:absolute;inset:62px 0 82px;overflow:auto;padding:18px 18px 28px;scrollbar-width:none}.stage::-webkit-scrollbar{display:none}
+.screen{display:none;animation:fade .22s ease both}.screen.active{display:block}@keyframes fade{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.eyebrow{color:var(--gold);font-size:10px;letter-spacing:.22em;font-weight:900;text-transform:uppercase}.title{font-size:37px;line-height:.98;letter-spacing:-.07em;margin:8px 0 0;color:#fff}.italic{font-family:Georgia,serif;color:var(--gold2);font-style:italic;font-weight:500}.subtitle{font-family:Georgia,serif;color:var(--gold2);font-style:italic;font-size:18px;margin-top:7px;line-height:1.35}.body{color:var(--muted);line-height:1.48;font-size:13px}
+.glass{border:1px solid rgba(199,166,106,.28);background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(10,15,26,.72));backdrop-filter:blur(22px);border-radius:25px;padding:16px;margin-top:14px;box-shadow:inset 0 1px 0 rgba(255,255,255,.08)}
+.astrolabe{height:230px;position:relative;display:grid;place-items:center}.ring{position:absolute;border-radius:50%;border:1px solid rgba(199,166,106,.55)}.r1{width:218px;height:218px}.r2{width:158px;height:158px;border-color:rgba(216,220,231,.32)}.r3{width:94px;height:94px}.crossh{position:absolute;width:206px;height:1px;background:rgba(199,166,106,.20)}.crossv{position:absolute;width:1px;height:206px;background:rgba(199,166,106,.20)}.core{width:34px;height:34px;border-radius:50%;background:radial-gradient(circle,#fff7d7,var(--gold));box-shadow:0 0 36px rgba(199,166,106,.82)}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}.pill{padding:7px 9px;border-radius:999px;background:rgba(199,166,106,.09);border:1px solid rgba(199,166,106,.22);font-size:11px;color:var(--gold2)}
+.card{border:1px solid rgba(199,166,106,.22);background:rgba(16,21,34,.75);border-radius:22px;padding:15px;margin-top:11px}.card h3{margin:0;color:#fff;font-size:17px}.card p{margin:7px 0 0;color:var(--muted);font-size:13px;line-height:1.45}.k{font-size:10px;letter-spacing:.15em;color:var(--gold);font-weight:900;margin-bottom:7px}.btn{width:100%;border-radius:15px;border:1px solid rgba(199,166,106,.34);padding:12px 10px;margin-top:11px;background:rgba(199,166,106,.11);color:var(--gold2);font-weight:800;cursor:pointer}.btn.gold{background:var(--gold);color:#17120B;border-color:var(--gold)}.btn:hover{filter:brightness(1.08)}
+.heroTitle{font-size:24px;color:#fff;font-weight:800;margin:5px 0}.timeline{display:grid;gap:7px;margin-top:8px}.line{display:flex;justify-content:space-between;color:var(--muted);font-size:13px}.line strong{color:var(--silver)}
+.skyLens{height:310px;position:relative;overflow:hidden;background:radial-gradient(circle at 68% 25%,rgba(120,200,255,.17),transparent 16%),linear-gradient(180deg,#050812,#131c35);border-radius:24px;border:1px solid rgba(199,166,106,.22);padding:17px;display:flex;flex-direction:column;justify-content:flex-end}.skyLens:before{content:"";position:absolute;inset:0;opacity:.56;background-image:radial-gradient(circle,#fff 0 1px,transparent 1.4px);background-size:38px 38px}.reticle{position:absolute;width:100px;height:100px;left:50%;top:42%;transform:translate(-50%,-50%);border-radius:50%;border:1px solid rgba(199,166,106,.72)}.band{position:absolute;left:-20px;right:-20px;bottom:76px;height:42px;border-radius:999px;background:rgba(243,217,155,.10);transform:rotate(-12deg)}
+.watch{height:265px;width:205px;margin:10px auto;border-radius:58px;padding:16px;border:4px solid rgba(216,220,231,.28);background:linear-gradient(145deg,#191f2f,#05070D)}.face{height:100%;border-radius:40px;border:1px solid rgba(199,166,106,.25);display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;background:radial-gradient(circle at 50% 38%,rgba(199,166,106,.13),transparent 45%)}
+.score{font-size:55px;color:var(--gold2);font-weight:900;line-height:1}.scoreLabel{font-size:10px;letter-spacing:.17em;color:var(--gold);font-weight:900;text-transform:uppercase;margin-bottom:8px}
+.nav{position:absolute;left:0;right:0;bottom:0;z-index:20;display:grid;grid-template-columns:repeat(5,1fr);padding:9px 8px 13px;background:rgba(4,7,14,.88);border-top:1px solid rgba(199,166,106,.17);backdrop-filter:blur(18px)}.nav button{border:0;border-radius:16px;background:transparent;color:var(--faint);padding:8px 2px;cursor:pointer;font-size:10px;font-weight:800}.nav button span{display:block;font-size:19px;margin-bottom:3px}.nav button.active{background:linear-gradient(135deg,var(--gold2),var(--gold));color:#17120B}
+.modal{display:none;position:absolute;z-index:50;inset:0;background:rgba(1,3,8,.82);align-items:center;justify-content:center;padding:17px}.modal.show{display:flex}.modalBox{width:100%;max-height:92%;overflow:auto;border-radius:26px;border:1px solid rgba(199,166,106,.36);background:rgba(8,12,22,.95);backdrop-filter:blur(24px);padding:17px}.close{float:right;border:0;background:transparent;color:var(--gold2);font-size:20px;cursor:pointer}
+.plan{border:1px solid rgba(216,220,231,.14);border-radius:18px;padding:13px;margin-top:10px;cursor:pointer}.plan.selected{border-color:var(--gold);background:rgba(199,166,106,.10)}.price{color:var(--gold2);font-weight:800;margin-top:5px}.fine{font-size:10px;color:var(--faint);line-height:1.45;margin-top:8px}.linkRow{text-align:center;color:var(--gold2);font-size:11px;margin-top:12px}
+.onboarding{position:absolute;inset:0;z-index:60;background:linear-gradient(180deg,#040611,#080b15);overflow:auto;padding:72px 20px 24px}.obStep{display:none}.obStep.active{display:block}.center{text-align:center}.input{width:100%;padding:13px 12px;border-radius:14px;border:1px solid rgba(199,166,106,.30);background:rgba(4,7,14,.62);color:#fff;margin-top:13px;font-size:14px}.ghostLink{text-align:center;color:var(--gold2);font-weight:800;font-size:13px;padding:14px 0;cursor:pointer}.hidden{display:none!important}
+.back{display:inline-flex;color:var(--gold2);font-weight:800;cursor:pointer;font-size:12px;margin-bottom:12px}
+@media(max-width:880px){.page{grid-template-columns:1fr}.phone{height:850px}.sideTitle{font-size:32px}aside{position:relative;top:auto;max-height:none}.phoneWrap{padding-bottom:20px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <aside>
+    <div class="brand">
+      <div class="logo"></div>
+      <div class="word">CHRONAURA</div>
+      <div class="slogan">Your time, written in the stars.</div>
+      <div class="descriptor">The Interactive Astral Clock</div>
+    </div>
+    <span class="status">Premium Expo Preview</span>
+    <h1 class="sideTitle">The refined <span>launch experience.</span></h1>
+    <p class="small">This click-through mirrors the new React Native / Expo replacement. It includes the premium onboarding, dynamic daily home, Tonight ritual, Sky Lens surfaces, Watch and widgets, Cosmic Vault, Membership & Prestige, and Privacy & Legal.</p>
+    <div class="steps">
+      <div class="step"><span>Launch tier</span><strong>Horizon+</strong></div>
+      <div class="step"><span>Monthly</span><strong>$4.99</strong></div>
+      <div class="step"><span>Annual</span><strong>$29.99</strong></div>
+      <div class="step"><span>Founder first year</span><strong>$24.99</strong></div>
+      <div class="step"><span>Trial</span><strong>7 days</strong></div>
+    </div>
+    <p class="small"><b style="color:#F3D99B">Start here:</b> use the onboarding buttons. After the reveal, choose Continue Exploring to enter the app or open the Horizon+ paywall.</p>
+  </aside>
+
+  <div class="phoneWrap">
+  <main class="phone">
+    <header class="topbar">
+      <div><div class="miniBrand">CHRONAURA</div><div class="miniSub">Your time, written in the stars.</div></div>
+      <div class="badge">Liquid Glass</div>
+    </header>
+
+    <section class="onboarding" id="onboarding">
+      <div class="obStep active" data-ob="0">
+        <div class="center">
+          <div class="eyebrow">Chronaura</div>
+          <h2 class="title">Your time, written in the <span class="italic">stars.</span></h2>
+          <div class="subtitle">The Interactive Astral Clock</div>
+          <div class="astrolabe"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="crossh"></div><div class="crossv"></div><div class="core"></div></div>
+          <p class="body">Begin with the moment your personal sky opened.</p>
+          <button class="btn gold" onclick="ob(1)">Begin My Sky</button>
+        </div>
+      </div>
+      <div class="obStep" data-ob="1">
+        <div class="glass">
+          <div class="eyebrow">Birth Sky · 01</div>
+          <h2 class="title">When did your universe <span class="italic">begin?</span></h2>
+          <p class="body">Enter your birthday to personalize the birth-sky reveal and daily rhythm.</p>
+          <input class="input" placeholder="MM / DD / YYYY" value="06 / 04 / 1978"/>
+          <button class="btn gold" onclick="ob(2)">Continue</button>
+        </div>
+      </div>
+      <div class="obStep" data-ob="2">
+        <div class="glass">
+          <div class="eyebrow">Birth Sky · 02</div>
+          <h2 class="title">Where did your sky <span class="italic">begin?</span></h2>
+          <p class="body">Location refines the celestial view. Permissions remain purpose-specific.</p>
+          <input class="input" placeholder="City, State or Country" value="Tennessee"/>
+          <button class="btn gold" onclick="ob(3)">Reveal My Birth Sky</button>
+        </div>
+      </div>
+      <div class="obStep" data-ob="3">
+        <div class="center">
+          <div class="eyebrow">Your Birth Sky</div>
+          <h2 class="title">A sky that belongs to your <span class="italic">beginning.</span></h2>
+          <div class="astrolabe"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="crossh"></div><div class="crossv"></div><div class="core"></div></div>
+          <div class="glass" style="text-align:left"><div class="heroTitle">June 4 · Tennessee</div><p class="body">Your personal celestial archive begins here. Tonight's sky is ready when you are.</p></div>
+          <button class="btn gold" onclick="openPaywall()">Unlock the Full Cosmos</button>
+          <div class="ghostLink" onclick="enterApp()">Continue Exploring</div>
+        </div>
+      </div>
+    </section>
+
+    <div class="stage">
+      <section class="screen active" data-screen="home">
+        <div class="eyebrow">Home · Thursday, June 4</div>
+        <h2 class="title">Living <span class="italic">Astrolabe.</span></h2>
+        <div class="subtitle">Your daily cosmic dashboard.</div>
+        <div class="glass">
+          <div class="astrolabe"><div class="ring r1"></div><div class="ring r2"></div><div class="ring r3"></div><div class="crossh"></div><div class="crossv"></div><div class="core"></div></div>
+          <div class="pills"><span class="pill">Moon · Waxing Gibbous</span><span class="pill">Illumination · 76%</span><span class="pill">Tonight Score · 91</span></div>
+        </div>
+        <div class="glass">
+          <div class="k">TONIGHT'S HIGHLIGHT</div><div class="heroTitle">Venus after dusk</div>
+          <p class="body">Venus becomes visible in 1h 18m.</p>
+          <button class="btn gold" onclick="openSub('tonight')">Open Tonight's Sky</button>
+        </div>
+        <div class="card"><h3>Daily Cosmic Alignment</h3><p>Notice the quiet signal beneath the noise. Give it one clear action.</p><button class="btn" onclick="toast('Saved to Cosmic Vault')">Save Alignment</button></div>
+        <div class="card"><h3>Tonight's Ritual</h3><p>Find the Moon, take three slow breaths, and save one line to your Vault.</p><button class="btn" onclick="openSub('tonight')">Begin Ritual</button></div>
+        <div class="card"><h3>Celestial Alarms</h3><p>Moonrise, sunset, visible-planet, and wind-down reminders.</p><button class="btn" onclick="toast('Celestial alarms enabled')">Enable Alarms</button></div>
+        <div class="card"><h3>Cosmic Vault</h3><p>Captures, notes, alignments, rituals, Astral Seals, and LifeSky moments.</p><button class="btn" onclick="openSub('vault')">Open Vault</button></div>
+        <div class="glass"><h3 style="margin-top:0">Today's Celestial Rhythm</h3><div class="timeline"><div class="line"><span>Sunrise</span><strong>6:22 AM</strong></div><div class="line"><span>Moonrise</span><strong>3:47 PM</strong></div><div class="line"><span>Sunset</span><strong>8:51 PM</strong></div><div class="line"><span>Best viewing</span><strong>8:42 – 10:18 PM</strong></div></div></div>
+      </section>
+
+      <section class="screen" data-screen="sky">
+        <div class="eyebrow">Sky</div><h2 class="title">Sky Lens + <span class="italic">Deep Sky.</span></h2><div class="subtitle">A privacy-safe observatory in your hand.</div>
+        <div class="skyLens glass"><div class="band"></div><div class="reticle"></div><div style="position:relative"><div class="k">SKY LENS READY</div><div class="heroTitle">Jupiter · Orion · Moon</div><p class="body">Camera, location, and motion alignment are requested only when you open Sky Lens.</p><button class="btn gold" onclick="toast('Sky Lens recentered')">Recenter Sky Lens</button></div></div>
+        <div class="card"><h3>Find Mode</h3><p>Guide toward the Moon, Venus, Jupiter, Orion, Sirius, Polaris, and the Milky Way Core.</p><button class="btn" onclick="toast('Find Mode pointed toward Venus')">Find Venus</button></div>
+        <div class="card"><h3>Cosmic X-Ray</h3><p>Reveal science, mythology, distance, and visual story behind a celestial object.</p><button class="btn" onclick="toast('Jupiter X-Ray opened')">Open X-Ray Lens</button></div>
+        <div class="card"><h3>Birth Sky Overlay</h3><p>Compare tonight's living sky with the sky connected to your beginning.</p><button class="btn" onclick="toast('Birth Sky Overlay shown')">Show Birth Overlay</button></div>
+        <div class="card"><h3>Deep Sky + Galaxy Mode</h3><p>Nebulae, galaxies, clusters, remnants, the Milky Way band, Galactic Center, and Great Rift.</p><button class="btn" onclick="toast('Milky Way mode activated')">Show Milky Way</button></div>
+      </section>
+
+      <section class="screen" data-screen="watch">
+        <div class="eyebrow">Watch + Widgets</div><h2 class="title">Your sky at a <span class="italic">glance.</span></h2><div class="subtitle">Useful, quiet, and tactile.</div>
+        <div class="glass">
+          <div class="watch"><div class="face"><div class="logo" style="width:56px;height:56px"></div><div style="color:var(--gold2);letter-spacing:.18em;font-size:11px;margin-top:10px">CHRONAURA</div><div style="font-size:36px;font-weight:900">91</div><div class="scoreLabel">Tonight Score</div></div></div>
+        </div>
+        <div class="card"><h3>Watch Face Gallery</h3><p>Seven refined layouts, five themes, moon stats, event countdowns, and the Midnight Gold lockup.</p><button class="btn" onclick="toast('Watch Face Gallery opened')">Browse Faces</button></div>
+        <div class="card"><h3>Portal Stack Widgets</h3><p>Moon phase, Tonight Score, visible planet, sunrise or moonrise countdown, celestial alarm, and Daily Alignment phrase.</p><button class="btn" onclick="toast('Widget previews opened')">Preview Widgets</button></div>
+        <div class="card"><h3>Taptic Astrolabe</h3><p>Subtle haptic feedback for alignment locks and meaningful celestial moments.</p><button class="btn" onclick="toast('Haptic astrolabe lock previewed')">Preview Haptic Lock</button></div>
+        <div class="card"><div class="k">FUTURE CONCEPT</div><h3>Desk Obelisk</h3><p>A StandBy ambient observatory and cosmic desk display for a later premium expansion.</p></div>
+      </section>
+
+      <section class="screen" data-screen="learn">
+        <div class="eyebrow">Learn</div><h2 class="title">Learn the <span class="italic">Cosmos.</span></h2><div class="subtitle">A living astronomy museum.</div>
+        <div class="card"><h3>Solar System</h3><p>Sun, planets, moons, orbits, asteroids, and comets.</p><button class="btn" onclick="toast('Solar System lesson opened')">Open Lesson</button></div>
+        <div class="card"><h3>Moon Phases</h3><p>Lunar cycle, moonrise, moonset, illumination, and observation notes.</p><button class="btn" onclick="toast('Moon Phases lesson opened')">Open Lesson</button></div>
+        <div class="card"><h3>88 Constellations</h3><p>Official constellations with seasons, lore, and science.</p><button class="btn" onclick="toast('Constellation lesson opened')">Open Lesson</button></div>
+        <div class="card"><h3>Stars</h3><p>Brightness, color, magnitude, life cycles, Sirius, Vega, and Polaris.</p><button class="btn" onclick="toast('Stars lesson opened')">Open Lesson</button></div>
+        <div class="card"><h3>Nebulae + Galaxies</h3><p>Orion Nebula, Andromeda, star clusters, and remnants.</p><button class="btn" onclick="toast('Deep Sky lesson opened')">Open Lesson</button></div>
+      </section>
+
+      <section class="screen" data-screen="settings">
+        <div class="eyebrow">Settings</div><h2 class="title">Control <span class="italic">Center.</span></h2><div class="subtitle">Manage your Chronaura experience.</div>
+        <div class="card"><h3>Membership & Prestige</h3><p>Horizon Free, Horizon+, Aura Pro preview, Sovereign waitlist, and spatial concepts.</p><button class="btn" onclick="openSub('membership')">Open Membership</button></div>
+        <div class="card"><h3>Privacy & Legal</h3><p>Permissions, Privacy Policy, Terms of Use, support, restore purchases, and subscription management.</p><button class="btn" onclick="openSub('legal')">Open Privacy & Legal</button></div>
+        <div class="card"><h3>Appearance</h3><p>Midnight Gold, Liquid Glass controls, reduced-transparency fallback, and reduced-motion support.</p><button class="btn" onclick="toast('Midnight Gold is active')">Review Appearance</button></div>
+        <div class="card"><h3>Sky Lens Calibration</h3><p>Figure-eight sensor calibration, recentering, and manual sky-map fallback.</p><button class="btn" onclick="toast('Calibration prompt opened')">Run Calibration</button></div>
+      </section>
+
+      <section class="screen" data-screen="tonight">
+        <div class="back" onclick="backTo('home')">‹ Back to Home</div>
+        <div class="eyebrow">Tonight</div><h2 class="title">What is special about the sky <span class="italic">tonight?</span></h2><div class="subtitle">A five-minute observatory ritual.</div>
+        <div class="glass"><div class="score">91</div><div class="scoreLabel">Tonight Score</div><p class="body">Best viewing window · 8:42 PM – 10:18 PM</p></div>
+        <div class="card"><div class="k">LOOK UP</div><h3>Venus after dusk</h3><p>Start at the western horizon as the sky darkens.</p></div>
+        <div class="glass"><h3 style="margin-top:0">Guided Sky Tour</h3><div class="timeline">
+          <div class="line"><strong>01</strong><span>Begin with the Moon.</span></div><div class="line"><strong>02</strong><span>Turn toward Venus.</span></div><div class="line"><strong>03</strong><span>Compare the brightest nearby star.</span></div><div class="line"><strong>04</strong><span>Save one observation.</span></div><div class="line"><strong>05</strong><span>Close with three breaths.</span></div>
+        </div><button class="btn gold" onclick="toast('Tonight saved to Cosmic Vault')">Save Tonight to My Vault</button></div>
+      </section>
+
+      <section class="screen" data-screen="vault">
+        <div class="back" onclick="backTo('home')">‹ Back to Home</div>
+        <div class="eyebrow">Personal Celestial Archive</div><h2 class="title">Cosmic <span class="italic">Vault.</span></h2><div class="subtitle">Your constellation of moments.</div>
+        <div class="glass"><div class="k">ALIGNMENT</div><div class="heroTitle">Daily Cosmic Alignment</div><p class="body">Notice the quiet signal beneath the noise. Give it one clear action.</p><div class="fine">Today · 8:42 PM</div></div>
+        <div class="glass"><div class="k">RITUAL</div><div class="heroTitle">Tonight's Guided Sky Tour</div><p class="body">Venus after dusk · Best viewing window 8:42 PM – 10:18 PM.</p><div class="fine">Today · 9:04 PM</div></div>
+      </section>
+
+      <section class="screen" data-screen="membership">
+        <div class="back" onclick="backTo('settings')">‹ Back to Settings</div>
+        <div class="eyebrow">Membership & Prestige</div><h2 class="title">Begin at the <span class="italic">horizon.</span></h2><div class="subtitle">Enter deeper layers as new experiences arrive.</div>
+        <div class="card"><div class="k">INCLUDED</div><h3>Horizon Free</h3><p>A welcoming free path for sky learning and daily discovery.</p></div>
+        <div class="glass" style="border-color:var(--gold)"><div class="k">AVAILABLE NOW · RECOMMENDED</div><div class="heroTitle">Horizon+</div><div class="price">$4.99/month · $29.99/year</div><p class="body">Eligible new subscribers receive a 7-day trial. Eligible founder annual offer: $24.99 for the first year.</p><button class="btn gold" onclick="openPaywall()">Unlock the Full Cosmos</button></div>
+        <div class="card"><div class="k">COMING LATER</div><h3>Aura Pro</h3><p>Richer Oracle experiences, advanced Cosmic X-Ray visualization, expanded deep-sky layers, Resonant Geometry, Aura Ambient, and premium personalization.</p><button class="btn" onclick="toast('Joined Aura Pro preview list')">Join Preview List</button></div>
+        <div class="card"><div class="k">WAITLIST · COMING LATER</div><h3>Sovereign</h3><p>Sovereign Sigil, Private Astral Network, Desk Obelisk direction, Watch Ultra tactile concepts, and future concierge layers.</p><button class="btn" onclick="toast('Joined Sovereign waitlist')">Join Sovereign Waitlist</button></div>
+        <div class="card"><div class="k">SPATIAL PREVIEW</div><h3>Stellar Portal · Spatial Matrix</h3><p>Future Apple Vision Pro passthrough observatory, immersive astrolabe, spatial archive, Aura Ambient casting, and Museum Screen Mode.</p></div>
+      </section>
+
+      <section class="screen" data-screen="legal">
+        <div class="back" onclick="backTo('settings')">‹ Back to Settings</div>
+        <div class="eyebrow">Privacy & Legal</div><h2 class="title">Clear, calm, and <span class="italic">respectful.</span></h2><div class="subtitle">Permissions remain purpose-specific.</div>
+        <div class="card"><h3>Privacy Policy</h3><p>Location, camera, motion, captures, Vault entries, notifications, subscriptions, analytics, AI, and future community data.</p><button class="btn" onclick="toast('Privacy Policy placeholder opened')">Open Privacy Policy</button></div>
+        <div class="card"><h3>Terms of Use</h3><p>Subscription terms, entertainment and reflective-use language, Sky Lens limitations, intellectual property, and future-concept separation.</p><button class="btn" onclick="toast('Terms of Use placeholder opened')">Open Terms of Use</button></div>
+        <div class="card"><h3>Support</h3><p>Help with Chronaura, billing, permissions, and the Cosmic Vault.</p><button class="btn" onclick="toast('Support page placeholder opened')">Open Support</button></div>
+        <div class="card"><h3>Restore Purchases</h3><p>Reconnect verified Horizon+ access from the App Store receipt.</p><button class="btn" onclick="toast('Restore flow placeholder opened')">Restore Purchases</button></div>
+        <div class="card"><h3>Manage Subscription</h3><p>Renewal and cancellation controls through Apple Account subscriptions.</p><button class="btn" onclick="toast('Manage Subscription opened')">Manage Subscription</button></div>
+      </section>
+    </div>
+
+    <nav class="nav">
+      <button class="active" data-tab="home"><span>☉</span>Home</button>
+      <button data-tab="sky"><span>⌕</span>Sky</button>
+      <button data-tab="watch"><span>◉</span>Watch</button>
+      <button data-tab="learn"><span>✦</span>Learn</button>
+      <button data-tab="settings"><span>⚙</span>Settings</button>
+    </nav>
+
+    <section class="modal" id="paywall">
+      <div class="modalBox">
+        <button class="close" onclick="closePaywall()">×</button>
+        <div class="eyebrow">Horizon+</div>
+        <h2 class="title">Unlock the Full <span class="italic">Cosmos.</span></h2>
+        <div class="subtitle">Your sky, your time, your daily alignment.</div>
+        <p class="body">✦ Live Sky Lens & Birth Sky Overlay<br>✦ Daily Cosmic Alignment & Tonight's Ritual<br>✦ Celestial Alarms, widgets & Watch experiences<br>✦ Full Celestial Archive & Astral Sound Baths</p>
+        <div class="plan selected" onclick="selectPlan(this)"><div class="k">BEST VALUE · FOUNDER OFFER</div><b>Annual Horizon+</b><div class="price">$24.99 for your first year</div><div class="fine">Eligible 7-day free trial · standard annual price $29.99/year</div></div>
+        <div class="plan" onclick="selectPlan(this)"><b>Monthly Horizon+</b><div class="price">$4.99/month</div><div class="fine">Eligible 7-day free trial · then $4.99/month</div></div>
+        <button class="btn gold" onclick="toast('Trial purchase flow placeholder opened')">Start My 7-Day Free Trial</button>
+        <div class="ghostLink" onclick="closePaywall();enterApp()">Continue Exploring</div>
+        <div class="linkRow">Restore Purchases · Terms of Use · Privacy Policy</div>
+        <div class="fine" style="text-align:center">7-day free trial for eligible new subscribers. Subscription renews automatically unless canceled. Cancel anytime in your Apple Account subscription settings.</div>
+      </div>
+    </section>
+
+    <section class="modal" id="toastModal">
+      <div class="modalBox" style="max-width:360px;text-align:center">
+        <div class="logo" style="width:58px;height:58px"></div>
+        <div class="heroTitle" id="toastText">Action complete</div>
+        <button class="btn gold" onclick="closeToast()">Done</button>
+      </div>
+    </section>
+  </main>
+  </div>
+</div>
+
+<script>
+const tabs=[...document.querySelectorAll('.nav button')];
+const screens=[...document.querySelectorAll('.screen')];
+function show(name){
+  screens.forEach(s=>s.classList.toggle('active',s.dataset.screen===name));
+  tabs.forEach(b=>b.classList.toggle('active',b.dataset.tab===name));
+  document.querySelector('.stage').scrollTop=0;
+}
+tabs.forEach(b=>b.onclick=()=>show(b.dataset.tab));
+function openSub(name){show(name)}
+function backTo(name){show(name)}
+function ob(n){document.querySelectorAll('.obStep').forEach(x=>x.classList.toggle('active',x.dataset.ob==n))}
+function enterApp(){document.getElementById('onboarding').classList.add('hidden');show('home')}
+function openPaywall(){document.getElementById('paywall').classList.add('show')}
+function closePaywall(){document.getElementById('paywall').classList.remove('show')}
+function selectPlan(el){document.querySelectorAll('.plan').forEach(x=>x.classList.remove('selected'));el.classList.add('selected')}
+function toast(msg){document.getElementById('toastText').textContent=msg;document.getElementById('toastModal').classList.add('show')}
+function closeToast(){document.getElementById('toastModal').classList.remove('show')}
+</script>
+</body>
+</html>

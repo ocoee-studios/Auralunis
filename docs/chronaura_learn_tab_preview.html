@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Chronaura Learn Tab Preview</title>
+<style>
+:root{--black:#0B0B12;--gold:#D4AF37;--gold2:#F6DC91;--silver:#C0C6D4;--muted:#8F99B3}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--silver);background:radial-gradient(circle at 20% 0%,rgba(212,175,55,.16),transparent 30%),linear-gradient(180deg,#020208,#0B0B12)}
+.wrap{width:min(1100px,calc(100% - 28px));margin:0 auto;padding:44px 0}
+.badge{display:inline-flex;padding:10px 14px;border-radius:999px;border:1px solid rgba(212,175,55,.34);background:rgba(212,175,55,.1);color:var(--gold2);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:850}
+h1{font-size:clamp(44px,7vw,88px);line-height:.9;color:#fff;letter-spacing:-.075em;margin:22px 0 12px}h1 span{font-family:Georgia,serif;color:var(--gold2);font-style:italic;font-weight:500}
+p{color:var(--muted);line-height:1.55}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:28px 0}.cat{border-radius:22px;padding:16px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08);cursor:pointer}.cat.active{background:rgba(212,175,55,.13);border-color:rgba(212,175,55,.3)}.cat b{display:block;color:#fff;margin-top:8px}.cat span{font-size:28px;color:var(--gold2)}
+.lesson{border-radius:26px;padding:20px;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.035));border:1px solid rgba(255,255,255,.08);margin-top:18px}.lesson h2{color:#fff;font-size:34px;letter-spacing:-.04em;margin:0 0 8px}.facts{display:grid;gap:8px;margin-top:14px}.fact{border-radius:16px;padding:11px;background:rgba(255,255,255,.045);border:1px solid rgba(255,255,255,.06)}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}.btn{border-radius:999px;padding:10px 12px;background:linear-gradient(135deg,var(--gold2),var(--gold));color:#17100a;font-weight:900}.btn.secondary{background:rgba(255,255,255,.06);color:var(--silver);border:1px solid rgba(255,255,255,.09)}
+@media(max-width:850px){.grid{grid-template-columns:1fr 1fr}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<span class="badge">New Dedicated Tab</span>
+<h1>Learn the <span>Cosmos.</span></h1>
+<p>Chronaura now gets a dedicated educational Learn tab for planets, constellations, stars, the Moon, Deep Sky, nebulae, galaxies, Milky Way / Galaxy Mode, and beginner lessons.</p>
+<div class="grid" id="cats"></div>
+<div class="lesson" id="lesson"></div>
+</div>
+<script>
+const cats=[
+["solar_system","☉","Solar System","The Sun, planets, moons, orbits, asteroids, and comets."],
+["moon","☾","Moon","Phases, moonrise, brightness, and lunar observing."],
+["planets","♃","Planets","Rocky worlds, gas giants, ice giants, and visibility."],
+["constellations","✦","Constellations","All 88 official constellations, seasons, and stories."],
+["stars","★","Stars","Magnitude, color, distance, and star life cycles."],
+["deep_sky","☄","Deep Sky","Nebulae, galaxies, clusters, and remnants."],
+["milky_way","◎","Milky Way","Galaxy band, core, dust lanes, and viewing windows."],
+["beginner_path","◇","30 Nights","A beginner course to learn the sky step by step."]
+];
+const lessons={
+solar_system:["What is the Solar System?","The Solar System is the Sun and everything bound to it by gravity.","The Sun contains most of the system’s mass.|Planets orbit along predictable paths.|Moons orbit planets while asteroids and comets follow their own paths."],
+moon:["Moon Phases","Moon phases happen because we see different portions of the Moon’s sunlit half as it orbits Earth.","New Moon means the sunlit side faces mostly away from Earth.|Full Moon means the sunlit side faces Earth.|The cycle takes about 29.5 days."],
+planets:["Inner vs Outer Planets","Mercury, Venus, Earth, and Mars are rocky inner planets. Jupiter, Saturn, Uranus, and Neptune are large outer planets.","Inner planets are smaller and rocky.|Outer planets are larger and colder.|Jupiter and Saturn are gas giants; Uranus and Neptune are ice giants."],
+constellations:["What are Constellations?","Constellations are named regions of the sky used for navigation, story, and seasonal tracking.","There are 88 official constellations.|Stars in a constellation are usually not physically close together.|Constellations change visibility with season and location."],
+stars:["Why are some stars brighter?","A star looks bright because of its true luminosity, distance, color, and sky conditions.","Magnitude measures apparent brightness.|Sirius is the brightest star in the night sky.|Star color gives clues about temperature."],
+deep_sky:["What are Nebulae?","Nebulae are clouds of gas and dust. Some are star nurseries; others are remnants of dying stars.","The Orion Nebula is a bright stellar nursery.|Dark nebulae block background light.|Planetary nebulae are shells from dying stars."],
+milky_way:["The Milky Way Band","The Milky Way band is the glowing plane of our galaxy seen from inside it.","The Milky Way Core is toward Sagittarius.|The Great Rift is a dark dust lane.|Best views need dark skies and low moon brightness."],
+beginner_path:["Night 1: Find the Moon","The first step in learning the sky is to locate, observe, and describe the Moon.","Notice phase, brightness, and position.|Check moonrise and moonset.|Save one Moon note to your Vault."]
+};
+let active="solar_system";
+function render(){
+ document.getElementById("cats").innerHTML=cats.map(c=>`<div class="cat ${c[0]===active?'active':''}" onclick="active='${c[0]}';render()"><span>${c[1]}</span><b>${c[2]}</b><p>${c[3]}</p></div>`).join("");
+ const l=lessons[active];
+ document.getElementById("lesson").innerHTML=`<h2>${l[0]}</h2><p>${l[1]}</p><div class="facts">${l[2].split("|").map(f=>`<div class="fact">${f}</div>`).join("")}</div><div class="actions"><div class="btn">Open in Sky Lens</div><div class="btn secondary">Open Archive Card</div><div class="btn secondary">Save Lesson</div></div>`;
+}
+render();
+</script>
+</body></html>

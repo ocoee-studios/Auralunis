@@ -1,0 +1,277 @@
+import React, { useState } from "react";
+import { Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { ScreenShell } from "@/components/ScreenShell";
+import { LogoMark } from "@/components/LogoMark";
+import { ChronauraColors, ChronauraPricing } from "@/theme/tokens";
+import { ChronauraBrand } from "@/data/brand";
+import type { ChronauraThemeMode } from "@/features/settings/SettingsTypes";
+import { useChronauraSettings } from "@/state/ChronauraSettingsContext";
+import { useChronauraVault } from "@/state/ChronauraVaultContext";
+import { DeviceDiagnosticsPanel } from "@/features/device-qa/DeviceDiagnosticsPanel";
+import { FutureLuxuryModulesPanel } from "@/features/future/FutureLuxuryModulesPanel";
+import { openChronauraSubscriptionManagement } from "@/services/RevenueCatService";
+
+type SettingRowProps = {
+  title: string;
+  description: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
+};
+
+function SettingRow({ title, description, value, onValueChange }: SettingRowProps) {
+  return (
+    <View style={styles.settingRow}>
+      <View style={{ flex: 1 }}>
+        <Text style={styles.settingTitle}>{title}</Text>
+        <Text style={styles.settingDescription}>{description}</Text>
+      </View>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: "rgba(255,255,255,0.14)", true: "rgba(212,175,55,0.42)" }}
+        thumbColor={value ? ChronauraColors.gold2 : ChronauraColors.silver}
+      />
+    </View>
+  );
+}
+
+function SettingsSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <View style={styles.section}>
+      <Text style={styles.sectionTitle}>{title}</Text>
+      {children}
+    </View>
+  );
+}
+
+export function SettingsScreen() {
+  const { settings, hydrated, updateSetting, resetSettings } = useChronauraSettings();
+  const { items, clearPrototypeVault } = useChronauraVault();
+  const [deviceDiagnosticsOpen, setDeviceDiagnosticsOpen] = useState(false);
+
+
+  async function handleManageSubscription() {
+    try {
+      const result = await openChronauraSubscriptionManagement();
+
+      if (result.status === "opened") return;
+
+      Alert.alert(
+        "Subscription management",
+        result.status === "not_configured"
+          ? "RevenueCat management is wired. Add the public RevenueCat SDK key before testing the App Store management link."
+          : "No active App Store subscription-management URL is available for this account yet."
+      );
+    } catch {
+      Alert.alert(
+        "Subscription management",
+        "The App Store subscription-management page could not be opened."
+      );
+    }
+  }
+
+  const themes: Array<[ChronauraThemeMode, string]> = [
+    ["midnight_gold", "Midnight Gold"],
+    ["soft_moon", "Soft Moon"],
+    ["deep_space", "Deep Space"],
+    ["system", "System"]
+  ];
+
+  return (
+    <ScreenShell title="Settings" subtitle="Control Center">
+      <View style={styles.hero}>
+        <LogoMark size={126} showWordmark showDescriptor centered />
+        <Text style={styles.heroCopy}>
+          {ChronauraBrand.tagline} Manage subscription, appearance, privacy, Sky Lens calibration,
+          notifications, Watch, widgets, learning preferences, and local data.
+        </Text>
+        <Text style={styles.syncState}>{hydrated ? "Settings saved locally" : "Loading local settings…"}</Text>
+      </View>
+
+      <SettingsSection title="Subscription">
+        <View style={styles.infoCard}>
+          <Text style={styles.infoTitle}>Chronaura Memberships</Text>
+          <Text style={styles.infoCopy}>
+            Horizon Free · Horizon+ {ChronauraPricing.horizonMonthly} or {ChronauraPricing.horizonAnnual} · Aura Pro {ChronauraPricing.auraMonthly} or {ChronauraPricing.auraAnnual}.
+          </Text>
+          <Text style={styles.infoCopy}>
+            Every paid launch tier includes a {ChronauraPricing.trial}. Sovereign remains a $299/year collector waitlist until its luxury features and fulfillment operations are ready.
+          </Text>
+          <Pressable
+            style={styles.actionButton}
+            onPress={handleManageSubscription}
+          >
+            <Text style={styles.actionButtonText}>Manage Subscription</Text>
+          </Pressable>
+        </View>
+      </SettingsSection>
+
+      <SettingsSection title="Appearance">
+        <View style={styles.themeGrid}>
+          {themes.map(([mode, label]) => {
+            const active = settings.themeMode === mode;
+            return (
+              <Pressable
+                key={mode}
+                style={[styles.themeTile, active && styles.themeTileActive]}
+                onPress={() => updateSetting("themeMode", mode)}
+              >
+                <Text style={styles.themeTitle}>{label}</Text>
+                <Text style={styles.themeSub}>{active ? "Active globally" : "Tap to apply"}</Text>
+              </Pressable>
+            );
+          })}
+        </View>
+      </SettingsSection>
+
+      <SettingsSection title="Notifications + Alarms">
+        <SettingRow title="Notifications" description="Master switch for reminders and celestial alerts." value={settings.notificationsEnabled} onValueChange={(value) => updateSetting("notificationsEnabled", value)} />
+        <SettingRow title="Celestial Alarms" description="Sunrise, moonrise, Venus visible, and stargazing-window alerts." value={settings.celestialAlarmsEnabled} onValueChange={(value) => updateSetting("celestialAlarmsEnabled", value)} />
+        <SettingRow title="Tonight’s Ritual Reminders" description="Gentle evening ritual reminders." value={settings.tonightRitualRemindersEnabled} onValueChange={(value) => updateSetting("tonightRitualRemindersEnabled", value)} />
+      </SettingsSection>
+
+      <SettingsSection title="Sky Lens">
+        <SettingRow title="Calibration Reminders" description="Prompt when compass or motion accuracy is poor." value={settings.skyLensCalibrationRemindersEnabled} onValueChange={(value) => updateSetting("skyLensCalibrationRemindersEnabled", value)} />
+
+        <Text style={styles.qualityLabel}>Sky Quality</Text>
+        <Text style={styles.qualityDescription}>
+          Affects the Tonight Score. Choose the best match for where you usually observe.
+        </Text>
+        <View style={styles.segmentRow}>
+          {(["urban", "suburban", "rural"] as const).map((quality) => (
+            <Pressable
+              key={quality}
+              style={[styles.segment, settings.skyQuality === quality && styles.segmentActive]}
+              onPress={() => updateSetting("skyQuality", quality)}
+            >
+              <Text style={[styles.segmentText, settings.skyQuality === quality && styles.segmentTextActive]}>
+                {quality.charAt(0).toUpperCase() + quality.slice(1)}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Sky Lens Calibration", "Move your phone slowly in a figure-eight, then recenter on a visible object such as the Moon.")}>
+          <Text style={styles.secondaryButtonText}>Run Sky Lens Calibration</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Manual Sky Map", "Open the Sky tab and choose Manual Sky Map for the privacy-safe fallback.")}>
+          <Text style={styles.secondaryButtonText}>Manual Sky Map Instructions</Text>
+        </Pressable>
+      </SettingsSection>
+
+      <SettingsSection title="Privacy + Data">
+        <SettingRow title="Local-First Vault" description="Keep Notes, LifeSky moments, lessons, and saved objects local by default." value={settings.localFirstVaultEnabled} onValueChange={(value) => updateSetting("localFirstVaultEnabled", value)} />
+        <SettingRow title="Cloud Sync" description="Optional future device sync. Off by default." value={settings.cloudSyncEnabled} onValueChange={(value) => updateSetting("cloudSyncEnabled", value)} />
+        <SettingRow title="AI Oracle Opt-In" description="Enable personalized Oracle briefings only when you choose." value={settings.aiOracleOptIn} onValueChange={(value) => updateSetting("aiOracleOptIn", value)} />
+        <Text style={styles.localCount}>{items.length} local prototype Vault items</Text>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Permissions", "Camera: Sky Lens only\nLocation: local sky calculations\nMotion: alignment\nPhotos: only when saving\nHealthKit: optional future wind-down feature")}>
+          <Text style={styles.secondaryButtonText}>Review Permissions</Text>
+        </Pressable>
+        <Pressable style={styles.dangerButton} onPress={() => clearPrototypeVault().then(() => Alert.alert("Prototype Vault", "Local prototype Vault items cleared."))}>
+          <Text style={styles.dangerButtonText}>Clear Prototype Vault</Text>
+        </Pressable>
+      </SettingsSection>
+
+      <SettingsSection title="Watch + Widgets">
+        <SettingRow title="Apple Watch Sync" description="Sync watch face state, Moon stats, and next event." value={settings.watchSyncEnabled} onValueChange={(value) => updateSetting("watchSyncEnabled", value)} />
+        <SettingRow title="Portal Stack Widgets" description="Moon, Tonight Score, Note, Event, Alarm, and mini astrolabe widgets." value={settings.widgetsEnabled} onValueChange={(value) => updateSetting("widgetsEnabled", value)} />
+      </SettingsSection>
+
+      <SettingsSection title="Audio + Learning">
+        <SettingRow title="Sound Bath Autoplay" description="Resume the last Astral Sound Bath during Lunar Wind-Down." value={settings.soundBathAutoplayEnabled} onValueChange={(value) => updateSetting("soundBathAutoplayEnabled", value)} />
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Learning Preferences", "Teacher Mode, difficulty, pronunciation help, quizzes, and saved progress direction prepared.")}>
+          <Text style={styles.secondaryButtonText}>Learning Preferences</Text>
+        </Pressable>
+      </SettingsSection>
+
+
+      <SettingsSection title="Future Luxury Modules">
+        <FutureLuxuryModulesPanel />
+      </SettingsSection>
+
+      <SettingsSection title="Native Device QA">
+        <Text style={styles.infoCopy}>
+          Run camera, location, compass, motion-sensor, photo-save, and haptic
+          checks on a physical iPhone before outdoor Sky Lens calibration.
+        </Text>
+        <Pressable
+          style={styles.secondaryButton}
+          onPress={() => setDeviceDiagnosticsOpen((previous) => !previous)}
+        >
+          <Text style={styles.secondaryButtonText}>
+            {deviceDiagnosticsOpen ? "Hide Device Diagnostics" : "Open Device Diagnostics"}
+          </Text>
+        </Pressable>
+        {deviceDiagnosticsOpen ? <DeviceDiagnosticsPanel /> : null}
+      </SettingsSection>
+
+      <SettingsSection title="Help + About">
+        <View style={styles.aboutCard}>
+          <LogoMark size={62} />
+          <View style={{ flex: 1 }}>
+            <Text style={styles.aboutTitle}>About Us</Text>
+            <Text style={styles.aboutCopy}>
+              Chronaura was created to turn the night sky into a living, personal experience. Blending astronomy, thoughtful design, and quiet daily rituals, we help you slow down, look up, and feel more connected to the universe around you.
+            </Text>
+          </View>
+        </View>
+
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Q&A / Help", "Astrolabe · Sky Lens · Learn · Vault · Watch · Widgets · Privacy · Subscription")}>
+          <Text style={styles.secondaryButtonText}>Open Q&A / Help</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("About Chronaura", `${ChronauraBrand.name} · ${ChronauraBrand.descriptor}\n${ChronauraBrand.tagline}`)}>
+          <Text style={styles.secondaryButtonText}>About Chronaura</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton} onPress={() => resetSettings().then(() => Alert.alert("Settings", "Local settings reset to safe defaults."))}>
+          <Text style={styles.secondaryButtonText}>Reset Settings</Text>
+        </Pressable>
+      </SettingsSection>
+    </ScreenShell>
+  );
+}
+
+const styles = StyleSheet.create({
+  hero: { borderRadius: 28, padding: 18, backgroundColor: "rgba(212,175,55,0.08)", borderWidth: 1, borderColor: "rgba(212,175,55,0.18)", marginBottom: 16 },
+  heroCopy: { color: ChronauraColors.silver, fontSize: 14, lineHeight: 21, marginTop: 14, textAlign: "center" },
+  syncState: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 10, textAlign: "center" },
+  section: { borderRadius: 24, padding: 14, backgroundColor: "rgba(255,255,255,0.04)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)", marginBottom: 14 },
+  sectionTitle: { color: ChronauraColors.gold2, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", fontWeight: "900", marginBottom: 10 },
+  infoCard: { borderRadius: 20, padding: 14, backgroundColor: "rgba(4,5,11,0.65)", borderWidth: 1, borderColor: "rgba(212,175,55,0.18)" },
+  infoTitle: { color: "#FFF", fontSize: 21, fontWeight: "900" },
+  infoCopy: { color: ChronauraColors.muted, fontSize: 13, lineHeight: 19, marginTop: 6 },
+  settingRow: { flexDirection: "row", gap: 12, alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.06)" },
+  settingTitle: { color: "#FFF", fontSize: 15, fontWeight: "800" },
+  settingDescription: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 17, marginTop: 3 },
+  themeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
+  themeTile: { width: "48%", borderRadius: 18, padding: 13, backgroundColor: "rgba(255,255,255,0.045)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)" },
+  themeTileActive: { backgroundColor: "rgba(212,175,55,0.12)", borderColor: "rgba(212,175,55,0.32)" },
+  themeTitle: { color: "#FFF", fontSize: 14, fontWeight: "900" },
+  themeSub: { color: ChronauraColors.muted, fontSize: 11, marginTop: 4 },
+  actionButton: { backgroundColor: ChronauraColors.gold2, borderRadius: 17, paddingVertical: 13, alignItems: "center", marginTop: 14 },
+  actionButtonText: { color: "#17100A", fontWeight: "900" },
+  secondaryButton: { borderRadius: 17, paddingVertical: 13, paddingHorizontal: 12, alignItems: "center", marginTop: 10, backgroundColor: "rgba(212,175,55,0.10)", borderWidth: 1, borderColor: "rgba(212,175,55,0.22)" },
+  secondaryButtonText: { color: "#FFF", fontWeight: "800" },
+  dangerButton: { borderRadius: 17, paddingVertical: 13, paddingHorizontal: 12, alignItems: "center", marginTop: 10, backgroundColor: "rgba(255,120,120,0.08)", borderWidth: 1, borderColor: "rgba(255,120,120,0.22)" },
+  dangerButtonText: { color: "#FFD2D2", fontWeight: "800" },
+  qualityLabel: { color: "#FFF", fontSize: 14, fontWeight: "800", marginTop: 12 },
+  qualityDescription: { color: ChronauraColors.silver, fontSize: 12, lineHeight: 17, marginTop: 4, marginBottom: 10 },
+  segmentRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
+  segment: { flex: 1, paddingVertical: 10, borderRadius: 14, alignItems: "center", backgroundColor: "rgba(212,175,55,0.06)", borderWidth: 1, borderColor: "rgba(212,175,55,0.15)" },
+  segmentActive: { backgroundColor: "rgba(212,175,55,0.20)", borderColor: ChronauraColors.gold2 },
+  segmentText: { color: ChronauraColors.silver, fontSize: 13, fontWeight: "700" },
+  segmentTextActive: { color: ChronauraColors.gold2 },
+  localCount: { color: ChronauraColors.gold2, fontSize: 12, marginTop: 12 },
+  aboutCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    borderRadius: 20,
+    padding: 14,
+    marginBottom: 4,
+    backgroundColor: "rgba(212,175,55,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(212,175,55,0.18)"
+  },
+  aboutTitle: { color: "#FFF", fontSize: 18, fontWeight: "900" },
+  aboutCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5 }
+});

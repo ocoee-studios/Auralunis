@@ -1,0 +1,14 @@
+{
+  "generated_at": "2026-05-29T20:42:01",
+  "all_accuracy_files_present": true,
+  "files": {
+    "src/features/sky-lens/accuracy/SkyLensAccuracyTypes.ts": true,
+    "src/features/sky-lens/accuracy/SkyLensMath.ts": true,
+    "src/features/sky-lens/accuracy/SkyLensMockTargets.ts": true,
+    "src/features/sky-lens/accuracy/SkyLensAccuracyRunner.ts": true,
+    "docs/SKY_LENS_ACCURACY_PLAN.md": true,
+    "qa/SKY_LENS_DEVICE_QA_CHECKLIST.md": true,
+    "qa/sky-lens-accuracy-check.js": true
+  },
+  "status": "PASS"
+}

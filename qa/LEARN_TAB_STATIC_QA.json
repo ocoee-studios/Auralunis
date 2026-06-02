@@ -1,0 +1,20 @@
+{
+  "generated_at": "2026-05-29T21:04:54",
+  "status": "PASS",
+  "missing_required": [],
+  "missing_imports": [],
+  "coverage": {
+    "Learn tab screen": true,
+    "Solar System": true,
+    "Moon": true,
+    "Planets": true,
+    "Constellations": true,
+    "Stars": true,
+    "Deep Sky": true,
+    "Nebulae": true,
+    "Galaxies": true,
+    "Milky Way": true,
+    "30 Nights": true
+  },
+  "tabs": "Learn tab added to RootTabs navigation"
+}

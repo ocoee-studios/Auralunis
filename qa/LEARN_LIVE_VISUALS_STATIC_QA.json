@@ -1,0 +1,15 @@
+{
+  "generated_at": "2026-05-29T21:22:13",
+  "status": "PASS",
+  "missing_required": [],
+  "missing_imports": [],
+  "coverage": {
+    "Solar System live visual": true,
+    "Moon live visual": true,
+    "Constellation live visual": true,
+    "Stars live visual": true,
+    "Deep Sky live visual": true,
+    "Milky Way live visual": true,
+    "30 Nights live visual": true
+  }
+}

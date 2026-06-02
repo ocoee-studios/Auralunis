@@ -1,0 +1,8 @@
+node_modules
+.expo
+dist
+web-build
+qa/typescript-stub-harness
+*.zip
+*.html
+.DS_Store

@@ -1,0 +1,50 @@
+import { useEffect, useMemo, useState } from "react";
+import { Accelerometer, Magnetometer } from "expo-sensors";
+import { pointingFromSensors, type Vec3 } from "./SkyLensOrientation";
+import type { CameraPointing } from "./SkyLensProjection";
+
+// expo-sensors' published types under this resolution only surface
+// isAvailableAsync; the streaming API exists at runtime. Typed locally to match.
+type SensorReading = { x: number; y: number; z: number };
+interface SensorModule {
+  setUpdateInterval: (intervalMs: number) => void;
+  addListener: (listener: (reading: SensorReading) => void) => { remove: () => void };
+}
+const Sensors = { Accelerometer, Magnetometer } as unknown as {
+  Accelerometer: SensorModule;
+  Magnetometer: SensorModule;
+};
+
+export interface DevicePointingState {
+  pointing: CameraPointing;
+  available: boolean;
+}
+
+// Streams accelerometer + magnetometer and derives the back camera's pointing
+// direction. The math is exact; real-world accuracy still depends on sensor
+// calibration, device FOV, and magnetic declination — tune those outdoors.
+export function useDevicePointing(updateMs = 120, magneticDeclinationDegrees = 0): DevicePointingState {
+  const [accelerometer, setAccelerometer] = useState<Vec3>({ x: 0, y: 0, z: 1 });
+  const [magnetometer, setMagnetometer] = useState<Vec3 | null>(null);
+
+  useEffect(() => {
+    Sensors.Accelerometer.setUpdateInterval(updateMs);
+    Sensors.Magnetometer.setUpdateInterval(updateMs);
+    const accelSub = Sensors.Accelerometer.addListener((reading) => setAccelerometer(reading));
+    const magSub = Sensors.Magnetometer.addListener((reading) => setMagnetometer(reading));
+
+    return () => {
+      accelSub.remove();
+      magSub.remove();
+    };
+  }, [updateMs]);
+
+  const pointing = useMemo<CameraPointing>(() => {
+    if (!magnetometer) {
+      return { azimuthDegrees: 0, altitudeDegrees: 0, rollDegrees: 0 };
+    }
+    return pointingFromSensors(accelerometer, magnetometer, magneticDeclinationDegrees);
+  }, [accelerometer, magnetometer, magneticDeclinationDegrees]);
+
+  return { pointing, available: magnetometer !== null };
+}

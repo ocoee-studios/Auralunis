@@ -1,0 +1,25 @@
+{
+  "generated_at": "2026-05-29T22:56:25",
+  "status": "PASS",
+  "missing_required": [],
+  "missing_imports": [],
+  "checks": {
+    "watch_face_gallery_present": true,
+    "theme_selector_present": true,
+    "complication_picker_present": true,
+    "curated_reset_present": true,
+    "seven_face_options": true,
+    "five_theme_options": true,
+    "complication_catalog": true,
+    "persistent_watch_face": true,
+    "persistent_watch_theme": true,
+    "persistent_complications": true,
+    "native_handoff_doc": true
+  },
+  "node_static_qa": {
+    "status": "PASS",
+    "stdout": "PASS App.tsx\nPASS src/navigation/RootTabs.tsx\nPASS src/screens/HomeScreen.tsx\nPASS src/screens/SkyScreen.tsx\nPASS src/screens/WatchScreen.tsx\nPASS src/features/watch/WatchFaceCatalog.ts\nPASS native-handoff/watchos/README_WATCH_FACE_GALLERY.md\nPASS src/screens/LearnScreen.tsx\nPASS src/screens/SettingsScreen.tsx\nPASS src/components/LogoMark.tsx\nPASS src/components/ScreenShell.tsx\nPASS src/features/paywall/TrialLaunchModal.tsx\nPASS src/features/permissions/SkyLensPermissionGate.tsx\nPASS src/features/sky-lens/ManualSkyMap.tsx\nPASS src/features/archive/DeepSkyCatalog.ts\nPASS src/state/ChronauraSettingsContext.tsx\nPASS src/state/ChronauraVaultContext.tsx\nPASS src/data/brand.ts\nPASS src/data/sourceOfTruth.ts\nPASS assets/logo/chronaura-stardust-emblem.png\nPASS assets/logo/chronaura-stardust-lockup.png\nPASS assets/logo/chronaura-app-icon.png\nPASS assets/logo/chronaura-splash.png\nPASS app.json\nPASS package.json\nPASS approved five-tab navigation\nPASS expo-camera permission hook\nPASS SkyScreen deep-sky/manual-map scaffold\nPASS watch face gallery, theme selector, and complication picker\nPASS settings persistence\nPASS prototype vault persistence\nPASS supported font weights\nPASS app icon config\nPASS splash config\nChronaura approved five-tab static QA passed.\n",
+    "stderr": ""
+  },
+  "platform_boundary": "Watch app layouts and saved complication preferences are wired. Real watchOS complication slot mapping and shareable Apple Watch templates require the native watchOS target."
+}

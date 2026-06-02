@@ -1,0 +1,12 @@
+{
+  "generated_at": "2026-05-29T21:30:13",
+  "status": "PASS",
+  "missing_imports": [],
+  "checks": {
+    "native_settings_has_logo_lockup": true,
+    "native_settings_has_logo_style": true,
+    "preview_has_logo_mark": true,
+    "preview_has_chronaura_wordmark": true,
+    "spec_mentions_logo": true
+  }
+}

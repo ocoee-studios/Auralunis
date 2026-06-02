@@ -1,0 +1,46 @@
+<!doctype html>
+<html><head><meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Chronaura Settings Tab Preview</title>
+<style>
+:root{--black:#0B0B12;--gold:#D4AF37;--gold2:#F6DC91;--silver:#C0C6D4;--muted:#8F99B3}
+*{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:radial-gradient(circle at 20% 0%,rgba(212,175,55,.16),transparent 30%),linear-gradient(180deg,#020208,#0B0B12);color:var(--silver)}
+.wrap{width:min(1120px,calc(100% - 28px));margin:0 auto;padding:42px 0}
+.badge{display:inline-flex;padding:9px 12px;border-radius:999px;border:1px solid rgba(212,175,55,.34);background:rgba(212,175,55,.1);color:var(--gold2);font-size:12px;letter-spacing:.18em;text-transform:uppercase;font-weight:850}
+.logo-lockup{display:flex;flex-direction:column;align-items:center;justify-content:center;margin:6px 0 22px;padding:22px;border-radius:32px;background:rgba(255,255,255,.045);border:1px solid rgba(212,175,55,.18)}
+.logo-mark{width:96px;height:96px;border-radius:50%;border:2px solid rgba(212,175,55,.72);position:relative;box-shadow:0 0 50px rgba(212,175,55,.18), inset 0 0 22px rgba(212,175,55,.08)}
+.logo-mark:before{content:"";position:absolute;inset:22px;border-radius:50%;border:1px solid rgba(192,198,212,.42)}
+.logo-mark:after{content:"";position:absolute;left:50%;top:50%;width:27px;height:27px;border-radius:50%;background:radial-gradient(circle,#fff7d0,#D4AF37);box-shadow:0 0 32px rgba(212,175,55,.75);transform:translate(-50%,-50%)}
+.wordmark{color:var(--gold2);font-family:Georgia,serif;letter-spacing:.22em;font-size:32px;margin-top:16px}
+.submark{color:var(--muted);letter-spacing:.02em;font-size:15px;margin-top:8px;font-style:italic}
+.descriptor{color:var(--muted);letter-spacing:.22em;text-transform:uppercase;font-size:10px;margin-top:10px}
+h1{font-size:clamp(42px,7vw,82px);line-height:.92;color:#fff;letter-spacing:-.075em;margin:18px 0 10px;text-align:center}h1 span{color:var(--gold2);font-family:Georgia,serif;font-style:italic;font-weight:500}
+p{color:var(--muted);line-height:1.55}.intro{text-align:center;max-width:760px;margin:0 auto}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:24px}
+.card{border-radius:26px;padding:18px;background:rgba(255,255,255,.055);border:1px solid rgba(255,255,255,.08)}.card h2{color:#fff;margin:0 0 8px;font-size:22px}.row{display:flex;justify-content:space-between;gap:12px;border-top:1px solid rgba(255,255,255,.07);padding:12px 0}.row:first-of-type{border-top:0}.pill{color:#17100a;background:linear-gradient(135deg,var(--gold2),var(--gold));border-radius:999px;padding:8px 10px;font-weight:900;font-size:12px}.switch{width:44px;height:24px;border-radius:999px;background:rgba(212,175,55,.35);position:relative;flex:0 0 auto}.switch:after{content:"";position:absolute;right:3px;top:3px;width:18px;height:18px;border-radius:50%;background:#F6DC91}
+@media(max-width:760px){.grid{grid-template-columns:1fr}.wordmark{font-size:25px}}
+</style></head><body>
+<div class="wrap">
+<span class="badge">Dedicated Tab Added</span>
+
+<div class="logo-lockup">
+  <div class="logo-mark"></div>
+  <div class="wordmark">CHRONAURA</div>
+  <div class="submark">Your time, written in the stars.</div>
+  <div class="descriptor">The Interactive Astral Clock</div>
+</div>
+
+<h1>Settings <span>Control Center.</span></h1>
+<p class="intro">Manage your subscription, appearance, notifications, Sky Lens calibration, privacy, watch, widgets, learning, and help from one dedicated place.</p>
+
+<div class="grid">
+<div class="card"><h2>Subscription</h2><p>$2.99/month Horizon+ or $5.99/month Aura Pro · $19.99/year Horizon+ or $49.99/year Aura Pro · $299/year Sovereign waitlist</p><span class="pill">Manage Subscription</span></div>
+<div class="card"><h2>Appearance</h2><div class="row"><span>Midnight Gold</span><span class="pill">Active</span></div><div class="row"><span>Soft Moon</span><span>Tap to use</span></div><div class="row"><span>Deep Space</span><span>Tap to use</span></div></div>
+<div class="card"><h2>Notifications + Alarms</h2><div class="row"><span>Notifications</span><span class="switch"></span></div><div class="row"><span>Celestial Alarms</span><span class="switch"></span></div><div class="row"><span>Tonight’s Ritual</span><span class="switch"></span></div></div>
+<div class="card"><h2>Sky Lens</h2><div class="row"><span>Calibration Reminders</span><span class="switch"></span></div><span class="pill">Run Calibration</span> <span class="pill">Manual Sky Map</span></div>
+<div class="card"><h2>Privacy + Data</h2><div class="row"><span>Local-first Vault</span><span class="switch"></span></div><div class="row"><span>Cloud Sync</span><span>Off by default</span></div><div class="row"><span>AI Oracle Opt-In</span><span>Off by default</span></div></div>
+<div class="card"><h2>Watch + Widgets</h2><div class="row"><span>Apple Watch Sync</span><span class="switch"></span></div><div class="row"><span>Portal Stack Widgets</span><span class="switch"></span></div></div>
+<div class="card"><h2>Audio + Learning</h2><div class="row"><span>Sound Bath Autoplay</span><span class="switch"></span></div><span class="pill">Learning Preferences</span></div>
+<div class="card"><h2>Help + About</h2><span class="pill">Open Q&A</span> <span class="pill">About Chronaura</span></div>
+</div>
+</div>
+</body></html>

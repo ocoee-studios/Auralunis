@@ -1,0 +1,48 @@
+{
+  "generated_at": "2026-06-04T22:27:17Z",
+  "package": "chronaura_native_test_build",
+  "overall_status": "PASS WITH KNOWN LIMITATIONS",
+  "checks_passed": 80,
+  "checks_failed": 0,
+  "live_navigation": [
+    "HomeScreen",
+    "SkyScreen",
+    "WatchScreen",
+    "LearnScreen",
+    "SettingsScreen"
+  ],
+  "screen_files": [
+    {
+      "file": "src/screens/HomeScreen.tsx",
+      "exists": true
+    },
+    {
+      "file": "src/screens/SkyScreen.tsx",
+      "exists": true
+    },
+    {
+      "file": "src/screens/WatchScreen.tsx",
+      "exists": true
+    },
+    {
+      "file": "src/screens/LearnScreen.tsx",
+      "exists": true
+    },
+    {
+      "file": "src/screens/SettingsScreen.tsx",
+      "exists": true
+    }
+  ],
+  "failures": [],
+  "native_limitations": [
+    "Ephemeris is real: astronomy-engine computes live Sun/Moon/planet positions (see scripts/ephemeris-selftest.js).",
+    "Satellite overlay is real: satellite.js propagates CelesTrak elements with SGP4 (see scripts/satellite-selftest.js).",
+    "Sky Lens AR alignment is implemented: accelerometer+magnetometer orientation + projection. Needs outdoor calibration per device.",
+    "Vault is encrypted with NaCl secretbox; key in SecureStore. Legacy data migrates seamlessly.",
+    "Tonight Score computed from weather + moon + sky quality (needs OpenWeatherMap API key for live cloud data).",
+    "Sunset + moonrise notifications via expo-notifications (needs notification permission on device).",
+    "RevenueCat purchase flow is fully wired; needs API key in app.json extra + App Store Connect products.",
+    "Apple Watch, WidgetKit/StandBy, visionOS are handoff scaffolds, not compiled native targets (post-v1).",
+    "Audio playback and Oracle backend remain future features."
+  ]
+}

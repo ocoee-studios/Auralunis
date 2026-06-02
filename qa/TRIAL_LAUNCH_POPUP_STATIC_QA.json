@@ -1,0 +1,16 @@
+{
+  "generated_at": "2026-05-29T22:15:18",
+  "status": "PASS",
+  "missing_required": [],
+  "checks": {
+    "modal_component_present": true,
+    "first_open_storage_key_present": true,
+    "asyncstorage_dependency_present": true,
+    "trial_button_present": true,
+    "continue_exploring_present": true,
+    "restore_purchases_present": true,
+    "annual_price_present": true,
+    "monthly_price_present": true
+  },
+  "behavior": "Show on first open, save local seen flag, do not show aggressively on every launch."
+}

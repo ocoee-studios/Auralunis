@@ -1,0 +1,6 @@
+Cinzel-Regular.ttf
+Montserrat-Light.ttf
+Montserrat-Regular.ttf
+Montserrat-Medium.ttf
+Montserrat-SemiBold.ttf
+Montserrat-Bold.ttf

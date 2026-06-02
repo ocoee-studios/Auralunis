@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-05-29T21:38:12",
+  "status": "PASS",
+  "checks": {
+    "preview_tagline_count": 1,
+    "preview_descriptor_count": 1,
+    "native_settings_tagline_reference_count": 1
+  },
+  "fix": "Removed duplicate tagline/descriptor from Settings preview and normalized the SettingsScreen branding block."
+}

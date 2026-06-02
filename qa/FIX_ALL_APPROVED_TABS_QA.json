@@ -1,0 +1,35 @@
+{
+  "generated_at": "2026-05-29T22:45:40",
+  "status": "PASS",
+  "active_tabs": [
+    "Home",
+    "Sky",
+    "Watch",
+    "Learn",
+    "Settings"
+  ],
+  "missing_required": [],
+  "missing_imports": [],
+  "font_weight_hits": [],
+  "checks": {
+    "required_files_present": true,
+    "imports_resolve_statically": true,
+    "active_tabs_exact": true,
+    "camera_hook_fixed": true,
+    "manual_map_added": true,
+    "deep_sky_wired": true,
+    "settings_context": true,
+    "vault_context": true,
+    "star_dust_logo": true,
+    "no_unsupported_font_weight": true
+  },
+  "validation_note": "Static QA passed. Dependency installation/typecheck could not be completed in this runtime; run npm install and npm run typecheck locally.",
+  "post_stub_cleanup": [
+    "Legacy ExploreScreen compile compatibility restored through optional Manual Map callback.",
+    "DeepSkyGlowVisual dynamic style lookup replaced with strict-safe style array."
+  ],
+  "lightweight_typescript_syntax_pass": "PASS",
+  "lightweight_typescript_syntax_note": "A strict local TypeScript pass with external-library stubs completed successfully. Run npm install and npm run typecheck in the real development environment for full dependency-aware validation.",
+  "node_static_qa": "PASS",
+  "sky_lens_accuracy_scaffold_qa": "PASS"
+}
