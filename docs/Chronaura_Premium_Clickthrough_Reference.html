@@ -79,7 +79,7 @@ aside{position:sticky;top:24px;align-self:start;border:1px solid rgba(199,166,10
       <div class="badge">Liquid Glass</div>
     </header>
 
-    <section class="onboarding" id="onboarding">
+    <section class="onboarding" id="onboarding"><div style="position:absolute;top:12px;right:16px;z-index:99"><span onclick="enterApp()" style="color:var(--gold2);font-size:11px;font-weight:800;cursor:pointer;padding:6px 10px;border:1px solid rgba(199,166,106,.3);border-radius:99px;background:rgba(199,166,106,.08)">Skip to App ›</span></div>
       <div class="obStep active" data-ob="0">
         <div class="center">
           <div class="eyebrow">Chronaura</div>
@@ -234,7 +234,7 @@ aside{position:sticky;top:24px;align-self:start;border:1px solid rgba(199,166,10
         <div class="plan selected" onclick="selectPlan(this)"><div class="k">BEST VALUE · FOUNDER OFFER</div><b>Annual Horizon+</b><div class="price">$24.99 for your first year</div><div class="fine">Eligible 7-day free trial · standard annual price $29.99/year</div></div>
         <div class="plan" onclick="selectPlan(this)"><b>Monthly Horizon+</b><div class="price">$4.99/month</div><div class="fine">Eligible 7-day free trial · then $4.99/month</div></div>
         <button class="btn gold" onclick="toast('Trial purchase flow placeholder opened')">Start My 7-Day Free Trial</button>
-        <div class="ghostLink" onclick="closePaywall();enterApp()">Continue Exploring</div>
+        <div class="ghostLink" onclick="closePaywall();enterApp()">Continue Exploring</div><div onclick="closePaywall();enterApp()" style="color:var(--faint);font-size:10px;cursor:pointer;padding:6px;text-align:center">Skip (testing only)</div>
         <div class="linkRow">Restore Purchases · Terms of Use · Privacy Policy</div>
         <div class="fine" style="text-align:center">7-day free trial for eligible new subscribers. Subscription renews automatically unless canceled. Cancel anytime in your Apple Account subscription settings.</div>
       </div>
