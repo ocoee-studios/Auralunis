@@ -5,14 +5,15 @@
 
 import React, { type ReactNode } from "react";
 import { Platform, StyleSheet, View } from "react-native";
-import type { ViewProps } from "react-native";
 import { ChronauraColors } from "@/theme/tokens";
 
 // expo-blur typed accessor (same resolution pattern as other Expo packages).
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyStyle = any;
 let BlurViewComponent: React.ComponentType<{
   intensity?: number;
   tint?: string;
-  style?: ViewProps["style"];
+  style?: AnyStyle;
   children?: ReactNode;
 }> | null = null;
 
@@ -31,7 +32,7 @@ type GlassPanelProps = {
   /** "default" | "light" | "dark". Default "dark" for Midnight Gold theme. */
   tint?: "default" | "light" | "dark";
   /** Optional additional styles. */
-  style?: ViewProps["style"];
+  style?: AnyStyle;
   /** Use a gold-accented border instead of the default subtle border. */
   accent?: boolean;
 };
