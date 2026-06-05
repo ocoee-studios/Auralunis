@@ -2,6 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
+import { GlassPanel } from "@/components/GlassPanel";
 import { SkyLensPermissionGate } from "@/features/permissions/SkyLensPermissionGate";
 import { SkyLensPlaceholder } from "@/features/sky-lens/SkyLensPlaceholder";
 import { ManualSkyMap } from "@/features/sky-lens/ManualSkyMap";
@@ -58,7 +59,7 @@ export function SkyScreen() {
         onPress={() => setManualMapOpen(true)}
       />
 
-      <View style={styles.skyCard}>
+      <GlassPanel accent style={{ marginBottom: 12 }}>
         <Text style={styles.sectionLabel}>TONIGHT’S SKY · LIVE</Text>
         <Text style={styles.sectionTitle}>Real positions for your location</Text>
         {sky.bodies.map((body) => (
@@ -74,7 +75,7 @@ export function SkyScreen() {
         {status === "fallback" ? (
           <Text style={styles.skyHint}>Default location · enable location for your exact sky.</Text>
         ) : null}
-      </View>
+      </GlassPanel>
 
       <FeatureCard
         title="Find Mode"
@@ -109,13 +110,13 @@ export function SkyScreen() {
 
       <AstrophotographyPredictorPanel />
 
-      <View style={styles.sectionCard}>
+      <GlassPanel style={{ marginBottom: 12 }}>
         <Text style={styles.sectionLabel}>DEEP SKY HIGHLIGHTS</Text>
         <Text style={styles.sectionTitle}>Nebulae, galaxies, clusters, and remnants</Text>
         <Text style={styles.sectionCopy}>
           Most deep-sky objects need dark skies, binoculars, or a telescope. Chronaura shows their true sky location honestly.
         </Text>
-      </View>
+      </GlassPanel>
 
       {featuredDeepSkyObjects.slice(0, 8).map((object) => (
         <FeatureCard

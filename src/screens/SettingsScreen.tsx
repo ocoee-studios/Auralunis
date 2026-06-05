@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { GlassPanel } from "@/components/GlassPanel";
 import { ScreenShell } from "@/components/ScreenShell";
 import { LogoMark } from "@/components/LogoMark";
 import { ChronauraColors, ChronauraPricing } from "@/theme/tokens";
@@ -89,7 +90,7 @@ export function SettingsScreen() {
       </View>
 
       <SettingsSection title="Subscription">
-        <View style={styles.infoCard}>
+        <GlassPanel accent>
           <Text style={styles.infoTitle}>Chronaura Memberships</Text>
           <Text style={styles.infoCopy}>
             Horizon Free · Horizon+ {ChronauraPricing.horizonMonthly} or {ChronauraPricing.horizonAnnual} · Aura Pro {ChronauraPricing.auraMonthly} or {ChronauraPricing.auraAnnual}.
@@ -103,7 +104,7 @@ export function SettingsScreen() {
           >
             <Text style={styles.actionButtonText}>Manage Subscription</Text>
           </Pressable>
-        </View>
+        </GlassPanel>
       </SettingsSection>
 
       <SettingsSection title="Appearance">

@@ -2,6 +2,7 @@ import React from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
+import { GlassPanel } from "@/components/GlassPanel";
 import { LogoMark } from "@/components/LogoMark";
 import { ChronauraColors } from "@/theme/tokens";
 import { useChronauraSettings } from "@/state/ChronauraSettingsContext";
@@ -199,9 +200,9 @@ export function WatchScreen() {
         <Text style={styles.previewMeta}>
           Theme: {selectedTheme.name} · Complications: {settings.selectedWatchComplicationIds.length}/{WATCH_COMPLICATION_LIMIT}
         </Text>
-      </View>
+      </GlassPanel>
 
-      <View style={styles.section}>
+      <GlassPanel style={{ marginBottom: 14 }}>
         <Text style={styles.sectionLabel}>WATCH APP FACE GALLERY</Text>
         <Text style={styles.sectionTitle}>Choose your Chronaura display</Text>
         <Text style={styles.sectionCopy}>
@@ -227,9 +228,9 @@ export function WatchScreen() {
             );
           })}
         </View>
-      </View>
+      </GlassPanel>
 
-      <View style={styles.section}>
+      <GlassPanel style={{ marginBottom: 14 }}>
         <Text style={styles.sectionLabel}>THEME SELECTOR</Text>
         <Text style={styles.sectionTitle}>Choose the material mood</Text>
 
@@ -254,7 +255,7 @@ export function WatchScreen() {
         </View>
       </View>
 
-      <View style={styles.section}>
+      <GlassPanel style={{ marginBottom: 14 }}>
         <Text style={styles.sectionLabel}>COMPLICATION PICKER</Text>
         <Text style={styles.sectionTitle}>Select up to four quick modules</Text>
         <Text style={styles.sectionCopy}>
