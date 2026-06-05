@@ -1,116 +1,47 @@
-export type DeepSkyObjectType =
-  | "nebula"
-  | "galaxy"
-  | "star_cluster"
-  | "supernova_remnant"
-  | "milky_way_region"
-  | "dust_lane"
-  | "galactic_center";
+export type DeepSkyType = "emission_nebula" | "dark_nebula" | "planetary_nebula" | "supernova_remnant" | "reflection_nebula" | "spiral_galaxy" | "elliptical_galaxy" | "irregular_galaxy" | "open_cluster" | "globular_cluster" | "star_cloud" | "galaxy_cluster";
+export type SkyLensLayer = "milky_way" | "deep_sky" | "galaxy_mode";
 
 export interface DeepSkyObject {
   id: string;
   name: string;
-  type: DeepSkyObjectType;
-  constellation?: string;
-  distanceLightYears?: number;
-  bestSeason?: string;
+  catalogId: string;
+  type: DeepSkyType;
+  constellation: string;
+  distanceLightYears: number | string;
+  apparentMagnitude: number;
+  angularSizeDegrees: number;
+  bestSeason: string | null;
   visibleToNakedEye: boolean;
-  skyLensLayer: "deep_sky" | "galaxy_mode" | "archive_only";
+  skyLensLayer: SkyLensLayer;
   summary: string;
+  description: string;
+  funFacts: string[];
 }
 
-export const featuredDeepSkyObjects: DeepSkyObject[] = [
-  {
-    id: "orion-nebula-m42",
-    name: "Orion Nebula",
-    type: "nebula",
-    constellation: "Orion",
-    distanceLightYears: 1344,
-    bestSeason: "Winter",
-    visibleToNakedEye: true,
-    skyLensLayer: "deep_sky",
-    summary: "A bright stellar nursery in Orion’s sword and one of the most iconic deep-sky objects."
-  },
-  {
-    id: "horsehead-nebula",
-    name: "Horsehead Nebula",
-    type: "nebula",
-    constellation: "Orion",
-    distanceLightYears: 1375,
-    bestSeason: "Winter",
-    visibleToNakedEye: false,
-    skyLensLayer: "deep_sky",
-    summary: "A dark nebula silhouetted against glowing hydrogen gas near Alnitak."
-  },
-  {
-    id: "crab-nebula-m1",
-    name: "Crab Nebula",
-    type: "supernova_remnant",
-    constellation: "Taurus",
-    distanceLightYears: 6500,
-    bestSeason: "Winter",
-    visibleToNakedEye: false,
-    skyLensLayer: "deep_sky",
-    summary: "The expanding remnant of a supernova observed in 1054."
-  },
-  {
-    id: "ring-nebula-m57",
-    name: "Ring Nebula",
-    type: "nebula",
-    constellation: "Lyra",
-    distanceLightYears: 2200,
-    bestSeason: "Summer",
-    visibleToNakedEye: false,
-    skyLensLayer: "deep_sky",
-    summary: "A planetary nebula formed from the outer layers of a dying star."
-  },
-  {
-    id: "andromeda-galaxy-m31",
-    name: "Andromeda Galaxy",
-    type: "galaxy",
-    constellation: "Andromeda",
-    distanceLightYears: 2537000,
-    bestSeason: "Autumn",
-    visibleToNakedEye: true,
-    skyLensLayer: "deep_sky",
-    summary: "The nearest major galaxy to the Milky Way and a key deep-sky highlight."
-  },
-  {
-    id: "milky-way-core",
-    name: "Milky Way Core",
-    type: "galactic_center",
-    constellation: "Sagittarius",
-    distanceLightYears: 27000,
-    bestSeason: "Summer",
-    visibleToNakedEye: true,
-    skyLensLayer: "galaxy_mode",
-    summary: "The direction of the dense, luminous heart of our galaxy near Sagittarius."
-  },
-  {
-    id: "great-rift",
-    name: "Great Rift",
-    type: "dust_lane",
-    bestSeason: "Summer",
-    visibleToNakedEye: true,
-    skyLensLayer: "galaxy_mode",
-    summary: "Dark lanes of interstellar dust that split the Milky Way’s glowing band."
-  },
-  {
-    id: "cygnus-star-cloud",
-    name: "Cygnus Star Cloud",
-    type: "milky_way_region",
-    constellation: "Cygnus",
-    bestSeason: "Summer",
-    visibleToNakedEye: true,
-    skyLensLayer: "galaxy_mode",
-    summary: "A rich star cloud along the Milky Way band in Cygnus."
-  }
+export const deepSkyCatalog: DeepSkyObject[] = [
+  // NEBULAE
+  { id:"m42",name:"Orion Nebula",catalogId:"M42",type:"emission_nebula",constellation:"Orion",distanceLightYears:1344,apparentMagnitude:4.0,angularSizeDegrees:1.1,bestSeason:"winter",visibleToNakedEye:true,skyLensLayer:"deep_sky",summary:"The brightest diffuse nebula and the nearest major star-forming region.",description:"A stellar nursery where new stars are actively being born from collapsing clouds of hydrogen gas. The Trapezium cluster at its heart consists of four hot young stars whose ultraviolet light illuminates the nebula. Visible to the naked eye as the fuzzy middle 'star' in Orion's sword. Contains enough material to form 10,000 Suns.",funFacts:["Spans about 24 light-years across","Contains over 700 young stars in various stages of formation","Was the first nebula ever photographed (1880)","The Trapezium stars are less than 300,000 years old"] },
+  { id:"b33",name:"Horsehead Nebula",catalogId:"B33",type:"dark_nebula",constellation:"Orion",distanceLightYears:1375,apparentMagnitude:6.8,angularSizeDegrees:0.1,bestSeason:"winter",visibleToNakedEye:false,skyLensLayer:"deep_sky",summary:"An iconic dark nebula shaped like a horse's head silhouetted against a bright emission nebula.",description:"A cold cloud of gas and dust that blocks light from the emission nebula IC 434 behind it. The horse-head shape is sculpted by radiation from the nearby star Sigma Orionis. Extremely difficult to see visually — it was discovered on a photographic plate in 1888 by Williamina Fleming.",funFacts:["One of the most photographed deep-sky objects","Will eventually be eroded away by the radiation of nearby stars","About 3.5 light-years from base to top","Contains embedded infant stars forming in the densest parts"] },
+  { id:"m1",name:"Crab Nebula",catalogId:"M1",type:"supernova_remnant",constellation:"Taurus",distanceLightYears:6500,apparentMagnitude:8.4,angularSizeDegrees:0.1,bestSeason:"winter",visibleToNakedEye:false,skyLensLayer:"deep_sky",summary:"Remnant of a supernova observed by Chinese astronomers in 1054 AD.",description:"The expanding debris cloud from a massive star that exploded nearly a thousand years ago. At its center lies a pulsar — a rapidly spinning neutron star just 30 km across that rotates 30 times per second, emitting beams of radiation. The supernova was bright enough to be visible in daylight for 23 days.",funFacts:["Chinese astronomers recorded it as a 'guest star' in July 1054","The pulsar at its center is one of the most studied objects in astronomy","Expanding at about 1,500 km/s","Was the first object cataloged by Charles Messier (hence M1)"] },
+  { id:"m57",name:"Ring Nebula",catalogId:"M57",type:"planetary_nebula",constellation:"Lyra",distanceLightYears:2283,apparentMagnitude:8.8,angularSizeDegrees:0.04,bestSeason:"summer",visibleToNakedEye:false,skyLensLayer:"deep_sky",summary:"A dying star's expelled atmosphere forming a luminous ring.",description:"A shell of ionized gas shed by a Sun-like star at the end of its life. The central white dwarf is incredibly hot (over 100,000°C) and illuminates the expanding gas ring with ultraviolet light. The ring shape is an illusion — it's actually a barrel-shaped structure that we're viewing almost end-on. Our Sun will create a similar nebula in about 5 billion years.",funFacts:["About 1 light-year in diameter","The central star will eventually cool and fade over billions of years","Different chemical elements produce different colors in the ring","Discovered in 1779 by Antoine Darquier de Pellepoix"] },
+  { id:"ngc7293",name:"Helix Nebula",catalogId:"NGC 7293",type:"planetary_nebula",constellation:"Aquarius",distanceLightYears:655,apparentMagnitude:7.6,angularSizeDegrees:0.44,bestSeason:"autumn",visibleToNakedEye:false,skyLensLayer:"deep_sky",summary:"The nearest bright planetary nebula — nicknamed the 'Eye of God.'",description:"One of the closest and largest planetary nebulae. Its two light-year diameter and proximity make it appear nearly half the size of the full Moon, though its surface brightness is low. Long-exposure photographs reveal a stunning pattern of radial filaments in the outer ring, called 'cometary knots.'",funFacts:["At 655 light-years, it's one of the nearest planetary nebulae","Contains about 20,000 cometary knots, each roughly the size of our solar system","Infrared images reveal a surprising disk of dust around the central star","Sometimes called the 'Eye of God' due to its appearance in Hubble images"] },
+  { id:"m16",name:"Eagle Nebula",catalogId:"M16",type:"emission_nebula",constellation:"Serpens",distanceLightYears:7000,apparentMagnitude:6.0,angularSizeDegrees:0.58,bestSeason:"summer",visibleToNakedEye:false,skyLensLayer:"deep_sky",summary:"Home to the Pillars of Creation — one of the most iconic images in astronomy.",description:"A vast star-forming region with dense columns of gas and dust ('pillars') where new stars are being born. The Hubble Space Telescope's 1995 image of the Pillars of Creation became one of the most reproduced astronomical images ever. The pillars are slowly being eroded by ultraviolet radiation from nearby hot young stars.",funFacts:["The Pillars of Creation are about 4-5 light-years tall","Evidence suggests the pillars may have already been destroyed by a supernova shockwave — but light from that event hasn't reached us yet","The cluster contains about 8,100 stars","The nebula spans about 70 by 55 light-years"] },
+  { id:"ngc2070",name:"Tarantula Nebula",catalogId:"NGC 2070",type:"emission_nebula",constellation:"Dorado",distanceLightYears:160000,apparentMagnitude:5.0,angularSizeDegrees:0.67,bestSeason:"winter",visibleToNakedEye:true,skyLensLayer:"deep_sky",summary:"The most active star-forming region in the Local Group — in the Large Magellanic Cloud.",description:"Despite being 160,000 light-years away in a neighboring galaxy, this nebula is so luminous it's visible to the naked eye. If it were at the Orion Nebula's distance, it would cast shadows on Earth. It contains the most massive stars known — some over 200 solar masses — and the compact cluster R136 at its core.",funFacts:["If placed at the distance of the Orion Nebula, it would fill half the sky","R136a1, at its core, is about 265 solar masses — one of the most massive stars known","Supernova 1987A, the closest supernova in modern times, occurred on the outskirts","Spans over 600 light-years across"] },
+  { id:"ngc6960",name:"Veil Nebula",catalogId:"NGC 6960/6992",type:"supernova_remnant",constellation:"Cygnus",distanceLightYears:2400,apparentMagnitude:7.0,angularSizeDegrees:3.0,bestSeason:"summer",visibleToNakedEye:false,skyLensLayer:"deep_sky",summary:"A delicate supernova remnant spread across 3° of sky — six times the full Moon's diameter.",description:"The ghostly remains of a star that exploded 10,000-20,000 years ago. The expanding shockwave has created intricate filaments of glowing gas that span 110 light-years. Divided into the Eastern Veil (NGC 6992), Western Veil (NGC 6960), and Pickering's Triangle.",funFacts:["The shockwave is still expanding at about 170 km/s","Covers an area of sky six times the diameter of the full Moon","The original star was probably 20 times the mass of the Sun","A popular target for astrophotographers due to its intricate structure"] },
+  { id:"m20",name:"Trifid Nebula",catalogId:"M20",type:"emission_nebula",constellation:"Sagittarius",distanceLightYears:5200,apparentMagnitude:6.3,angularSizeDegrees:0.47,bestSeason:"summer",visibleToNakedEye:false,skyLensLayer:"deep_sky",summary:"A unique nebula combining emission (red), reflection (blue), and dark nebulae in one object.",description:"Three dark dust lanes divide the red emission nebula into lobes, giving it its name ('tri-fid' = three-part). Adjacent blue reflection nebula adds stunning color contrast in photographs. An active star-forming region with stellar jets from young protostars.",funFacts:["Combines three types of nebulae in one: emission, reflection, and dark","The central star that illuminates the nebula is a young, hot multiple star system","Hubble revealed stellar jets from protostars embedded in the nebula","Located near the larger Lagoon Nebula (M8) — both visible in the same binocular field"] },
+  // GALAXIES
+  { id:"m31",name:"Andromeda Galaxy",catalogId:"M31",type:"spiral_galaxy",constellation:"Andromeda",distanceLightYears:2537000,apparentMagnitude:3.4,angularSizeDegrees:3.17,bestSeason:"autumn",visibleToNakedEye:true,skyLensLayer:"galaxy_mode",summary:"The nearest major galaxy to the Milky Way and the most distant object visible to the naked eye.",description:"A spiral galaxy containing roughly one trillion stars — about twice the Milky Way's count. It's approaching us at 110 km/s and will merge with the Milky Way in about 4.5 billion years, forming 'Milkomeda.' Its angular extent is over six full Moon diameters, though only the bright core is visible without optical aid. Contains its own system of satellite galaxies (M32, M110) and globular clusters.",funFacts:["Light from Andromeda has traveled 2.5 million years to reach your eyes","It's approaching us at 110 km/s — the two galaxies will merge in ~4.5 billion years","Contains about 1 trillion stars","Has at least 450 globular clusters — more than the Milky Way","The full extent is wider than 6 full Moons on the sky"] },
+  { id:"m51",name:"Whirlpool Galaxy",catalogId:"M51",type:"spiral_galaxy",constellation:"Canes Venatici",distanceLightYears:23000000,apparentMagnitude:8.4,angularSizeDegrees:0.19,bestSeason:"spring",visibleToNakedEye:false,skyLensLayer:"galaxy_mode",summary:"The first galaxy where spiral structure was observed, interacting with a smaller companion.",description:"A grand-design spiral galaxy seen nearly face-on, revealing its spectacular spiral arms. It's interacting with the smaller irregular galaxy NGC 5195 at the end of one arm. This gravitational interaction may be enhancing star formation in the spiral arms. Lord Rosse first identified its spiral structure in 1845 using a 72-inch telescope.",funFacts:["First galaxy where spiral structure was identified (1845)","The interaction with NGC 5195 has triggered bursts of star formation","Located about 23 million light-years away","Contains a supermassive black hole about 1 million solar masses"] },
+  { id:"m87",name:"Virgo A",catalogId:"M87",type:"elliptical_galaxy",constellation:"Virgo",distanceLightYears:53000000,apparentMagnitude:8.6,angularSizeDegrees:0.12,bestSeason:"spring",visibleToNakedEye:false,skyLensLayer:"galaxy_mode",summary:"A supergiant elliptical galaxy at the heart of the Virgo Cluster — home to the first imaged black hole.",description:"One of the most massive galaxies in the nearby universe, containing several trillion stars and over 15,000 globular clusters. Its central supermassive black hole (6.5 billion solar masses) was the first to be directly imaged by the Event Horizon Telescope in 2019. A relativistic jet of plasma extends 5,000 light-years from the black hole.",funFacts:["Home to the first black hole ever directly imaged (2019)","Its black hole has 6.5 billion times the Sun's mass","Contains about 15,000 globular clusters (vs ~150 for the Milky Way)","A plasma jet extends 5,000 light-years from the central black hole","Dominates the Virgo Cluster, the nearest large galaxy cluster"] },
+  { id:"ngc253",name:"Sculptor Galaxy",catalogId:"NGC 253",type:"spiral_galaxy",constellation:"Sculptor",distanceLightYears:11400000,apparentMagnitude:7.1,angularSizeDegrees:0.46,bestSeason:"autumn",visibleToNakedEye:false,skyLensLayer:"galaxy_mode",summary:"One of the brightest and dustiest spiral galaxies beyond the Local Group.",description:"A starburst galaxy with vigorous star formation, especially in its central region. Tilted at a moderate angle, revealing dusty spiral arms streaked with dark lanes. One of the brightest galaxies in the sky and a favorite target for amateur astronomers in the southern hemisphere.",funFacts:["One of the brightest galaxies outside the Local Group","Classified as a starburst galaxy — forming stars at an exceptionally high rate","Contains a central source that may be a supermassive black hole","Discovered by Caroline Herschel in 1783"] },
+  { id:"lmc",name:"Large Magellanic Cloud",catalogId:"LMC",type:"irregular_galaxy",constellation:"Dorado",distanceLightYears:160000,apparentMagnitude:0.9,angularSizeDegrees:10.75,bestSeason:"winter",visibleToNakedEye:true,skyLensLayer:"galaxy_mode",summary:"A satellite galaxy of the Milky Way — the fourth-largest galaxy in the Local Group.",description:"An irregular galaxy visible to the naked eye from the Southern Hemisphere as a prominent patch of light. Home to the Tarantula Nebula, the most active star-forming region in the Local Group. Site of Supernova 1987A, the closest supernova observed in modern times. Named after the explorer Ferdinand Magellan, whose crew recorded it during their circumnavigation.",funFacts:["Contains about 30 billion stars","Home to the Tarantula Nebula — the brightest nebula in the Local Group","Supernova 1987A occurred here — the closest supernova in almost 400 years","About 14,000 light-years in diameter","Known to indigenous peoples of the Southern Hemisphere for thousands of years"] },
+  { id:"smc",name:"Small Magellanic Cloud",catalogId:"SMC",type:"irregular_galaxy",constellation:"Tucana",distanceLightYears:200000,apparentMagnitude:2.7,angularSizeDegrees:5.33,bestSeason:"autumn",visibleToNakedEye:true,skyLensLayer:"galaxy_mode",summary:"A dwarf irregular galaxy orbiting the Milky Way — visible to the naked eye from the Southern Hemisphere.",description:"A smaller companion to the Large Magellanic Cloud, connected to it by a bridge of gas. Contains 47 Tucanae, one of the most spectacular globular clusters, in its foreground. Henrietta Swan Leavitt's study of Cepheid variables in the SMC led to the period-luminosity relationship used to measure cosmic distances — one of the most important discoveries in astronomy.",funFacts:["About 7,000 light-years in diameter","Contains several hundred million stars","Leavitt's work on SMC Cepheids led to measuring the expansion of the universe","Connected to the LMC by a 75,000 light-year bridge of hydrogen gas"] },
+  // CLUSTERS
+  { id:"m45",name:"Pleiades",catalogId:"M45",type:"open_cluster",constellation:"Taurus",distanceLightYears:444,apparentMagnitude:1.6,angularSizeDegrees:1.83,bestSeason:"winter",visibleToNakedEye:true,skyLensLayer:"deep_sky",summary:"The Seven Sisters — the most famous and easily visible star cluster in the sky.",description:"A young open cluster of hot blue stars about 100 million years old. Most people see six stars with the naked eye; sharp-eyed observers can see seven or more. The cluster is passing through an unrelated dust cloud, creating blue reflection nebulosity visible in long-exposure photographs. Referenced in the Bible, Homer, and traditions of cultures from Japan (Subaru) to Aboriginal Australia to the Aztecs.",funFacts:["About 100 million years old — young for stars","Contains over 1,000 confirmed members","The Japanese name 'Subaru' means 'unite' — the car company's logo depicts the cluster","Most cultures worldwide have a name and legend for this cluster","Moving through space together at about 40 km/s"] },
+  { id:"m13",name:"Great Hercules Cluster",catalogId:"M13",type:"globular_cluster",constellation:"Hercules",distanceLightYears:22200,apparentMagnitude:5.8,angularSizeDegrees:0.33,bestSeason:"summer",visibleToNakedEye:true,skyLensLayer:"deep_sky",summary:"The finest globular cluster in the northern sky — a swarm of 300,000 ancient stars.",description:"A dense spherical collection of about 300,000 stars bound by gravity, orbiting the Milky Way's core. Most of its stars are about 11.65 billion years old — nearly as old as the universe itself. In 1974, the Arecibo message (a radio broadcast containing information about humanity) was aimed at M13 as a symbolic target.",funFacts:["Contains roughly 300,000 stars in a sphere 145 light-years across","Stars near the core are only 0.1 light-years apart (vs 4 light-years between the Sun and nearest star)","About 11.65 billion years old","Target of the 1974 Arecibo message to extraterrestrial intelligence","Edmond Halley discovered it in 1714"] },
+  { id:"omega_cen",name:"Omega Centauri",catalogId:"NGC 5139",type:"globular_cluster",constellation:"Centaurus",distanceLightYears:15800,apparentMagnitude:3.9,angularSizeDegrees:0.6,bestSeason:"spring",visibleToNakedEye:true,skyLensLayer:"deep_sky",summary:"The largest and brightest globular cluster visible from Earth — possibly the core of a captured dwarf galaxy.",description:"With about 10 million stars, Omega Centauri is far larger than typical globular clusters and may be the remnant nucleus of a dwarf galaxy that the Milky Way absorbed billions of years ago. Its stars span a range of ages and metallicities — unusual for a globular cluster and consistent with the dwarf galaxy hypothesis. Visible to the naked eye as a fuzzy star.",funFacts:["Contains about 10 million stars — 30 times more than a typical globular cluster","May contain an intermediate-mass black hole at its center","Known since antiquity — Ptolemy cataloged it as a star","If it is a captured galaxy core, its original galaxy may have been similar in size to the Fornax Dwarf"] },
+  // MILKY WAY FEATURES
+  { id:"milky_core",name:"Milky Way Core",catalogId:"Sgr A*",type:"star_cloud",constellation:"Sagittarius",distanceLightYears:26000,apparentMagnitude:0,angularSizeDegrees:30,bestSeason:"summer",visibleToNakedEye:true,skyLensLayer:"milky_way",summary:"The center of our galaxy — home to a 4-million-solar-mass black hole.",description:"The bright central bulge of the Milky Way, visible as the densest, brightest part of the Milky Way band in dark summer skies. The actual center is hidden behind dense dust clouds but has been studied at radio, infrared, and X-ray wavelengths. Sagittarius A* is the compact radio source at the exact center — a supermassive black hole of 4.3 million solar masses, directly imaged by the Event Horizon Telescope in 2022.",funFacts:["Sagittarius A* has 4.3 million times the Sun's mass","Stars near the galactic center orbit at speeds up to 7,000 km/s","The EHT image of Sgr A* was released in May 2022","About 26,000 light-years from Earth","The galactic center is obscured by about 25 magnitudes of dust extinction in visible light"] },
+  { id:"great_rift",name:"Great Rift",catalogId:"Dark",type:"dark_nebula",constellation:"Cygnus",distanceLightYears:300,apparentMagnitude:0,angularSizeDegrees:120,bestSeason:"summer",visibleToNakedEye:true,skyLensLayer:"milky_way",summary:"A series of dark dust clouds that visually split the Milky Way band in two.",description:"An extensive series of overlapping molecular clouds stretching from Cygnus through Aquila, Ophiuchus, and into Sagittarius. These relatively nearby dust clouds block the light of more distant stars, creating the appearance of a dark lane dividing the Milky Way. Many indigenous cultures incorporated this feature into their sky mythology — the Inca saw it as a celestial river with dark-cloud animal constellations.",funFacts:["Extends over 120° of sky — about one-third of the Milky Way band","The nearest parts are only about 300 light-years away","Some of the densest parts are active star-forming regions","The Inca civilization mapped 'dark constellations' within the Great Rift"] },
+  { id:"cygnus_cloud",name:"Cygnus Star Cloud",catalogId:"Cygnus",type:"star_cloud",constellation:"Cygnus",distanceLightYears:3000,apparentMagnitude:0,angularSizeDegrees:10,bestSeason:"summer",visibleToNakedEye:true,skyLensLayer:"milky_way",summary:"One of the densest and most dramatic star fields visible to the naked eye.",description:"A prominent brightening of the Milky Way in Cygnus where we look along the Orion Arm of our galaxy. The sheer density of stars creates a luminous cloud effect visible in dark skies. Contains numerous nebulae, clusters, and star-forming regions embedded in the galactic plane.",funFacts:["We are looking along the length of our own spiral arm (the Orion Arm)","Contains the North America Nebula, visible to the naked eye under dark skies","One of the best regions of sky for binocular scanning","Cygnus X-1, the first confirmed black hole, lies in this direction"] }
 ];
-
-export const deepSkyArchiveSections = [
-  "Nebulae",
-  "Galaxies",
-  "Star Clusters",
-  "Supernova Remnants",
-  "Milky Way / Galaxy Mode"
-] as const;
