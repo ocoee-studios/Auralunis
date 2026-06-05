@@ -200,7 +200,7 @@ export function WatchScreen() {
         <Text style={styles.previewMeta}>
           Theme: {selectedTheme.name} · Complications: {settings.selectedWatchComplicationIds.length}/{WATCH_COMPLICATION_LIMIT}
         </Text>
-      </GlassPanel>
+      </View>
 
       <GlassPanel style={{ marginBottom: 14 }}>
         <Text style={styles.sectionLabel}>WATCH APP FACE GALLERY</Text>
