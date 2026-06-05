@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
+import { GlassPanel } from "@/components/GlassPanel";
 import { AstrolabePreview } from "@/components/AstrolabePreview";
 import { ChronauraColors } from "@/theme/tokens";
 import { useChronauraVault } from "@/state/ChronauraVaultContext";
@@ -73,7 +74,7 @@ export function HomeScreen() {
     <ScreenShell title="Living Astrolabe" subtitle="Home">
       <AstrolabePreview sky={sky} />
 
-      <View style={styles.summary}>
+      <GlassPanel accent style={{ marginBottom: 12 }}>
         <Text style={styles.summaryTitle}>Tonight Score · {tonightScore.score}/100 · {tonightScore.label}</Text>
         <Text style={styles.summaryCopy}>{skySummary}</Text>
         {status === "fallback" ? (
@@ -84,9 +85,9 @@ export function HomeScreen() {
         <Pressable style={styles.compactButton} onPress={() => fetchCurrentWeather(location).then(setWeather).catch(() => {})}>
           <Text style={styles.compactButtonText}>Refresh Tonight Score</Text>
         </Pressable>
-      </View>
+      </GlassPanel>
 
-      <View style={styles.noteCard}>
+      <GlassPanel style={{ marginBottom: 12 }}>
         <Text style={styles.noteTitle}>Cosmic Notes</Text>
         <Text style={styles.noteCopy}>Save observations, ritual thoughts, dreams, or LifeSky moments locally.</Text>
         <TextInput
@@ -101,7 +102,7 @@ export function HomeScreen() {
           <Text style={styles.primaryButtonText}>Save Note to Vault</Text>
         </Pressable>
         <Text style={styles.vaultCount}>{items.length} locally saved prototype Vault items</Text>
-      </View>
+      </GlassPanel>
 
       <FeatureCard
         title="Daily Cosmic Alignment"
