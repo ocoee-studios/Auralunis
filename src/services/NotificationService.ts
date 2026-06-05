@@ -99,3 +99,6 @@ export async function scheduleSkyEventNotifications(
 
   return scheduled;
 }
+
+// Re-export ISS pass computation for use in notification scheduling.
+export { computeNextISSPasses } from "@/services/ISSPassService";

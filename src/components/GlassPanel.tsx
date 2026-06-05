@@ -49,7 +49,7 @@ export function GlassPanel({
   // Real blur on iOS when expo-blur is available.
   if (Platform.OS === "ios" && BlurViewComponent) {
     return (
-      <View style={[styles.outer, borderStyle, style]}>
+      <View style={[styles.outer, borderStyle, style]} accessible accessibilityRole="summary">
         <BlurViewComponent
           intensity={intensity}
           tint={tint}

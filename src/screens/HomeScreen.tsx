@@ -12,6 +12,7 @@ import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisSer
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherService";
 import { computeTonightScore } from "@/services/TonightScoreService";
+import { tapLight, tapSuccess } from "@/services/HapticService";
 import { scheduleSkyEventNotifications } from "@/services/NotificationService";
 
 function formatClock(iso: string | null): string {
@@ -82,7 +83,7 @@ export function HomeScreen() {
             Showing a default location. Enable location access for your exact sky.
           </Text>
         ) : null}
-        <Pressable style={styles.compactButton} onPress={() => fetchCurrentWeather(location).then(setWeather).catch(() => {})}>
+        <Pressable style={styles.compactButton} onPress={() => { tapLight(); fetchCurrentWeather(location).then(setWeather).catch(() => {}); }}>
           <Text style={styles.compactButtonText}>Refresh Tonight Score</Text>
         </Pressable>
       </GlassPanel>

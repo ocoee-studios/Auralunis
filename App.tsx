@@ -26,6 +26,7 @@ import type {
 } from "@/features/paywall/MonetizationCatalog";
 import { configureNotificationHandler } from "@/services/NotificationService";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
+import { recordSession } from "@/services/ReviewPromptService";
 
 const ONBOARDING_SEEN_KEY = "chronaura.onboarding.seen";
 
@@ -38,6 +39,7 @@ export default function App() {
 
     async function initialize() {
       configureNotificationHandler();
+      void recordSession();
 
       void configureRevenueCat().catch(() => {
         // Keep the free Horizon experience usable if purchase setup is unavailable.

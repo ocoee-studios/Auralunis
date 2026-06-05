@@ -1,5 +1,6 @@
 import React from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { tapSelection } from "@/services/HapticService";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";

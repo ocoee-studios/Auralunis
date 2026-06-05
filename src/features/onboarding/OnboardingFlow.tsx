@@ -1,10 +1,12 @@
 // First-launch onboarding: welcome → birthday → birth sky reveal → feature showcase.
 // After the reveal, the user can "Continue Exploring" (enters free) or
 // "Unlock Horizon+" (opens the paywall). Matches the approved clickthrough.
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import { LogoMark } from "@/components/LogoMark";
 import { ChronauraColors } from "@/theme/tokens";
+import { tapSuccess } from "@/services/HapticService";
 
 type Props = {
   visible: boolean;
@@ -15,6 +17,29 @@ type Props = {
 export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
   const [step, setStep] = useState(0);
   const [birthday, setBirthday] = useState("");
+
+  // Birth sky reveal animation
+  const ringScale = useSharedValue(0.3);
+  const ringOpacity = useSharedValue(0);
+  const coreGlow = useSharedValue(0.4);
+
+  useEffect(() => {
+    if (step === 2) {
+      ringScale.value = withSpring(1, { damping: 12, stiffness: 80 });
+      ringOpacity.value = withTiming(1, { duration: 600 });
+      coreGlow.value = withSpring(1, { damping: 8, stiffness: 60 });
+      tapSuccess();
+    }
+  }, [step]);
+
+  const ringStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: ringScale.value }],
+    opacity: ringOpacity.value
+  }));
+  const coreStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: coreGlow.value }],
+    shadowOpacity: coreGlow.value
+  }));
 
   return (
     <Modal visible={visible} animationType="fade" transparent={false}>
@@ -67,9 +92,9 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
           <View style={s.center}>
             <Text style={s.stepEyebrow}>YOUR BIRTH SKY</Text>
             <Text style={s.stepTitle}>The sky remembers.</Text>
-            <View style={s.revealRing}>
-              <View style={s.revealCore} />
-            </View>
+            <Animated.View style={[s.revealRing, ringStyle]}>
+              <Animated.View style={[s.revealCore, coreStyle]} />
+            </Animated.View>
             <Text style={s.bodyText}>
               {birthday
                 ? `On the night of ${birthday}, these stars were above you. Your celestial fingerprint is part of Chronaura now.`
