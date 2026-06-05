@@ -253,7 +253,7 @@ export function WatchScreen() {
             );
           })}
         </View>
-      </View>
+      </GlassPanel>
 
       <GlassPanel style={{ marginBottom: 14 }}>
         <Text style={styles.sectionLabel}>COMPLICATION PICKER</Text>
@@ -282,7 +282,7 @@ export function WatchScreen() {
             </Pressable>
           );
         })}
-      </View>
+      </GlassPanel>
 
       <Pressable style={styles.primaryButton} onPress={resetCuratedSetup}>
         <Text style={styles.primaryButtonText}>Restore Signature Curated Setup</Text>
