@@ -1,0 +1,36 @@
+Feature,Included now,Status,Next action
+Cinematic birth-sky onboarding,Included in React Native source,Prototype-ready,Verify navigation and copy on simulator
+Birth-sky reveal,Included in React Native source,Prototype-ready,Merge approved visuals
+Living Astrolabe Home,Included in React Native source,Prototype-ready,Connect real astronomy data later
+Dynamic daily sky summary,Included with local deterministic sample data,Scaffolded,Replace with real astronomy engine
+Tonight guided sky ritual,Included in React Native source,Prototype-ready,Expand seasonal content later
+Cosmic Vault,Included with AsyncStorage persistence,Prototype-ready,Verify data model and deletion behavior
+Celestial alarms,Permission-safe placeholder flow,Scaffolded,Schedule real notifications
+Selective Liquid Glass,GlassView / BlurView / solid fallback structure,Scaffolded,Verify on supported iOS devices
+Haptics,Tap and astrolabe lock scaffolding,Scaffolded,Tune on device
+Sky Lens,Permission-safe screen and feature surfaces,Scaffolded,"Connect camera, motion, location, astronomy engine"
+Cosmic X-Ray,Visible feature surface,Scaffolded,Connect object data
+Birth Sky Overlay,Visible feature surface,Scaffolded,Connect real sky calculations
+Deep Sky / Galaxy Mode,Visible feature surface,Scaffolded,Connect real sky data
+Chrono-Photography,Visible feature surface,Scaffolded,Build capture and explicit-save pipeline
+Learn tab,Included,Prototype-ready,Expand lessons and content
+Watch experience,Visible screens and handoff notes,Scaffolded,Create watchOS target
+Portal Stack widgets,Visible screens and handoff notes,Scaffolded,Create WidgetKit target
+Taptic Astrolabe,Preview surface,Future/native work,Build and test watch haptics
+Desk Obelisk,Preview surface,Future concept,Keep disabled until built
+Horizon+ paywall,Included UI and copy,Scaffolded,Wire StoreKit / RevenueCat
+Continue Exploring,Included,Prototype-ready,Verify seen-flag behavior
+Membership & Prestige,Included,Prototype-ready,Keep future tiers non-purchasable
+Aura Pro,Coming Later card,Future concept,Do not enable checkout
+Sovereign,Waitlist card,Future concept,Do not enable checkout
+Stellar Portal,Spatial preview,Future concept,Do not claim native readiness
+Spatial Matrix,Spatial preview,Future concept,Do not claim native readiness
+Privacy & Legal,Included placeholder route,Scaffolded,Publish URLs and verify links
+Privacy Policy,Placeholder URL,Launch blocker,"Draft, review, publish"
+Terms of Use,Placeholder URL,Launch blocker,"Draft, review, publish"
+Support page,Placeholder URL,Launch blocker,Publish and test
+watchOS app target setup,Xcode checklist and SwiftUI starter included,Scaffolded,Create target in Xcode and add target membership
+Watch astrolabe face,"Three rings, moon, compass, complication layout starter included",Scaffolded,Merge approved Watch assets and tune on device
+Watch Liquid Glass,SwiftUI glassEffect path for watchOS 26+ with fallback,Scaffolded,Verify syntax and rendering in Xcode 26 on physical Watch
+WatchConnectivity,"iPhone manager, Expo module scaffold, Watch receiver, payload contract included",Scaffolded,Register module and test paired devices
+Digital Crown time scrub,±12h one-hour-step Crown scaffold with click haptics,Scaffolded,Test hour checkpoint behavior on Watch

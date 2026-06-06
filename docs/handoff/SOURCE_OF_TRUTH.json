@@ -1,0 +1,44 @@
+{
+  "product": "Chronaura",
+  "descriptor": "The Interactive Astral Clock",
+  "slogan": "Your time, written in the stars.",
+  "studio": "Ocoee Studios",
+  "production_source": "active-react-native-repo/",
+  "platform": "React Native / Expo",
+  "navigation": [
+    "Home",
+    "Sky",
+    "Watch",
+    "Learn",
+    "Settings"
+  ],
+  "visual_system": "Midnight Gold with selective Liquid Glass",
+  "launch_membership": {
+    "free": "Horizon Free",
+    "paid": "Horizon+",
+    "monthly_usd": 4.99,
+    "annual_usd": 29.99,
+    "founder_first_year_usd": 24.99,
+    "trial_days": 7,
+    "free_path_label": "Continue Exploring"
+  },
+  "future_tiers": {
+    "Aura Pro": "Coming Later",
+    "Sovereign": "Waitlist \u00b7 Coming Later"
+  },
+  "future_modules": [
+    "Stellar Portal",
+    "Spatial Matrix",
+    "Aura Ambient",
+    "Desk Obelisk",
+    "Sovereign Sigil",
+    "Private Astral Network",
+    "Apple Watch Ultra Taptic Crown"
+  ],
+  "external_asset_package_required": "chronaura_ops_team_master_handoff_COMPLETE.zip",
+  "legal_placeholders": {
+    "privacy": "https://ocoee-studios.com/chronaura/privacy",
+    "terms": "https://ocoee-studios.com/chronaura/terms",
+    "support": "https://ocoee-studios.com/chronaura/support"
+  }
+}
