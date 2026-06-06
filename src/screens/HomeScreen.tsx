@@ -231,22 +231,17 @@ const styles = StyleSheet.create({
     backgroundColor: ChronauraColors.gold2
   },
   primaryButtonText: { color: "#17100A", fontWeight: "900" },
-  vaultCount: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 10 }
-});
-
-// Additional styles appended for mockup-matching layout
-Object.assign((HomeScreen as any).__styles || {}, {
-  dateText: { fontSize: 11, color: ChronauraColors.muted, letterSpacing: 0.5, fontWeight: "500", marginBottom: 8 },
-  timeBlock: { alignItems: "center", marginVertical: 8 },
-  timeLabel: { fontSize: 9, color: ChronauraColors.muted, letterSpacing: 1.5, textTransform: "uppercase" },
-  timeValue: { fontSize: 32, fontWeight: "900", color: "#FFF", marginTop: 2 },
+  vaultCount: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 10 },
+  dateText: { fontSize: 11, color: ChronauraColors.muted, letterSpacing: 0.5, fontWeight: "500" as const, marginBottom: 8 },
+  timeBlock: { alignItems: "center" as const, marginVertical: 8 },
+  timeLabel: { fontSize: 9, color: ChronauraColors.muted, letterSpacing: 1.5, textTransform: "uppercase" as const },
+  timeValue: { fontSize: 32, fontWeight: "900" as const, color: "#FFF", marginTop: 2 },
   timeLocation: { fontSize: 10, color: ChronauraColors.muted, marginTop: 2 },
-  twoCol: { flexDirection: "row", gap: 10, marginBottom: 12 },
-  colLabel: { fontSize: 8, letterSpacing: 1.5, color: ChronauraColors.gold, fontWeight: "800", textTransform: "uppercase", marginBottom: 8 },
-  scoreCircle: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: ChronauraColors.gold, alignItems: "center", justifyContent: "center", alignSelf: "center", marginBottom: 8 },
-  scoreNumber: { fontSize: 26, fontWeight: "900", color: ChronauraColors.gold2 },
+  twoCol: { flexDirection: "row" as const, gap: 10, marginBottom: 12 },
+  colLabel: { fontSize: 8, letterSpacing: 1.5, color: ChronauraColors.gold, fontWeight: "800" as const, textTransform: "uppercase" as const, marginBottom: 8 },
+  scoreCircle: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: ChronauraColors.gold, alignItems: "center" as const, justifyContent: "center" as const, alignSelf: "center" as const, marginBottom: 8 },
+  scoreNumber: { fontSize: 26, fontWeight: "900" as const, color: ChronauraColors.gold2 },
   scoreLabel: { fontSize: 8, color: ChronauraColors.gold, letterSpacing: 1 },
   colHint: { fontSize: 10, color: ChronauraColors.muted, lineHeight: 15 },
-  colBody: { fontSize: 12, color: ChronauraColors.silver, lineHeight: 18, marginTop: 8 },
+  colBody: { fontSize: 12, color: ChronauraColors.silver, lineHeight: 18, marginTop: 8 }
 });
-// The styles are already in the StyleSheet above — extending via the existing create call.
