@@ -29,7 +29,7 @@ function moonPhaseName(pct: number): string {
 function dominantConstellation(sky: TonightSky): string {
   const bodies = sky.visibleBodies.filter(b => b.id !== "sun" && b.id !== "moon");
   if (bodies.length === 0) return "the quiet sky";
-  const brightest = bodies.reduce((a, b) => a.magnitude < b.magnitude ? a : b);
+  const brightest = bodies.reduce((a, b) => (a.magnitude ?? 99) < (b.magnitude ?? 99) ? a : b);
   return brightest.name + "'s sky";
 }
 

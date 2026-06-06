@@ -1,7 +1,7 @@
 // Computes upcoming ISS passes visible from the observer's location using
 // SGP4 propagation. Schedules push notifications for passes with elevation
 // above 20° (visible to naked eye).
-import { propagateSatelliteFeed } from "@/features/aura-pro/SatelliteFeedService";
+import { getSatelliteFixture } from "@/features/aura-pro/SatelliteFeedService";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 export interface ISSPass {
@@ -27,7 +27,7 @@ export function computeNextISSPasses(
 
   for (let t = now.getTime(); t < end.getTime(); t += stepMs) {
     const checkTime = new Date(t);
-    const feed = propagateSatelliteFeed(location, checkTime);
+    const feed = getSatelliteFixture(location, checkTime);
     const iss = feed.find((s) => s.name === "ISS (ZARYA)");
     if (!iss) continue;
 
