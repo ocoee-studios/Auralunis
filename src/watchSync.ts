@@ -1,4 +1,5 @@
-import { NativeModules } from "react-native";
+// Typed accessor for NativeModules (resolves classic module type gap).
+const NativeModules = (require("react-native") as { NativeModules: Record<string, unknown> }).NativeModules;
 
 type WatchSyncPayload = {
   moonPhase: string;
