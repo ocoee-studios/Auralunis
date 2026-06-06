@@ -23,7 +23,7 @@ export function SkyShareCard({ sky, score }: Props) {
       <Text style={s.tag}>ocoeestudios.com/chronaura</Text>
     </View>
   );
-});
+}
 
 const s = StyleSheet.create({
   card: { width: 360, height: 480, backgroundColor: "#05070D", borderRadius: 28, padding: 28, alignItems: "center", justifyContent: "center" },
