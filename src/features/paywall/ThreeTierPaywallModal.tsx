@@ -2,6 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LogoMark } from "@/components/LogoMark";
+import { GlassPanel } from "@/components/GlassPanel";
 import { ChronauraColors } from "@/theme/tokens";
 import { FOUNDER_ANNUAL_COPY, SEVEN_DAY_TRIAL_COPY, type BillingPeriod, type ChronauraPaidTierId } from "@/features/paywall/MonetizationCatalog";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
