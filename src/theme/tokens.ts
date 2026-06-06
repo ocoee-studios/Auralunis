@@ -1,62 +1,66 @@
+// Chronaura Design System — from the approved brand guide.
+// Colors, typography, and spacing tokens used across all screens.
+
 export const ChronauraColors = {
-  black: "#0B0B12",
-  deep: "#070912",
-  navy: "#121A2C",
-  gold: "#D4AF37",
-  gold2: "#F6DC91",
-  silver: "#C0C6D4",
-  muted: "#8F99B3",
-  blue: "#62CFFF",
-  violet: "#8B74FF",
-  green: "#9DFFC7",
-  orange: "#FFB07A"
+  // Primary palette (from brand guide)
+  cosmicBlack: "#0B0B12",
+  midnightNavy: "#121A2C",
+  deepIndigo: "#1E2A44",
+  gold: "#D4AF37",        // Astral Gold — primary accent
+  silver: "#C0C6D4",      // Moon Silver — secondary text
+  violet: "#7B5CF6",      // Nebula Violet — accent highlight
+
+  // Extended palette
+  gold2: "#F3D99B",       // Light gold for highlights
+  goldDim: "#C7A66A",     // Muted gold for borders
+  muted: "#A8AFBF",       // Muted text
+  faint: "#747D90",       // Faint labels
+
+  // Backgrounds
+  background: "#0B0B12",  // App background (Cosmic Black)
+  surface: "#121A2C",     // Card/panel surface (Midnight Navy)
+  elevated: "#1E2A44",    // Elevated surface (Deep Indigo)
+
+  // Borders
+  borderGold: "rgba(212,175,55,0.34)",
+  borderSubtle: "rgba(192,198,212,0.12)",
+  borderFaint: "rgba(255,255,255,0.06)",
+
+  // Glass panel
+  glassBackground: "rgba(18,26,44,0.74)",
+  glassBorder: "rgba(212,175,55,0.28)",
+  glassHighlight: "rgba(255,255,255,0.08)"
 } as const;
 
-export const ChronauraPricing = {
-  horizonFree: "Free forever",
-  horizonMonthly: "$2.99/month",
-  horizonAnnual: "$19.99/year",
-  auraMonthly: "$5.99/month",
-  auraAnnual: "$49.99/year",
-  sovereignAnnual: "$299/year",
-  trial: "7-day free trial for eligible new subscribers"
-} as const;
-
-export type ChronauraThemePalette = {
-  gradient: readonly [string, string, string];
-  card: string;
-  border: string;
-  accent: string;
-  accentSoft: string;
-};
-
-export const ChronauraThemes = {
-  midnight_gold: {
-    gradient: ["#0B0B12", "#070912", "#05060B"],
-    card: "rgba(255,255,255,0.055)",
-    border: "rgba(212,175,55,0.18)",
-    accent: "#D4AF37",
-    accentSoft: "rgba(212,175,55,0.13)"
+export const ChronauraTypography = {
+  // Display (brand name, screen titles)
+  display: {
+    fontFamily: "Cinzel_400Regular",      // Google Fonts: Cinzel
+    fallback: "Georgia"                    // Fallback until font loads
   },
-  soft_moon: {
-    gradient: ["#101321", "#11182B", "#080B14"],
-    card: "rgba(210,220,255,0.07)",
-    border: "rgba(192,198,212,0.22)",
-    accent: "#C0C6D4",
-    accentSoft: "rgba(192,198,212,0.12)"
-  },
-  deep_space: {
-    gradient: ["#02040A", "#07111E", "#060713"],
-    card: "rgba(98,207,255,0.055)",
-    border: "rgba(98,207,255,0.20)",
-    accent: "#62CFFF",
-    accentSoft: "rgba(98,207,255,0.12)"
-  },
-  system: {
-    gradient: ["#0B0B12", "#070912", "#05060B"],
-    card: "rgba(255,255,255,0.055)",
-    border: "rgba(212,175,55,0.18)",
-    accent: "#D4AF37",
-    accentSoft: "rgba(212,175,55,0.13)"
+  // Body (descriptions, labels, values)
+  body: {
+    fontFamily: "Montserrat_400Regular",   // Google Fonts: Montserrat Light
+    medium: "Montserrat_500Medium",        // Montserrat Medium
+    fallback: "System"
   }
-} as const satisfies Record<string, ChronauraThemePalette>;
+} as const;
+
+export const ChronauraSpacing = {
+  xs: 4,
+  sm: 8,
+  md: 14,
+  lg: 20,
+  xl: 28,
+  xxl: 40,
+  screenPadding: 16,
+  cardRadius: 22,
+  buttonRadius: 14
+} as const;
+
+export const ChronauraTaglines = [
+  "Time moves. The cosmos remembers.",
+  "Your time. Written in the stars.",
+  "Explore time. Align with the universe.",
+  "The universe is now in your hands."
+] as const;
