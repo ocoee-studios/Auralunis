@@ -1,0 +1,18 @@
+export interface ScaleComparison {
+  id: string; title: string; category: "distance" | "size" | "time" | "speed" | "mass";
+  value: string; humanScale: string; mindBlower: string;
+}
+
+export const cosmicScales: ScaleComparison[] = [
+  { id:"moon_dist",title:"Earth to Moon",category:"distance",value:"384,400 km",humanScale:"If you drove at highway speed non-stop, it would take 160 days.",mindBlower:"All 7 other planets in our solar system could fit in the gap between Earth and the Moon." },
+  { id:"sun_dist",title:"Earth to Sun",category:"distance",value:"150 million km",humanScale:"A beam of light takes 8 minutes 20 seconds. A car would take 171 years.",mindBlower:"If the Sun were a basketball, Earth would be a peppercorn 26 meters away." },
+  { id:"light_year",title:"One Light-Year",category:"distance",value:"9.46 trillion km",humanScale:"If you shrunk the Sun to a grain of sand, the nearest star would be 6.4 km away.",mindBlower:"The Voyager 1 spacecraft, traveling at 61,000 km/h, would take 18,000 years to travel one light-year." },
+  { id:"milky_way",title:"Across the Milky Way",category:"distance",value:"100,000 light-years",humanScale:"Light that left the other side of our galaxy when Homo erectus lived hasn't reached us yet.",mindBlower:"There are more stars in the Milky Way than grains of sand on all of Earth's beaches — about 200-400 billion." },
+  { id:"observable",title:"Observable Universe",category:"distance",value:"93 billion light-years",humanScale:"Contains at least 2 trillion galaxies, each with hundreds of billions of stars.",mindBlower:"The observable universe is a sphere around us. Every point in space has its own observable universe. Most of the universe is beyond our horizon." },
+  { id:"sun_size",title:"The Sun",category:"size",value:"1.4 million km diameter",humanScale:"1.3 million Earths could fit inside the Sun.",mindBlower:"The Sun loses 4 million tons of mass every second through nuclear fusion — and has enough fuel for another 5 billion years." },
+  { id:"neutron_star",title:"A Neutron Star",category:"size",value:"~20 km diameter",humanScale:"A city-sized object with the mass of the Sun. A teaspoon would weigh a billion tons.",mindBlower:"Neutron stars spin up to 716 times per second. Their surface gravity is 200 billion times Earth's." },
+  { id:"earth_age",title:"Age of Earth",category:"time",value:"4.54 billion years",humanScale:"If Earth's history were compressed to 24 hours, humans appear in the last 3 seconds.",mindBlower:"For the first 2 billion years, Earth had no free oxygen. Cyanobacteria slowly poisoned the atmosphere with O₂ — the greatest mass extinction ever." },
+  { id:"universe_age",title:"Age of the Universe",category:"time",value:"13.8 billion years",humanScale:"If the universe's age were one year, the Sun formed on September 2nd, and humans evolved at 11:59 PM on December 31st.",mindBlower:"The cosmic microwave background radiation — the afterglow of the Big Bang — fills every point in space. It's the oldest light in the universe." },
+  { id:"speed_light",title:"Speed of Light",category:"speed",value:"299,792 km/s",humanScale:"Could circle Earth 7.5 times in one second.",mindBlower:"Nothing with mass can reach it. As you approach it, time slows down, length contracts, and mass increases toward infinity." },
+  { id:"black_hole_mass",title:"Ton 618 (Largest Known Black Hole)",category:"mass",value:"66 billion solar masses",humanScale:"Its event horizon is 11 times the orbit of Neptune.",mindBlower:"It was already this massive when the universe was only 3.5 billion years old. How it grew so fast is still unexplained." }
+];
