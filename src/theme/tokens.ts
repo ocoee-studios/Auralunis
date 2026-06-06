@@ -87,11 +87,12 @@ export interface ChronauraThemePalette {
   accent: string;
   text: string;
   muted: string;
+  gradient: string[];
 }
 
 export const ChronauraThemes: Record<string, ChronauraThemePalette> = {
-  system: { background: "#0B0B12", surface: "#121A2C", accent: "#D4AF37", text: "#F8F4EA", muted: "#A8AFBF" },
-  midnight_gold: { background: "#0B0B12", surface: "#121A2C", accent: "#D4AF37", text: "#F8F4EA", muted: "#A8AFBF" },
-  soft_moon: { background: "#14182A", surface: "#1E2640", accent: "#C0C6D4", text: "#F0F2F8", muted: "#8E96A8" },
-  deep_space: { background: "#040408", surface: "#0A0C18", accent: "#7B5CF6", text: "#E8E4F0", muted: "#6E6E8A" }
+  system: { background: "#0B0B12", surface: "#121A2C", accent: "#D4AF37", text: "#F8F4EA", muted: "#A8AFBF", gradient: ["#0B0B12", "#121A2C"] },
+  midnight_gold: { background: "#0B0B12", surface: "#121A2C", accent: "#D4AF37", text: "#F8F4EA", muted: "#A8AFBF", gradient: ["#0B0B12", "#121A2C"] },
+  soft_moon: { background: "#14182A", surface: "#1E2640", accent: "#C0C6D4", text: "#F0F2F8", muted: "#8E96A8", gradient: ["#14182A", "#1E2640"] },
+  deep_space: { background: "#040408", surface: "#0A0C18", accent: "#7B5CF6", text: "#E8E4F0", muted: "#6E6E8A", gradient: ["#040408", "#0A0C18"] }
 };
