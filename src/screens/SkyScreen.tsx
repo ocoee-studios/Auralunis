@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import { Alert, StyleSheet, Text, View } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
+import { MilkyWayBackdrop } from "@/components/MilkyWayBackdrop";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
 import { SkyLensPermissionGate } from "@/features/permissions/SkyLensPermissionGate";
@@ -41,7 +42,7 @@ export function SkyScreen() {
   }
 
   return (
-    <ScreenShell title="Sky Lens + Archive" subtitle="Sky">
+    <ScreenShell title="Sky Lens + Archive" subtitle="Sky" backdrop={<MilkyWayBackdrop />}>
       {skyLensOpen ? <SkyLensPlaceholder onClose={() => setSkyLensOpen(false)} /> : null}
       {manualMapOpen ? <ManualSkyMap onClose={() => setManualMapOpen(false)} /> : null}
 
@@ -143,25 +144,9 @@ export function SkyScreen() {
 }
 
 const styles = StyleSheet.create({
-  sectionCard: {
-    borderRadius: 24,
-    padding: 16,
-    marginBottom: 12,
-    backgroundColor: "rgba(98,207,255,0.07)",
-    borderWidth: 1,
-    borderColor: "rgba(98,207,255,0.18)"
-  },
   sectionLabel: { color: ChronauraColors.gold2, fontSize: 10, letterSpacing: 2.4, fontWeight: "900" },
   sectionTitle: { color: "#FFF", fontSize: 20, fontWeight: "900", marginTop: 8 },
   sectionCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6 },
-  skyCard: {
-    borderRadius: 24,
-    padding: 16,
-    marginBottom: 12,
-    backgroundColor: "rgba(212,175,55,0.08)",
-    borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.20)"
-  },
   skyRow: {
     flexDirection: "row",
     justifyContent: "space-between",

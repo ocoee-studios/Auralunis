@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
 import { GlassPanel } from "@/components/GlassPanel";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
@@ -13,6 +14,20 @@ import { StarBrightnessVisual } from "@/features/learn/visuals/StarBrightnessVis
 import { DeepSkyGlowVisual } from "@/features/learn/visuals/DeepSkyGlowVisual";
 import { MilkyWayBandVisual } from "@/features/learn/visuals/MilkyWayBandVisual";
 import { ThirtyNightsProgressVisual } from "@/features/learn/visuals/ThirtyNightsProgressVisual";
+
+// Per-category cosmic gradient + accent, evoking celestial imagery without
+// bundling photographic assets.
+const CATEGORY_THEME: Record<string, { gradient: [string, string]; accent: string }> = {
+  solar_system: { gradient: ["#3A2A0E", "#160F05"], accent: "rgba(243,217,155,0.45)" },
+  moon: { gradient: ["#1E2435", "#0B0F18"], accent: "rgba(192,198,212,0.45)" },
+  planets: { gradient: ["#2E1A12", "#140B07"], accent: "rgba(239,159,39,0.45)" },
+  constellations: { gradient: ["#1A1E3C", "#0A0C18"], accent: "rgba(123,92,246,0.45)" },
+  stars: { gradient: ["#16243A", "#0A111C"], accent: "rgba(120,200,255,0.45)" },
+  deep_sky: { gradient: ["#2C123C", "#120818"], accent: "rgba(157,92,200,0.5)" },
+  milky_way: { gradient: ["#102A33", "#06141A"], accent: "rgba(110,160,200,0.5)" },
+  beginner_path: { gradient: ["#0E2A1C", "#06140D"], accent: "rgba(74,222,128,0.4)" }
+};
+const DEFAULT_THEME = { gradient: ["#161A28", "#0A0C14"] as [string, string], accent: "rgba(255,255,255,0.12)" };
 
 function LearnVisualForCategory({ categoryId }: { categoryId: LearnCategoryId }) {
   switch (categoryId) {
@@ -60,13 +75,20 @@ export function LearnScreen() {
       <View style={styles.categoryGrid}>
         {learnCategories.map((category) => {
           const active = selectedCategory === category.id;
+          const theme = CATEGORY_THEME[category.id] ?? DEFAULT_THEME;
           return (
             <Pressable
               key={category.id}
-              style={[styles.categoryCard, active && styles.categoryCardActive]}
+              style={[styles.categoryCard, { borderColor: theme.accent }, active && styles.categoryCardActive]}
               onPress={() => setSelectedCategory(category.id as LearnCategoryId)}
             >
-              <Text style={styles.categoryIcon}>{category.icon}</Text>
+              <LinearGradient
+                colors={theme.gradient}
+                start={{ x: 0.1, y: 0 }}
+                end={{ x: 0.9, y: 1 }}
+                style={StyleSheet.absoluteFill}
+              />
+              <Text style={[styles.categoryIcon, { color: ChronauraColors.gold2 }]}>{category.icon}</Text>
               <Text style={styles.categoryTitle}>{category.title}</Text>
               <Text style={styles.categoryDescription}>{category.description}</Text>
             </Pressable>
@@ -150,11 +172,12 @@ const styles = StyleSheet.create({
     padding: 13,
     backgroundColor: "rgba(255,255,255,0.045)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.07)"
+    borderColor: "rgba(255,255,255,0.07)",
+    overflow: "hidden"
   },
   categoryCardActive: {
-    backgroundColor: "rgba(212,175,55,0.12)",
-    borderColor: "rgba(212,175,55,0.28)"
+    borderColor: ChronauraColors.gold,
+    borderWidth: 1.5
   },
   categoryIcon: { fontSize: 24, color: ChronauraColors.gold2 },
   categoryTitle: { color: "#FFF", fontSize: 14, fontWeight: "900", marginTop: 7 },

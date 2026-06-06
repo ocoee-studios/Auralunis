@@ -11,14 +11,17 @@ type Props = {
   title: string;
   subtitle: string;
   children: React.ReactNode;
+  /** Optional full-bleed visual rendered behind content (e.g. Milky Way band). */
+  backdrop?: React.ReactNode;
 };
 
-export function ScreenShell({ title, subtitle, children }: Props) {
+export function ScreenShell({ title, subtitle, children, backdrop }: Props) {
   const { palette } = useChronauraSettings();
   const insets = useSafeAreaInsets();
 
   return (
     <LinearGradient colors={palette.gradient} style={styles.root}>
+      {backdrop}
       <StarDust count={12} color={ChronauraColors.gold} opacity={0.18} />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}>
         {/* Brand header matching mockup: [Logo] CHRONAURA */}

@@ -44,7 +44,9 @@ declare module "react-native" {
   export const StyleSheet: {
     create<T extends Record<string, any>>(styles: T): T;
     absoluteFillObject: any;
+    absoluteFill: any;
   };
+  export function useWindowDimensions(): { width: number; height: number };
 }
 
 declare module "expo-linear-gradient" {
@@ -100,6 +102,14 @@ declare module "react-native-svg" {
   export const Circle: FC<any>;
   export const Line: FC<any>;
   export const Path: FC<any>;
+  export const Defs: FC<any>;
+  export const RadialGradient: FC<any>;
+  export const LinearGradient: FC<any>;
+  export const Stop: FC<any>;
+  export const Polygon: FC<any>;
+  export const Ellipse: FC<any>;
+  export const Rect: FC<any>;
+  export const G: FC<any>;
   export default Svg;
 }
 
