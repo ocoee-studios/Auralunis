@@ -26,6 +26,7 @@ import type {
 } from "@/features/paywall/MonetizationCatalog";
 import { configureNotificationHandler } from "@/services/NotificationService";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
+import { useChronauraFonts } from "@/theme/useFonts";
 import { recordSession } from "@/services/ReviewPromptService";
 
 const ONBOARDING_SEEN_KEY = "chronaura.onboarding.seen";

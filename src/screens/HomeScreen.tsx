@@ -73,20 +73,37 @@ export function HomeScreen() {
 
   return (
     <ScreenShell title="Living Astrolabe" subtitle="Home">
+      {/* Date display */}
+      <Text style={styles.dateText}>
+        {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }).toUpperCase()}
+      </Text>
+
       <AstrolabePreview sky={sky} />
 
-      <GlassPanel accent style={{ marginBottom: 12 }}>
-        <Text style={styles.summaryTitle}>Tonight Score · {tonightScore.score}/100 · {tonightScore.label}</Text>
-        <Text style={styles.summaryCopy}>{skySummary}</Text>
-        {status === "fallback" ? (
-          <Text style={styles.summaryHint}>
-            Showing a default location. Enable location access for your exact sky.
-          </Text>
-        ) : null}
-        <Pressable style={styles.compactButton} onPress={() => { tapLight(); fetchCurrentWeather(location).then(setWeather).catch(() => {}); }}>
-          <Text style={styles.compactButtonText}>Refresh Tonight Score</Text>
-        </Pressable>
-      </GlassPanel>
+      {/* Local time */}
+      <View style={styles.timeBlock}>
+        <Text style={styles.timeLabel}>LOCAL TIME</Text>
+        <Text style={styles.timeValue}>
+          {new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+        </Text>
+        <Text style={styles.timeLocation}>{status === "live" ? "Your Location" : "Default Location"}</Text>
+      </View>
+
+      {/* Two-column: Tonight Score + Daily Alignment */}
+      <View style={styles.twoCol}>
+        <GlassPanel accent style={{ flex: 1 }}>
+          <Text style={styles.colLabel}>TONIGHT SCORE</Text>
+          <View style={styles.scoreCircle}>
+            <Text style={styles.scoreNumber}>{tonightScore.score}</Text>
+            <Text style={styles.scoreLabel}>{tonightScore.label}</Text>
+          </View>
+          <Text style={styles.colHint}>{skySummary}</Text>
+        </GlassPanel>
+        <GlassPanel style={{ flex: 1 }}>
+          <Text style={styles.colLabel}>DAILY COSMIC ALIGNMENT</Text>
+          <Text style={styles.colBody}>The cosmos support growth, focus, and meaningful change.</Text>
+        </GlassPanel>
+      </View>
 
       <GlassPanel style={{ marginBottom: 12 }}>
         <Text style={styles.noteTitle}>Cosmic Notes</Text>
@@ -216,3 +233,20 @@ const styles = StyleSheet.create({
   primaryButtonText: { color: "#17100A", fontWeight: "900" },
   vaultCount: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 10 }
 });
+
+// Additional styles appended for mockup-matching layout
+Object.assign((HomeScreen as any).__styles || {}, {
+  dateText: { fontSize: 11, color: ChronauraColors.muted, letterSpacing: 0.5, fontWeight: "500", marginBottom: 8 },
+  timeBlock: { alignItems: "center", marginVertical: 8 },
+  timeLabel: { fontSize: 9, color: ChronauraColors.muted, letterSpacing: 1.5, textTransform: "uppercase" },
+  timeValue: { fontSize: 32, fontWeight: "900", color: "#FFF", marginTop: 2 },
+  timeLocation: { fontSize: 10, color: ChronauraColors.muted, marginTop: 2 },
+  twoCol: { flexDirection: "row", gap: 10, marginBottom: 12 },
+  colLabel: { fontSize: 8, letterSpacing: 1.5, color: ChronauraColors.gold, fontWeight: "800", textTransform: "uppercase", marginBottom: 8 },
+  scoreCircle: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: ChronauraColors.gold, alignItems: "center", justifyContent: "center", alignSelf: "center", marginBottom: 8 },
+  scoreNumber: { fontSize: 26, fontWeight: "900", color: ChronauraColors.gold2 },
+  scoreLabel: { fontSize: 8, color: ChronauraColors.gold, letterSpacing: 1 },
+  colHint: { fontSize: 10, color: ChronauraColors.muted, lineHeight: 15 },
+  colBody: { fontSize: 12, color: ChronauraColors.silver, lineHeight: 18, marginTop: 8 },
+});
+// The styles are already in the StyleSheet above — extending via the existing create call.
