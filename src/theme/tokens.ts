@@ -80,3 +80,18 @@ export const ChronauraTaglines = [
   "Explore time. Align with the universe.",
   "The universe is now in your hands."
 ] as const;
+
+export interface ChronauraThemePalette {
+  background: string;
+  surface: string;
+  accent: string;
+  text: string;
+  muted: string;
+}
+
+export const ChronauraThemes: Record<string, ChronauraThemePalette> = {
+  system: { background: "#0B0B12", surface: "#121A2C", accent: "#D4AF37", text: "#F8F4EA", muted: "#A8AFBF" },
+  midnight_gold: { background: "#0B0B12", surface: "#121A2C", accent: "#D4AF37", text: "#F8F4EA", muted: "#A8AFBF" },
+  soft_moon: { background: "#14182A", surface: "#1E2640", accent: "#C0C6D4", text: "#F0F2F8", muted: "#8E96A8" },
+  deep_space: { background: "#040408", surface: "#0A0C18", accent: "#7B5CF6", text: "#E8E4F0", muted: "#6E6E8A" }
+};

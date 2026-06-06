@@ -1,6 +1,6 @@
 // Captures a React Native view as an image and shares it.
 let ViewShot: { captureRef: (ref: unknown, opts: object) => Promise<string> } | null = null;
-let Sharing: { shareAsync: (url: string) => Promise<void> } | null = null;
+let Sharing: { shareAsync: (url: string, options?: Record<string, unknown>) => Promise<void> } | null = null;
 
 try {
   ViewShot = require("react-native-view-shot") as typeof ViewShot;
