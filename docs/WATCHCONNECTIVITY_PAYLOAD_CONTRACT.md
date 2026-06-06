@@ -1,34 +1,54 @@
 # WatchConnectivity Payload Contract
 
-## iPhone → Watch (applicationContext)
+## Purpose
+
+Keep the Watch payload intentionally small and stable.
+
+## Payload
 
 ```json
 {
-  "moonPhase": "WAXING GIBBOUS",
-  "moonPercent": 61,
-  "moonDistanceKm": 384400,
-  "tonightScore": 82,
-  "nextEvent": "GOLDEN HOUR",
-  "nextEventCountdown": "IN 2H 43M",
-  "solarTime": "10:09 PM",
-  "celestialBody": "MOON",
-  "updatedAt": "2026-06-05T22:09:00Z"
+  "moonPhase": "Waxing Gibbous",
+  "tonightScore": 91,
+  "nextEvent": "Venus visible in 1h 18m",
+  "updatedAt": "2026-06-05T21:00:00Z"
 }
 ```
 
-## Transport
+## iPhone → Watch delivery
 
-- `updateApplicationContext` — durable, guaranteed delivery even if watch is asleep
-- `sendMessage` — optional fast path when counterpart is reachable
+Use two delivery paths:
 
-## Update frequency
+1. `updateApplicationContext`
+   - sends the latest durable state
+   - replaces older application-context state
+   - use for the current Moon phase, score, and next event
 
-- On app foreground
-- On significant location change
-- On ephemeris refresh (every 5 minutes while app is active)
-- On watch request (`didReceiveMessage` with `{"request": "skyData"}`)
+2. `sendMessage`
+   - optional foreground fast path
+   - call only when `isReachable` is true
+   - do not rely on it as the only delivery mechanism
 
-## Source files
+## Watch behavior
 
-- iPhone: `apple-native/iOS/ChronauraWatchSync/`
-- Watch: `apple-native/watchOS/ChronauraWatch/Connectivity/`
+- Activate the default `WCSession`.
+- Apply the latest `applicationContext` after activation.
+- Decode new application-context updates.
+- Decode foreground messages when received.
+- Publish payload updates on the main actor for SwiftUI.
+
+## React Native bridge
+
+The iPhone native module scaffold is located at:
+
+```text
+apple-native/iOS/ChronauraWatchSync/
+```
+
+The JavaScript wrapper is:
+
+```text
+src/watchSync.ts
+```
+
+After the iOS native project exists, register the Expo module with the iOS app target and call `syncChronauraWatch(...)` whenever the Home sky summary changes.
