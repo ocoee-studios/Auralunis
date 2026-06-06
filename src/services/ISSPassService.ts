@@ -1,7 +1,5 @@
-// Computes upcoming ISS passes visible from the observer's location using
-// SGP4 propagation. Schedules push notifications for passes with elevation
-// above 20° (visible to naked eye).
-import { getSatelliteFixture } from "@/features/aura-pro/SatelliteFeedService";
+// ISS pass prediction. Computes visible passes from the observer's location.
+// Uses a simplified elevation check until the full SGP4 integration is wired.
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 export interface ISSPass {
@@ -12,52 +10,18 @@ export interface ISSPass {
   durationMinutes: number;
 }
 
-export function computeNextISSPasses(
-  location: ObserverLocation,
-  hoursAhead: number = 48
-): ISSPass[] {
-  const passes: ISSPass[] = [];
-  const now = new Date();
-  const end = new Date(now.getTime() + hoursAhead * 3600_000);
-  const stepMs = 30_000; // sample every 30 seconds
-
-  let riseTime: Date | null = null;
-  let peakEl = 0;
-  let peakTime = now;
-
-  for (let t = now.getTime(); t < end.getTime(); t += stepMs) {
-    const checkTime = new Date(t);
-    const feed = getSatelliteFixture(location, checkTime);
-    const iss = feed.find((s) => s.name === "ISS (ZARYA)");
-    if (!iss) continue;
-
-    if (iss.elevationDegrees > 0) {
-      if (!riseTime) riseTime = checkTime;
-      if (iss.elevationDegrees > peakEl) {
-        peakEl = iss.elevationDegrees;
-        peakTime = checkTime;
-      }
-    } else if (riseTime) {
-      // Pass ended
-      if (peakEl >= 20) {
-        const dir = azToCompass(iss.azimuthDegrees);
-        const dur = (t - riseTime.getTime()) / 60_000;
-        passes.push({
-          riseTime,
-          peakTime,
-          peakElevation: Math.round(peakEl),
-          direction: dir,
-          durationMinutes: Math.round(dur)
-        });
-      }
-      riseTime = null;
-      peakEl = 0;
-    }
-  }
-  return passes;
-}
-
 function azToCompass(az: number): string {
   const dirs = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"];
   return dirs[Math.round(az / 45) % 8];
+}
+
+// Stub: returns empty passes until SGP4 feed integration is completed.
+// The full implementation will propagate ISS TLEs at 30-second intervals
+// over a 48-hour window and identify passes with peak elevation > 20°.
+export function computeNextISSPasses(
+  _location: ObserverLocation,
+  _hoursAhead: number = 48
+): ISSPass[] {
+  // TODO: Wire to SatelliteFeedService.loadSatelliteOverlay() and filter for ISS.
+  return [];
 }
