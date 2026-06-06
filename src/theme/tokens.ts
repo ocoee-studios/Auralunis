@@ -38,16 +38,6 @@ export const ChronauraColors = {
   black: "#0B0B12"
 } as const;
 
-export const ChronauraPricing = {
-  horizonMonthly: "$4.99/month",
-  horizonAnnual: "$29.99/year",
-  founderAnnual: "$24.99 first year",
-  auraMonthly: "$5.99/month",
-  auraAnnual: "$49.99/year",
-  sovereignAnnual: "$299/year",
-  trial: "7-day free trial"
-} as const;
-
 export const ChronauraTypography = {
   // Display (brand name, screen titles)
   display: {
@@ -96,3 +86,13 @@ export const ChronauraThemes: Record<string, ChronauraThemePalette> = {
   soft_moon: { background: "#14182A", surface: "#1E2640", accent: "#C0C6D4", text: "#F0F2F8", muted: "#8E96A8", gradient: ["#14182A", "#1E2640"] },
   deep_space: { background: "#040408", surface: "#0A0C18", accent: "#7B5CF6", text: "#E8E4F0", muted: "#6E6E8A", gradient: ["#040408", "#0A0C18"] }
 };
+
+export const ChronauraPricing = {
+  monthly: "$6.99/month",
+  annual: "$39.99/year",
+  annualMonthly: "$3.33/month",
+  trial: "7-day free trial",
+  // Removed from launch — add later when features are built
+  // auraMonthly: future tier
+  // sovereignAnnual: future tier
+} as const;

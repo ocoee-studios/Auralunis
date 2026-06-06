@@ -93,10 +93,10 @@ export function SettingsScreen() {
         <GlassPanel accent>
           <Text style={styles.infoTitle}>Chronaura Memberships</Text>
           <Text style={styles.infoCopy}>
-            Horizon Free · Horizon+ {ChronauraPricing.horizonMonthly} or {ChronauraPricing.horizonAnnual} · Aura Pro {ChronauraPricing.auraMonthly} or {ChronauraPricing.auraAnnual}.
+            Chronaura Premium: {ChronauraPricing.monthly} or {ChronauraPricing.annual}. Includes {ChronauraPricing.trial}.
           </Text>
           <Text style={styles.infoCopy}>
-            Every paid launch tier includes a {ChronauraPricing.trial}. Sovereign remains a $299/year collector waitlist until its luxury features and fulfillment operations are ready.
+            Start with a free trial, upgrade when you're ready. Cancel anytime.
           </Text>
           <Pressable
             style={styles.actionButton}

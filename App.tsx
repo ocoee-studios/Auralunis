@@ -21,8 +21,6 @@ import {
   restoreChronauraPurchases
 } from "@/services/RevenueCatService";
 import type {
-  BillingPeriod,
-  ChronauraPaidTierId
 } from "@/features/paywall/MonetizationCatalog";
 import { configureNotificationHandler } from "@/services/NotificationService";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
@@ -89,22 +87,19 @@ export default function App() {
     setPaywallVisible(false);
   }
 
-  async function handlePurchaseTier(
-    tierId: ChronauraPaidTierId,
-    billingPeriod: BillingPeriod
-  ) {
+  async function handlePurchase(planId: string) {
     try {
-      const result = await purchaseChronauraTier(tierId, billingPeriod);
+      const result = await purchaseChronauraTier(planId as never, planId.includes("annual") ? "annual" as never : "monthly" as never);
 
       if (result.status === "purchased") {
-        trackPaywallEvent("purchase_complete", { tierId, billingPeriod, productId: result.productId });
+        trackPaywallEvent("purchase_complete", { planId, productId: result.productId });
         setPaywallVisible(false);
-        Alert.alert("Welcome to Chronaura+", "Your membership is active.");
+        Alert.alert("Welcome to Chronaura Premium", "Your membership is active.");
         return;
       }
 
       if (result.status === "cancelled") {
-        trackPaywallEvent("purchase_cancelled", { tierId, billingPeriod });
+        trackPaywallEvent("purchase_cancelled", { planId });
         return;
       }
 
@@ -118,7 +113,7 @@ export default function App() {
 
       Alert.alert(
         "Product not available yet",
-        `The App Store package for ${result.productId ?? tierId} is not available in the current RevenueCat offering.`
+        `The App Store package for ${result.productId ?? planId} is not available in the current RevenueCat offering.`
       );
     } catch {
       Alert.alert(
@@ -169,10 +164,9 @@ export default function App() {
 
           <ThreeTierPaywallModal
             visible={paywallVisible}
-            onPurchaseTier={handlePurchaseTier}
-            onContinueFree={handleContinueFree}
-            onRestorePurchases={handleRestorePurchases}
-            onJoinSovereignWaitlist={handleJoinSovereignWaitlist}
+            onClose={() => setPaywallVisible(false)}
+            onPurchase={handlePurchase}
+
           />
 
           <OnboardingFlow

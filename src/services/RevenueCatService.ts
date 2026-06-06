@@ -4,12 +4,10 @@ import Purchases, {
   type CustomerInfo,
   type PurchasesPackage
 } from "react-native-purchases";
-import {
-  RevenueCatIds,
-  type BillingPeriod,
-  type ChronauraPaidTierId,
-  getProductForTier
-} from "@/features/paywall/MonetizationCatalog";
+import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
+
+type BillingPeriod = "monthly" | "annual";
+type ChronauraPaidTierId = string;
 
 type ConfigureResult =
   | { status: "configured" }
@@ -72,10 +70,10 @@ export async function purchaseChronauraTier(
   customerInfo?: CustomerInfo;
   productId?: string;
 }> {
-  const product = getProductForTier(tierId, billingPeriod);
+  const product = { productId: billingPeriod === "annual" ? RevenueCatIds.products.premiumAnnual : RevenueCatIds.products.premiumMonthly, packageId: billingPeriod === "annual" ? RevenueCatIds.packages.premiumAnnual : RevenueCatIds.packages.premiumMonthly };
 
-  if (!product || !product.availableAtLaunch) {
-    return { status: "not_available", productId: product?.productId };
+  if (!product) {
+    return { status: "not_available", productId: "" };
   }
 
   const configuration = await configureRevenueCat();
@@ -87,7 +85,7 @@ export async function purchaseChronauraTier(
   const packages = await getCurrentPackages();
   const selectedPackage = packages.find(
     (candidate) =>
-      candidate.identifier === product.revenueCatPackageId ||
+      candidate.identifier === product.packageId ||
       candidate.product.identifier === product.productId
   );
 
@@ -148,9 +146,9 @@ export async function openChronauraSubscriptionManagement(): Promise<{
 export function hasChronauraEntitlement(
   customerInfo: CustomerInfo,
   entitlementId:
-    | typeof RevenueCatIds.entitlements.horizonPlus
-    | typeof RevenueCatIds.entitlements.auraPro
-    | typeof RevenueCatIds.entitlements.sovereign
+    | typeof RevenueCatIds.entitlement
+    | typeof RevenueCatIds.entitlement
+    | typeof RevenueCatIds.entitlement
 ) {
   return Boolean(customerInfo.entitlements.active[entitlementId]);
 }
