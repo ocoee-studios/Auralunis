@@ -40,7 +40,7 @@ function Particle({ delay, color, baseOpacity }: { delay: number; color: string;
 
 export function StarDust({ count = 8, color = "#C7A66A", opacity = 0.35 }: Props) {
   return (
-    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+    <View style={{ position: "absolute" as const, left: 0, right: 0, top: 0, bottom: 0 }} pointerEvents="none">
       {Array.from({ length: count }, (_, i) => (
         <Particle key={i} delay={i * 400} color={color} baseOpacity={opacity} />
       ))}
