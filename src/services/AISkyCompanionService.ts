@@ -20,7 +20,7 @@ function buildSkyContext(location: ObserverLocation): string {
     .filter(b => b.id !== "sun")
     .map(b => `${b.name}: az ${Math.round(b.azimuthDegrees)}° alt ${Math.round(b.altitudeDegrees)}°`)
     .join(", ");
-  return `Observer at lat ${location.latitude.toFixed(2)}, lon ${location.longitude.toFixed(2)}. ` +
+  return `Observer at lat ${location.latitudeDegrees.toFixed(2)}, lon ${location.longitudeDegrees.toFixed(2)}. ` +
     `Moon: ${sky.moonIlluminationPercent}% illuminated. ` +
     `Visible bodies: ${visible || "none above horizon"}. ` +
     `Time: ${new Date().toISOString()}.`;

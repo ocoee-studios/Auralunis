@@ -37,8 +37,8 @@ export function bortleDescription(bortle: number): string {
 export function suggestDarkSites(location: ObserverLocation): DarkSkyLocation[] {
   // In production, this would query a light pollution API or local database.
   // For now, return contextual suggestions based on general direction.
-  const lat = location.latitude;
-  const lon = location.longitude;
+  const lat = location.latitudeDegrees;
+  const lon = location.longitudeDegrees;
   return [
     { id: "nearby-rural", name: "Nearest Rural Area", latitude: lat + 0.5, longitude: lon - 0.3, bortle: 4, description: "Drive away from city lights. Look for areas with minimal development.", driveTime: "~45 min" },
     { id: "dark-park", name: "Dark Sky Preserve", latitude: lat + 1.0, longitude: lon + 0.5, bortle: 3, description: "Designated dark sky area with controlled lighting.", driveTime: "~1.5 hours" },
