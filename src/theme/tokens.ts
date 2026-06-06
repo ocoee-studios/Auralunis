@@ -33,7 +33,19 @@ export const ChronauraColors = {
 
   // Backward-compatible aliases (referenced by existing screens)
   orange: "#EF9F27",
-  blue: "#78C8FF"
+  blue: "#78C8FF",
+  green: "#4ADE80",
+  black: "#0B0B12"
+} as const;
+
+export const ChronauraPricing = {
+  horizonMonthly: "$4.99/month",
+  horizonAnnual: "$29.99/year",
+  founderAnnual: "$24.99 first year",
+  auraMonthly: "$5.99/month",
+  auraAnnual: "$49.99/year",
+  sovereignAnnual: "$299/year",
+  trial: "7-day free trial"
 } as const;
 
 export const ChronauraTypography = {
