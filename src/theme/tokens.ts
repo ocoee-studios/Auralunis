@@ -29,7 +29,11 @@ export const ChronauraColors = {
   // Glass panel
   glassBackground: "rgba(18,26,44,0.74)",
   glassBorder: "rgba(212,175,55,0.28)",
-  glassHighlight: "rgba(255,255,255,0.08)"
+  glassHighlight: "rgba(255,255,255,0.08)",
+
+  // Backward-compatible aliases (referenced by existing screens)
+  orange: "#EF9F27",
+  blue: "#78C8FF"
 } as const;
 
 export const ChronauraTypography = {
