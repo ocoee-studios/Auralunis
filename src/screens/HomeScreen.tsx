@@ -86,7 +86,7 @@ export function HomeScreen() {
         <Text style={styles.timeValue}>
           {new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
         </Text>
-        <Text style={styles.timeLocation}>{status === "live" ? "Your Location" : "Default Location"}</Text>
+        <Text style={styles.timeLocation}>{status !== "fallback" ? "Your Location" : "Default Location"}</Text>
       </View>
 
       {/* Two-column: Tonight Score + Daily Alignment */}
