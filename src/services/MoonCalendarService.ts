@@ -1,29 +1,12 @@
 // Computes moon phase for each day of a given month using astronomy-engine.
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
+import { moonPhaseName } from "@/services/MoonPhase";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 export interface MoonDay {
   date: Date;
   illumination: number;
   phaseName: string;
-}
-
-const PHASE_NAMES = [
-  "New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous",
-  "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"
-];
-
-function phaseName(illumination: number, isWaxing: boolean): string {
-  if (illumination < 3) return PHASE_NAMES[0];
-  if (illumination > 97) return PHASE_NAMES[4];
-  if (isWaxing) {
-    if (illumination < 40) return PHASE_NAMES[1];
-    if (illumination < 60) return PHASE_NAMES[2];
-    return PHASE_NAMES[3];
-  }
-  if (illumination > 60) return PHASE_NAMES[5];
-  if (illumination > 40) return PHASE_NAMES[6];
-  return PHASE_NAMES[7];
 }
 
 export function computeMoonCalendar(
@@ -33,14 +16,18 @@ export function computeMoonCalendar(
 ): MoonDay[] {
   const days: MoonDay[] = [];
   const daysInMonth = new Date(year, month, 0).getDate();
-  let prevIllum = 0;
+  // Seed from the night before the 1st so day 1's waxing/waning is correct.
+  // (Seeding 0 would make illum >= prevIllum always true, forcing the 1st to a
+  // waxing phase name even when the moon is actually waning.)
+  const nightBefore = new Date(year, month - 1, 0, 22, 0, 0);
+  let prevIllum = computeTonightSky(location, nightBefore).moonIlluminationPercent;
 
   for (let d = 1; d <= daysInMonth; d++) {
     const date = new Date(year, month - 1, d, 22, 0, 0); // 10 PM local
     const sky = computeTonightSky(location, date);
     const illum = sky.moonIlluminationPercent;
     const waxing = illum >= prevIllum;
-    days.push({ date, illumination: illum, phaseName: phaseName(illum, waxing) });
+    days.push({ date, illumination: illum, phaseName: moonPhaseName(illum, waxing) });
     prevIllum = illum;
   }
   return days;

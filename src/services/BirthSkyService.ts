@@ -2,6 +2,7 @@
 // rising constellation. Referenced throughout the app for personalization.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
+import { moonPhaseLabel } from "@/services/MoonPhase";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import type { TonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 
@@ -16,14 +17,6 @@ export interface BirthSkyProfile {
   moonPercent: number;
   risingConstellation: string;
   personalMessage: string;
-}
-
-function moonPhaseName(pct: number): string {
-  if (pct < 3) return "New Moon";
-  if (pct < 35) return "Waxing Crescent";
-  if (pct < 65) return "Half Moon";
-  if (pct < 97) return "Gibbous Moon";
-  return "Full Moon";
 }
 
 function dominantConstellation(sky: TonightSky): string {
@@ -57,7 +50,7 @@ export async function computeAndStoreBirthSky(
     computedAt: new Date().toISOString(),
     sky,
     visiblePlanets,
-    moonPhase: moonPhaseName(moonPercent),
+    moonPhase: moonPhaseLabel(moonPercent),
     moonPercent,
     risingConstellation: dominantConstellation(sky),
     personalMessage: ""

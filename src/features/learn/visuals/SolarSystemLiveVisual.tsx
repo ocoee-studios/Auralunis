@@ -2,6 +2,12 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ChronauraColors } from "@/theme/tokens";
 
+// The orbit container is a fixed 260×260 square (see styles.center), so its
+// center is at 130,130. Planet dots are 10px, so offset by half to center them
+// on the orbit rings (which are centered by flexbox).
+const ORRERY_SIZE = 260;
+const PLANET_CENTER = ORRERY_SIZE / 2 - 5;
+
 export function SolarSystemLiveVisual() {
   const [step, setStep] = useState(0);
 
@@ -18,10 +24,10 @@ export function SolarSystemLiveVisual() {
         {[42, 62, 86, 112].map((size, i) => (
           <View key={size} style={[styles.orbit, { width: size * 2, height: size * 2, borderRadius: size }]} />
         ))}
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 8) * 42, left: 154 + Math.cos(step / 8) * 42, backgroundColor: ChronauraColors.gold2 }]} />
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 10 + 1.2) * 62, left: 154 + Math.cos(step / 10 + 1.2) * 62, backgroundColor: "#d0d8ff" }]} />
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 12 + 2.1) * 86, left: 154 + Math.cos(step / 12 + 2.1) * 86, backgroundColor: "#62CFFF" }]} />
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 14 + 2.8) * 112, left: 154 + Math.cos(step / 14 + 2.8) * 112, backgroundColor: "#FFB07A" }]} />
+        <View style={[styles.planet, { top: PLANET_CENTER + Math.sin(step / 8) * 42, left: PLANET_CENTER + Math.cos(step / 8) * 42, backgroundColor: ChronauraColors.gold2 }]} />
+        <View style={[styles.planet, { top: PLANET_CENTER + Math.sin(step / 10 + 1.2) * 62, left: PLANET_CENTER + Math.cos(step / 10 + 1.2) * 62, backgroundColor: "#d0d8ff" }]} />
+        <View style={[styles.planet, { top: PLANET_CENTER + Math.sin(step / 12 + 2.1) * 86, left: PLANET_CENTER + Math.cos(step / 12 + 2.1) * 86, backgroundColor: "#62CFFF" }]} />
+        <View style={[styles.planet, { top: PLANET_CENTER + Math.sin(step / 14 + 2.8) * 112, left: PLANET_CENTER + Math.cos(step / 14 + 2.8) * 112, backgroundColor: "#FFB07A" }]} />
       </View>
       <Text style={styles.caption}>A living mini-orrery for the Sun and planetary motion. Production can wire this to real orbital time scrubbing.</Text>
     </View>
@@ -40,7 +46,9 @@ const styles = StyleSheet.create({
   label: { color: ChronauraColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
   center: {
     marginTop: 12,
-    height: 260,
+    width: ORRERY_SIZE,
+    height: ORRERY_SIZE,
+    alignSelf: "center",
     alignItems: "center",
     justifyContent: "center"
   },

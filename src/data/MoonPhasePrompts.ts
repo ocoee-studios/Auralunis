@@ -1,3 +1,5 @@
+import { moonPhaseName } from "@/services/MoonPhase";
+
 export interface MoonPrompt { phase: string; prompt: string; reflection: string; }
 
 export const moonPhasePrompts: MoonPrompt[] = [
@@ -12,14 +14,7 @@ export const moonPhasePrompts: MoonPrompt[] = [
 ];
 
 export function getPromptForIllumination(percent: number, isWaxing: boolean): MoonPrompt {
-  if (percent < 3) return moonPhasePrompts[0];
-  if (percent > 97) return moonPhasePrompts[4];
-  if (isWaxing) {
-    if (percent < 35) return moonPhasePrompts[1];
-    if (percent < 65) return moonPhasePrompts[2];
-    return moonPhasePrompts[3];
-  }
-  if (percent > 65) return moonPhasePrompts[5];
-  if (percent > 35) return moonPhasePrompts[6];
-  return moonPhasePrompts[7];
+  // Look up by the canonical phase name so thresholds stay single-sourced.
+  const name = moonPhaseName(percent, isWaxing);
+  return moonPhasePrompts.find((p) => p.phase === name) ?? moonPhasePrompts[0];
 }

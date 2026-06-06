@@ -59,8 +59,11 @@ export async function recordObservation(update: {
   }
   if (update.isLateNight) stats.lateNightSessions += 1;
 
+  // Meteorological seasons (Northern Hemisphere): Dec–Feb winter, Mar–May
+  // spring, Jun–Aug summer, Sep–Nov autumn.
   const month = new Date().getMonth();
-  const season = month < 3 ? "winter" : month < 6 ? "spring" : month < 9 ? "summer" : "autumn";
+  const season =
+    month === 11 || month < 2 ? "winter" : month < 5 ? "spring" : month < 8 ? "summer" : "autumn";
   if (!stats.seasonsObserved.includes(season)) stats.seasonsObserved.push(season);
 
   await AsyncStorage.setItem(KEY, JSON.stringify(stats));

@@ -18,7 +18,11 @@ function projectTarget(pointing, az, alt, fov, box) {
   const vRot = -h * Math.sin(r) + v * Math.cos(r);
   const halfH = fov.horizontalDegrees / 2;
   const halfV = fov.verticalDegrees / 2;
-  const behind = Math.abs(dAz) > 90;
+  // Behind = opposite hemisphere (true angular separation > 90°), not raw azimuth delta.
+  const cosSep =
+    Math.sin(toRad(alt)) * Math.sin(toRad(pointing.altitudeDegrees)) +
+    Math.cos(toRad(alt)) * Math.cos(toRad(pointing.altitudeDegrees)) * Math.cos(toRad(dAz));
+  const behind = cosSep < 0;
   return {
     x: box.width / 2 + (hRot / halfH) * (box.width / 2),
     y: box.height / 2 - (vRot / halfV) * (box.height / 2),
@@ -58,6 +62,14 @@ const center = projectTarget(pointing, 180, 20, fov, box);
 assert("target ahead maps to center", Math.abs(center.x - 150) < 0.5 && Math.abs(center.y - 180) < 0.5 && center.onScreen);
 const behind = projectTarget(pointing, 300, 20, fov, box);
 assert("target behind is off-screen", behind.behind && !behind.onScreen);
+// Regression: near the zenith a large azimuth delta is a small true angle, so a
+// target in front must NOT be flagged behind (was a false positive on raw dAz).
+const nearZenith = { azimuthDegrees: 0, altitudeDegrees: 80, rollDegrees: 0 };
+const zenithFront = projectTarget(nearZenith, 170, 80, fov, box);
+assert("near-zenith target in front is not behind", !zenithFront.behind);
+// And a true opposite-hemisphere target is still behind.
+const trulyBehind = projectTarget(nearZenith, 0, -80, fov, box);
+assert("opposite-hemisphere target is behind", trulyBehind.behind);
 const above = projectTarget(pointing, 180, 50, fov, box);
 assert("target above FOV is off-screen", !above.onScreen && above.y < 0);
 

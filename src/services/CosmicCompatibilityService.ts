@@ -1,5 +1,6 @@
 // Compare birth skies between two people.
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
+import { moonPhaseLabel } from "@/services/MoonPhase";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 export interface BirthSkyComparison {
@@ -9,14 +10,6 @@ export interface BirthSkyComparison {
   uniqueTo1: string[];
   uniqueTo2: string[];
   narrative: string;
-}
-
-function moonName(pct: number): string {
-  if (pct < 3) return "New Moon";
-  if (pct < 35) return "Crescent";
-  if (pct < 65) return "Quarter Moon";
-  if (pct < 97) return "Gibbous";
-  return "Full Moon";
 }
 
 export function compareBirthSkies(
@@ -33,8 +26,8 @@ export function compareBirthSkies(
   const unique1 = planets1.filter(p => !planets2.includes(p));
   const unique2 = planets2.filter(p => !planets1.includes(p));
 
-  const moon1 = moonName(sky1.moonIlluminationPercent);
-  const moon2 = moonName(sky2.moonIlluminationPercent);
+  const moon1 = moonPhaseLabel(sky1.moonIlluminationPercent);
+  const moon2 = moonPhaseLabel(sky2.moonIlluminationPercent);
 
   let narrative: string;
   if (moon1 === moon2) {

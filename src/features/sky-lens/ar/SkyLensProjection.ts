@@ -68,7 +68,14 @@ export function projectTarget(
   const x = box.width / 2 + (hRot / halfH) * (box.width / 2);
   const y = box.height / 2 - (vRot / halfV) * (box.height / 2);
 
-  const behind = Math.abs(deltaAz) > 90;
+  // "Behind" = the target is in the opposite hemisphere from where the camera
+  // points, i.e. the true angular separation exceeds 90°. Using the raw azimuth
+  // delta here would wrongly flag near-zenith targets as behind, because a large
+  // azimuth swing near the pole spans only a small true angle.
+  const cosSeparation =
+    Math.sin(toRad(targetAltitudeDegrees)) * Math.sin(toRad(pointing.altitudeDegrees)) +
+    Math.cos(toRad(targetAltitudeDegrees)) * Math.cos(toRad(pointing.altitudeDegrees)) * Math.cos(toRad(deltaAz));
+  const behind = cosSeparation < 0;
   const onScreen = !behind && Math.abs(hRot) <= halfH && Math.abs(vRot) <= halfV;
   const bearingDegrees =
     (Math.atan2(y - box.height / 2, x - box.width / 2) * 180) / Math.PI;

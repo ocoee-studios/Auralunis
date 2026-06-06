@@ -22,7 +22,12 @@ async function save(state: StreakState): Promise<void> {
 }
 
 function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
+  // Local calendar day (not UTC) so a late-evening session counts as tonight
+  // for users far from UTC.
+  const d = new Date();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
 }
 
 export async function completeNight(): Promise<StreakState> {
