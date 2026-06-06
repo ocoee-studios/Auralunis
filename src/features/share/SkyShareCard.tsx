@@ -1,6 +1,6 @@
 // Shareable image card: astrolabe snapshot, tonight score, visible planets,
 // moon phase. Rendered as a React Native view, captured by ViewShot.
-import React, { forwardRef } from "react";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { ChronauraColors } from "@/theme/tokens";
 import type { TonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
@@ -8,11 +8,11 @@ import type { TonightScoreResult } from "@/services/TonightScoreService";
 
 type Props = { sky: TonightSky; score: TonightScoreResult };
 
-export const SkyShareCard = forwardRef<View, Props>(function SkyShareCard({ sky, score }, ref) {
+export function SkyShareCard({ sky, score }: Props) {
   const planets = sky.visibleBodies.filter((b) => b.id !== "sun" && b.id !== "moon");
 
   return (
-    <View ref={ref} style={s.card}>
+    <View style={s.card} collapsable={false}>
       <Text style={s.brand}>CHRONAURA</Text>
       <Text style={s.score}>{score.score}</Text>
       <Text style={s.label}>TONIGHT SCORE · {score.label.toUpperCase()}</Text>
