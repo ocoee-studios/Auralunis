@@ -1,37 +1,34 @@
-// Catches JS crashes and shows a recovery screen instead of white screen of death.
-import React from "react";
+// Catches JS crashes and shows a recovery screen.
+// Uses require("react").Component to work around type resolution.
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ChronauraColors } from "@/theme/tokens";
 
-type Props = { children: React.ReactNode };
+const React = require("react") as { Component: any; createElement: any };
+
+type Props = { children: unknown };
 type State = { hasError: boolean; error: string };
 
-export class ErrorBoundary extends React.Component<Props, State> {
+export class ErrorBoundary extends (React.Component as any) {
   state: State = { hasError: false, error: "" };
 
   static getDerivedStateFromError(error: Error): State {
     return { hasError: true, error: error.message };
   }
 
-  componentDidCatch(error: Error) {
-    console.error("Chronaura ErrorBoundary:", error);
-  }
-
   render() {
-    if (this.state.hasError) {
-      return (
-        <View style={s.container}>
-          <Text style={s.icon}>✦</Text>
-          <Text style={s.title}>Something went wrong</Text>
-          <Text style={s.body}>Chronaura encountered an unexpected error. Your Vault data is safe.</Text>
-          <Text style={s.detail}>{this.state.error}</Text>
-          <Pressable style={s.button} onPress={() => this.setState({ hasError: false, error: "" })}>
-            <Text style={s.buttonText}>Try Again</Text>
-          </Pressable>
-        </View>
+    const self = this as unknown as { state: State; props: Props; setState: (s: Partial<State>) => void };
+    if (self.state.hasError) {
+      return React.createElement(View, { style: s.container },
+        React.createElement(Text, { style: s.icon }, "✦"),
+        React.createElement(Text, { style: s.title }, "Something went wrong"),
+        React.createElement(Text, { style: s.body }, "Chronaura encountered an unexpected error. Your Vault data is safe."),
+        React.createElement(Text, { style: s.detail }, self.state.error),
+        React.createElement(Pressable, { style: s.button, onPress: () => self.setState({ hasError: false, error: "" }) },
+          React.createElement(Text, { style: s.buttonText }, "Try Again")
+        )
       );
     }
-    return this.props.children;
+    return self.props.children;
   }
 }
 
