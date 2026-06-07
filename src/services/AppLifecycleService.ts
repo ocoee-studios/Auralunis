@@ -9,7 +9,7 @@ const listeners: Callback[] = [];
 
 let currentState: AppStateStatus = "active";
 
-AppState.addEventListener("change", (nextState) => {
+AppState.addEventListener("change", (nextState: AppStateStatus) => {
   if (currentState.match(/inactive|background/) && nextState === "active") {
     // Returned to foreground — clear stale cache
     clearEphemerisCache();
