@@ -1,6 +1,6 @@
 // Wraps content that has text inputs to prevent keyboard from hiding them.
 import React, { type ReactNode } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
+const { KeyboardAvoidingView, Platform, StyleSheet } = require("react-native") as any;
 
 type Props = { children: ReactNode };
 

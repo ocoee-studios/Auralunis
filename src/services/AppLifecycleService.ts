@@ -1,6 +1,7 @@
 // Handles app foreground/background transitions.
 // Refreshes sky data when returning from background, pauses animations in background.
-import { AppState, type AppStateStatus } from "react-native";
+const { AppState } = require("react-native") as any;
+type AppStateStatus = "active" | "background" | "inactive";
 import { clearEphemerisCache } from "@/services/EphemerisCacheService";
 
 type Callback = (state: AppStateStatus) => void;
