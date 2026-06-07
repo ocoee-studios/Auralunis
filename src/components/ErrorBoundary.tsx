@@ -1,12 +1,12 @@
 // Catches JS crashes and shows a recovery screen instead of white screen of death.
-import React, { Component, type ReactNode } from "react";
+import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ChronauraColors } from "@/theme/tokens";
 
-type Props = { children: ReactNode };
+type Props = { children: React.ReactNode };
 type State = { hasError: boolean; error: string };
 
-export class ErrorBoundary extends Component<Props, State> {
+export class ErrorBoundary extends React.Component<Props, State> {
   state: State = { hasError: false, error: "" };
 
   static getDerivedStateFromError(error: Error): State {
