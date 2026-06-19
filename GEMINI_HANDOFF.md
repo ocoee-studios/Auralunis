@@ -281,6 +281,6 @@ docs/
 ## Contacts
 
 - Studio: Ocoee Studios
-- Support: support@ocoeestudios.com
-- Privacy: privacy@ocoeestudios.com
+- Support: admin@ocoeestudios.com
+- Privacy: manager@ocoeestudios.com
 - GitHub personal: `jamiebzzz-stack` / org: `ocoee-studios`

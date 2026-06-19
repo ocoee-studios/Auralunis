@@ -1,7 +1,7 @@
 # Terms of Use (EULA) — Chronaura
 
 **Last updated:** June 2026  
-**Developer:** Ocoee Studios · support@ocoeestudios.com
+**Developer:** Ocoee Studios · admin@ocoeestudios.com
 
 ---
 
@@ -57,5 +57,5 @@ We may update these Terms to reflect new features or legal requirements. Continu
 
 ## 11. Contact
 
-support@ocoeestudios.com  
+admin@ocoeestudios.com  
 Ocoee Studios · ocoeestudios.com

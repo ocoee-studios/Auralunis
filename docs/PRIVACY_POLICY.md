@@ -70,4 +70,4 @@ the top indicates the most recent revision.
 
 ## Contact
 
-privacy@ocoeestudios.com
+manager@ocoeestudios.com

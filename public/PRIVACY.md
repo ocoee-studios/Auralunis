@@ -1,7 +1,7 @@
 # Privacy Policy — Chronaura
 
 **Last updated:** June 2026  
-**Developer:** Ocoee Studios · privacy@ocoeestudios.com  
+**Developer:** Ocoee Studios · manager@ocoeestudios.com  
 **Bundle ID:** com.ocoee.chronaura
 
 ---
@@ -61,5 +61,5 @@ We may update this policy to reflect new features. The "Last updated" date at th
 
 ## Contact
 
-privacy@ocoeestudios.com  
+manager@ocoeestudios.com  
 Ocoee Studios · ocoeestudios.com

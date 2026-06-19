@@ -11,7 +11,7 @@
 - [ ] Add URL to App Store listing
 
 ## Support Page
-- [ ] Create support page or email (e.g., support@ocoeestudios.com)
+- [ ] Create support page or email (e.g., admin@ocoeestudios.com)
 - [ ] Add URL to App Store listing
 - [ ] Add to Settings screen
 
