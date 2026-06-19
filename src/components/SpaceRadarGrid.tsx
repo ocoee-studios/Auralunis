@@ -27,6 +27,8 @@ export interface RadarBlip {
   label: string;
   /** If true, blip flashes crimson (debris mode) */
   isDebris?: boolean;
+  /** If true, blip pulses amber (reentry alert mode) */
+  isDecayAlert?: boolean;
   /** 0..1 opacity for train nodes */
   opacity?: number;
 }
@@ -80,7 +82,12 @@ function AnimatedBlip({ blip, onPress }: { blip: RadarBlip; onPress: () => void 
 
   // Debris flash
   useEffect(() => {
-    if (blip.isDebris) {
+    if (blip.isDecayAlert) {
+      debrisOpacity.value = withRepeat(
+        withSequence(withTiming(0.15, { duration: 500 }), withTiming(1, { duration: 500 })),
+        -1, false
+      );
+    } else if (blip.isDebris) {
       debrisOpacity.value = withRepeat(
         withSequence(withTiming(0.2, { duration: 300 }), withTiming(1, { duration: 300 })),
         -1, false
@@ -92,7 +99,7 @@ function AnimatedBlip({ blip, onPress }: { blip: RadarBlip; onPress: () => void 
 
   const animStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: blipX.value }, { translateY: blipY.value }],
-    opacity: blip.isDebris ? debrisOpacity.value : (blip.opacity ?? (blip.isActive ? 1 : 0.65)),
+    opacity: (blip.isDecayAlert || blip.isDebris) ? debrisOpacity.value : (blip.opacity ?? (blip.isActive ? 1 : 0.65)),
   }));
 
   return (
@@ -101,13 +108,13 @@ function AnimatedBlip({ blip, onPress }: { blip: RadarBlip; onPress: () => void 
         onPress={onPress}
         style={[styles.blipTouch, {
           width: size, height: size, borderRadius: size / 2,
-          backgroundColor: blip.isDebris ? "#FF3B30" : blip.color,
+          backgroundColor: blip.isDecayAlert ? "#FF9500" : blip.isDebris ? "#FF3B30" : blip.color,
         }]}
         hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
       >
         {blip.isActive && (
           <View style={[styles.halo, {
-            borderColor: blip.isDebris ? "#FF3B30" : blip.color,
+            borderColor: blip.isDecayAlert ? "#FF9500" : blip.isDebris ? "#FF3B30" : blip.color,
             width: size + 14, height: size + 14, borderRadius: (size + 14) / 2, top: -7, left: -7,
           }]} />
         )}

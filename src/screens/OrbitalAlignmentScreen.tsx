@@ -43,7 +43,7 @@ import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/se
 import { computeStaticParams, elevationAudioLabel, STATIC_COLORS } from "@/services/IonosphericStaticService";
 import { ChronauraColors } from "@/theme/tokens";
 
-type TrackingMode = "fleet" | "deep-space" | "train" | "golden" | "debris" | "meteor" | "chain" | "static";
+type TrackingMode = "fleet" | "deep-space" | "train" | "golden" | "debris" | "meteor" | "chain" | "static" | "reentry";
 
 const MODE_LABELS: Record<TrackingMode, string> = {
   fleet: "Fleet", "deep-space": "Deep Space", train: "Train", golden: "Golden",
@@ -69,6 +69,8 @@ export function OrbitalAlignmentScreen() {
   const [weather, setWeather] = useState<SpaceWeatherSnapshot | null>(null);
   const [debrisFleet, setDebrisFleet] = useState<ReturnType<typeof computeDebrisFleet>>([]);
   const [debrisLockCounters, setDebrisLockCounters] = useState<Record<string, number>>({});
+  const [reentryFleet, setReentryFleet] = useState<ReturnType<typeof computeReentryFleet>>([]);
+  const reentryAlertFiredRef = useRef<Set<string>>(new Set());
   const [chainProgress, setChainProgress] = useState(() => {
     const dummy = { id: "", name: "", description: "", targets: [], difficulty: "easy" as const, reward: 0 };
     return getChainProgress(dummy);
@@ -136,6 +138,25 @@ export function OrbitalAlignmentScreen() {
     fetchSpaceWeather().then(setWeather).catch(() => {});
   }, []);
 
+  // Reentry tick
+  useEffect(() => {
+    if (mode !== "reentry") return;
+    const id = setInterval(() => {
+      simulateDecayTick();
+      const fleet = computeReentryFleet(location, pointing);
+      setReentryFleet(fleet);
+      // Fire urgent haptic if critical/imminent corridor crosses local horizon
+      fleet.forEach(s => {
+        if ((s.object.threatLevel === "critical" || s.object.threatLevel === "imminent") &&
+            s.crossesLocalHorizon && !reentryAlertFiredRef.current.has(s.object.id)) {
+          reentryAlertFiredRef.current.add(s.object.id);
+          Vibration.vibrate(reentryAlertPattern());
+        }
+      });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [mode, location, pointing]);
+
   // Chain init
   useEffect(() => {
     if (mode !== "chain") return;
@@ -194,6 +215,11 @@ export function OrbitalAlignmentScreen() {
       const act = trainBlips.find(b => b.isActive);
       return { activeScore: act?.alignmentScore ?? 0, isLocked: (act?.totalAngularError ?? 999) < 3.5, activeColor: "#A78BFA", activeName: "Starlink Group 12", activeAzimuth: 0, activeElevation: 0, activeAltKm: 340 };
     }
+    if (mode === "reentry" && reentryFleet.length) {
+      const t = reentryFleet[0];
+      const threatColor = t.object.threatLevel === "imminent" || t.object.threatLevel === "critical" ? "#FF3B30" : "#FF9500";
+      return { activeScore: t.alignment.alignmentScore, isLocked: t.alignment.isLocked, activeColor: threatColor, activeName: t.object.name, activeAzimuth: t.alignment.targetAzimuth, activeElevation: t.alignment.targetElevation, activeAltKm: Math.round(t.object.perigeeKm) };
+    }
     if (mode === "debris" && debrisFleet.length) {
       const t = debrisFleet[0];
       return { activeScore: t.alignment.alignmentScore, isLocked: t.alignment.isLocked, activeColor: "#FF3B30", activeName: t.object.name, activeAzimuth: t.alignment.targetAzimuth, activeElevation: t.alignment.targetElevation, activeAltKm: t.object.altitudeKm };
@@ -211,7 +237,7 @@ export function OrbitalAlignmentScreen() {
 
   // Haptics
   useEffect(() => {
-    if (mode === "fleet" || mode === "deep-space" || mode === "debris" || mode === "meteor") {
+    if (mode === "fleet" || mode === "deep-space" || mode === "debris" || mode === "meteor" || mode === "reentry") {
       hapticCtrl.current.update(activeScore, isLocked);
     }
     if (mode === "train") {
@@ -229,7 +255,7 @@ export function OrbitalAlignmentScreen() {
 
   // Cosmic Drift lock recording
   useEffect(() => {
-    if (isLocked && !wasLockedRef.current && ["fleet","deep-space","train","debris"].includes(mode)) {
+    if (isLocked && !wasLockedRef.current && ["fleet","deep-space","train","debris","reentry"].includes(mode)) {
       const type = mode === "fleet" ? "satellite" : mode === "deep-space" ? "planet" : "satellite";
       recordLock({ targetId: activeName, targetName: activeName, targetType: type, targetColor: activeColor, observerLat: location.latitudeDegrees, observerLon: location.longitudeDegrees, azimuth: activeAzimuth, elevation: activeElevation, altitudeKm: activeAltKm })
         .then(() => setDriftRefresh(n => n + 1)).catch(() => {});
@@ -258,6 +284,7 @@ export function OrbitalAlignmentScreen() {
     if (mode === "deep-space") return planetaryTargets.map(pt => { const d = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, pt.azimuth, pt.altitude); return { id: pt.id, azimuthDiff: d.azimuthDiff, elevationDiff: d.elevationDiff, color: pt.planet.radarColor, isActive: pt.id === activePlanet?.id, label: pt.planet.name }; });
     if (mode === "train") return trainBlips.map(b => ({ id: b.id, azimuthDiff: b.azimuthDiff, elevationDiff: b.elevationDiff, color: b.color, isActive: b.isActive, label: "", opacity: b.opacity }));
     if (mode === "debris") return debrisFleet.map(s => ({ id: s.object.id, azimuthDiff: s.alignment.azimuthDiff, elevationDiff: s.alignment.elevationDiff, color: "#FF3B30", isActive: s.object.id === debrisFleet[0]?.object.id, label: s.object.name, isDebris: true }));
+    if (mode === "reentry") return reentryFleet.map(s => ({ id: s.object.id, azimuthDiff: s.alignment.azimuthDiff, elevationDiff: s.alignment.elevationDiff, color: s.object.alertColor, isActive: s.object.id === reentryFleet[0]?.object.id, label: s.object.name, isDecayAlert: true }));
     if (mode === "meteor") return activeShowers.map(s => { const azDiff = (((s.azimuth - pointing.azimuthDegrees + 180) % 360) + 360) % 360 - 180; const elDiff = s.altitude - pointing.altitudeDegrees; return { id: s.shower.id, azimuthDiff: azDiff, elevationDiff: elDiff, color: s.shower.radarColor, isActive: s.shower.id === activeShowers[0]?.shower.id, label: s.shower.name }; });
     if (mode === "chain" && chainProgress.currentIndex < chainProgress.chain.targets.length) {
       const t = chainProgress.chain.targets[chainProgress.currentIndex];
@@ -426,6 +453,7 @@ export function OrbitalAlignmentScreen() {
             <Text style={styles.tapHint}>
               {mode === "fleet" ? "Tap a blip to identify the satellite" :
                mode === "debris" ? "Flashing blips = space debris · lock for 5s to catalogue" :
+               mode === "reentry" ? "Pulsing blips = decaying objects · amber = watch · crimson = imminent" :
                mode === "meteor" && activeShowers.length > 0 ? `${activeShowers[0].shower.name} radiant · sonar active` :
                mode === "chain" ? `Target: ${chainProgress.chain.targets[chainProgress.currentIndex]?.name ?? "chain complete"}` :
                "Tap a blip to identify"}
@@ -453,6 +481,7 @@ export function OrbitalAlignmentScreen() {
                 </View>
                 {mode === "deep-space" && activePlanet && <Text style={styles.note}>{activePlanet.planet.fact}</Text>}
                 {mode === "debris" && debrisFleet[0] && <Text style={[styles.note, { color: "#FF3B30" }]}>{debrisFleet[0].object.description}</Text>}
+                {mode === "reentry" && reentryFleet[0] && <Text style={[styles.note, { color: reentryFleet[0].object.alertColor }]}>{reentryFleet[0].object.description}</Text>}
                 {mode === "meteor" && activeShowers[0] && <Text style={styles.note}>{activeShowers[0].shower.description}</Text>}
               </View>
             )}

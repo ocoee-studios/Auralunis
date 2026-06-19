@@ -13,6 +13,10 @@ export interface SpatialTarget {
   latitudeDegrees: number;
   longitudeDegrees: number;
   altitudeKm: number;
+  /** True when this object is in active orbital decay / reentry warning */
+  decayAlert?: boolean;
+  /** Orbital velocity in km/s — drops as orbit decays */
+  velocityKms?: number;
 }
 
 export interface AlignmentResult {
