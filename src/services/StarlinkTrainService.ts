@@ -1,138 +1,155 @@
 // StarlinkTrainService.ts
 // Atmospheric Wake — Starlink Train Tracker.
-// Models a freshly launched Starlink train as a chain of N satellites
-// spaced ~0.05° apart along the same orbital track.
-// Replace the mock with a live Celestrak/N2YO API call when ready.
-//
-// Train haptics: rapid compass ticks from HapticController when the
-// active blip crosses within 15° of device pointing.
+// Live data: fetches TLE strings from Celestrak, propagates via satellite.js
+// every second so blip positions are accurate to the real sky.
+// Fallback: mock 28-node train if network unavailable.
 
+import { calculateAlignment, type AlignmentResult } from "@/utils/alignmentEngine";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
-import type { SpatialTarget } from "@/utils/alignmentEngine";
-import { calculateAlignment } from "@/utils/alignmentEngine";
 import type { CameraPointing } from "@/features/sky-lens/ar/SkyLensProjection";
+import {
+  getLiveStarlinkPositions,
+  repropagateStarlinkToNow,
+  isSatelliteJsAvailable,
+  type PropagatedPosition,
+} from "@/services/LiveTLEService";
 
-export interface TrainNode {
-  id: string;
-  /** 0 = lead satellite, N-1 = tail */
-  index: number;
-  latitudeDegrees: number;
-  longitudeDegrees: number;
-  altitudeKm: number;
-  /** Violet at lead, fading to near-invisible at tail */
-  opacity: number;
-}
-
-export interface StarlinkTrain {
-  id: string;
-  name: string;
-  launchDate: string;
-  nodeCount: number;
-  nodes: TrainNode[];
-  /** Whether this train is currently overhead (elevation > 10°) for this observer */
-  isVisible: boolean;
-  /** Minutes until train is overhead (0 if visible now) */
-  minutesUntil: number;
-}
-
-// Separation between consecutive nodes in the train (degrees of arc along track)
-const NODE_SEPARATION_DEG = 0.055;
 const TRAIN_COLOR = "#A78BFA"; // Nebula violet
+const TRAIN_NODE_LIMIT = 28;
 
-/** Mock: a single Starlink-12 train currently passing overhead */
-function buildMockTrain(tick: number): StarlinkTrain {
-  const now = Date.now();
-  const nodeCount = 28;
-  const baseAz = (tick * 0.9) % 360;
-  const baseLat = 45 + Math.sin(now * 0.00004) * 20;
-  const baseLon = ((tick * 0.6) % 360) - 180;
-
-  const nodes: TrainNode[] = Array.from({ length: nodeCount }, (_, i) => {
-    // Space nodes along the orbital track (simplified: just offset longitude)
-    const lonOffset = i * NODE_SEPARATION_DEG * 1.2;
-    const latOffset = i * NODE_SEPARATION_DEG * 0.3;
-    const opacity = 1 - (i / nodeCount) * 0.75; // lead is brightest
-
-    return {
-      id: `sl-train-12-${i}`,
-      index: i,
-      latitudeDegrees: Math.max(-51.6, Math.min(51.6, baseLat - latOffset)),
-      longitudeDegrees: ((baseLon - lonOffset + 180) % 360) - 180,
-      altitudeKm: 340 - i * 0.5, // slight altitude gradient as they spread
-      opacity,
-    };
-  });
-
-  return {
-    id: "starlink-train-12",
-    name: "Starlink Group 12",
-    launchDate: "2025-11-14",
-    nodeCount,
-    nodes,
-    isVisible: true,
-    minutesUntil: 0,
-  };
-}
-
-let _tick = 0;
-
-export function tickTrainSimulation(): void {
-  _tick++;
-}
-
-export function getActiveTrain(): StarlinkTrain {
-  return buildMockTrain(_tick);
-}
-
-/** Convert train nodes to SpatialTargets for radar blip rendering */
-export function trainToRadarBlips(
-  train: StarlinkTrain,
-  observer: ObserverLocation,
-  pointing: CameraPointing
-): Array<{
+export interface TrainBlip {
   id: string;
+  index: number;
   azimuthDiff: number;
   elevationDiff: number;
   color: string;
+  /** 1.0 at lead, fading to 0.25 at tail */
   opacity: number;
   isActive: boolean;
   isLead: boolean;
   alignmentScore: number;
-}> {
-  const results = train.nodes.map((node) => {
-    const target: SpatialTarget = {
-      id: node.id,
-      name: `SL-12 Node ${node.index + 1}`,
-      latitudeDegrees: node.latitudeDegrees,
-      longitudeDegrees: node.longitudeDegrees,
-      altitudeKm: node.altitudeKm,
-    };
-    const alignment = calculateAlignment(observer, pointing, target);
+  totalAngularError: number;
+}
+
+// ─── Live position state ──────────────────────────────────────────────────────
+
+let _livePositions: PropagatedPosition[] = [];
+let _isLive = false;
+let _fetchPromise: Promise<void> | null = null;
+
+/** Fetch TLE data from Celestrak (once, cached for 2h). Call on train mode entry. */
+export async function initStarlinkTrainLive(): Promise<boolean> {
+  if (!isSatelliteJsAvailable()) return false;
+  if (_fetchPromise) return _isLive;
+
+  _fetchPromise = getLiveStarlinkPositions(TRAIN_NODE_LIMIT)
+    .then(positions => {
+      if (positions.length > 0) {
+        _livePositions = positions;
+        _isLive = true;
+      }
+    })
+    .catch(() => { _isLive = false; });
+
+  await _fetchPromise;
+  return _isLive;
+}
+
+/**
+ * Re-propagate cached TLE records to the current second.
+ * Call every 1000ms in a setInterval while in train mode.
+ * This is cheap — no network call, just math on cached TLE strings.
+ */
+export async function tickStarlinkLive(): Promise<void> {
+  if (!_isLive) return;
+  const updated = await repropagateStarlinkToNow(TRAIN_NODE_LIMIT);
+  if (updated.length > 0) _livePositions = updated;
+}
+
+// ─── Mock fallback ────────────────────────────────────────────────────────────
+
+let _mockTick = 0;
+
+function buildMockPositions(): PropagatedPosition[] {
+  const now = Date.now();
+  return Array.from({ length: TRAIN_NODE_LIMIT }, (_, i) => {
+    const lonOffset = i * 0.055 * 1.2;
+    const latOffset = i * 0.055 * 0.3;
     return {
-      id: node.id,
+      noradId: 57680 + i,
+      name: `STARLINK-L${i + 1}`,
+      latitudeDegrees: Math.max(-51.6, Math.min(51.6, 45 + Math.sin(now * 0.00004) * 20 - latOffset)),
+      longitudeDegrees: (((_mockTick * 0.6 - lonOffset) % 360) + 360) % 360 - 180,
+      altitudeKm: 550 - i * 0.3,
+      velocityKms: 7.66,
+      timestamp: new Date().toISOString(),
+    };
+  });
+}
+
+export function tickStarlinkMock(): void {
+  _mockTick++;
+}
+
+// ─── Public API ───────────────────────────────────────────────────────────────
+
+/**
+ * Get current train blips for radar rendering.
+ * Uses live positions if available, mock otherwise.
+ */
+export function getStarlinkTrainBlips(
+  observer: ObserverLocation,
+  pointing: CameraPointing
+): TrainBlip[] {
+  const positions = _isLive && _livePositions.length > 0
+    ? _livePositions
+    : buildMockPositions();
+
+  const results = positions.map((pos, i) => {
+    const alignment = calculateAlignment(observer, pointing, {
+      id: `sl-${pos.noradId}`,
+      name: pos.name,
+      latitudeDegrees: pos.latitudeDegrees,
+      longitudeDegrees: pos.longitudeDegrees,
+      altitudeKm: pos.altitudeKm,
+    });
+
+    const opacity = Math.max(0.25, 1 - (i / positions.length) * 0.75);
+
+    return {
+      id: `sl-${pos.noradId}`,
+      index: i,
       azimuthDiff: alignment.azimuthDiff,
       elevationDiff: alignment.elevationDiff,
       color: TRAIN_COLOR,
-      opacity: node.opacity,
+      opacity,
       isActive: false,
-      isLead: node.index === 0,
+      isLead: i === 0,
       alignmentScore: alignment.alignmentScore,
       totalAngularError: alignment.totalAngularError,
     };
   });
 
   // Mark the node closest to device pointing as active
-  const minErr = Math.min(...results.map((r) => r.totalAngularError));
-  return results.map((r) => ({
-    ...r,
-    isActive: r.totalAngularError === minErr,
-  }));
+  if (results.length > 0) {
+    const minIdx = results.reduce((best, r, i) =>
+      r.totalAngularError < results[best].totalAngularError ? i : best, 0
+    );
+    results[minIdx].isActive = true;
+  }
+
+  return results;
 }
 
-/** Should haptics tick? Returns interval ms, or null for silence */
+export function isTrainLive(): boolean { return _isLive; }
+export function getTrainNodeCount(): number {
+  return _isLive ? _livePositions.length : TRAIN_NODE_LIMIT;
+}
+
+/** Haptic interval ms based on closest node error — null = silent */
 export function trainHapticInterval(closestError: number): number | null {
   if (closestError > 30) return null;
   if (closestError > 15) return 500;
   if (closestError > 5)  return 250;
-  return 100; // machine-gun at near-lock
+  return 100;
 }

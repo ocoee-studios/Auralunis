@@ -32,11 +32,11 @@ import { SpaceRadarGrid, type RadarBlip } from "@/components/SpaceRadarGrid";
 import { HapticController } from "@/utils/hapticController";
 import { WatchHaptics } from "@/modules/WatchHaptics";
 import { computePlanetaryTargets, planetAlignmentDiff } from "@/utils/planetaryEphemeris";
-import { getActiveTrain, tickTrainSimulation, trainToRadarBlips, trainHapticInterval } from "@/services/StarlinkTrainService";
+import { getStarlinkTrainBlips, tickStarlinkLive, tickStarlinkMock, initStarlinkTrainLive, trainHapticInterval, isTrainLive, getTrainNodeCount } from "@/services/StarlinkTrainService";
 import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
 import { recordLock } from "@/services/CosmicDriftService";
 import { CosmicDriftGalaxy } from "@/components/CosmicDriftGalaxy";
-import { simulateDebrisTick, computeDebrisFleet, updateDebrisLocks, catalogueDebris, getTotalCatalogued } from "@/services/SpaceDebrisService";
+import { computeDebrisFleet, tickDebrisMock, tickDebrisLive, initDebrisLive, tickLockTimers, getTotalCatalogued, isDebrisLive } from "@/services/SpaceDebrisService";
 import { getActiveShowers } from "@/services/MeteorShowerService";
 import { getDailyChain, getChainProgress, advanceChain, resetChain } from "@/services/SkyAlignmentChainService";
 import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/services/SolarWindService";
@@ -97,7 +97,7 @@ export function OrbitalAlignmentScreen() {
   // Fleet tick
   useEffect(() => {
     if (mode !== "fleet") return;
-    const id = setInterval(() => { simulateTick(); setFleetState(computeFleetState(location, pointing)); }, 1000);
+    const id = setInterval(async () => { simulateTick(); setFleetState(computeFleetState(location, pointing)); }, 1000);
     return () => clearInterval(id);
   }, [mode, location, pointing]);
 
@@ -113,10 +113,15 @@ export function OrbitalAlignmentScreen() {
       .catch(() => {}); // silent fallback to simulation
   }, [mode]);
 
-  // Train tick
+  // Train tick — live re-propagation or mock
   useEffect(() => {
     if (mode !== "train") return;
-    const id = setInterval(() => tickTrainSimulation(), 1000);
+    // Try to init live data on entry
+    initStarlinkTrainLive().catch(() => {});
+    const id = setInterval(() => {
+      tickStarlinkLive().catch(() => {});
+      tickStarlinkMock(); // keeps mock moving too (no-op if live)
+    }, 1000);
     return () => clearInterval(id);
   }, [mode]);
 
@@ -125,18 +130,11 @@ export function OrbitalAlignmentScreen() {
     if (mode !== "debris") return;
     const id = setInterval(() => {
       simulateDebrisTick();
+      // Re-propagate live TLE or advance mock
+      await tickDebrisLive().catch(() => {});
+      tickDebrisMock();
       const fleet = computeDebrisFleet(location, pointing);
-      updateDebrisLocks(fleet);
-      // Check 5-second catalogues
-      fleet.forEach(s => {
-        if (s.alignment.isLocked && !s.catalogued) {
-          const prev = debrisLockTimers.current[s.object.id] ?? 0;
-          debrisLockTimers.current[s.object.id] = prev + 1;
-          if (prev + 1 >= 5) catalogueDebris(s.object.id);
-        } else {
-          debrisLockTimers.current[s.object.id] = 0;
-        }
-      });
+      tickLockTimers(fleet);
       setDebrisFleet(fleet);
       setDebrisLockCounters({ ...debrisLockTimers.current });
     }, 1000);
@@ -213,7 +211,7 @@ export function OrbitalAlignmentScreen() {
 
   const trainBlips = useMemo(() => {
     if (mode !== "train") return [];
-    return trainToRadarBlips(getActiveTrain(), location, pointing);
+    return getStarlinkTrainBlips(location, pointing);
   }, [mode, pointing.azimuthDegrees, pointing.altitudeDegrees, simTick]);
 
   const sunPos = useMemo(() => mode === "golden" ? computeSunPosition(location) : null, [mode, location, simTick]);
@@ -481,7 +479,7 @@ export function OrbitalAlignmentScreen() {
 
             <Text style={styles.tapHint}>
               {mode === "fleet" ? "Tap a blip to identify the satellite" :
-               mode === "debris" ? "Flashing blips = space debris · lock for 5s to catalogue" :
+               mode === "debris" ? `Debris · ${isDebrisLive() ? "LIVE TLE" : "Simulation"} · lock 5s to catalogue` :
                mode === "reentry" ? "Pulsing blips = decaying objects · amber = watch · crimson = imminent" :
                mode === "meteor" && activeShowers.length > 0 ? `${activeShowers[0].shower.name} radiant · sonar active` :
                mode === "chain" ? `Target: ${chainProgress.chain.targets[chainProgress.currentIndex]?.name ?? "chain complete"}` :
