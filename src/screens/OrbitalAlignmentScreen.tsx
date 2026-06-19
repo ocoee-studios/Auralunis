@@ -43,6 +43,8 @@ import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/se
 import { computeStaticParams, elevationAudioLabel, STATIC_COLORS } from "@/services/IonosphericStaticService";
 import { getIonosphericEngine, destroyIonosphericEngine } from "@/services/IonosphericAudioEngine";
 import { ChronauraColors } from "@/theme/tokens";
+import { RadarTutorial } from "@/features/onboarding/RadarTutorial";
+import { LockShareCard, type LockShareData } from "@/components/LockShareCard";
 import { isModeGated, FREE_DRIFT_EVENT_LIMIT, type TrackingMode } from "@/features/paywall/MonetizationCatalog";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { PremiumModeGate } from "@/components/PremiumModeGate";
@@ -76,6 +78,8 @@ export function OrbitalAlignmentScreen() {
   const [selectedSatId, setSelectedSatId] = useState<string | null>(null);
   const [showDrift, setShowDrift] = useState(false);
   const [driftRefresh, setDriftRefresh] = useState(0);
+  const [lockShareData, setLockShareData] = useState<LockShareData | null>(null);
+  const [tutorialDone, setTutorialDone] = useState(false);
   const [weather, setWeather] = useState<SpaceWeatherSnapshot | null>(null);
   const [audioMuted, setAudioMuted] = useState(false);
   const [debrisFleet, setDebrisFleet] = useState<ReturnType<typeof computeDebrisFleet>>([]);
@@ -298,6 +302,21 @@ export function OrbitalAlignmentScreen() {
       const type = mode === "fleet" ? "satellite" : mode === "deep-space" ? "planet" : "satellite";
       recordLock({ targetId: activeName, targetName: activeName, targetType: type, targetColor: activeColor, observerLat: location.latitudeDegrees, observerLon: location.longitudeDegrees, azimuth: activeAzimuth, elevation: activeElevation, altitudeKm: activeAltKm, isPremium })
         .then(() => setDriftRefresh(n => n + 1)).catch(() => {});
+
+      // Show share card on lock
+      setLockShareData({
+        targetName: activeName,
+        targetColor: activeColor,
+        targetType: type,
+        alignmentScore: activeScore,
+        azimuth: activeAzimuth,
+        elevation: activeElevation,
+        altitudeKm: activeAltKm,
+        observerLat: location.latitudeDegrees,
+        observerLon: location.longitudeDegrees,
+        locationLabel: simMode ? "New York City" : "Your Location",
+        timestamp: new Date().toISOString(),
+      });
     }
     wasLockedRef.current = isLocked;
   }, [isLocked, mode]);
@@ -360,6 +379,8 @@ export function OrbitalAlignmentScreen() {
   // ── Main ─────────────────────────────────────────────────────────────────────
   return (
     <View style={styles.screen}>
+      <RadarTutorial onComplete={() => setTutorialDone(true)} />
+
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
         {/* Solar Wind Aura header */}
@@ -636,6 +657,10 @@ export function OrbitalAlignmentScreen() {
         if (!sat || !state) return null;
         return <SatelliteDataCard satellite={sat} alignmentScore={state.alignment.alignmentScore} targetAzimuth={state.alignment.targetAzimuth} targetElevation={state.alignment.targetElevation} onClose={() => setSelectedSatId(null)} />;
       })()}
+
+      {lockShareData && (
+        <LockShareCard data={lockShareData} onClose={() => setLockShareData(null)} />
+      )}
     </View>
   );
 }

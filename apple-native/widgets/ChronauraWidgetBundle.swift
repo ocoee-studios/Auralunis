@@ -7,5 +7,6 @@ struct ChronauraWidgetBundle: WidgetBundle {
         TonightScoreWidget()
         MoonPhaseWidget()
         NextEventWidget()
+        ISSPassWidget()
     }
 }
