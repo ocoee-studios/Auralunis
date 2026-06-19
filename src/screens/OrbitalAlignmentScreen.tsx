@@ -408,11 +408,7 @@ export function OrbitalAlignmentScreen() {
           <PremiumModeGate
             modeName={MODE_LABELS[mode]}
             modeDescription={PREMIUM_MODE_DESCRIPTIONS[mode] ?? "This mode requires Chronaura Premium."}
-            onUpgrade={() => {
-              // TODO: open ThreeTierPaywallModal when wired to navigation
-              // For now, refresh entitlement in case they've already purchased
-              refreshEntitlement();
-            }}
+            onUpgrade={refreshEntitlement}
           />
         )}
 

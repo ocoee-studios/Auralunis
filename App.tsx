@@ -25,9 +25,20 @@ import type {
 import { configureNotificationHandler } from "@/services/NotificationService";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
 import { useChronauraFonts } from "@/theme/useFonts";
+import { PaywallNavigationProvider, usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { recordSession } from "@/services/ReviewPromptService";
 
 const ONBOARDING_SEEN_KEY = "chronaura.onboarding.seen";
+
+// Bridges the global PaywallNavigationContext to App.tsx's local paywallVisible state.
+// Mounted inside PaywallNavigationProvider so it can read the context.
+function PaywallBridge({ onOpen }: { onOpen: () => void }) {
+  const { isPaywallVisible } = usePaywallNavigation();
+  React.useEffect(() => {
+    if (isPaywallVisible) onOpen();
+  }, [isPaywallVisible]);
+  return null;
+}
 
 export default function App() {
   const [onboardingVisible, setOnboardingVisible] = useState(false);
@@ -156,26 +167,28 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <ChronauraSettingsProvider>
-        <ChronauraVaultProvider>
-          <NavigationContainer>
-            <RootTabs />
-          </NavigationContainer>
+      <PaywallNavigationProvider>
+        <ChronauraSettingsProvider>
+          <ChronauraVaultProvider>
+            <NavigationContainer>
+              <RootTabs />
+            </NavigationContainer>
+            <PaywallBridge onOpen={() => setPaywallVisible(true)} />
 
-          <ThreeTierPaywallModal
-            visible={paywallVisible}
-            onClose={() => setPaywallVisible(false)}
-            onPurchase={handlePurchase}
-
-          />
+            <ThreeTierPaywallModal
+              visible={paywallVisible}
+              onClose={() => setPaywallVisible(false)}
+              onPurchase={handlePurchase}
+            />
 
           <OnboardingFlow
             visible={onboardingVisible}
             onComplete={handleOnboardingComplete}
             onOpenPaywall={handleOnboardingOpenPaywall}
           />
-        </ChronauraVaultProvider>
-      </ChronauraSettingsProvider>
+          </ChronauraVaultProvider>
+        </ChronauraSettingsProvider>
+      </PaywallNavigationProvider>
     </GestureHandlerRootView>
   );
 }

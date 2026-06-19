@@ -10,18 +10,20 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
-import { ChronauraPricing } from "@/theme/tokens";
+import { ChronauraColors, ChronauraPricing } from "@/theme/tokens";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 interface PremiumModeGateProps {
   modeName: string;
   modeDescription: string;
-  onUpgrade: () => void;
+  onUpgrade?: () => void;
 }
 
 const LOCK_EMOJI_ALT = "✦"; // using gold sparkle instead of emoji per style guide
 
 export function PremiumModeGate({ modeName, modeDescription, onUpgrade }: PremiumModeGateProps) {
+  const { openPaywall } = usePaywallNavigation();
+  const handleUpgrade = () => { openPaywall(); onUpgrade?.(); };
   return (
     <View style={styles.container}>
       {/* Lock indicator */}
@@ -47,7 +49,7 @@ export function PremiumModeGate({ modeName, modeDescription, onUpgrade }: Premiu
       </Text>
 
       {/* CTA */}
-      <TouchableOpacity style={styles.ctaButton} onPress={onUpgrade}>
+      <TouchableOpacity style={styles.ctaButton} onPress={handleUpgrade}>
         <Text style={styles.ctaText}>Unlock Premium</Text>
       </TouchableOpacity>
 
