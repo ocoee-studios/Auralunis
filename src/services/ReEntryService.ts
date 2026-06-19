@@ -10,6 +10,7 @@
 // Alert fires if the corridor crosses within 12h of the observer's local horizon.
 
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
+import { getSpaceTrackCookie, ensureSpaceTrackAuth } from "@/services/LiveTLEService";
 import { calculateAlignment } from "@/utils/alignmentEngine";
 import type { CameraPointing } from "@/features/sky-lens/ar/SkyLensProjection";
 
@@ -118,6 +119,21 @@ const MOCK_REENTRY_OBJECTS: ReEntryObject[] = [
 ];
 
 let _decayFleet = MOCK_REENTRY_OBJECTS.map(o => ({ ...o }));
+let _isLiveTIP = false;
+
+/** Call on reentry mode entry — syncs live TIP data if credentials available */
+export async function initReEntryLive(): Promise<boolean> {
+  const live = await fetchLiveTIPData();
+  if (live && live.length > 0) {
+    _decayFleet = live;
+    _isLiveTIP = true;
+    return true;
+  }
+  _isLiveTIP = false;
+  return false;
+}
+
+export function isReEntryLive(): boolean { return _isLiveTIP; }
 let _decayTick = 0;
 
 /** Simulate orbit decay — perigee drops ~0.5km per tick, velocity decreases */

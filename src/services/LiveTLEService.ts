@@ -297,6 +297,16 @@ export async function repropagateDebrisToNow(limit = 6): Promise<PropagatedPosit
   return propagateAll(records, new Date());
 }
 
+/** Returns the current Space-Track session cookie if authenticated, null otherwise.
+ *  ReEntryService uses this to reuse the session without re-authenticating. */
+export function getSpaceTrackCookie(): string | null { return _spaceTrackCookie; }
+
+/** Authenticate with Space-Track and cache cookie — callable externally */
+export async function ensureSpaceTrackAuth(username: string, password: string): Promise<boolean> {
+  if (_spaceTrackCookie) return true;
+  return authenticateSpaceTrack(username, password);
+}
+
 export function isSatelliteJsAvailable(): boolean {
   try {
     return typeof Satellite.twoline2satrec === "function";

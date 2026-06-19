@@ -159,6 +159,8 @@ export function OrbitalAlignmentScreen() {
   // Reentry tick
   useEffect(() => {
     if (mode !== "reentry") return;
+    // Try live TIP data on mode entry
+    initReEntryLive().catch(() => {});
     const id = setInterval(() => {
       simulateDecayTick();
       const fleet = computeReentryFleet(location, pointing);
@@ -514,7 +516,7 @@ export function OrbitalAlignmentScreen() {
             <Text style={styles.tapHint}>
               {mode === "fleet" ? "Tap a blip to identify the satellite" :
                mode === "debris" ? `Debris · ${isDebrisLive() ? "LIVE TLE" : "Simulation"} · lock 5s to catalogue` :
-               mode === "reentry" ? "Pulsing blips = decaying objects · amber = watch · crimson = imminent" :
+               mode === "reentry" ? `Decaying objects · ${isReEntryLive() ? "LIVE TIP" : "Simulation"} · amber = watch · crimson = imminent` :
                mode === "meteor" && activeShowers.length > 0 ? `${activeShowers[0].shower.name} radiant · sonar active` :
                mode === "chain" ? `Target: ${chainProgress.chain.targets[chainProgress.currentIndex]?.name ?? "chain complete"}` :
                "Tap a blip to identify"}
