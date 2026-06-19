@@ -132,7 +132,7 @@ All development done collaboratively by Mrs. Pepper (Ocoee Studios) and Claude (
 | Meteor | MeteorShowerService | On-device RA/Dec catalog | Always accurate |
 | Chain | SkyAlignmentChainService | On-device daily seed | Always accurate |
 | Static | IonosphericStaticService + AudioEngine | expo-av (needs audio files) | Params live, audio needs MP3s |
-| Re-Entry | ReEntryService | Mock (Space-Track TIP pending) | Simulation only |
+| Re-Entry | ReEntryService | Space-Track TIP live → mock fallback | Live TIP on entry (needs creds) |
 
 **All modes include:**
 - Horizon Scope (curved horizon arc by device pitch)

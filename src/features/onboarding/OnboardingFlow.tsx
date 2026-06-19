@@ -1,6 +1,6 @@
 // First-launch onboarding: welcome → birthday → birth sky reveal → feature showcase.
 // After the reveal, the user can "Continue Exploring" (enters free) or
-// "Unlock Horizon+" (opens the paywall). Matches the approved clickthrough.
+// "Unlock Premium" (opens the paywall). Matches the approved clickthrough.
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
@@ -123,7 +123,7 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
               <Text style={s.ctaText}>Continue Exploring</Text>
             </Pressable>
             <Pressable style={s.secondaryCta} onPress={() => { onComplete(); onOpenPaywall(); }}>
-              <Text style={s.secondaryCtaText}>Unlock the Full Cosmos — Horizon+</Text>
+              <Text style={s.secondaryCtaText}>Unlock the Full Cosmos — Premium</Text>
             </Pressable>
           </View>
         )}
