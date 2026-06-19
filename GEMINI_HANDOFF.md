@@ -1,12 +1,13 @@
 # Chronaura — Full App Handoff for Gemini
 
-> **What this is:** A complete orientation document for any AI agent picking up work on Chronaura. Read this before touching any code.
+> **Last updated:** Session 8 (monetization + live TLE pipeline)
+> Read this before suggesting any code changes. Much of what you might suggest is already built.
 
 ---
 
 ## Logo
 
-This is the approved Chronaura emblem. It is a crescent-C astrolabe — three concentric rings, compass needle with N/S/E/W points, central gold starburst, small moon icon on the ring, and gold spheres at the cardinal points. Do not replace or simplify it.
+Crescent-C astrolabe — three concentric rings, compass needle, N/S/E/W points, central gold starburst, small moon icon on the ring, gold spheres at cardinal points. Do not replace or simplify it.
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
@@ -37,10 +38,10 @@ This is the approved Chronaura emblem. It is a crescent-C astrolabe — three co
   <polygon points="100,10 96,22 104,22" fill="#D4AF37" opacity="0.8"/>
   <polygon points="100,190 96,180 104,180" fill="#D4AF37" opacity="0.5"/>
   <line x1="16" y1="100" x2="184" y2="100" stroke="#D4AF37" stroke-width="0.5" opacity="0.25"/>
-  <text x="100" y="9" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" font-weight="bold" opacity="0.8">N</text>
-  <text x="100" y="198" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" font-weight="bold" opacity="0.6">S</text>
-  <text x="195" y="103" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" font-weight="bold" opacity="0.6">E</text>
-  <text x="5" y="103" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" font-weight="bold" opacity="0.6">W</text>
+  <text x="100" y="9" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" font-weight="bold">N</text>
+  <text x="100" y="198" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" opacity="0.6">S</text>
+  <text x="195" y="103" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" opacity="0.6">E</text>
+  <text x="5" y="103" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" opacity="0.6">W</text>
   <path d="M118 52 C88 62 68 88 68 118 c0 34 24 58 52 58 -8 4 -18 2 -28 0 C62 170 40 146 40 118 40 78 72 48 118 52 Z" fill="url(#goldGrad)" filter="url(#glow)"/>
   <circle cx="140" cy="116" r="8" fill="#C0C6D4" opacity="0.7"/>
   <circle cx="144" cy="113" r="6.5" fill="#0B0B12"/>
@@ -50,296 +51,236 @@ This is the approved Chronaura emblem. It is a crescent-C astrolabe — three co
   <circle cx="100" cy="162" r="3.5" fill="#D4AF37" opacity="0.7"/>
   <circle cx="38" cy="100" r="3.5" fill="#D4AF37" opacity="0.7"/>
   <text x="130" y="42" font-size="6" fill="#F3D99B" opacity="0.7">✦</text>
-  <text x="148" y="68" font-size="4" fill="#F3D99B" opacity="0.5">✦</text>
-  <text x="52" y="58" font-size="5" fill="#F3D99B" opacity="0.4">✦</text>
 </svg>
 ```
 
-**Logo rules (do not break these):**
-- Never replace the crescent-C astrolabe with a generic moon or compass icon
-- Never simplify the three-ring geometry
-- Background is always Cosmic Black `#0B0B12`
-- Wordmark: **CHRONAURA** in Cinzel serif, gold `#D4AF37`
-- Slogan: *Your time, written in the stars.*
-- Descriptor: *The Interactive Astral Clock*
+**Logo rules:** Never replace with generic moon/compass. Never simplify the three rings. Always on `#0B0B12`. Wordmark: CHRONAURA in Cinzel serif. Slogan: *Your time, written in the stars.*
 
 ---
 
-## What Chronaura Is
+## App Identity
 
-An iOS astronomy companion app — described as "The Interactive Astral Clock." It shows the real sky through a camera-aligned AR overlay, tracks satellites and planets in real time, and has an encrypted personal vault for sky observations.
-
+- **Name:** Chronaura — The Interactive Astral Clock
 - **Developer:** Ocoee Studios (Mrs. Pepper, founder)
 - **Bundle ID:** `com.ocoee.chronaura`
 - **GitHub:** `jamiebzzz-stack/chronaura` (private)
-- **Stack:** React Native / Expo SDK 51, TypeScript
-- **57 commits, 47 TSX files, 104 TS files**
+- **Stack:** React Native / Expo SDK 51 / TypeScript
+- **Commits:** 60+
 
 ---
 
-## Design System
+## Design System (locked)
 
 | Token | Value |
 |---|---|
-| Cosmic Black (background) | `#0B0B12` |
+| Cosmic Black (bg) | `#0B0B12` |
 | Midnight Navy (surface) | `#121A2C` |
 | Deep Indigo (elevated) | `#1E2A44` |
-| Astral Gold (primary accent) | `#D4AF37` |
-| Gold 2 (highlights) | `#F3D99B` |
-| Moon Silver (secondary text) | `#C0C6D4` |
+| Astral Gold | `#D4AF37` |
+| Gold 2 | `#F3D99B` |
+| Moon Silver | `#C0C6D4` |
 | Nebula Violet | `#7B5CF6` |
-| Muted text | `#A8AFBF` |
-| Faint labels | `#747D90` |
-| Success green | `#4ADE80` |
-| Alert amber | `#FF9500` |
-| Alert crimson | `#FF3B30` |
+| Green (lock) | `#4ADE80` |
+| Amber (decay watch) | `#FF9500` |
+| Crimson (decay critical) | `#FF3B30` |
 
-**Typography:** Cinzel serif (headings/logo) + Montserrat (body/UI)
-
-**Glass panel:** `background: rgba(18,26,44,0.74)` + `border: 1px solid rgba(212,175,55,0.28)` + `border-radius: 16px`
+Typography: Cinzel serif (headings) + Montserrat (body/UI)
 
 ---
 
-## Navigation (locked — do not change)
+## Navigation (locked — 5 tabs, do not add more)
 
-5 tabs: **Home · Sky · Watch · Learn · Settings**
+**Home · Sky · Watch · Learn · Settings**
 
-The Orbital Alignment / Atmosphere Explorer screen is accessed from the Sky tab as a full-screen modal overlay, not a separate tab.
+OrbitalAlignmentScreen opens as a full-screen modal from the Sky tab — not a separate tab.
 
 ---
 
 ## Pricing (locked)
 
-| Tier | Price | Notes |
+| Product | Price | Trial |
 |---|---|---|
-| Horizon Free | Free forever | Core features |
-| Chronaura Premium | $6.99/mo or $39.99/yr | 7-day free trial |
-| Aura Pro | Coming Later | Do not enable purchase flow |
-| Sovereign | Waitlist | Do not enable purchase flow |
+| Chronaura Premium monthly | $6.99/mo | ❌ No trial — direct charge |
+| Chronaura Premium annual | $39.99/yr | ✅ 7-day free trial (annual only) |
+| Founders Lifetime | $99.99 one-time | ❌ No trial |
 
-RevenueCat product IDs: `com.ocoee.chronaura.premium.monthly` / `.premium.annual`
-Entitlement: `chronaura_premium`
+RevenueCat product IDs:
+- `com.ocoee.chronaura.premium.monthly`
+- `com.ocoee.chronaura.premium.annual`
+- `com.ocoee.chronaura.lifetime.founders`
+
+Entitlement: `chronaura_premium` (all three products unlock this)
+
+**Do not suggest changing these prices or adding more tiers.**
 
 ---
 
-## Key Architecture
+## Feature Gates (locked)
 
-| Library | Purpose |
+| Mode | Free | Premium |
+|---|---|---|
+| Fleet (ISS, Hubble, NOAA-20, Terra, Starlink) | ✅ | — |
+| Deep Space (7 planets, Keplerian ephemeris) | ✅ | — |
+| Golden Hour (sun vector, countdown) | ✅ | — |
+| Meteor Shower Sonar | ✅ | — |
+| Starlink Train Tracker | — | ✅ |
+| Space Debris Mission Loop | — | ✅ |
+| Re-Entry Vector Warning | — | ✅ |
+| Sky-Crawl Alignment Chains | — | ✅ |
+| Ionospheric Static audio | — | ✅ |
+| Cosmic Drift galaxy (unlimited) | 5 events free | ✅ unlimited |
+
+Gate implementation: `isModeGated(mode)` in `src/features/paywall/MonetizationCatalog.ts`. `useEntitlement()` hook in `src/hooks/useEntitlement.ts`. `PremiumModeGate` component in `src/components/PremiumModeGate.tsx`. All wired into `OrbitalAlignmentScreen.tsx`.
+
+**Do not suggest rewriting paywall gates — they are fully implemented.**
+
+---
+
+## What Is Already Built (do not suggest rebuilding these)
+
+### Core tracking engine
+- `src/utils/alignmentEngine.ts` — pure bearing/elevation/score math. `SpatialTarget` interface includes `decayAlert?` and `velocityKms?`.
+- `src/utils/hapticController.ts` — score-based proximity haptic cadence
+- `src/utils/planetaryEphemeris.ts` — full Keplerian orbital model for 7 planets (~1° accuracy)
+
+### Radar component
+- `src/components/SpaceRadarGrid.tsx` — multi-blip SVG radar with:
+  - Horizon Scope (curved arc by device pitch, ground shading)
+  - Debris flash (fast crimson pulse)
+  - Decay alert pulse (slow amber pulse)
+  - Train node opacity fade lead→tail
+  - Spring-animated blips via Reanimated (UI thread)
+
+### All 9 tracking modes — fully implemented in `OrbitalAlignmentScreen.tsx`
+1. **Fleet** — 6 LEO satellites, live Celestrak TLE on mode entry
+2. **Deep Space** — 7 planets, on-device Keplerian math
+3. **Train** — Starlink chain, live Celestrak TLE + per-second re-propagation
+4. **Golden Hour** — USNO solar position, golden hour countdown
+5. **Debris** — Space debris, live Celestrak + optional Space-Track auth
+6. **Meteor** — 6 shower radiant points, sonar haptic cadence
+7. **Chain** — Daily multi-target puzzle, date-seeded
+8. **Static** — Ionospheric audio synthesis params + expo-av playback engine
+9. **Re-Entry** — Orbital decay tracking, corridor alerts, urgent haptics
+
+### Data services
+- `AtmosphereExplorerService.ts` — fleet simulation + live TLE sync
+- `StarlinkTrainService.ts` — live Celestrak fetch + per-second SGP4 re-propagation
+- `SpaceDebrisService.ts` — live Celestrak debris clouds + optional Space-Track auth
+- `ReEntryService.ts` — decay tracking, corridor prediction, double-pulse haptic
+- `MeteorShowerService.ts` — 6 showers with real radiant RA/Dec
+- `SkyAlignmentChainService.ts` — daily puzzle generator
+- `ChronoLightService.ts` — USNO solar position, golden hour windows
+- `SolarWindService.ts` — live NOAA Kp index (10-min cache)
+- `IonosphericStaticService.ts` — audio synthesis parameter math
+- `CosmicDriftService.ts` — lock history persistence (AsyncStorage, 5-event free cap)
+
+### Live TLE pipeline (fully built)
+- `src/services/LiveTLEService.ts` — confirmed-working Celestrak endpoints:
+  - `celestrak.org/NORAD/elements/gp.php?GROUP=starlink&FORMAT=tle`
+  - `celestrak.org/NORAD/elements/gp.php?CATNR=25544&FORMAT=tle`
+  - `celestrak.org/NORAD/elements/gp.php?GROUP=cosmos-1408-debris&FORMAT=tle`
+  - Space-Track.org authenticated feed for debris
+  - satellite.js SGP4 propagation on-device
+  - `repropagateStarlinkToNow()` / `repropagateDebrisToNow()` — per-second refresh from cache (no extra network calls)
+  - 2-hour cache, stale-on-failure fallback
+
+### Audio engine (fully built)
+- `src/services/IonosphericAudioEngine.ts` — expo-av two-deck crossfader:
+  - Deck A plays current phase noise loop, Deck B preloads next
+  - 400ms crossfade on phase change
+  - Chime layer fires on interval synced to alignment score
+  - `setMuted()` toggle
+  - Graceful silent fallback if audio MP3 files not yet bundled
+- **Audio still needs:** 6 MP3 files per `assets/audio/README.md` (brown noise, pink noise, chimes at 220/440/528 Hz). Generate with Audacity. Then uncomment `require()` lines in the engine.
+
+### Native modules (Swift)
+- `apple-native/iOS/ChronauraHaptics/ChronauraHapticsModule.swift` — Expo Module, CoreHaptics
+- `apple-native/watchOS/ChronauraWatch/Haptics/ChronauraWatchHapticsEngine.swift`
+- `src/modules/WatchHaptics.ts` — JS bridge
+
+### Monetization
+- `src/features/paywall/MonetizationCatalog.ts` — three products, `isModeGated()`, feature lists
+- `src/features/paywall/ThreeTierPaywallModal.tsx` — three-tier paywall UI
+- `src/hooks/useEntitlement.ts` — RevenueCat entitlement check + AppState refresh
+- `src/components/PremiumModeGate.tsx` — inline upgrade card for gated modes
+- `src/components/SatelliteDataCard.tsx` — retro data card (tap a radar blip)
+- `src/components/CosmicDriftGalaxy.tsx` — rotating SVG particle cloud of lock history
+
+### App Store compliance
+- `public/PRIVACY.md` — host at `ocoeestudios.com/chronaura/privacy`
+- `public/TERMS.md` — host at `ocoeestudios.com/chronaura/terms`
+- `public/APP_STORE_REVIEW_NOTES.md` — paste into App Store Connect review notes
+- Simulation Mode built into `OrbitalAlignmentScreen` for static lab testing
+
+---
+
+## What Is NOT Yet Done (valid suggestions welcome here)
+
+| Item | Notes |
 |---|---|
-| `astronomy-engine` | Real ephemeris — Sun, Moon, planets |
-| `satellite.js` | SGP4 orbital propagation for satellites |
-| `tweetnacl` | NaCl secretbox encryption for Vault |
-| `expo-sensors` | Accelerometer + magnetometer for AR pointing |
-| `expo-location` | GPS for observer position |
-| `react-native-purchases` | RevenueCat subscriptions |
-| `react-native-svg` | SVG radar scope, galaxy particle cloud |
-| `react-native-reanimated` | UI-thread animations (blip spring, galaxy rotation) |
-| `expo-haptics` + `CoreHaptics` | Haptic feedback (see ChronauraHapticsModule.swift) |
-| `expo-av` | Audio (Ionospheric Static) |
-| `expo-secure-store` | Vault encryption key in Keychain |
-| `AsyncStorage` | Vault items, Cosmic Drift lock history |
+| Audio MP3 files | 6 files needed — see `assets/audio/README.md`. Generate with Audacity. |
+| Space-Track credentials | Free account at space-track.org. Call `setSpaceTrackCredentials()` in `SpaceDebrisService`. |
+| Re-Entry live data | Currently mocked. Wire to Space-Track TIP stream when ready. |
+| Xcode native build | Run `npx expo prebuild` on Mac. CoreHaptics module registers automatically. |
+| ThreeTierPaywallModal navigation | "Unlock Premium" button in `PremiumModeGate` needs to open the modal — requires navigation context. |
+| Quantum Intercept | Needs real-time server — not buildable client-only. Deferred post-launch. |
+| iOS 26 Liquid Glass | Spec in `docs/LIQUID_GLASS_IMPLEMENTATION_SPEC.md`. Post-launch. |
+| watchOS Xcode target | Swift scaffolds exist in `apple-native/watchOS/` but not compiled into Xcode project yet. |
 
 ---
 
-## File Structure (key files)
+## Architecture Rules (do not break these)
+
+| Rule | Reason |
+|---|---|
+| TLE propagation stays in service layer, never in `alignmentEngine.ts` | Engine is pure math — no network/format awareness |
+| `SpatialTarget` has no `tleLine1/tleLine2` fields | Propagation output (lat/lon/alt) is what the engine needs |
+| Reanimated shared values for radar blips | UI thread only — no JS bridge jank |
+| Expo Modules pattern for Swift native code | Matches existing `ChronauraWatchSyncModule` pattern, auto-registers |
+| AsyncStorage for Cosmic Drift, not encrypted vault | Lock history is celebration data, not sensitive |
+| 2h Celestrak cache | TLEs update every few hours — more frequent = battery waste |
+| Daily chain seeded from date hash | Same challenge for all users without a server |
+| Trial on annual plan only | Prevents weekend trial-and-cancel on monthly |
+
+---
+
+## Key File Locations
 
 ```
 src/
-├── screens/
-│   ├── HomeScreen.tsx          — Living Astrolabe, Tonight Score, Cosmic Notes
-│   ├── SkyScreen.tsx           — Sky Lens, Manual Map, Orbital Alignment entry
-│   ├── WatchScreen.tsx         — Watch Face Gallery, complications
-│   ├── LearnScreen.tsx         — 30 Nights curriculum, topic explorer
-│   ├── SettingsScreen.tsx      — Subscription, appearance, notifications
-│   └── OrbitalAlignmentScreen.tsx  — THE BIG ONE (see below)
-├── components/
-│   ├── SpaceRadarGrid.tsx      — 2D SVG radar with multi-blip, horizon scope, decay flash
-│   ├── SatelliteDataCard.tsx   — Bottom-sheet retro data card (tap a blip)
-│   ├── CosmicDriftGalaxy.tsx   — Rotating SVG particle galaxy (lock history)
-│   ├── AstrolabePreview.tsx    — Animated astrolabe on Home tab
-│   └── GlassPanel.tsx          — Reusable glass panel component
-├── utils/
-│   ├── alignmentEngine.ts      — Pure bearing/elevation/score math (SpatialTarget, AlignmentResult)
-│   ├── hapticController.ts     — Proximity haptic cadence (uses WatchHaptics)
-│   └── planetaryEphemeris.ts  — Full Keplerian orbital model for 7 planets
-├── services/
-│   ├── AtmosphereExplorerService.ts  — LEO fleet simulation + alignment for 6 satellites
-│   ├── SpaceDebrisService.ts         — Debris catalog, 5s lock cataloguing
-│   ├── ReEntryService.ts             — Orbital decay tracking, reentry corridor, alerts
-│   ├── StarlinkTrainService.ts       — 28-node Starlink train, chain blips
-│   ├── MeteorShowerService.ts        — 6 showers, radiant tracking, sonar cadence
-│   ├── SkyAlignmentChainService.ts   — Daily chain puzzle generator
-│   ├── ChronoLightService.ts         — USNO solar position, golden hour windows
-│   ├── SolarWindService.ts           — Live NOAA Kp index, aura intensity
-│   ├── IonosphericStaticService.ts   — Audio synthesis parameters by alignment score
-│   ├── CosmicDriftService.ts         — Lock event persistence (AsyncStorage)
-│   ├── HapticService.ts              — expo-haptics wrappers (tapLight/Medium/Heavy/Success)
-│   ├── RevenueCatService.ts          — Subscription management
-│   ├── TonightScoreService.ts        — 0-100 sky quality score
-│   └── ISSPassService.ts             — ISS pass prediction stub (awaiting live TLE)
-├── data/
-│   ├── AtmosphereCatalog.ts    — 6 LEO satellite registry (ISS, Hubble, NOAA-20, Terra, 2x Starlink)
-│   └── brand.ts                — Brand constants
-├── modules/
-│   └── WatchHaptics.ts         — JS bridge to ChronauraHapticsModule (CoreHaptics)
-├── state/
-│   ├── ChronauraVaultContext.tsx    — Encrypted vault state
-│   └── ChronauraSettingsContext.tsx — App settings
-└── theme/
-    └── tokens.ts               — ChronauraColors, ChronauraPricing
+├── screens/OrbitalAlignmentScreen.tsx   ← 9-mode tracking hub (DO NOT restructure)
+├── components/SpaceRadarGrid.tsx        ← radar with horizon scope, multi-blip
+├── components/PremiumModeGate.tsx       ← inline paywall card
+├── components/CosmicDriftGalaxy.tsx     ← particle galaxy
+├── components/SatelliteDataCard.tsx     ← retro blip data card
+├── hooks/useEntitlement.ts              ← RevenueCat premium check
+├── utils/alignmentEngine.ts             ← pure math (no imports of services)
+├── utils/planetaryEphemeris.ts          ← Keplerian planetary positions
+├── services/LiveTLEService.ts           ← Celestrak + Space-Track + SGP4
+├── services/IonosphericAudioEngine.ts   ← expo-av two-deck crossfader
+├── services/CosmicDriftService.ts       ← lock history, 5-event free cap
+├── features/paywall/MonetizationCatalog.ts ← pricing, gates, feature lists
+├── features/paywall/ThreeTierPaywallModal.tsx ← three-tier paywall UI
+└── theme/tokens.ts                      ← ChronauraColors, ChronauraPricing
 
 apple-native/
-├── iOS/
-│   ├── ChronauraHaptics/
-│   │   └── ChronauraHapticsModule.swift  — Expo Module, CoreHaptics compass tick + lock pulse
-│   └── ChronauraWatchSync/
-│       └── ChronauraWatchSyncModule.swift — Watch data sync
-└── watchOS/
-    └── ChronauraWatch/
-        ├── ChronauraWatchApp.swift
-        ├── AstrolabeFaceView.swift
-        ├── Haptics/
-        │   └── ChronauraWatchHapticsEngine.swift  — CoreHaptics on Watch
-        └── Connectivity/
-            └── ChronauraWatchConnectivityBridge.swift
+├── iOS/ChronauraHaptics/ChronauraHapticsModule.swift
+└── watchOS/ChronauraWatch/Haptics/ChronauraWatchHapticsEngine.swift
 
 public/
-├── PRIVACY.md     — Full privacy policy (host at ocoeestudios.com/chronaura/privacy)
-├── TERMS.md       — EULA (host at ocoeestudios.com/chronaura/terms)
-└── APP_STORE_REVIEW_NOTES.md  — Paste into App Store Connect review notes field
+├── PRIVACY.md
+├── TERMS.md
+└── APP_STORE_REVIEW_NOTES.md
+
+docs/
+└── CLAUDE_SESSION_NOTES.md   ← full build history, all decisions
 ```
-
----
-
-## OrbitalAlignmentScreen — The Main Feature Screen
-
-This is the most complex screen. It has **9 tracking modes** switchable via a button grid:
-
-| Mode | What it does |
-|---|---|
-| **Fleet** | Tracks 6 real LEO satellites (ISS, Hubble, NOAA-20, Terra, 2x Starlink) on the radar in real time |
-| **Deep Space** | Full Keplerian ephemeris for all 7 planets — point at Jupiter at 2am and lock onto it |
-| **Train** | 28-node Starlink Group 12 chain — machine-gun haptic cadence as you sweep the chain |
-| **Golden** | USNO solar position — golden hour countdown, phase bar, sun azimuth |
-| **Debris** | 6 real debris objects (Cosmos 1408, Fengyun-1C, Iridium-33, etc.) — hold 5s lock to catalogue |
-| **Meteor** | 6 shower radiant points — sonar haptic ping cadence by proximity |
-| **Chain** | Daily multi-target puzzle (e.g. "Cassini Chain: Venus → Saturn") — lock each in sequence |
-| **Static** | Ionospheric Static audio parameter display — noise/chime synthesis params by alignment |
-| **Re-Entry** | Orbital decay tracking — pulsing amber/crimson blips, reentry corridor, urgent haptic alert |
-
-**All radar modes include:**
-- Horizon Scope: curved gold dashed arc driven by device pitch — ground shades amber below it
-- Cosmic Drift galaxy: tap the ✦ card to expand your personal lock history particle cloud
-- Solar Wind Aura header: live NOAA Kp index, color shifts calm/active/storm/severe
-
-**Cosmic Drift** records every 100% lock event to AsyncStorage with: target name, timestamp, observer lat/lon, azimuth, elevation, altitude. The `CosmicDriftGalaxy` renders these as a rotating SVG particle cloud — each star is a real past lock, colored by target.
-
----
-
-## Haptic System
-
-**Phone (expo-haptics via HapticService.ts):**
-- `tapLight()` — approaching (score 70-85), 500ms interval
-- `tapMedium()` — near-lock (score 85+), 250ms interval
-- `tapSuccess()` — legacy fallback
-
-**Watch (CoreHaptics via ChronauraHapticsModule.swift + WatchHaptics.ts):**
-- `triggerCompassTick()` — sharp transient (intensity 0.6, sharpness 0.8) — approaching
-- `triggerLockPulse()` — continuous 0.4s (intensity 1.0, sharpness 0.4) — on lock
-
-**Train mode:** machine-gun `triggerCompassTick()` at 500/250/100ms based on proximity
-
-**Reentry mode:** `Vibration.vibrate([0, 100, 80, 100, 200, 200])` — urgent double-pulse when critical corridor crosses local horizon
-
----
-
-## Screens Inventory
-
-### Home
-- Living Astrolabe (animated SVG)
-- Tonight Score ring (0-100, computed from sky quality + weather)
-- Daily Cosmic Alignment
-- Tonight's Sky live (Sun, Moon, planet az/alt from astronomy-engine)
-- Cosmic Notes (quick vault entry)
-- Sound Bath toggle
-- Time-Scrub Matrix Panel (Aura Pro future)
-
-### Sky
-- Sky Lens (AR camera overlay — permission gated)
-- Manual Sky Map (fallback without camera)
-- Orbital Alignment entry → opens OrbitalAlignmentScreen full-screen
-- Find Mode (ephemeris-driven "point at Venus" tool)
-- X-Ray Lens / Birth Sky Overlay
-- Milky Way / Galaxy Mode
-- Satellite Thermal Overlay Panel
-- Astrophotography Predictor Panel
-- Deep Sky Highlights (8 featured objects)
-- Celestial Archive entry
-
-### Watch
-- Watch Face Gallery
-- Complication Picker
-- Watch Theme Selector
-- Haptic Breathing
-- Future: Taptic Astrolabe, Desk Obelisk
-
-### Learn
-- Sky in 30 Nights progress bar
-- Topic browser (Solar System, Moon, Planets, Constellations, Stars, Deep Sky)
-- Each topic expands with key facts and Sky Lens actions
-
-### Settings
-- Subscription card (Premium $6.99/mo or $39.99/yr)
-- Appearance (theme selector, Night Vision mode toggle)
-- Notifications (sky events, ISS passes)
-- Observatory (sky quality, magnetic declination)
-- About (version, contact)
-
----
-
-## What Is and Isn't Built
-
-### Built and code-complete
-- All 5 tab screens
-- OrbitalAlignmentScreen with 9 modes
-- SpaceRadarGrid multi-blip with horizon scope
-- SatelliteDataCard retro modal
-- CosmicDriftGalaxy particle cloud
-- Full planetary ephemeris (7 planets)
-- Starlink train tracker
-- Space debris mission loop
-- Meteor shower sonar
-- Sky-Crawl alignment chains
-- Chrono-Light golden hour
-- Solar Wind Aura (live NOAA)
-- Ionospheric Static synthesis params
-- Re-Entry Vector Warning
-- CoreHaptics iOS + watchOS modules
-- Expo native module bridge
-- Encrypted vault (NaCl + Keychain)
-- RevenueCat subscription wiring
-- Tonight Score
-- App Store compliance docs (TERMS.md, PRIVACY.md, review notes)
-- Simulation Mode for App Store reviewers
-
-### Stubs / needs live data
-- ISS pass prediction (stub — needs live TLE from SatelliteFeedService)
-- Starlink train (mock — needs Celestrak live data)
-- Space debris (mock — needs Space-Track.org API)
-- Reentry alerts (mock — needs Space-Track TIP stream)
-- Quantum Intercept / global observer matching (needs backend server — intentionally deferred)
-
-### Not yet started
-- Actual audio playback for Ionospheric Static (IonosphericStaticService outputs params only — needs expo-av implementation)
-- iOS 26 Liquid Glass native rendering (spec exists in docs)
-- Xcode project file / native build (no .xcodeproj committed — requires `npx expo prebuild`)
 
 ---
 
 ## Contacts
 
-- **Studio:** Ocoee Studios
-- **Email:** manager@ocoeestudios.com / admin@ocoeestudios.com / support@ocoeestudios.com
-- **Privacy:** privacy@ocoeestudios.com
-- **GitHub (personal):** `jamiebzzz-stack`
-- **GitHub (org):** `ocoee-studios`
+- Studio: Ocoee Studios
+- Support: support@ocoeestudios.com
+- Privacy: privacy@ocoeestudios.com
+- GitHub personal: `jamiebzzz-stack` / org: `ocoee-studios`
