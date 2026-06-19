@@ -167,7 +167,7 @@ export function OrbitalAlignmentScreen() {
   if (!isReady) {
     return (
       <View style={[styles.scroll, styles.loadingOuter]}>
-        <Text style={styles.title}>Orbital Alignment</Text>
+        <Text style={styles.title}>CHRONAURA TELEMETRY</Text>
         <View style={styles.loadingCard}>
           <Text style={styles.loadingTitle}>Acquiring telemetry…</Text>
           <Text style={styles.loadingDetail}>
@@ -203,7 +203,7 @@ export function OrbitalAlignmentScreen() {
       contentContainerStyle={styles.container}
       showsVerticalScrollIndicator={false}
     >
-      <Text style={styles.title}>Orbital Alignment</Text>
+      <Text style={styles.title}>CHRONAURA TELEMETRY</Text>
 
       {/* Simulation Mode banner */}
       {simMode && (
