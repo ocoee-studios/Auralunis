@@ -10,7 +10,6 @@
 //   LOCKED       → one-shot lock pulse, then silent
 
 import { WatchHaptics } from "@/modules/WatchHaptics";
-import { tapSuccess } from "@/services/HapticService";
 
 type Zone = "silent" | "approaching" | "nearLock" | "locked";
 

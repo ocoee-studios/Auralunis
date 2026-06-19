@@ -121,6 +121,99 @@ const MOCK_REENTRY_OBJECTS: ReEntryObject[] = [
 let _decayFleet = MOCK_REENTRY_OBJECTS.map(o => ({ ...o }));
 let _isLiveTIP = false;
 
+
+// Space-Track TIP (Tracking and Impact Prediction) endpoint
+const SPACE_TRACK_TIP_URL =
+  "https://www.space-track.org/basicspacesdata/query/class/tip/DECAY_EPOCH/gt/now/orderby/DECAY_EPOCH/limit/10/format/json";
+
+let _tipCredentials: { username: string; password: string } | null = null;
+
+/** Provide Space-Track credentials to enable live TIP data. Call once on app init. */
+export function setReEntryCredentials(username: string, password: string): void {
+  _tipCredentials = { username, password };
+}
+
+/**
+ * Fetch live reentry predictions from Space-Track TIP stream.
+ * Returns null if unauthenticated or network unavailable — caller falls back to mock.
+ */
+async function fetchLiveTIPData(): Promise<ReEntryObject[] | null> {
+  if (!_tipCredentials) return null;
+
+  try {
+    const authed = await ensureSpaceTrackAuth(
+      _tipCredentials.username,
+      _tipCredentials.password
+    );
+    if (!authed) return null;
+
+    const cookie = getSpaceTrackCookie();
+    if (!cookie) return null;
+
+    const res = await fetch(SPACE_TRACK_TIP_URL, {
+      headers: { Cookie: cookie, Accept: "application/json" },
+    });
+
+    if (!res.ok) return null;
+
+    const predictions = await res.json() as Array<{
+      NORAD_CAT_ID?: number | string;
+      SATNAME?:      string;
+      DECAY_EPOCH?:  string;
+      LAT?:          string | number;
+      LON?:          string | number;
+      PERIGEE?:      string | number;
+      APOGEE?:       string | number;
+    }>;
+
+    if (!Array.isArray(predictions) || predictions.length === 0) return null;
+
+    const now = Date.now();
+
+    return predictions
+      .filter(p => p.NORAD_CAT_ID && p.DECAY_EPOCH)
+      .map((p, i): ReEntryObject => {
+        const decayMs   = new Date(p.DECAY_EPOCH!).getTime();
+        const hoursLeft = Math.max(0, (decayMs - now) / 3600_000);
+        const perigee   = parseFloat(String(p.PERIGEE  ?? 120));
+        const apogee    = parseFloat(String(p.APOGEE   ?? 200));
+        const lat       = parseFloat(String(p.LAT      ?? 0));
+        const lon       = parseFloat(String(p.LON      ?? 0));
+        const norad     = Number(p.NORAD_CAT_ID);
+
+        let threat: DecayThreatLevel = "watch";
+        if (hoursLeft < 2)  threat = "imminent";
+        else if (hoursLeft < 12) threat = "critical";
+        else if (hoursLeft < 48) threat = "warning";
+
+        return {
+          id:   `tip-${norad}`,
+          name: p.SATNAME ?? `Object ${norad}`,
+          noradId: norad,
+          perigeeKm: isNaN(perigee) ? 120 : perigee,
+          apogeeKm:  isNaN(apogee)  ? 200 : apogee,
+          velocityKms: 7.8 - (i * 0.05),
+          reentryWindowStart: p.DECAY_EPOCH!,
+          reentryWindowEnd:   new Date(decayMs + 12 * 3600_000).toISOString(),
+          hoursUntilReentry:  hoursLeft,
+          corridorPoints: buildCorridor(
+            isNaN(lat) ? 0 : lat,
+            isNaN(lon) ? 0 : lon,
+            (i * 47) % 360
+          ),
+          threatLevel: threat,
+          alertColor: threatColor(threat),
+          origin: "Space-Track TIP",
+          description: `Live TIP prediction — NORAD ${norad}. Predicted reentry: ${p.DECAY_EPOCH}.`,
+          latitudeDegrees:  isNaN(lat) ? 0 : lat,
+          longitudeDegrees: isNaN(lon) ? 0 : lon,
+        };
+      });
+  } catch {
+    return null;
+  }
+}
+
 /** Call on reentry mode entry — syncs live TIP data if credentials available */
 export async function initReEntryLive(): Promise<boolean> {
   const live = await fetchLiveTIPData();
