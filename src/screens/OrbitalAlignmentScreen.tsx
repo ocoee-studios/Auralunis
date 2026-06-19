@@ -25,7 +25,7 @@ import type { CameraPointing } from "@/features/sky-lens/ar/SkyLensProjection";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 // Mode services
-import { simulateTick, computeFleetState, type FleetState } from "@/services/AtmosphereExplorerService";
+import { simulateTick, computeFleetState, syncLiveTLEData, type FleetState } from "@/services/AtmosphereExplorerService";
 import { ATMOSPHERE_CATALOG } from "@/data/AtmosphereCatalog";
 import { SatelliteDataCard } from "@/components/SatelliteDataCard";
 import { SpaceRadarGrid, type RadarBlip } from "@/components/SpaceRadarGrid";
@@ -41,6 +41,7 @@ import { getActiveShowers } from "@/services/MeteorShowerService";
 import { getDailyChain, getChainProgress, advanceChain, resetChain } from "@/services/SkyAlignmentChainService";
 import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/services/SolarWindService";
 import { computeStaticParams, elevationAudioLabel, STATIC_COLORS } from "@/services/IonosphericStaticService";
+import { getIonosphericEngine, destroyIonosphericEngine } from "@/services/IonosphericAudioEngine";
 import { ChronauraColors } from "@/theme/tokens";
 
 type TrackingMode = "fleet" | "deep-space" | "train" | "golden" | "debris" | "meteor" | "chain" | "static" | "reentry";
@@ -67,6 +68,7 @@ export function OrbitalAlignmentScreen() {
   const [showDrift, setShowDrift] = useState(false);
   const [driftRefresh, setDriftRefresh] = useState(0);
   const [weather, setWeather] = useState<SpaceWeatherSnapshot | null>(null);
+  const [audioMuted, setAudioMuted] = useState(false);
   const [debrisFleet, setDebrisFleet] = useState<ReturnType<typeof computeDebrisFleet>>([]);
   const [debrisLockCounters, setDebrisLockCounters] = useState<Record<string, number>>({});
   const [reentryFleet, setReentryFleet] = useState<ReturnType<typeof computeReentryFleet>>([]);
@@ -102,6 +104,14 @@ export function OrbitalAlignmentScreen() {
   useEffect(() => {
     if (mode === "fleet") setFleetState(computeFleetState(location, pointing));
   }, [mode, pointing.azimuthDegrees, pointing.altitudeDegrees]);
+
+  // Live TLE sync — fires once when entering fleet mode
+  useEffect(() => {
+    if (mode !== "fleet") return;
+    syncLiveTLEData()
+      .then(synced => { if (synced) setFleetState(computeFleetState(location, pointing)); })
+      .catch(() => {}); // silent fallback to simulation
+  }, [mode]);
 
   // Train tick
   useEffect(() => {
@@ -156,6 +166,25 @@ export function OrbitalAlignmentScreen() {
     }, 1000);
     return () => clearInterval(id);
   }, [mode, location, pointing]);
+
+  // Audio engine — init on mount, destroy on unmount
+  useEffect(() => {
+    const engine = getIonosphericEngine();
+    engine.init().catch(() => {});
+    return () => { destroyIonosphericEngine().catch(() => {}); };
+  }, []);
+
+  // Feed alignment score into audio engine whenever in static mode
+  useEffect(() => {
+    if (mode !== "static") {
+      getIonosphericEngine().setMuted(true);
+      return;
+    }
+    getIonosphericEngine().setMuted(audioMuted);
+    if (!audioMuted) {
+      getIonosphericEngine().update(activeScore, isLocked);
+    }
+  }, [mode, activeScore, isLocked, audioMuted]);
 
   // Chain init
   useEffect(() => {

@@ -37,6 +37,42 @@ const DRIFT_RATES: Record<string, { lonRate: number; latAmp: number; latFreq: nu
 
 // Mutable working copy — mutated by simulateTick each interval
 let fleet: AtmosphericSatellite[] = ATMOSPHERE_CATALOG.map((s) => ({ ...s }));
+let _liveSyncActive = false;
+
+/**
+ * Attempt to update fleet positions from live Celestrak TLE data.
+ * Falls back silently to simulation if network unavailable or satellite.js missing.
+ * Call once on mount when in fleet mode.
+ */
+export async function syncLiveTLEData(): Promise<boolean> {
+  if (!isSatelliteJsAvailable()) return false;
+  if (_liveSyncActive) return false;
+  _liveSyncActive = true;
+
+  try {
+    const [issPos, starlinkPositions] = await Promise.all([
+      getLiveISSPosition(),
+      getLiveStarlinkPositions(2),
+    ]);
+
+    fleet = fleet.map(sat => {
+      if (sat.id === "iss" && issPos) {
+        return { ...sat, latitudeDegrees: issPos.latitudeDegrees, longitudeDegrees: issPos.longitudeDegrees, altitudeKm: issPos.altitudeKm };
+      }
+      if (sat.class === "starlink" && starlinkPositions.length > 0) {
+        const live = starlinkPositions.shift();
+        if (live) return { ...sat, latitudeDegrees: live.latitudeDegrees, longitudeDegrees: live.longitudeDegrees, altitudeKm: live.altitudeKm };
+      }
+      return sat;
+    });
+
+    return true;
+  } catch {
+    return false;
+  } finally {
+    _liveSyncActive = false;
+  }
+}
 
 /**
  * Advance every satellite's simulated orbital position by one tick.
