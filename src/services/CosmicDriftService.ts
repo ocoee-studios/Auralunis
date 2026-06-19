@@ -8,6 +8,7 @@
 // No encryption needed — this is celebration data, not sensitive.
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { FREE_DRIFT_EVENT_LIMIT } from "@/features/paywall/MonetizationCatalog";
 
 const STORAGE_KEY = "chronaura.cosmic_drift.entries";
 
@@ -81,7 +82,8 @@ async function saveEntries(entries: LockEntry[]): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
 }
 
-/** Record a new lock event. Deduplicates by targetId within a 60-second window. */
+/** Record a new lock event. Deduplicates by targetId within a 60-second window.
+ *  Pass isPremium=true to bypass the free tier event cap. */
 export async function recordLock(params: {
   targetId: string;
   targetName: string;
@@ -92,9 +94,15 @@ export async function recordLock(params: {
   azimuth: number;
   elevation: number;
   altitudeKm: number;
-}): Promise<LockEntry> {
+  isPremium?: boolean;
+}): Promise<LockEntry | null> {
   const entries = await loadEntries();
   const now = new Date().toISOString();
+
+  // Free tier cap: max FREE_DRIFT_EVENT_LIMIT events
+  if (!params.isPremium && entries.length >= FREE_DRIFT_EVENT_LIMIT) {
+    return null; // Caller should show upgrade prompt
+  }
 
   // Deduplicate: ignore if same target locked within 60s
   const recent = entries.find(
@@ -125,6 +133,12 @@ export async function recordLock(params: {
 
   await saveEntries([entry, ...entries]);
   return entry;
+}
+
+/** How many drift events the user has recorded */
+export async function getDriftEventCount(): Promise<number> {
+  const entries = await loadEntries();
+  return entries.length;
 }
 
 export async function getLockEntries(): Promise<LockEntry[]> {

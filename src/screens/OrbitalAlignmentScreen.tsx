@@ -43,8 +43,17 @@ import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/se
 import { computeStaticParams, elevationAudioLabel, STATIC_COLORS } from "@/services/IonosphericStaticService";
 import { getIonosphericEngine, destroyIonosphericEngine } from "@/services/IonosphericAudioEngine";
 import { ChronauraColors } from "@/theme/tokens";
+import { isModeGated, FREE_DRIFT_EVENT_LIMIT, type TrackingMode } from "@/features/paywall/MonetizationCatalog";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { PremiumModeGate } from "@/components/PremiumModeGate";
 
-type TrackingMode = "fleet" | "deep-space" | "train" | "golden" | "debris" | "meteor" | "chain" | "static" | "reentry";
+const PREMIUM_MODE_DESCRIPTIONS: Partial<Record<TrackingMode, string>> = {
+  train:   "Track a live Starlink satellite train with machine-gun haptic feedback as the chain sweeps overhead.",
+  debris:  "Scan the sky for orbital debris. Hold a 100% lock for 5 seconds to catalogue each piece of space junk.",
+  reentry: "Real-time orbital decay alerts. Watch pulsing blips mark objects burning back into the atmosphere.",
+  chain:   "Daily multi-target alignment puzzle. Lock Venus, Saturn, and the ISS in a single fluid sweep.",
+  static:  "Ionospheric Static audio mode. Hear the sky — noise thins to a clean carrier wave as you lock on.",
+};
 
 const MODE_LABELS: Record<TrackingMode, string> = {
   fleet: "Fleet", "deep-space": "Deep Space", train: "Train", golden: "Golden",
@@ -78,6 +87,7 @@ export function OrbitalAlignmentScreen() {
     return getChainProgress(dummy);
   });
 
+  const { isPremium, refresh: refreshEntitlement } = useEntitlement();
   const hapticCtrl = useRef(new HapticController());
   const trainHapticRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const debrisLockTimers = useRef<Record<string, number>>({});
@@ -284,7 +294,7 @@ export function OrbitalAlignmentScreen() {
   useEffect(() => {
     if (isLocked && !wasLockedRef.current && ["fleet","deep-space","train","debris","reentry"].includes(mode)) {
       const type = mode === "fleet" ? "satellite" : mode === "deep-space" ? "planet" : "satellite";
-      recordLock({ targetId: activeName, targetName: activeName, targetType: type, targetColor: activeColor, observerLat: location.latitudeDegrees, observerLon: location.longitudeDegrees, azimuth: activeAzimuth, elevation: activeElevation, altitudeKm: activeAltKm })
+      recordLock({ targetId: activeName, targetName: activeName, targetType: type, targetColor: activeColor, observerLat: location.latitudeDegrees, observerLon: location.longitudeDegrees, azimuth: activeAzimuth, elevation: activeElevation, altitudeKm: activeAltKm, isPremium })
         .then(() => setDriftRefresh(n => n + 1)).catch(() => {});
     }
     wasLockedRef.current = isLocked;
@@ -371,15 +381,43 @@ export function OrbitalAlignmentScreen() {
 
         {/* Mode switcher — 2 rows of 4 */}
         <View style={styles.modeGrid}>
-          {(Object.keys(MODE_LABELS) as TrackingMode[]).map(m => (
-            <TouchableOpacity key={m} style={[styles.modeBtn, mode === m && { borderColor: ChronauraColors.gold, backgroundColor: "rgba(212,175,55,0.12)" }]} onPress={() => setMode(m)}>
-              <Text style={[styles.modeBtnText, mode === m && { color: ChronauraColors.gold }]}>{MODE_LABELS[m]}</Text>
-            </TouchableOpacity>
-          ))}
+          {(Object.keys(MODE_LABELS) as TrackingMode[]).map(m => {
+            const gated = isModeGated(m) && !isPremium;
+            const isActive = mode === m;
+            return (
+              <TouchableOpacity
+                key={m}
+                style={[
+                  styles.modeBtn,
+                  isActive && { borderColor: ChronauraColors.gold, backgroundColor: "rgba(212,175,55,0.12)" },
+                  gated && { borderColor: ChronauraColors.borderSubtle, opacity: 0.6 },
+                ]}
+                onPress={() => setMode(m)}
+              >
+                {gated && <Text style={styles.modeLock}>◈ </Text>}
+                <Text style={[styles.modeBtnText, isActive && { color: ChronauraColors.gold }, gated && { color: ChronauraColors.faint }]}>
+                  {MODE_LABELS[m]}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
         </View>
 
+        {/* ── Premium gate — show upgrade card for gated modes on free tier ── */}
+        {isModeGated(mode) && !isPremium && (
+          <PremiumModeGate
+            modeName={MODE_LABELS[mode]}
+            modeDescription={PREMIUM_MODE_DESCRIPTIONS[mode] ?? "This mode requires Chronaura Premium."}
+            onUpgrade={() => {
+              // TODO: open ThreeTierPaywallModal when wired to navigation
+              // For now, refresh entitlement in case they've already purchased
+              refreshEntitlement();
+            }}
+          />
+        )}
+
         {/* ── Golden Hour ── */}
-        {mode === "golden" && sunPos && (
+        {mode === "golden" && sunPos && (!isModeGated("golden") || isPremium) && (
           <>
             <View style={[styles.card, { borderColor: "#EF9F27" + "55" }]}>
               <Text style={styles.cardLabel}>Sun Position</Text>
@@ -406,7 +444,7 @@ export function OrbitalAlignmentScreen() {
         )}
 
         {/* ── Ionospheric Static ── */}
-        {mode === "static" && staticParams && (
+        {mode === "static" && staticParams && (!isModeGated("static") || isPremium) && (
           <View style={[styles.card, { borderColor: STATIC_COLORS[staticParams.phase] + "55" }]}>
             <Text style={styles.cardLabel}>Ionospheric Static</Text>
             <View style={styles.pills}>
@@ -460,7 +498,7 @@ export function OrbitalAlignmentScreen() {
         )}
 
         {/* ── Radar (modes with visual tracking) ── */}
-        {mode !== "golden" && mode !== "static" && (
+        {mode !== "golden" && mode !== "static" && (!isModeGated(mode) || isPremium) && (
           <>
             <Animated.View style={pulseStyle}>
               <View style={[styles.badge, { borderColor: statusColor }]}>
@@ -628,6 +666,7 @@ const styles = StyleSheet.create({
   modeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 12, width: "100%", justifyContent: "center" },
   modeBtn: { borderWidth: 1, borderColor: ChronauraColors.borderSubtle, borderRadius: 9, paddingHorizontal: 10, paddingVertical: 5 },
   modeBtnText: { color: ChronauraColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 1 },
+  modeLock: { color: ChronauraColors.gold, fontSize: 8, fontWeight: "800" },
   badge: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 3, marginBottom: 4, alignSelf: "center" },
   badgeText: { fontSize: 9, fontWeight: "800", letterSpacing: 3 },
   tapHint: { color: ChronauraColors.faint, fontSize: 9, marginBottom: 8 },

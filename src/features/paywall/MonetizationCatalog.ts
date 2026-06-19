@@ -1,28 +1,38 @@
-// Chronaura pricing — simplified for launch.
-// Free + Premium only. No Aura Pro or Sovereign at launch.
+// MonetizationCatalog.ts
+// Chronaura pricing — optimized for launch.
+// Three products: Monthly (no trial), Annual (7-day trial), Lifetime Founders (one-time).
+// Trial is ANNUAL ONLY — prevents weekend trial-and-cancel on monthly.
 
 export const RevenueCatIds = {
   products: {
-    premiumMonthly: "com.ocoee.chronaura.premium.monthly",
-    premiumAnnual: "com.ocoee.chronaura.premium.annual"
+    premiumMonthly:    "com.ocoee.chronaura.premium.monthly",
+    premiumAnnual:     "com.ocoee.chronaura.premium.annual",
+    lifetimeFounders:  "com.ocoee.chronaura.lifetime.founders",
   },
   packages: {
-    premiumMonthly: "premium_monthly",
-    premiumAnnual: "premium_annual"
+    premiumMonthly:    "premium_monthly",
+    premiumAnnual:     "premium_annual",
+    lifetimeFounders:  "lifetime_founders",
   },
-  entitlement: "chronaura_premium"
+  // All three products unlock this single entitlement
+  entitlement: "chronaura_premium",
 } as const;
 
 export interface PlanOption {
   id: string;
   productId: string;
   name: string;
-  interval: "monthly" | "annual";
+  interval: "monthly" | "annual" | "lifetime";
+  /** Primary price display — e.g. "$39.99/year" */
   displayPrice: string;
-  effectiveMonthly: string;
+  /** Secondary line — monthly equivalent or subtitle */
+  subtitle: string;
   revenueCatPackageId: string;
   badge?: string;
+  /** Trial only on annual */
   trial: boolean;
+  /** Anchor price shown as strikethrough on lifetime card */
+  anchorPrice?: string;
 }
 
 export const plans: PlanOption[] = [
@@ -32,10 +42,10 @@ export const plans: PlanOption[] = [
     name: "Chronaura Premium",
     interval: "annual",
     displayPrice: "$39.99/year",
-    effectiveMonthly: "$3.33/mo",
+    subtitle: "$3.33/month, billed annually",
     revenueCatPackageId: RevenueCatIds.packages.premiumAnnual,
-    badge: "BEST VALUE",
-    trial: true
+    badge: "BEST VALUE · SAVE 52%",
+    trial: true,   // 7-day free trial on annual only
   },
   {
     id: "premium_monthly",
@@ -43,35 +53,78 @@ export const plans: PlanOption[] = [
     name: "Chronaura Premium",
     interval: "monthly",
     displayPrice: "$6.99/month",
-    effectiveMonthly: "$6.99/mo",
+    subtitle: "Billed monthly · Cancel anytime",
     revenueCatPackageId: RevenueCatIds.packages.premiumMonthly,
-    trial: true
-  }
+    trial: false,  // No trial on monthly — direct charge
+  },
+  {
+    id: "lifetime_founders",
+    productId: RevenueCatIds.products.lifetimeFounders,
+    name: "Founders Lifetime",
+    interval: "lifetime",
+    displayPrice: "$99.99",
+    subtitle: "One-time purchase · Never pay again",
+    revenueCatPackageId: RevenueCatIds.packages.lifetimeFounders,
+    badge: "FOUNDERS",
+    trial: false,
+    anchorPrice: "$167.88", // what 24 months of annual would cost — anchor comparison
+  },
 ];
 
+// ─── Feature gates ────────────────────────────────────────────────────────────
+
+/** Tracking modes accessible on the free tier */
+export const FREE_TRACKING_MODES = ["fleet", "deep-space", "golden", "meteor"] as const;
+
+/** Tracking modes that require chronaura_premium */
+export const PREMIUM_TRACKING_MODES = ["train", "debris", "reentry", "chain", "static"] as const;
+
+export type FreeTrackingMode    = typeof FREE_TRACKING_MODES[number];
+export type PremiumTrackingMode = typeof PREMIUM_TRACKING_MODES[number];
+export type TrackingMode        = FreeTrackingMode | PremiumTrackingMode;
+
+export function isModeGated(mode: string): boolean {
+  return PREMIUM_TRACKING_MODES.includes(mode as PremiumTrackingMode);
+}
+
+/** Cosmic Drift: free users can save this many lock events */
+export const FREE_DRIFT_EVENT_LIMIT = 5;
+
+// ─── Paywall feature lists ────────────────────────────────────────────────────
+
 export const freeFeatures = [
+  "Fleet tracking — ISS, Hubble, NOAA-20",
+  "Deep Space — all 7 planets in real time",
+  "Golden Hour sun vector",
+  "Meteor shower sonar",
   "Tonight Score",
-  "Basic Learn (Planets, Moon)",
-  "3 constellation entries",
-  "5-day streak limit"
+  "Basic Learn (Solar System, Moon, Planets)",
+  `Cosmic Drift — first ${FREE_DRIFT_EVENT_LIMIT} lock events`,
 ];
 
 export const premiumFeatures = [
   "Everything in Free",
-  "AI Sky Companion (Claude-powered)",
-  "Full astronomy encyclopedia (88 constellations, 21 deep-sky objects)",
+  "Starlink Train Tracker — live Celestrak TLE",
+  "Space Debris Mission Loop — catalogue orbital junk",
+  "Re-Entry Vector Warning — decay alerts",
+  "Sky-Crawl Alignment Chains — daily puzzles",
+  "Ionospheric Static audio mode",
+  "Unlimited Cosmic Drift galaxy history",
+  "AI Sky Companion",
+  "Full astronomy encyclopedia",
   "Birth Sky Profile + Cosmic Compatibility",
-  "Cosmic Vault (encrypted)",
+  "Encrypted Cosmic Vault",
   "Night Vision Mode",
-  "Sky Timelapse",
-  "Constellation Challenge",
+  "Apple Watch companion + complications",
+  "iOS widgets",
   "Dark Sky Finder",
   "Eclipse & Celestial Events Calendar",
-  "Astrophotography guides",
-  "Achievement badges & Annual Sky Recap",
-  "Apple Watch companion",
-  "iOS widgets (Tonight Score, Moon Phase, Next Event)",
-  "Unlimited streaks",
   "Cultural sky stories from 12 traditions",
-  "Share cards"
+];
+
+export const lifetimeFeatures = [
+  "Everything in Premium",
+  "Locked in at today's price — forever",
+  "All future features included",
+  "Founders badge in your profile",
 ];
