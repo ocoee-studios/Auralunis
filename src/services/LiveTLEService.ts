@@ -192,6 +192,7 @@ export function propagateRecord(record: TLERecord, date: Date = new Date()): Pro
   try {
     const satrec = Satellite.twoline2satrec(record.line1, record.line2);
     const posVel = Satellite.propagate(satrec, date);
+    if (!posVel) return null;
 
     if (!posVel.position || typeof posVel.position === "boolean") return null;
     if (!posVel.velocity || typeof posVel.velocity === "boolean") return null;

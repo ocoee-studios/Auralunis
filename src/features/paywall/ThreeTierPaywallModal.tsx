@@ -4,9 +4,9 @@
 // Lifetime Founders acts as anchor price ($99.99) making annual feel like a steal.
 // Trial is ANNUAL ONLY — no trial on monthly (prevents weekend trial-and-cancel).
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
-  Modal, Pressable, ScrollView, StyleSheet,
+  Linking, Modal, Pressable, ScrollView, StyleSheet,
   Text, TouchableOpacity, View,
 } from "react-native";
 import { ChronauraColors } from "@/theme/tokens";
@@ -16,16 +16,59 @@ import {
   lifetimeFeatures,
   type PlanOption,
 } from "./MonetizationCatalog";
+import { getCurrentPackages } from "@/services/RevenueCatService";
 import { tapLight, tapSuccess } from "@/services/HapticService";
+
+// Hosted legal pages (see docs/LEGAL_PRIVACY_LAUNCH_TODO.md) + Apple Standard EULA.
+const TERMS_URL = "https://ocoeestudios.com/chronaura/terms";
+const PRIVACY_URL = "https://ocoeestudios.com/chronaura/privacy";
+const EULA_URL = "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/";
 
 type Props = {
   visible: boolean;
   onClose: () => void;
   onPurchase: (planId: string) => void;
+  onRestore: () => void;
 };
 
-export function ThreeTierPaywallModal({ visible, onClose, onPurchase }: Props) {
+export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore }: Props) {
   const [selected, setSelected] = useState<string>("premium_annual");
+
+  // Live StoreKit prices keyed by plan id, so the UI never shows a price that
+  // can drift from App Store Connect. Falls back to static displayPrice until
+  // packages load (or if RevenueCat isn't configured).
+  const [livePrices, setLivePrices] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    if (!visible) return;
+    let active = true;
+    getCurrentPackages()
+      .then((packages) => {
+        if (!active) return;
+        const map: Record<string, string> = {};
+        for (const plan of plans) {
+          const match = packages.find(
+            (pkg) =>
+              pkg.identifier === plan.revenueCatPackageId ||
+              pkg.product.identifier === plan.productId
+          );
+          if (match?.product.priceString) {
+            map[plan.id] = match.product.priceString;
+          }
+        }
+        setLivePrices(map);
+      })
+      .catch(() => {
+        // RevenueCat unavailable — keep static fallback prices.
+      });
+    return () => {
+      active = false;
+    };
+  }, [visible]);
+
+  function priceFor(plan: PlanOption) {
+    return livePrices[plan.id] ?? plan.displayPrice;
+  }
 
   const annual   = plans.find(p => p.id === "premium_annual")!;
   const monthly  = plans.find(p => p.id === "premium_monthly")!;
@@ -59,17 +102,20 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase }: Props) {
             {/* Plan selector — Annual first (default) */}
             <PlanCard
               plan={annual}
+              priceText={priceFor(annual)}
               selected={selected === annual.id}
               onPress={() => handleSelect(annual)}
               highlight
             />
             <PlanCard
               plan={monthly}
+              priceText={priceFor(monthly)}
               selected={selected === monthly.id}
               onPress={() => handleSelect(monthly)}
             />
             <PlanCard
               plan={lifetime}
+              priceText={priceFor(lifetime)}
               selected={selected === lifetime.id}
               onPress={() => handleSelect(lifetime)}
             />
@@ -83,10 +129,18 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase }: Props) {
               </Text>
               <Text style={styles.ctaSub}>
                 {selectedPlan.trial
-                  ? `Then ${selectedPlan.displayPrice} · Cancel anytime`
+                  ? `Then ${priceFor(selectedPlan)} · Cancel anytime`
                   : selectedPlan.subtitle}
               </Text>
             </TouchableOpacity>
+
+            {/* Auto-renewable subscription disclosure — required for subscription tiers. */}
+            {selectedPlan.interval !== "lifetime" && (
+              <Text style={styles.disclosure}>
+                Subscription auto-renews unless cancelled at least 24h before the
+                period ends. Manage or cancel in your Apple ID settings.
+              </Text>
+            )}
 
             {/* Feature list */}
             <Text style={styles.sectionLabel}>What you get</Text>
@@ -99,11 +153,13 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase }: Props) {
 
             {/* Footer */}
             <View style={styles.footer}>
-              <Text style={styles.footerLink} onPress={onClose}>Restore Purchases</Text>
+              <Text style={styles.footerLink} onPress={onRestore}>Restore Purchases</Text>
               <Text style={styles.footerDot}>·</Text>
-              <Text style={styles.footerLink}>Terms</Text>
+              <Text style={styles.footerLink} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text>
               <Text style={styles.footerDot}>·</Text>
-              <Text style={styles.footerLink}>Privacy</Text>
+              <Text style={styles.footerLink} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy</Text>
+              <Text style={styles.footerDot}>·</Text>
+              <Text style={styles.footerLink} onPress={() => Linking.openURL(EULA_URL)}>EULA</Text>
             </View>
 
             <TouchableOpacity onPress={onClose} style={styles.skipBtn}>
@@ -118,9 +174,10 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase }: Props) {
 }
 
 function PlanCard({
-  plan, selected, onPress, highlight,
+  plan, priceText, selected, onPress, highlight,
 }: {
   plan: PlanOption;
+  priceText: string;
   selected: boolean;
   onPress: () => void;
   highlight?: boolean;
@@ -152,7 +209,7 @@ function PlanCard({
           <Text style={styles.anchorPrice}>{plan.anchorPrice}</Text>
         )}
         <Text style={[styles.planPrice, selected && { color: ChronauraColors.gold }]}>
-          {plan.displayPrice}
+          {priceText}
         </Text>
         {plan.badge && (
           <View style={styles.badge}>
@@ -188,6 +245,7 @@ const styles = StyleSheet.create({
   cta: { backgroundColor: ChronauraColors.gold, borderRadius: 16, padding: 16, alignItems: "center", marginVertical: 20 },
   ctaText: { color: ChronauraColors.cosmicBlack, fontSize: 16, fontWeight: "900", letterSpacing: 0.5 },
   ctaSub: { color: "rgba(11,11,18,0.7)", fontSize: 11, marginTop: 3 },
+  disclosure: { color: ChronauraColors.faint, fontSize: 10, lineHeight: 15, textAlign: "center", marginTop: -8, marginBottom: 16 },
   sectionLabel: { color: ChronauraColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 },
   featureRow: { flexDirection: "row", gap: 10, paddingVertical: 6, borderTopWidth: 1, borderTopColor: ChronauraColors.borderFaint },
   featureCheck: { color: ChronauraColors.gold, fontSize: 11, marginTop: 1 },

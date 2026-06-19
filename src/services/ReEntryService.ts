@@ -121,6 +121,16 @@ const MOCK_REENTRY_OBJECTS: ReEntryObject[] = [
 let _decayFleet = MOCK_REENTRY_OBJECTS.map(o => ({ ...o }));
 let _isLiveTIP = false;
 
+/**
+ * Fetch live Space-Track TIP (Tracking & Impact Prediction) messages.
+ * Live integration is NOT yet wired (see file header) — returns null so callers
+ * fall back to the mock decay dataset. Stub retained so call sites type-check.
+ * TODO: wire via ensureSpaceTrackAuth()/getSpaceTrackCookie().
+ */
+async function fetchLiveTIPData(): Promise<ReEntryObject[] | null> {
+  return null;
+}
+
 /** Call on reentry mode entry — syncs live TIP data if credentials available */
 export async function initReEntryLive(): Promise<boolean> {
   const live = await fetchLiveTIPData();

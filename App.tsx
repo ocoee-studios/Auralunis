@@ -179,6 +179,7 @@ export default function App() {
               visible={paywallVisible}
               onClose={() => setPaywallVisible(false)}
               onPurchase={handlePurchase}
+              onRestore={handleRestorePurchases}
             />
 
           <OnboardingFlow

@@ -13,7 +13,7 @@
 // + Horizon Scope on all radar modes
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Vibration } from "react-native";
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withSequence,
   withTiming, withSpring, Easing,
@@ -37,6 +37,7 @@ import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/ser
 import { recordLock } from "@/services/CosmicDriftService";
 import { CosmicDriftGalaxy } from "@/components/CosmicDriftGalaxy";
 import { computeDebrisFleet, tickDebrisMock, tickDebrisLive, initDebrisLive, tickLockTimers, getTotalCatalogued, isDebrisLive } from "@/services/SpaceDebrisService";
+import { computeDecayFleet, initReEntryLive, simulateDecayTick, isReEntryLive, reentryAlertPattern, type DecayState } from "@/services/ReEntryService";
 import { getActiveShowers } from "@/services/MeteorShowerService";
 import { getDailyChain, getChainProgress, advanceChain, resetChain } from "@/services/SkyAlignmentChainService";
 import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/services/SolarWindService";
@@ -59,7 +60,7 @@ const PREMIUM_MODE_DESCRIPTIONS: Partial<Record<TrackingMode, string>> = {
 
 const MODE_LABELS: Record<TrackingMode, string> = {
   fleet: "Fleet", "deep-space": "Deep Space", train: "Train", golden: "Golden",
-  debris: "Debris", meteor: "Meteor", chain: "Chain", static: "Static",
+  debris: "Debris", reentry: "Reentry", meteor: "Meteor", chain: "Chain", static: "Static",
 };
 
 const SIM_LOCATION: ObserverLocation = { latitudeDegrees: 40.7128, longitudeDegrees: -74.006, altitudeMeters: 10 };
@@ -84,7 +85,7 @@ export function OrbitalAlignmentScreen() {
   const [audioMuted, setAudioMuted] = useState(false);
   const [debrisFleet, setDebrisFleet] = useState<ReturnType<typeof computeDebrisFleet>>([]);
   const [debrisLockCounters, setDebrisLockCounters] = useState<Record<string, number>>({});
-  const [reentryFleet, setReentryFleet] = useState<ReturnType<typeof computeReentryFleet>>([]);
+  const [reentryFleet, setReentryFleet] = useState<ReturnType<typeof computeDecayFleet>>([]);
   const reentryAlertFiredRef = useRef<Set<string>>(new Set());
   const [chainProgress, setChainProgress] = useState(() => {
     const dummy = { id: "", name: "", description: "", targets: [], difficulty: "easy" as const, reward: 0 };
@@ -143,9 +144,8 @@ export function OrbitalAlignmentScreen() {
   useEffect(() => {
     if (mode !== "debris") return;
     const id = setInterval(() => {
-      simulateDebrisTick();
-      // Re-propagate live TLE or advance mock
-      await tickDebrisLive().catch(() => {});
+      // Re-propagate live TLE or advance mock (fire-and-forget; mock tick advances state)
+      tickDebrisLive().catch(() => {});
       tickDebrisMock();
       const fleet = computeDebrisFleet(location, pointing);
       tickLockTimers(fleet);
@@ -167,10 +167,10 @@ export function OrbitalAlignmentScreen() {
     initReEntryLive().catch(() => {});
     const id = setInterval(() => {
       simulateDecayTick();
-      const fleet = computeReentryFleet(location, pointing);
+      const fleet = computeDecayFleet(location, pointing);
       setReentryFleet(fleet);
       // Fire urgent haptic if critical/imminent corridor crosses local horizon
-      fleet.forEach(s => {
+      fleet.forEach((s: DecayState) => {
         if ((s.object.threatLevel === "critical" || s.object.threatLevel === "imminent") &&
             s.crossesLocalHorizon && !reentryAlertFiredRef.current.has(s.object.id)) {
           reentryAlertFiredRef.current.add(s.object.id);
@@ -188,17 +188,8 @@ export function OrbitalAlignmentScreen() {
     return () => { destroyIonosphericEngine().catch(() => {}); };
   }, []);
 
-  // Feed alignment score into audio engine whenever in static mode
-  useEffect(() => {
-    if (mode !== "static") {
-      getIonosphericEngine().setMuted(true);
-      return;
-    }
-    getIonosphericEngine().setMuted(audioMuted);
-    if (!audioMuted) {
-      getIonosphericEngine().update(activeScore, isLocked);
-    }
-  }, [mode, activeScore, isLocked, audioMuted]);
+  // (Ionospheric audio score-feed effect moved below — it reads activeScore/isLocked,
+  //  which are declared later; referencing them here hit the temporal dead zone.)
 
   // Chain init
   useEffect(() => {
@@ -277,6 +268,19 @@ export function OrbitalAlignmentScreen() {
 
   const statusColor = isLocked ? ChronauraColors.green : activeScore > 65 ? activeColor : ChronauraColors.silver;
   const statusText = isLocked ? "LOCKED" : activeScore > 65 ? "ALIGNING" : "SEARCHING";
+
+  // Feed alignment score into audio engine whenever in static mode.
+  // (Declared here, after activeScore/isLocked, so the deps array doesn't read them in the TDZ.)
+  useEffect(() => {
+    if (mode !== "static") {
+      getIonosphericEngine().setMuted(true);
+      return;
+    }
+    getIonosphericEngine().setMuted(audioMuted);
+    if (!audioMuted) {
+      getIonosphericEngine().update(activeScore, isLocked);
+    }
+  }, [mode, activeScore, isLocked, audioMuted]);
 
   // Haptics
   useEffect(() => {

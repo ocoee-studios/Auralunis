@@ -13,11 +13,11 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ocoee.chronaura",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "Chronaura uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view.",
         "NSLocationWhenInUseUsageDescription": "Chronaura uses your location to calculate the sky, moon, planets, and visible events above you.",
         "NSPhotoLibraryAddUsageDescription": "Chronaura saves sky captures and cosmic time-lapse exports only when you choose to save them.",
-        "NSMotionUsageDescription": "Chronaura uses motion sensors to align the sky lens with the direction your phone is pointing.",
-        "NSHealthShareUsageDescription": "Chronaura can optionally use Apple Watch heart-rate data to pulse ambient visuals during wind-down experiences."
+        "NSMotionUsageDescription": "Chronaura uses motion sensors to align the sky lens with the direction your phone is pointing."
       }
     },
     "android": {
@@ -26,7 +26,11 @@
         "CAMERA",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
-        "BODY_SENSORS"
+        "android.permission.CAMERA",
+        "android.permission.ACCESS_COARSE_LOCATION",
+        "android.permission.ACCESS_FINE_LOCATION",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
       ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/logo/chronaura-adaptive-foreground.png",
@@ -43,7 +47,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Chronaura uses your location to calculate the sky, moon, planets, and visible events above you."
+          "locationWhenInUsePermission": "Chronaura uses your location to calculate the sky, moon, planets, and visible events above you."
         }
       ],
       [
@@ -75,8 +79,15 @@
         "midnight",
         "gold",
         "minimal",
+        "celestial",
+        "midnight",
+        "gold",
+        "minimal",
         "celestial"
-      ]
+      ],
+      "eas": {
+        "projectId": "2042e628-fd67-4c3e-a540-8ad57ebde2df"
+      }
     }
   }
 }
