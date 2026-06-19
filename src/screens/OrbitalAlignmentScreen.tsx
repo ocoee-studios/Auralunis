@@ -1,16 +1,19 @@
-// OrbitalAlignmentScreen.tsx
-// Unified tracking screen with four modes:
-//   "fleet"      — Atmosphere Explorer (LEO satellite fleet)
-//   "deep-space" — Planetary Deep Space Mode (Solar System)
-//   "train"      — Starlink Train Tracker (Atmospheric Wake)
-//   "golden"     — Chrono-Light Golden Hour Shadow Sniper
-//
-// Every 100% lock in fleet/deep-space/train is recorded to Cosmic Drift.
+// OrbitalAlignmentScreen.tsx — Chronaura Telemetry Hub
+// Eight tracking modes unified under one screen:
+//   fleet       Atmosphere Explorer (LEO satellites)
+//   deep-space  Planetary ephemeris (Solar System)
+//   train       Starlink Train Tracker
+//   golden      Chrono-Light Golden Hour
+//   debris      Debris Clean Mission Loop
+//   meteor      Meteor Shower Sonar
+//   chain       Sky-Crawl Alignment Chain
+//   static      Ionospheric Static audio display
+// + Solar Wind Aura header
+// + Cosmic Drift galaxy diary
+// + Horizon Scope on all radar modes
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import {
-  View, Text, StyleSheet, ScrollView, TouchableOpacity,
-} from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withSequence,
   withTiming, withSpring, Easing,
@@ -21,70 +24,66 @@ import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLo
 import type { CameraPointing } from "@/features/sky-lens/ar/SkyLensProjection";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
-// Fleet
+// Mode services
 import { simulateTick, computeFleetState, type FleetState } from "@/services/AtmosphereExplorerService";
 import { ATMOSPHERE_CATALOG } from "@/data/AtmosphereCatalog";
 import { SatelliteDataCard } from "@/components/SatelliteDataCard";
 import { SpaceRadarGrid, type RadarBlip } from "@/components/SpaceRadarGrid";
-
-// Haptics
 import { HapticController } from "@/utils/hapticController";
-
-// Deep Space
-import { computePlanetaryTargets, planetAlignmentDiff, PLANETS } from "@/utils/planetaryEphemeris";
-
-// Starlink Train
-import { getActiveTrain, tickTrainSimulation, trainToRadarBlips, trainHapticInterval } from "@/services/StarlinkTrainService";
 import { WatchHaptics } from "@/modules/WatchHaptics";
-
-// Chrono-Light
+import { computePlanetaryTargets, planetAlignmentDiff } from "@/utils/planetaryEphemeris";
+import { getActiveTrain, tickTrainSimulation, trainToRadarBlips, trainHapticInterval } from "@/services/StarlinkTrainService";
 import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
-
-// Cosmic Drift
 import { recordLock } from "@/services/CosmicDriftService";
 import { CosmicDriftGalaxy } from "@/components/CosmicDriftGalaxy";
-
-// Theme
+import { simulateDebrisTick, computeDebrisFleet, updateDebrisLocks, catalogueDebris, getTotalCatalogued } from "@/services/SpaceDebrisService";
+import { getActiveShowers } from "@/services/MeteorShowerService";
+import { getDailyChain, getChainProgress, advanceChain, resetChain } from "@/services/SkyAlignmentChainService";
+import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/services/SolarWindService";
+import { computeStaticParams, elevationAudioLabel, STATIC_COLORS } from "@/services/IonosphericStaticService";
 import { ChronauraColors } from "@/theme/tokens";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-type TrackingMode = "fleet" | "deep-space" | "train" | "golden";
+type TrackingMode = "fleet" | "deep-space" | "train" | "golden" | "debris" | "meteor" | "chain" | "static";
 
 const MODE_LABELS: Record<TrackingMode, string> = {
-  "fleet":       "Fleet",
-  "deep-space":  "Deep Space",
-  "train":       "Train",
-  "golden":      "Golden Hour",
+  fleet: "Fleet", "deep-space": "Deep Space", train: "Train", golden: "Golden",
+  debris: "Debris", meteor: "Meteor", chain: "Chain", static: "Static",
 };
 
-// ─── Simulation ───────────────────────────────────────────────────────────────
 const SIM_LOCATION: ObserverLocation = { latitudeDegrees: 40.7128, longitudeDegrees: -74.006, altitudeMeters: 10 };
 function buildSimPointing(tick: number): CameraPointing {
   return { azimuthDegrees: (tick * 1.5) % 360, altitudeDegrees: 30 + Math.sin((tick * Math.PI) / 120) * 20, rollDegrees: 0 };
 }
 
-// ─── Component ────────────────────────────────────────────────────────────────
 export function OrbitalAlignmentScreen() {
   const { pointing: livePointing, available: sensorAvailable } = useDevicePointing(80);
   const { location: liveLocation, status: gpsStatus } = useObserverLocation();
 
   const [simMode, setSimMode] = useState(false);
   const [simTick, setSimTick] = useState(0);
-  const [trackingMode, setTrackingMode] = useState<TrackingMode>("fleet");
+  const [mode, setMode] = useState<TrackingMode>("fleet");
   const [fleetState, setFleetState] = useState<FleetState>({ satellites: [], activeTarget: null });
   const [selectedSatId, setSelectedSatId] = useState<string | null>(null);
   const [showDrift, setShowDrift] = useState(false);
   const [driftRefresh, setDriftRefresh] = useState(0);
+  const [weather, setWeather] = useState<SpaceWeatherSnapshot | null>(null);
+  const [debrisFleet, setDebrisFleet] = useState<ReturnType<typeof computeDebrisFleet>>([]);
+  const [debrisLockCounters, setDebrisLockCounters] = useState<Record<string, number>>({});
+  const [chainProgress, setChainProgress] = useState(() => {
+    const dummy = { id: "", name: "", description: "", targets: [], difficulty: "easy" as const, reward: 0 };
+    return getChainProgress(dummy);
+  });
 
-  const hapticController = useRef(new HapticController());
+  const hapticCtrl = useRef(new HapticController());
   const trainHapticRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const debrisLockTimers = useRef<Record<string, number>>({});
   const wasLockedRef = useRef(false);
   const pulseOpacity = useSharedValue(1);
 
   const location = simMode ? SIM_LOCATION : liveLocation;
   const pointing = simMode ? buildSimPointing(simTick) : livePointing;
 
-  // Sim sweep tick
+  // Sim sweep
   useEffect(() => {
     if (!simMode) return;
     const id = setInterval(() => setSimTick(t => t + 1), 200);
@@ -93,205 +92,189 @@ export function OrbitalAlignmentScreen() {
 
   // Fleet tick
   useEffect(() => {
-    if (trackingMode !== "fleet") return;
-    const id = setInterval(() => {
-      simulateTick();
-      setFleetState(computeFleetState(location, pointing));
-    }, 1000);
+    if (mode !== "fleet") return;
+    const id = setInterval(() => { simulateTick(); setFleetState(computeFleetState(location, pointing)); }, 1000);
     return () => clearInterval(id);
-  }, [trackingMode, location, pointing]);
+  }, [mode, location, pointing]);
 
   useEffect(() => {
-    if (trackingMode === "fleet") setFleetState(computeFleetState(location, pointing));
-  }, [trackingMode, pointing.azimuthDegrees, pointing.altitudeDegrees]);
+    if (mode === "fleet") setFleetState(computeFleetState(location, pointing));
+  }, [mode, pointing.azimuthDegrees, pointing.altitudeDegrees]);
 
   // Train tick
   useEffect(() => {
-    if (trackingMode !== "train") return;
+    if (mode !== "train") return;
     const id = setInterval(() => tickTrainSimulation(), 1000);
     return () => clearInterval(id);
-  }, [trackingMode]);
+  }, [mode]);
+
+  // Debris tick + lock timer
+  useEffect(() => {
+    if (mode !== "debris") return;
+    const id = setInterval(() => {
+      simulateDebrisTick();
+      const fleet = computeDebrisFleet(location, pointing);
+      updateDebrisLocks(fleet);
+      // Check 5-second catalogues
+      fleet.forEach(s => {
+        if (s.alignment.isLocked && !s.catalogued) {
+          const prev = debrisLockTimers.current[s.object.id] ?? 0;
+          debrisLockTimers.current[s.object.id] = prev + 1;
+          if (prev + 1 >= 5) catalogueDebris(s.object.id);
+        } else {
+          debrisLockTimers.current[s.object.id] = 0;
+        }
+      });
+      setDebrisFleet(fleet);
+      setDebrisLockCounters({ ...debrisLockTimers.current });
+    }, 1000);
+    return () => clearInterval(id);
+  }, [mode, location, pointing]);
+
+  // Solar wind fetch
+  useEffect(() => {
+    fetchSpaceWeather().then(setWeather).catch(() => {});
+  }, []);
+
+  // Chain init
+  useEffect(() => {
+    if (mode !== "chain") return;
+    const chain = getDailyChain(location);
+    setChainProgress(getChainProgress(chain));
+  }, [mode, location]);
 
   // Cleanup
   useEffect(() => () => {
-    hapticController.current.destroy();
+    hapticCtrl.current.destroy();
     if (trainHapticRef.current) clearInterval(trainHapticRef.current);
   }, []);
 
-  // ── Derived state per mode ──────────────────────────────────────────────────
-  const planetaryTargets = useMemo(() => {
-    if (trackingMode !== "deep-space") return [];
-    return computePlanetaryTargets(location);
-  }, [trackingMode, location]);
-
-  const planetaryBlips: RadarBlip[] = useMemo(() => {
-    if (trackingMode !== "deep-space") return [];
-    return planetaryTargets.map(pt => {
-      const diff = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, pt.azimuth, pt.altitude);
-      return {
-        id: pt.id,
-        azimuthDiff: diff.azimuthDiff,
-        elevationDiff: diff.elevationDiff,
-        color: pt.planet.radarColor,
-        isActive: false,
-        label: pt.planet.name,
-      };
-    });
-  }, [trackingMode, planetaryTargets, pointing.azimuthDegrees, pointing.altitudeDegrees]);
+  // ── Derived values ──────────────────────────────────────────────────────────
+  const planetaryTargets = useMemo(() => mode === "deep-space" ? computePlanetaryTargets(location) : [], [mode, location]);
 
   const activePlanet = useMemo(() => {
-    if (trackingMode !== "deep-space" || planetaryTargets.length === 0) return null;
+    if (mode !== "deep-space" || !planetaryTargets.length) return null;
     return planetaryTargets.reduce((best, pt) => {
-      const diff = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, pt.azimuth, pt.altitude);
-      const bestDiff = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, best.azimuth, best.altitude);
-      return diff.totalAngularError < bestDiff.totalAngularError ? pt : best;
+      const d = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, pt.azimuth, pt.altitude);
+      const bd = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, best.azimuth, best.altitude);
+      return d.totalAngularError < bd.totalAngularError ? pt : best;
     });
-  }, [trackingMode, planetaryTargets, pointing.azimuthDegrees, pointing.altitudeDegrees]);
-
-  const planetaryBlipsWithActive: RadarBlip[] = useMemo(() => {
-    if (!activePlanet) return planetaryBlips;
-    return planetaryBlips.map(b => ({ ...b, isActive: b.id === activePlanet.id }));
-  }, [planetaryBlips, activePlanet]);
+  }, [mode, planetaryTargets, pointing.azimuthDegrees, pointing.altitudeDegrees]);
 
   const trainBlips = useMemo(() => {
-    if (trackingMode !== "train") return [];
-    const train = getActiveTrain();
-    return trainToRadarBlips(train, location, pointing);
-  }, [trackingMode, pointing.azimuthDegrees, pointing.altitudeDegrees, simTick]);
+    if (mode !== "train") return [];
+    return trainToRadarBlips(getActiveTrain(), location, pointing);
+  }, [mode, pointing.azimuthDegrees, pointing.altitudeDegrees, simTick]);
 
-  const trainBlipsAsRadar: RadarBlip[] = useMemo(() => trainBlips.map(b => ({
-    id: b.id,
-    azimuthDiff: b.azimuthDiff,
-    elevationDiff: b.elevationDiff,
-    color: b.color,
-    isActive: b.isActive,
-    label: b.isLead ? "Lead" : "",
-  })), [trainBlips]);
+  const sunPos = useMemo(() => mode === "golden" ? computeSunPosition(location) : null, [mode, location, simTick]);
+  const goldenEvents = useMemo(() => mode === "golden" ? findNextGoldenEvents(location) : [], [mode, location]);
+  const activeShowers = useMemo(() => {
+    if (mode !== "meteor") return [];
+    return getActiveShowers(location, pointing.azimuthDegrees, pointing.altitudeDegrees);
+  }, [mode, location, pointing.azimuthDegrees, pointing.altitudeDegrees]);
 
-  const sunPosition = useMemo(() => {
-    if (trackingMode !== "golden") return null;
-    return computeSunPosition(location);
-  }, [trackingMode, location, simTick]);
+  const staticParams = useMemo(() => {
+    if (mode !== "static") return null;
+    const score = fleetState.activeTarget?.alignment.alignmentScore ?? 0;
+    const locked = fleetState.activeTarget?.alignment.isLocked ?? false;
+    return computeStaticParams(score, locked);
+  }, [mode, fleetState]);
 
-  const goldenEvents = useMemo(() => {
-    if (trackingMode !== "golden") return [];
-    return findNextGoldenEvents(location);
-  }, [trackingMode, location]);
-
-  // ── Active target for score/haptics/lock ────────────────────────────────────
+  // Active score / color / name for the badge + haptics
   const { activeScore, isLocked, activeColor, activeName, activeAzimuth, activeElevation, activeAltKm } = useMemo(() => {
-    if (trackingMode === "fleet" && fleetState.activeTarget) {
+    if (mode === "fleet" && fleetState.activeTarget) {
       const t = fleetState.activeTarget;
-      return {
-        activeScore: t.alignment.alignmentScore,
-        isLocked: t.alignment.isLocked,
-        activeColor: t.satellite.radarColor,
-        activeName: t.satellite.name,
-        activeAzimuth: t.alignment.targetAzimuth,
-        activeElevation: t.alignment.targetElevation,
-        activeAltKm: t.satellite.altitudeKm,
-      };
+      return { activeScore: t.alignment.alignmentScore, isLocked: t.alignment.isLocked, activeColor: t.satellite.radarColor, activeName: t.satellite.name, activeAzimuth: t.alignment.targetAzimuth, activeElevation: t.alignment.targetElevation, activeAltKm: t.satellite.altitudeKm };
     }
-    if (trackingMode === "deep-space" && activePlanet) {
-      const diff = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, activePlanet.azimuth, activePlanet.altitude);
-      return {
-        activeScore: diff.alignmentScore,
-        isLocked: diff.isLocked,
-        activeColor: activePlanet.planet.radarColor,
-        activeName: activePlanet.planet.name,
-        activeAzimuth: Math.round(activePlanet.azimuth),
-        activeElevation: Math.round(activePlanet.altitude * 10) / 10,
-        activeAltKm: Math.round(activePlanet.distAU * 149_597_870),
-      };
+    if (mode === "deep-space" && activePlanet) {
+      const d = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, activePlanet.azimuth, activePlanet.altitude);
+      return { activeScore: d.alignmentScore, isLocked: d.isLocked, activeColor: activePlanet.planet.radarColor, activeName: activePlanet.planet.name, activeAzimuth: Math.round(activePlanet.azimuth), activeElevation: Math.round(activePlanet.altitude * 10) / 10, activeAltKm: Math.round(activePlanet.distAU * 149597870) };
     }
-    if (trackingMode === "train") {
-      const active = trainBlips.find(b => b.isActive);
-      const score = active?.alignmentScore ?? 0;
-      return {
-        activeScore: score,
-        isLocked: (active?.totalAngularError ?? 999) < 3.5,
-        activeColor: "#A78BFA",
-        activeName: "Starlink Group 12",
-        activeAzimuth: 0,
-        activeElevation: 0,
-        activeAltKm: 340,
-      };
+    if (mode === "train") {
+      const act = trainBlips.find(b => b.isActive);
+      return { activeScore: act?.alignmentScore ?? 0, isLocked: (act?.totalAngularError ?? 999) < 3.5, activeColor: "#A78BFA", activeName: "Starlink Group 12", activeAzimuth: 0, activeElevation: 0, activeAltKm: 340 };
+    }
+    if (mode === "debris" && debrisFleet.length) {
+      const t = debrisFleet[0];
+      return { activeScore: t.alignment.alignmentScore, isLocked: t.alignment.isLocked, activeColor: "#FF3B30", activeName: t.object.name, activeAzimuth: t.alignment.targetAzimuth, activeElevation: t.alignment.targetElevation, activeAltKm: t.object.altitudeKm };
+    }
+    if (mode === "meteor" && activeShowers.length) {
+      const s = activeShowers[0];
+      const score = Math.max(0, Math.round(100 * (1 - s.angularError / 90)));
+      return { activeScore: score, isLocked: s.angularError < 3.5, activeColor: s.shower.radarColor, activeName: s.shower.name, activeAzimuth: Math.round(s.azimuth), activeElevation: Math.round(s.altitude * 10) / 10, activeAltKm: 80 };
     }
     return { activeScore: 0, isLocked: false, activeColor: ChronauraColors.gold, activeName: "—", activeAzimuth: 0, activeElevation: 0, activeAltKm: 0 };
-  }, [trackingMode, fleetState, activePlanet, trainBlips, pointing]);
+  }, [mode, fleetState, activePlanet, trainBlips, debrisFleet, activeShowers, pointing]);
 
   const statusColor = isLocked ? ChronauraColors.green : activeScore > 65 ? activeColor : ChronauraColors.silver;
   const statusText = isLocked ? "LOCKED" : activeScore > 65 ? "ALIGNING" : "SEARCHING";
 
-  // ── Haptics ─────────────────────────────────────────────────────────────────
+  // Haptics
   useEffect(() => {
-    if (trackingMode === "fleet" || trackingMode === "deep-space") {
-      hapticController.current.update(activeScore, isLocked);
+    if (mode === "fleet" || mode === "deep-space" || mode === "debris" || mode === "meteor") {
+      hapticCtrl.current.update(activeScore, isLocked);
     }
-    if (trackingMode === "train") {
-      const active = trainBlips.find(b => b.isActive);
-      const interval = trainHapticInterval(active?.totalAngularError ?? 999);
+    if (mode === "train") {
+      const act = trainBlips.find(b => b.isActive);
+      const interval = trainHapticInterval(act?.totalAngularError ?? 999);
       if (trainHapticRef.current) clearInterval(trainHapticRef.current);
-      if (interval) {
-        trainHapticRef.current = setInterval(() => WatchHaptics.triggerCompassTick(), interval);
-      }
+      if (interval) trainHapticRef.current = setInterval(() => WatchHaptics.triggerCompassTick(), interval);
     }
-  }, [activeScore, isLocked, trackingMode, trainBlips]);
+    if (mode === "meteor" && activeShowers.length) {
+      const interval = activeShowers[0].sonarInterval;
+      if (trainHapticRef.current) clearInterval(trainHapticRef.current);
+      if (interval) trainHapticRef.current = setInterval(() => WatchHaptics.triggerCompassTick(), interval);
+    }
+  }, [activeScore, isLocked, mode, trainBlips, activeShowers]);
 
-  // ── Cosmic Drift lock recording ──────────────────────────────────────────────
+  // Cosmic Drift lock recording
   useEffect(() => {
-    if (isLocked && !wasLockedRef.current && (trackingMode === "fleet" || trackingMode === "deep-space" || trackingMode === "train")) {
-      const type = trackingMode === "fleet" ? "satellite" : trackingMode === "deep-space" ? "planet" : "starlink-train";
-      recordLock({
-        targetId: trackingMode === "fleet" ? (fleetState.activeTarget?.satellite.id ?? "unknown") : activeName,
-        targetName: activeName,
-        targetType: type,
-        targetColor: activeColor,
-        observerLat: location.latitudeDegrees,
-        observerLon: location.longitudeDegrees,
-        azimuth: activeAzimuth,
-        elevation: activeElevation,
-        altitudeKm: activeAltKm,
-      }).then(() => setDriftRefresh(n => n + 1)).catch(() => {});
+    if (isLocked && !wasLockedRef.current && ["fleet","deep-space","train","debris"].includes(mode)) {
+      const type = mode === "fleet" ? "satellite" : mode === "deep-space" ? "planet" : "satellite";
+      recordLock({ targetId: activeName, targetName: activeName, targetType: type, targetColor: activeColor, observerLat: location.latitudeDegrees, observerLon: location.longitudeDegrees, azimuth: activeAzimuth, elevation: activeElevation, altitudeKm: activeAltKm })
+        .then(() => setDriftRefresh(n => n + 1)).catch(() => {});
     }
     wasLockedRef.current = isLocked;
-  }, [isLocked, trackingMode]);
+  }, [isLocked, mode]);
 
-  // ── Pulse animation ──────────────────────────────────────────────────────────
+  // Chain lock advance
+  useEffect(() => {
+    if (mode === "chain" && isLocked && !wasLockedRef.current) {
+      advanceChain();
+      setChainProgress(p => ({ ...p, currentIndex: Math.min(p.currentIndex + 1, p.chain.targets.length) }));
+    }
+  }, [isLocked, mode]);
+
+  // Pulse
   useEffect(() => {
     if (isLocked) { pulseOpacity.value = withSpring(1); return; }
-    pulseOpacity.value = withRepeat(
-      withSequence(
-        withTiming(0.4, { duration: 650, easing: Easing.inOut(Easing.ease) }),
-        withTiming(1.0, { duration: 650, easing: Easing.inOut(Easing.ease) })
-      ), -1, false
-    );
+    pulseOpacity.value = withRepeat(withSequence(withTiming(0.4, { duration: 650, easing: Easing.inOut(Easing.ease) }), withTiming(1.0, { duration: 650, easing: Easing.inOut(Easing.ease) })), -1, false);
   }, [isLocked]);
-
   const pulseStyle = useAnimatedStyle(() => ({ opacity: pulseOpacity.value }));
-  const isReady = simMode || (gpsStatus !== "loading" && sensorAvailable);
 
-  // ── Active blips for radar ───────────────────────────────────────────────────
+  // Active blips
   const activeBlips: RadarBlip[] = useMemo(() => {
-    if (trackingMode === "fleet") {
-      return fleetState.satellites.map(s => ({
-        id: s.satellite.id,
-        azimuthDiff: s.alignment.azimuthDiff,
-        elevationDiff: s.alignment.elevationDiff,
-        color: s.satellite.radarColor,
-        isActive: s.satellite.id === fleetState.activeTarget?.satellite.id,
-        label: s.satellite.shortName,
-      }));
+    if (mode === "fleet") return fleetState.satellites.map(s => ({ id: s.satellite.id, azimuthDiff: s.alignment.azimuthDiff, elevationDiff: s.alignment.elevationDiff, color: s.satellite.radarColor, isActive: s.satellite.id === fleetState.activeTarget?.satellite.id, label: s.satellite.shortName }));
+    if (mode === "deep-space") return planetaryTargets.map(pt => { const d = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, pt.azimuth, pt.altitude); return { id: pt.id, azimuthDiff: d.azimuthDiff, elevationDiff: d.elevationDiff, color: pt.planet.radarColor, isActive: pt.id === activePlanet?.id, label: pt.planet.name }; });
+    if (mode === "train") return trainBlips.map(b => ({ id: b.id, azimuthDiff: b.azimuthDiff, elevationDiff: b.elevationDiff, color: b.color, isActive: b.isActive, label: "", opacity: b.opacity }));
+    if (mode === "debris") return debrisFleet.map(s => ({ id: s.object.id, azimuthDiff: s.alignment.azimuthDiff, elevationDiff: s.alignment.elevationDiff, color: "#FF3B30", isActive: s.object.id === debrisFleet[0]?.object.id, label: s.object.name, isDebris: true }));
+    if (mode === "meteor") return activeShowers.map(s => { const azDiff = (((s.azimuth - pointing.azimuthDegrees + 180) % 360) + 360) % 360 - 180; const elDiff = s.altitude - pointing.altitudeDegrees; return { id: s.shower.id, azimuthDiff: azDiff, elevationDiff: elDiff, color: s.shower.radarColor, isActive: s.shower.id === activeShowers[0]?.shower.id, label: s.shower.name }; });
+    if (mode === "chain" && chainProgress.currentIndex < chainProgress.chain.targets.length) {
+      const t = chainProgress.chain.targets[chainProgress.currentIndex];
+      const azDiff = (((t.azimuth - pointing.azimuthDegrees + 180) % 360) + 360) % 360 - 180;
+      const elDiff = t.altitude - pointing.altitudeDegrees;
+      return [{ id: t.id, azimuthDiff: azDiff, elevationDiff: elDiff, color: t.color, isActive: true, label: t.name }];
     }
-    if (trackingMode === "deep-space") return planetaryBlipsWithActive;
-    if (trackingMode === "train") return trainBlipsAsRadar;
     return [];
-  }, [trackingMode, fleetState, planetaryBlipsWithActive, trainBlipsAsRadar]);
+  }, [mode, fleetState, planetaryTargets, activePlanet, trainBlips, debrisFleet, activeShowers, chainProgress, pointing]);
 
-  // ── Loading screen ───────────────────────────────────────────────────────────
+  const isReady = simMode || (gpsStatus !== "loading" && sensorAvailable);
+  const auraStyle = weather ? AURA_VISUALS[weather.auraIntensity] : AURA_VISUALS.calm;
+
+  // ── Loading ──────────────────────────────────────────────────────────────────
   if (!isReady) {
     return (
-      <View style={[styles.screen, styles.loadingOuter]}>
+      <View style={[styles.screen, styles.center]}>
         <Text style={styles.title}>CHRONAURA TELEMETRY</Text>
         <View style={styles.loadingCard}>
           <Text style={styles.loadingTitle}>Acquiring telemetry…</Text>
@@ -300,18 +283,30 @@ export function OrbitalAlignmentScreen() {
         </View>
         <View style={styles.simCard}>
           <Text style={styles.simCardTitle}>Testing indoors?</Text>
-          <TouchableOpacity style={styles.simButton} onPress={() => setSimMode(true)}>
-            <Text style={styles.simButtonText}>Enable Simulation Mode</Text>
+          <TouchableOpacity style={styles.simBtn} onPress={() => setSimMode(true)}>
+            <Text style={styles.simBtnText}>Enable Simulation Mode</Text>
           </TouchableOpacity>
         </View>
       </View>
     );
   }
 
-  // ── Main UI ──────────────────────────────────────────────────────────────────
+  // ── Main ─────────────────────────────────────────────────────────────────────
   return (
     <View style={styles.screen}>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
+
+        {/* Solar Wind Aura header */}
+        {weather && (
+          <View style={[styles.auraBar, { borderColor: auraStyle.primaryColor + "55" }]}>
+            <View style={[styles.auraDot, { backgroundColor: auraStyle.primaryColor }]} />
+            <View style={{ flex: 1 }}>
+              <Text style={[styles.auraTitle, { color: auraStyle.primaryColor }]}>SOLAR WIND · Kp {weather.kpIndex.toFixed(1)} · {weather.auraIntensity.toUpperCase()}</Text>
+              <Text style={styles.auraDesc}>{weather.summary}</Text>
+            </View>
+          </View>
+        )}
+
         <Text style={styles.title}>CHRONAURA TELEMETRY</Text>
 
         {simMode && (
@@ -320,51 +315,98 @@ export function OrbitalAlignmentScreen() {
           </TouchableOpacity>
         )}
 
-        {/* Mode switcher */}
-        <View style={styles.modeRow}>
-          {(["fleet", "deep-space", "train", "golden"] as TrackingMode[]).map(m => (
-            <TouchableOpacity
-              key={m}
-              style={[styles.modeBtn, trackingMode === m && { borderColor: ChronauraColors.gold, backgroundColor: "rgba(212,175,55,0.12)" }]}
-              onPress={() => setTrackingMode(m)}
-            >
-              <Text style={[styles.modeBtnText, trackingMode === m && { color: ChronauraColors.gold }]}>{MODE_LABELS[m]}</Text>
+        {/* Mode switcher — 2 rows of 4 */}
+        <View style={styles.modeGrid}>
+          {(Object.keys(MODE_LABELS) as TrackingMode[]).map(m => (
+            <TouchableOpacity key={m} style={[styles.modeBtn, mode === m && { borderColor: ChronauraColors.gold, backgroundColor: "rgba(212,175,55,0.12)" }]} onPress={() => setMode(m)}>
+              <Text style={[styles.modeBtnText, mode === m && { color: ChronauraColors.gold }]}>{MODE_LABELS[m]}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* ── Golden Hour mode ── */}
-        {trackingMode === "golden" && sunPosition && (
+        {/* ── Golden Hour ── */}
+        {mode === "golden" && sunPos && (
           <>
             <View style={[styles.card, { borderColor: "#EF9F27" + "55" }]}>
-              <Text style={styles.cardTitle}>Sun Position</Text>
-              <View style={styles.row}>
-                <InfoPill label="Azimuth" value={`${Math.round(sunPosition.azimuth)}°`} />
-                <InfoPill label="Elevation" value={`${sunPosition.elevation.toFixed(1)}°`} />
-                <InfoPill label="Phase" value={sunPosition.phase.replace("-", " ")} />
+              <Text style={styles.cardLabel}>Sun Position</Text>
+              <View style={styles.pills}>
+                <InfoPill label="Az" value={`${Math.round(sunPos.azimuth)}°`} />
+                <InfoPill label="El" value={`${sunPos.elevation.toFixed(1)}°`} />
+                <InfoPill label="Phase" value={sunPos.phase.replace("-", " ")} />
               </View>
-              <View style={[styles.phaseBar, { marginTop: 14 }]}>
-                <View style={[styles.phaseFill, { width: `${Math.max(0, Math.min(100, (sunPosition.elevation + 6) / 12 * 100))}%` as `${number}%`, backgroundColor: sunPosition.isGoldenHour ? "#EF9F27" : sunPosition.isMagicHour ? "#D4AF37" : "#4ADE80" }]} />
+              <View style={[styles.phaseBar, { marginTop: 12 }]}>
+                <View style={[styles.phaseFill, { width: `${Math.max(0, Math.min(100, (sunPos.elevation + 6) / 12 * 100))}%` as `${number}%`, backgroundColor: sunPos.isGoldenHour ? "#EF9F27" : "#D4AF37" }]} />
               </View>
             </View>
-
             {goldenEvents.map(evt => (
               <View key={evt.type} style={[styles.card, { borderColor: "#EF9F27" + "44" }]}>
-                <Text style={styles.cardTitle}>{evt.type === "dawn" ? "Golden Dawn" : "Golden Dusk"}</Text>
-                <View style={styles.row}>
+                <Text style={styles.cardLabel}>{evt.type === "dawn" ? "Golden Dawn" : "Golden Dusk"}</Text>
+                <View style={styles.pills}>
                   <InfoPill label="Countdown" value={formatCountdown(evt.minutesUntil)} />
                   <InfoPill label="Sun Az" value={`${Math.round(evt.azimuth)}°`} />
                 </View>
-                <Text style={[styles.fallbackNote, { marginTop: 8 }]}>
-                  {sunPosition.isGoldenHour ? "Golden hour active now — light is perfect." : `Point your camera at azimuth ${Math.round(evt.azimuth)}°.`}
-                </Text>
+                {sunPos.isGoldenHour && <Text style={styles.note}>Golden hour active now — light is perfect.</Text>}
               </View>
             ))}
           </>
         )}
 
-        {/* ── Radar (fleet / deep-space / train) ── */}
-        {trackingMode !== "golden" && (
+        {/* ── Ionospheric Static ── */}
+        {mode === "static" && staticParams && (
+          <View style={[styles.card, { borderColor: STATIC_COLORS[staticParams.phase] + "55" }]}>
+            <Text style={styles.cardLabel}>Ionospheric Static</Text>
+            <View style={styles.pills}>
+              <InfoPill label="Phase" value={staticParams.phase.replace("-"," ")} />
+              <InfoPill label="Noise" value={`${staticParams.noiseFrequency} Hz`} />
+              {staticParams.chimeFrequency > 0 && <InfoPill label="Chime" value={`${staticParams.chimeFrequency} Hz`} />}
+            </View>
+            <Text style={[styles.note, { color: STATIC_COLORS[staticParams.phase], marginTop: 8 }]}>{staticParams.description}</Text>
+            <Text style={[styles.note, { marginTop: 6 }]}>{elevationAudioLabel(pointing.altitudeDegrees)}</Text>
+          </View>
+        )}
+
+        {/* ── Sky Chain ── */}
+        {mode === "chain" && (
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>Daily Chain · {chainProgress.chain.name}</Text>
+            <Text style={[styles.cardVal, { fontSize: 11, marginBottom: 10 }]}>{chainProgress.chain.description}</Text>
+            {chainProgress.chain.targets.map((t, i) => (
+              <View key={t.id} style={styles.chainRow}>
+                <View style={[styles.chainDot, { backgroundColor: i < chainProgress.currentIndex ? ChronauraColors.green : i === chainProgress.currentIndex ? t.color : ChronauraColors.elevated }]} />
+                <Text style={[styles.chainName, { color: i < chainProgress.currentIndex ? ChronauraColors.green : i === chainProgress.currentIndex ? t.color : ChronauraColors.faint }]}>{t.name}</Text>
+                {i < chainProgress.currentIndex && <Text style={{ color: ChronauraColors.green, fontSize: 12 }}>✓</Text>}
+                {i === chainProgress.currentIndex && <Text style={{ color: t.color, fontSize: 10, fontWeight: "800" }}>CURRENT</Text>}
+              </View>
+            ))}
+            {chainProgress.completedAt && <Text style={[styles.note, { color: ChronauraColors.green, marginTop: 8 }]}>Chain complete! +{chainProgress.chain.reward} XP</Text>}
+            {!chainProgress.completedAt && chainProgress.currentIndex < chainProgress.chain.targets.length && (
+              <Text style={[styles.note, { marginTop: 8 }]}>Lock onto {chainProgress.chain.targets[chainProgress.currentIndex]?.name} to advance</Text>
+            )}
+          </View>
+        )}
+
+        {/* ── Meteor Shower ── */}
+        {mode === "meteor" && activeShowers.length === 0 && (
+          <View style={styles.card}>
+            <Text style={styles.cardLabel}>Meteor Shower Sonar</Text>
+            <Text style={styles.note}>No major showers active today. Next: check December for the Geminids.</Text>
+          </View>
+        )}
+
+        {/* ── Debris stats ── */}
+        {mode === "debris" && (
+          <View style={[styles.card, { borderColor: "#FF3B30" + "44" }]}>
+            <Text style={styles.cardLabel}>Debris Mission</Text>
+            <View style={styles.pills}>
+              <InfoPill label="Catalogued" value={`${getTotalCatalogued()} / ${debrisFleet.length}`} />
+              <InfoPill label="Active Lock" value={debrisFleet[0] ? `${debrisLockCounters[debrisFleet[0].object.id] ?? 0}s / 5s` : "—"} />
+            </View>
+            <Text style={[styles.note, { marginTop: 8 }]}>Hold 100% lock for 5 seconds to catalogue debris.</Text>
+          </View>
+        )}
+
+        {/* ── Radar (modes with visual tracking) ── */}
+        {mode !== "golden" && mode !== "static" && (
           <>
             <Animated.View style={pulseStyle}>
               <View style={[styles.badge, { borderColor: statusColor }]}>
@@ -376,73 +418,94 @@ export function OrbitalAlignmentScreen() {
               blips={activeBlips}
               alignmentScore={activeScore}
               isLocked={isLocked}
-              onBlipPress={trackingMode === "fleet" ? setSelectedSatId : undefined}
+              onBlipPress={mode === "fleet" ? setSelectedSatId : undefined}
+              devicePitch={pointing.altitudeDegrees}
+              showHorizon={true}
             />
 
-            {trackingMode === "train" && (
-              <Text style={styles.tapHint}>Starlink Group 12 · {getActiveTrain().nodeCount} nodes · chain heading {Math.round(pointing.azimuthDegrees)}°</Text>
-            )}
-            {trackingMode !== "train" && <Text style={styles.tapHint}>Tap a blip to identify</Text>}
+            <Text style={styles.tapHint}>
+              {mode === "fleet" ? "Tap a blip to identify the satellite" :
+               mode === "debris" ? "Flashing blips = space debris · lock for 5s to catalogue" :
+               mode === "meteor" && activeShowers.length > 0 ? `${activeShowers[0].shower.name} radiant · sonar active` :
+               mode === "chain" ? `Target: ${chainProgress.chain.targets[chainProgress.currentIndex]?.name ?? "chain complete"}` :
+               "Tap a blip to identify"}
+            </Text>
 
             <View style={styles.scoreRow}>
-              <Text style={[styles.scoreValue, { color: statusColor }]}>{activeScore}%</Text>
+              <Text style={[styles.scoreVal, { color: statusColor }]}>{activeScore}%</Text>
               <View style={styles.scoreTrack}>
                 <View style={[styles.scoreFill, { width: `${activeScore}%` as `${number}%`, backgroundColor: statusColor }]} />
               </View>
             </View>
 
             {/* Active target card */}
-            <View style={[styles.card, { borderColor: activeColor + "55" }]}>
-              <Text style={styles.cardTitle}>Active Target</Text>
-              <View style={styles.activeHeader}>
-                <View style={[styles.colorDot, { backgroundColor: activeColor }]} />
-                <Text style={[styles.cardValue, { color: activeColor }]}>{activeName}</Text>
+            {activeName !== "—" && (
+              <View style={[styles.card, { borderColor: activeColor + "55" }]}>
+                <Text style={styles.cardLabel}>Active Target</Text>
+                <View style={styles.activeHeader}>
+                  <View style={[styles.dot, { backgroundColor: activeColor }]} />
+                  <Text style={[styles.cardVal, { color: activeColor }]}>{activeName}</Text>
+                </View>
+                <View style={styles.pills}>
+                  <InfoPill label="Az" value={`${activeAzimuth}°`} />
+                  <InfoPill label="El" value={`${activeElevation}°`} />
+                  {mode === "deep-space" && activePlanet ? <InfoPill label="Dist" value={`${activePlanet.distAU.toFixed(2)} AU`} /> : <InfoPill label="Alt" value={`${activeAltKm} km`} />}
+                </View>
+                {mode === "deep-space" && activePlanet && <Text style={styles.note}>{activePlanet.planet.fact}</Text>}
+                {mode === "debris" && debrisFleet[0] && <Text style={[styles.note, { color: "#FF3B30" }]}>{debrisFleet[0].object.description}</Text>}
+                {mode === "meteor" && activeShowers[0] && <Text style={styles.note}>{activeShowers[0].shower.description}</Text>}
               </View>
-              <View style={styles.row}>
-                <InfoPill label="Az" value={`${activeAzimuth}°`} />
-                <InfoPill label="El" value={`${activeElevation}°`} />
-                {trackingMode === "deep-space" && activePlanet && (
-                  <InfoPill label="Distance" value={`${activePlanet.distAU.toFixed(2)} AU`} />
-                )}
-                {trackingMode !== "deep-space" && <InfoPill label="Alt" value={`${activeAltKm} km`} />}
-              </View>
-              {trackingMode === "deep-space" && activePlanet && (
-                <Text style={[styles.fallbackNote, { marginTop: 8 }]}>{activePlanet.planet.fact}</Text>
-              )}
-            </View>
+            )}
 
             {/* Fleet list */}
-            {trackingMode === "fleet" && (
+            {mode === "fleet" && (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Fleet · {fleetState.satellites.length} Objects</Text>
-                {fleetState.satellites.map(state => (
-                  <TouchableOpacity key={state.satellite.id} style={styles.fleetRow} onPress={() => setSelectedSatId(state.satellite.id)}>
-                    <View style={[styles.colorDot, { backgroundColor: state.satellite.radarColor }]} />
-                    <View style={styles.fleetRowMeta}>
-                      <Text style={styles.fleetName}>{state.satellite.shortName}</Text>
-                      <Text style={styles.fleetDetail}>{state.satellite.agency.split(" /")[0]}</Text>
+                <Text style={styles.cardLabel}>Fleet · {fleetState.satellites.length} Objects</Text>
+                {fleetState.satellites.map(s => (
+                  <TouchableOpacity key={s.satellite.id} style={styles.listRow} onPress={() => setSelectedSatId(s.satellite.id)}>
+                    <View style={[styles.dot, { backgroundColor: s.satellite.radarColor }]} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.listName}>{s.satellite.shortName}</Text>
+                      <Text style={styles.listSub}>{s.satellite.agency.split(" /")[0]}</Text>
                     </View>
-                    <Text style={[styles.fleetScore, { color: state.satellite.radarColor }]}>{state.alignment.alignmentScore}%</Text>
-                    <Text style={styles.fleetArrow}>›</Text>
+                    <Text style={[styles.listScore, { color: s.satellite.radarColor }]}>{s.alignment.alignmentScore}%</Text>
+                    <Text style={styles.arrow}>›</Text>
                   </TouchableOpacity>
                 ))}
               </View>
             )}
 
-            {/* Planet list */}
-            {trackingMode === "deep-space" && (
+            {/* Debris list */}
+            {mode === "debris" && (
               <View style={styles.card}>
-                <Text style={styles.cardTitle}>Solar System · {planetaryTargets.length} Bodies</Text>
+                <Text style={styles.cardLabel}>Debris Objects · {debrisFleet.length} Tracked</Text>
+                {debrisFleet.map(s => (
+                  <View key={s.object.id} style={styles.listRow}>
+                    <View style={[styles.dot, { backgroundColor: s.catalogued ? ChronauraColors.green : "#FF3B30" }]} />
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.listName}>{s.object.name}</Text>
+                      <Text style={styles.listSub}>{s.object.origin} · {s.object.debrisYear}</Text>
+                    </View>
+                    <Text style={[styles.listScore, { color: s.catalogued ? ChronauraColors.green : "#FF3B30" }]}>{s.catalogued ? "✓" : `${s.alignment.alignmentScore}%`}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Planet list */}
+            {mode === "deep-space" && (
+              <View style={styles.card}>
+                <Text style={styles.cardLabel}>Solar System · {planetaryTargets.length} Bodies</Text>
                 {planetaryTargets.map(pt => {
-                  const diff = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, pt.azimuth, pt.altitude);
+                  const d = planetAlignmentDiff(pointing.azimuthDegrees, pointing.altitudeDegrees, pt.azimuth, pt.altitude);
                   return (
-                    <View key={pt.id} style={styles.fleetRow}>
-                      <View style={[styles.colorDot, { backgroundColor: pt.planet.radarColor }]} />
-                      <View style={styles.fleetRowMeta}>
-                        <Text style={styles.fleetName}>{pt.planet.name}</Text>
-                        <Text style={styles.fleetDetail}>{pt.altitude > 0 ? `el ${pt.altitude.toFixed(1)}°` : "below horizon"}</Text>
+                    <View key={pt.id} style={styles.listRow}>
+                      <View style={[styles.dot, { backgroundColor: pt.planet.radarColor }]} />
+                      <View style={{ flex: 1 }}>
+                        <Text style={styles.listName}>{pt.planet.name}</Text>
+                        <Text style={styles.listSub}>{pt.altitude > 0 ? `el ${pt.altitude.toFixed(1)}°` : "below horizon"}</Text>
                       </View>
-                      <Text style={[styles.fleetScore, { color: pt.planet.radarColor }]}>{diff.alignmentScore}%</Text>
+                      <Text style={[styles.listScore, { color: pt.planet.radarColor }]}>{d.alignmentScore}%</Text>
                     </View>
                   );
                 })}
@@ -451,43 +514,35 @@ export function OrbitalAlignmentScreen() {
           </>
         )}
 
-        {/* Cosmic Drift toggle */}
+        {/* Cosmic Drift */}
         <TouchableOpacity style={[styles.card, { borderColor: ChronauraColors.violet + "55" }]} onPress={() => setShowDrift(v => !v)}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <Text style={[styles.cardTitle, { color: ChronauraColors.violet }]}>✦ COSMIC DRIFT GALAXY</Text>
-            <Text style={[styles.cardTitle, { color: ChronauraColors.violet }]}>{showDrift ? "▲" : "▼"}</Text>
+            <Text style={[styles.cardLabel, { color: ChronauraColors.violet }]}>✦ COSMIC DRIFT GALAXY</Text>
+            <Text style={[styles.cardLabel, { color: ChronauraColors.violet }]}>{showDrift ? "▲" : "▼"}</Text>
           </View>
-          {!showDrift && <Text style={styles.fleetDetail}>Your personal lock history — tap to expand</Text>}
+          {!showDrift && <Text style={styles.listSub}>Your personal lock history — tap to expand</Text>}
         </TouchableOpacity>
-
         {showDrift && <CosmicDriftGalaxy refreshTrigger={driftRefresh} />}
 
         {/* Observer */}
         <View style={[styles.card, { marginBottom: 40 }]}>
-          <Text style={styles.cardTitle}>Observer</Text>
-          <View style={styles.row}>
+          <Text style={styles.cardLabel}>Observer</Text>
+          <View style={styles.pills}>
             <InfoPill label="Lat" value={`${location.latitudeDegrees.toFixed(3)}°`} />
             <InfoPill label="Lon" value={`${location.longitudeDegrees.toFixed(3)}°`} />
             <InfoPill label="Device Az" value={`${Math.round(pointing.azimuthDegrees)}°`} />
+            <InfoPill label="Pitch" value={`${Math.round(pointing.altitudeDegrees)}°`} />
           </View>
-          {simMode && <Text style={styles.fallbackNote}>Simulated observer: New York City</Text>}
+          {simMode && <Text style={styles.note}>Simulated observer: New York City</Text>}
         </View>
+
       </ScrollView>
 
-      {/* Satellite data card modal */}
       {selectedSatId && (() => {
         const sat = ATMOSPHERE_CATALOG.find(s => s.id === selectedSatId);
         const state = fleetState.satellites.find(s => s.satellite.id === selectedSatId);
         if (!sat || !state) return null;
-        return (
-          <SatelliteDataCard
-            satellite={sat}
-            alignmentScore={state.alignment.alignmentScore}
-            targetAzimuth={state.alignment.targetAzimuth}
-            targetElevation={state.alignment.targetElevation}
-            onClose={() => setSelectedSatId(null)}
-          />
-        );
+        return <SatelliteDataCard satellite={sat} alignmentScore={state.alignment.alignmentScore} targetAzimuth={state.alignment.targetAzimuth} targetElevation={state.alignment.targetElevation} onClose={() => setSelectedSatId(null)} />;
       })()}
     </View>
   );
@@ -497,7 +552,7 @@ function InfoPill({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.pill}>
       <Text style={styles.pillLabel}>{label}</Text>
-      <Text style={styles.pillValue}>{value}</Text>
+      <Text style={styles.pillVal}>{value}</Text>
     </View>
   );
 }
@@ -505,44 +560,50 @@ function InfoPill({ label, value }: { label: string; value: string }) {
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: ChronauraColors.cosmicBlack },
   scroll: { flex: 1 },
-  loadingOuter: { alignItems: "center", justifyContent: "center", paddingHorizontal: 24 },
-  container: { alignItems: "center", paddingTop: 56, paddingHorizontal: 16, paddingBottom: 20 },
-  title: { color: ChronauraColors.gold, fontSize: 13, fontWeight: "800", letterSpacing: 4, marginBottom: 12 },
-  simBanner: { backgroundColor: ChronauraColors.deepIndigo, borderRadius: 8, paddingHorizontal: 16, paddingVertical: 6, marginBottom: 10, borderWidth: 1, borderColor: ChronauraColors.borderSubtle },
+  center: { alignItems: "center", justifyContent: "center", paddingHorizontal: 24 },
+  container: { alignItems: "center", paddingTop: 52, paddingHorizontal: 14, paddingBottom: 20 },
+  title: { color: ChronauraColors.gold, fontSize: 12, fontWeight: "800", letterSpacing: 4, marginBottom: 10 },
+  auraBar: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: ChronauraColors.surface, borderRadius: 12, borderWidth: 1, padding: 10, marginBottom: 10 },
+  auraDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
+  auraTitle: { fontSize: 9, fontWeight: "800", letterSpacing: 1.5 },
+  auraDesc: { fontSize: 10, color: ChronauraColors.faint, marginTop: 2 },
+  simBanner: { backgroundColor: ChronauraColors.deepIndigo, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 5, marginBottom: 10, borderWidth: 1, borderColor: ChronauraColors.borderSubtle },
   simBannerText: { color: ChronauraColors.silver, fontSize: 9, fontWeight: "700", letterSpacing: 1.5 },
-  modeRow: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 14, width: "100%", justifyContent: "center" },
-  modeBtn: { borderWidth: 1, borderColor: ChronauraColors.borderSubtle, borderRadius: 10, paddingHorizontal: 12, paddingVertical: 6 },
-  modeBtnText: { color: ChronauraColors.faint, fontSize: 10, fontWeight: "700", letterSpacing: 1 },
-  badge: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 18, paddingVertical: 4, marginBottom: 4, alignSelf: "center" },
-  badgeText: { fontSize: 10, fontWeight: "800", letterSpacing: 3 },
-  tapHint: { color: ChronauraColors.faint, fontSize: 10, marginBottom: 10 },
-  scoreRow: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 12 },
-  scoreValue: { fontSize: 18, fontWeight: "900", width: 48, textAlign: "right" },
+  modeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 12, width: "100%", justifyContent: "center" },
+  modeBtn: { borderWidth: 1, borderColor: ChronauraColors.borderSubtle, borderRadius: 9, paddingHorizontal: 10, paddingVertical: 5 },
+  modeBtnText: { color: ChronauraColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 1 },
+  badge: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 3, marginBottom: 4, alignSelf: "center" },
+  badgeText: { fontSize: 9, fontWeight: "800", letterSpacing: 3 },
+  tapHint: { color: ChronauraColors.faint, fontSize: 9, marginBottom: 8 },
+  scoreRow: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 },
+  scoreVal: { fontSize: 17, fontWeight: "900", width: 46, textAlign: "right" },
   scoreTrack: { flex: 1, height: 4, backgroundColor: ChronauraColors.elevated, borderRadius: 2, overflow: "hidden" },
   scoreFill: { height: "100%", borderRadius: 2 },
-  card: { width: "100%", backgroundColor: ChronauraColors.surface, borderRadius: 16, borderWidth: 1, borderColor: ChronauraColors.borderGold, padding: 14, marginBottom: 10 },
-  cardTitle: { color: ChronauraColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 },
-  cardValue: { fontSize: 13, fontWeight: "800", marginBottom: 8, flex: 1 },
-  activeHeader: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 8 },
-  colorDot: { width: 8, height: 8, borderRadius: 4 },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: 7 },
-  pill: { backgroundColor: ChronauraColors.elevated, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 7, flex: 1 },
+  card: { width: "100%", backgroundColor: ChronauraColors.surface, borderRadius: 14, borderWidth: 1, borderColor: ChronauraColors.borderGold, padding: 13, marginBottom: 9 },
+  cardLabel: { color: ChronauraColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 },
+  cardVal: { fontSize: 13, fontWeight: "800", color: ChronauraColors.gold2, marginBottom: 7 },
+  activeHeader: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 7 },
+  dot: { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
+  pills: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
+  pill: { backgroundColor: ChronauraColors.elevated, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 6, flex: 1 },
   pillLabel: { color: ChronauraColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" },
-  pillValue: { color: ChronauraColors.silver, fontSize: 12, fontWeight: "700", marginTop: 2 },
-  fleetRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 8, borderTopWidth: 1, borderTopColor: ChronauraColors.borderFaint },
-  fleetRowMeta: { flex: 1 },
-  fleetName: { color: ChronauraColors.silver, fontSize: 12, fontWeight: "700" },
-  fleetDetail: { color: ChronauraColors.faint, fontSize: 10, marginTop: 1 },
-  fleetScore: { fontSize: 12, fontWeight: "700", marginRight: 4 },
-  fleetArrow: { color: ChronauraColors.faint, fontSize: 16 },
-  phaseBar: { width: "100%", height: 5, backgroundColor: ChronauraColors.elevated, borderRadius: 3, overflow: "hidden" },
-  phaseFill: { height: "100%", borderRadius: 3 },
-  loadingCard: { alignItems: "center", gap: 8, marginBottom: 28 },
-  loadingTitle: { color: ChronauraColors.silver, fontSize: 16, fontWeight: "700" },
-  loadingDetail: { color: ChronauraColors.faint, fontSize: 13 },
-  simCard: { width: "100%", backgroundColor: ChronauraColors.surface, borderRadius: 16, borderWidth: 1, borderColor: ChronauraColors.borderSubtle, padding: 18, alignItems: "center", gap: 10 },
-  simCardTitle: { color: ChronauraColors.silver, fontSize: 14, fontWeight: "700" },
-  simButton: { backgroundColor: ChronauraColors.deepIndigo, borderRadius: 12, paddingHorizontal: 20, paddingVertical: 10, borderWidth: 1, borderColor: ChronauraColors.borderGold },
-  simButtonText: { color: ChronauraColors.gold2, fontSize: 13, fontWeight: "700" },
-  fallbackNote: { color: ChronauraColors.gold, fontSize: 11, opacity: 0.75 },
+  pillVal: { color: ChronauraColors.silver, fontSize: 11, fontWeight: "700", marginTop: 2 },
+  listRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 7, borderTopWidth: 1, borderTopColor: ChronauraColors.borderFaint },
+  listName: { color: ChronauraColors.silver, fontSize: 12, fontWeight: "700" },
+  listSub: { color: ChronauraColors.faint, fontSize: 10, marginTop: 1 },
+  listScore: { fontSize: 11, fontWeight: "700", marginRight: 3 },
+  arrow: { color: ChronauraColors.faint, fontSize: 15 },
+  chainRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 7, borderTopWidth: 1, borderTopColor: ChronauraColors.borderFaint },
+  chainDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
+  chainName: { flex: 1, fontSize: 12, fontWeight: "700" },
+  phaseBar: { width: "100%", height: 4, backgroundColor: ChronauraColors.elevated, borderRadius: 2, overflow: "hidden" },
+  phaseFill: { height: "100%", borderRadius: 2 },
+  note: { color: ChronauraColors.faint, fontSize: 10, lineHeight: 16, marginTop: 6 },
+  loadingCard: { alignItems: "center", gap: 8, marginBottom: 24 },
+  loadingTitle: { color: ChronauraColors.silver, fontSize: 15, fontWeight: "700" },
+  loadingDetail: { color: ChronauraColors.faint, fontSize: 12 },
+  simCard: { width: "100%", backgroundColor: ChronauraColors.surface, borderRadius: 14, borderWidth: 1, borderColor: ChronauraColors.borderSubtle, padding: 16, alignItems: "center", gap: 10 },
+  simCardTitle: { color: ChronauraColors.silver, fontSize: 13, fontWeight: "700" },
+  simBtn: { backgroundColor: ChronauraColors.deepIndigo, borderRadius: 11, paddingHorizontal: 18, paddingVertical: 9, borderWidth: 1, borderColor: ChronauraColors.borderGold },
+  simBtnText: { color: ChronauraColors.gold2, fontSize: 12, fontWeight: "700" },
 });
