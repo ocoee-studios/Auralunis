@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import { Alert, StyleSheet, Text, View } from "react-native";
+import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
@@ -13,12 +13,14 @@ import { SatelliteThermalOverlayPanel } from "@/features/aura-pro/SatelliteTherm
 import { AstrophotographyPredictorPanel } from "@/features/aura-pro/AstrophotographyPredictorPanel";
 import { computeTonightSky, findBody } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
+import { OrbitalAlignmentScreen } from "@/screens/OrbitalAlignmentScreen";
 
 export function SkyScreen() {
   const [showPermission, setShowPermission] = useState(false);
   const [skyLensOpen, setSkyLensOpen] = useState(false);
   const [manualMapOpen, setManualMapOpen] = useState(false);
   const [galaxyModeOn, setGalaxyModeOn] = useState(false);
+  const [alignmentOpen, setAlignmentOpen] = useState(false);
   const { addItem } = useChronauraVault();
 
   const { location, status } = useObserverLocation();
@@ -44,6 +46,18 @@ export function SkyScreen() {
     <ScreenShell title="Sky Lens + Archive" subtitle="Sky">
       {skyLensOpen ? <SkyLensPlaceholder onClose={() => setSkyLensOpen(false)} /> : null}
       {manualMapOpen ? <ManualSkyMap onClose={() => setManualMapOpen(false)} /> : null}
+      {alignmentOpen ? (
+        <View style={StyleSheet.absoluteFillObject}>
+          <OrbitalAlignmentScreen />
+          {/* Back button overlaid at top-left */}
+          <TouchableOpacity
+            style={styles.backButton}
+            onPress={() => setAlignmentOpen(false)}
+          >
+            <Text style={styles.backButtonText}>← Sky</Text>
+          </TouchableOpacity>
+        </View>
+      ) : null}
 
       <FeatureCard
         title="Chronaura Sky Lens"
@@ -57,6 +71,13 @@ export function SkyScreen() {
         description="Explore a privacy-safe fallback map without camera access. Ideal when indoors or when camera permission is declined."
         actionLabel="Open Manual Map"
         onPress={() => setManualMapOpen(true)}
+      />
+
+      <FeatureCard
+        title="Orbital Alignment"
+        description="Point your phone at the sky and lock onto a satellite or celestial target using live GPS and device orientation. Radar scope tracks the target in real time."
+        actionLabel="Open Alignment"
+        onPress={() => setAlignmentOpen(true)}
       />
 
       <GlassPanel accent style={{ marginBottom: 12 }}>
@@ -174,5 +195,21 @@ const styles = StyleSheet.create({
   skyName: { color: "#FFF", fontSize: 14, fontWeight: "700" },
   skyVal: { color: ChronauraColors.gold2, fontSize: 13, fontVariant: ["tabular-nums"] },
   skyValDim: { color: ChronauraColors.muted, fontSize: 13 },
-  skyHint: { color: ChronauraColors.muted, fontSize: 11, marginTop: 10 }
+  skyHint: { color: ChronauraColors.muted, fontSize: 11, marginTop: 10 },
+  backButton: {
+    position: "absolute",
+    top: 54,
+    left: 20,
+    backgroundColor: "rgba(18,26,44,0.88)",
+    borderRadius: 20,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: ChronauraColors.borderGold,
+  },
+  backButtonText: {
+    color: ChronauraColors.gold2,
+    fontSize: 14,
+    fontWeight: "700",
+  },
 });
