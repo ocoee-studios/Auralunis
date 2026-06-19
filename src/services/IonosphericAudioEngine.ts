@@ -69,7 +69,7 @@ export class IonosphericAudioEngine {
     try {
       await Audio.setAudioModeAsync({
         allowsRecordingIOS: false,
-        playsInSilentModeIOS: false, // respect silent mode — user opt-in feel
+        playsInSilentModeIOS: true,  // play through silent switch — user controls via in-app mute toggle
         staysActiveInBackground: false,
         shouldDuckAndroid: true,
       });
