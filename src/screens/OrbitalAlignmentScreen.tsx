@@ -91,7 +91,7 @@ export function OrbitalAlignmentScreen() {
   // Haptic updates
   useEffect(() => {
     if (!alignment) return;
-    hapticController.current.update(alignment.totalAngularError, alignment.isLocked);
+    hapticController.current.update(alignment.alignmentScore, alignment.isLocked);
   }, [alignment?.totalAngularError, alignment?.isLocked]);
 
   // Pulse animation — active while searching

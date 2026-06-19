@@ -1,21 +1,23 @@
 // hapticController.ts
 // Centralized proximity haptic cadence for the Orbital Alignment screen.
-// Wraps the existing HapticService so DashboardScreen stays clean.
+// Uses CoreHaptics via WatchHaptics for precise, warm tactile feedback on iOS.
+// Falls back to HapticService on non-CoreHaptics devices.
 //
-// Proximity zones:
-//   > 30° error  → silent
-//   ≤ 30° error  → single light tap every 500ms ("approaching")
-//   ≤  5° error  → fast medium heartbeat every 150ms ("near lock")
-//   LOCKED       → one-shot success notification, then silent
+// Proximity zones (by alignmentScore):
+//   score ≤ 70   → silent
+//   score 70–85  → compass tick every 500ms ("approaching")
+//   score > 85   → compass tick every 250ms ("near lock")
+//   LOCKED       → one-shot lock pulse, then silent
 
-import { tapLight, tapMedium, tapSuccess } from "@/services/HapticService";
+import { WatchHaptics } from "@/modules/WatchHaptics";
+import { tapSuccess } from "@/services/HapticService";
 
 type Zone = "silent" | "approaching" | "nearLock" | "locked";
 
-function zoneFor(totalAngularError: number, isLocked: boolean): Zone {
+function zoneFor(alignmentScore: number, isLocked: boolean): Zone {
   if (isLocked) return "locked";
-  if (totalAngularError <= 5) return "nearLock";
-  if (totalAngularError <= 30) return "approaching";
+  if (alignmentScore > 85) return "nearLock";
+  if (alignmentScore > 70) return "approaching";
   return "silent";
 }
 
@@ -24,12 +26,16 @@ export class HapticController {
   private currentZone: Zone = "silent";
   private wasLocked = false;
 
-  update(totalAngularError: number, isLocked: boolean): void {
-    const zone = zoneFor(totalAngularError, isLocked);
+  /**
+   * Call this on every alignment update.
+   * Pass alignmentScore (0-100) and isLocked from AlignmentResult.
+   */
+  update(alignmentScore: number, isLocked: boolean): void {
+    const zone = zoneFor(alignmentScore, isLocked);
 
-    // One-shot lock success
+    // One-shot lock confirmation
     if (isLocked && !this.wasLocked) {
-      tapSuccess();
+      WatchHaptics.triggerLockPulse();
     }
     this.wasLocked = isLocked;
 
@@ -39,15 +45,25 @@ export class HapticController {
 
     switch (zone) {
       case "approaching":
-        this.intervalId = setInterval(() => tapLight(), 500);
+        // Slower tick — user is getting warm
+        this.intervalId = setInterval(
+          () => WatchHaptics.triggerCompassTick(),
+          500
+        );
         break;
+
       case "nearLock":
-        this.intervalId = setInterval(() => tapMedium(), 150);
+        // Faster tick — almost there
+        this.intervalId = setInterval(
+          () => WatchHaptics.triggerCompassTick(),
+          250
+        );
         break;
+
       case "silent":
       case "locked":
       default:
-        // silent — no interval
+        // No interval — locked fires once above, below 70 is quiet
         break;
     }
   }
