@@ -194,7 +194,7 @@ Spec exists in `docs/LIQUID_GLASS_IMPLEMENTATION_SPEC.md`. Native SwiftUI implem
 | Alert amber (decay watch) | `#FF9500` |
 | Alert crimson (decay critical) | `#FF3B30` |
 
-**Typography:** Cinzel serif (headings) + Montserrat (body)
+**Typography:** Cinzel (headings) + Playfair Display (body)
 **Glass panel:** `rgba(18,26,44,0.74)` background + gold border at 28% opacity
 
 ---

@@ -46,8 +46,8 @@ export const AuraLunisTypography = {
   },
   // Body (descriptions, labels, values)
   body: {
-    fontFamily: "Montserrat_400Regular",   // Google Fonts: Montserrat Light
-    medium: "Montserrat_500Medium",        // Montserrat Medium
+    fontFamily: "PlayfairDisplay_400Regular",  // Google Fonts: Playfair Display
+    medium: "PlayfairDisplay_500Medium",       // Playfair Display Medium
     fallback: "System"
   }
 } as const;
@@ -66,7 +66,7 @@ export const AuraLunisSpacing = {
 
 export const AuraLunisTaglines = [
   "Time moves. The cosmos remembers.",
-  "Your time. Written in the stars.",
+  "Your Time, Written in the Stars",
   "Explore time. Align with the universe.",
   "The universe is now in your hands."
 ] as const;

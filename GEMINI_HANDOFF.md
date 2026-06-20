@@ -54,7 +54,7 @@ Crescent-C astrolabe — three concentric rings, compass needle, N/S/E/W points,
 </svg>
 ```
 
-**Logo rules:** Never replace with generic moon/compass. Never simplify the three rings. Always on `#030816`. Wordmark: AURALUNIS in Cinzel serif. Slogan: *Your time, written in the stars.*
+**Logo rules:** Never replace with generic moon/compass. Never simplify the three rings. Always on `#030816`. Wordmark: AURALUNIS in Cinzel serif. Slogan: *Your Time, Written in the Stars*
 
 ---
 
@@ -84,7 +84,7 @@ Crescent-C astrolabe — three concentric rings, compass needle, N/S/E/W points,
 | Amber (decay watch) | `#FF9500` |
 | Crimson (decay critical) | `#FF3B30` |
 
-Typography: Cinzel serif (headings) + Montserrat (body/UI)
+Typography: Cinzel serif (headings) + Playfair Display (body)
 
 ---
 

@@ -16,7 +16,7 @@ platform system font when custom fonts have not yet been installed.
 | Usage | Typeface direction | Suggested weights |
 |---|---|---|
 | Brand headings, celestial names, premium display text | Cinzel | Regular |
-| UI labels, cards, buttons, navigation, body text | Montserrat | Light, Regular, Medium, SemiBold, Bold |
+| UI labels, cards, buttons, navigation, body text | Playfair Display | Light, Regular, Medium, SemiBold, Bold |
 | Technical coordinates and compact metrics | Platform monospace or a separately licensed mono font | Regular, Medium |
 
 ## Ops integration target
@@ -26,11 +26,11 @@ Create this folder in the native app source after the licensed files are obtaine
 ```text
 assets/fonts/
 ├── Cinzel-Regular.ttf
-├── Montserrat-Light.ttf
-├── Montserrat-Regular.ttf
-├── Montserrat-Medium.ttf
-├── Montserrat-SemiBold.ttf
-└── Montserrat-Bold.ttf
+├── PlayfairDisplay-Regular.ttf
+├── PlayfairDisplay-Medium.ttf
+├── PlayfairDisplay-SemiBold.ttf
+├── PlayfairDisplay-Bold.ttf
+└── PlayfairDisplay-ExtraBold.ttf
 ```
 
 Then load them with the Expo font-loading approach chosen by the engineering team

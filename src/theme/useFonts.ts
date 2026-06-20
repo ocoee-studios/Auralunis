@@ -1,4 +1,5 @@
-// Font loader for Cinzel (display) and Montserrat (body).
+// Font loader for Cinzel (display headings) and Playfair Display (body text).
+// Brand guide: Trajan Pro primary → Cinzel (free alternative), Playfair Display secondary.
 // Wraps expo-font with the Google Fonts packages.
 import { useEffect, useState } from "react";
 
@@ -10,16 +11,16 @@ try {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const Cinzel = require("@expo-google-fonts/cinzel") as Record<string, unknown>;
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const Montserrat = require("@expo-google-fonts/montserrat") as Record<string, unknown>;
+  const Playfair = require("@expo-google-fonts/playfair-display") as Record<string, unknown>;
 
   loadFonts = async () => {
     await Font.loadAsync({
       Cinzel_400Regular: Cinzel.Cinzel_400Regular,
       Cinzel_700Bold: Cinzel.Cinzel_700Bold,
-      Montserrat_300Light: Montserrat.Montserrat_300Light,
-      Montserrat_400Regular: Montserrat.Montserrat_400Regular,
-      Montserrat_500Medium: Montserrat.Montserrat_500Medium,
-      Montserrat_700Bold: Montserrat.Montserrat_700Bold
+      PlayfairDisplay_400Regular: Playfair.PlayfairDisplay_400Regular,
+      PlayfairDisplay_500Medium: Playfair.PlayfairDisplay_500Medium,
+      PlayfairDisplay_600SemiBold: Playfair.PlayfairDisplay_600SemiBold,
+      PlayfairDisplay_700Bold: Playfair.PlayfairDisplay_700Bold,
     });
   };
 } catch {

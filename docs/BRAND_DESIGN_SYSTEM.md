@@ -50,14 +50,14 @@ The AuraLunis logo is a gold crescent "C" within an astrolabe compass:
 |---|---|---|---|
 | Display | Cinzel | Regular (400) | "AURALUNIS" headers, screen titles |
 | Display bold | Cinzel | Bold (700) | Emphasis, scores |
-| Body | Montserrat | Light (300) | Descriptions, long text |
-| Body | Montserrat | Regular (400) | Labels, cards |
-| Body | Montserrat | Medium (500) | Buttons, values |
-| Body | Montserrat | Bold (700) | Section titles, emphasis |
+| Body | Playfair Display | Light (300) | Descriptions, long text |
+| Body | Playfair Display | Regular (400) | Labels, cards |
+| Body | Playfair Display | Medium (500) | Buttons, values |
+| Body | Playfair Display | Bold (700) | Section titles, emphasis |
 
 ## Taglines (approved)
 - "Time moves. The cosmos remembers."
-- "Your time. Written in the stars."
+- "Your Time, Written in the Stars"
 - "Explore time. Align with the universe."
 - "The universe is now in your hands."
 
@@ -68,4 +68,4 @@ The AuraLunis logo is a gold crescent "C" within an astrolabe compass:
 4. **Star dust** — subtle animated particles on key surfaces
 5. **Real data** — no placeholder text, all sky data computed from ephemeris
 6. **Generous space** — premium apps breathe, cards have 14-16px padding
-7. **Serif titles** — Cinzel for brand moments, Montserrat for everything else
+7. **Serif titles** — Cinzel for brand moments, Playfair Display for everything else

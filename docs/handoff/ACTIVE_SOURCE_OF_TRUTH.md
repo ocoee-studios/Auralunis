@@ -3,7 +3,7 @@
 ## Brand
 - Name: AuraLunis
 - Descriptor: The Interactive Astral Clock
-- Slogan: Your time, written in the stars.
+- Slogan: Your Time, Written in the Stars
 - Studio: Ocoee Studios
 - Identity: Midnight Gold celestial luxury with selective Liquid Glass
 

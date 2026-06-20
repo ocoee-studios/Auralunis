@@ -49,7 +49,7 @@ PRIVACY-FIRST
 
 Your data stays on your device. Vault entries are encrypted. No account required. No ads. No tracking.
 
-Made by Ocoee Studios. Your time, written in the stars.
+Made by Ocoee Studios. Your Time, Written in the Stars
 
 ## Keywords (100 chars)
 astronomy,stargazing,planets,moon,constellation,eclipse,night sky,telescope,stars,cosmos
