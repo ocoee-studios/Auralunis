@@ -40,8 +40,8 @@ const required = [
   "src/features/permissions/SkyLensPermissionGate.tsx",
   "src/features/sky-lens/ManualSkyMap.tsx",
   "src/features/archive/DeepSkyCatalog.ts",
-  "src/state/ChronauraSettingsContext.tsx",
-  "src/state/ChronauraVaultContext.tsx",
+  "src/state/AuraLunisSettingsContext.tsx",
+  "src/state/AuraLunisVaultContext.tsx",
   "src/data/brand.ts",
   "src/data/sourceOfTruth.ts",
   "assets/logo/chronaura-stardust-emblem.png",
@@ -133,7 +133,7 @@ for (const term of [
 }
 pass("watch face gallery, theme selector, and complication picker");
 
-const settingsContext = fs.readFileSync(path.join(root, "src/state/ChronauraSettingsContext.tsx"), "utf8");
+const settingsContext = fs.readFileSync(path.join(root, "src/state/AuraLunisSettingsContext.tsx"), "utf8");
 if (!settingsContext.includes("AsyncStorage")) fail("settings persistence", "AsyncStorage missing");
 else pass("settings persistence");
 
@@ -141,13 +141,13 @@ else pass("settings persistence");
 const settingsScreen = fs.readFileSync(path.join(root, "src/screens/SettingsScreen.tsx"), "utf8");
 for (const term of [
   "About Us",
-  "Chronaura was created to turn the night sky into a living, personal experience. Blending astronomy, thoughtful design, and quiet daily rituals, we help you slow down, look up, and feel more connected to the universe around you."
+  "AuraLunis was created to turn the night sky into a living, personal experience. Blending astronomy, thoughtful design, and quiet daily rituals, we help you slow down, look up, and feel more connected to the universe around you."
 ]) {
   if (!settingsScreen.includes(term)) fail("SettingsScreen", `missing ${term}`);
 }
 pass("settings about us section");
 
-const vaultContext = fs.readFileSync(path.join(root, "src/state/ChronauraVaultContext.tsx"), "utf8");
+const vaultContext = fs.readFileSync(path.join(root, "src/state/AuraLunisVaultContext.tsx"), "utf8");
 if (!vaultContext.includes("AsyncStorage")) fail("vault persistence", "AsyncStorage missing");
 else pass("prototype vault persistence");
 
@@ -197,4 +197,4 @@ if (!app.expo.splash || app.expo.splash.image !== "./assets/logo/chronaura-splas
 else pass("splash config");
 
 if (failed) process.exit(1);
-console.log("Chronaura approved five-tab static QA passed.");
+console.log("AuraLunis approved five-tab static QA passed.");

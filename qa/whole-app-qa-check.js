@@ -38,8 +38,8 @@ const required = [
   "src/features/archive/DeepSkyCatalog.ts",
   "src/features/learn/LearnCatalog.ts",
   "src/features/watch/WatchFaceCatalog.ts",
-  "src/state/ChronauraSettingsContext.tsx",
-  "src/state/ChronauraVaultContext.tsx",
+  "src/state/AuraLunisSettingsContext.tsx",
+  "src/state/AuraLunisVaultContext.tsx",
   "src/components/LogoMark.tsx",
   "assets/logo/chronaura-stardust-emblem.png",
   "assets/logo/chronaura-app-icon.png",
@@ -66,7 +66,7 @@ for (const term of ["Living Astrolabe", "Cosmic Notes", "Save Note to Vault", "L
 }
 
 const sky = read("src/screens/SkyScreen.tsx");
-for (const term of ["Chronaura Sky Lens", "Manual Sky Map", "Find Mode", "X-Ray Lens + Birth Sky Overlay", "Milky Way / Galaxy Mode", "featuredDeepSkyObjects", "Celestial Archive"]) {
+for (const term of ["AuraLunis Sky Lens", "Manual Sky Map", "Find Mode", "X-Ray Lens + Birth Sky Overlay", "Milky Way / Galaxy Mode", "featuredDeepSkyObjects", "Celestial Archive"]) {
   check(`Sky: ${term}`, sky.includes(term));
 }
 
@@ -95,15 +95,15 @@ const settings = read("src/screens/SettingsScreen.tsx");
 for (const term of ["Subscription", "Appearance", "Notifications + Alarms", "Sky Lens", "Privacy + Data", "Watch + Widgets", "Audio + Learning", "Help + About", "About Us"]) {
   check(`Settings: ${term}`, settings.includes(term));
 }
-check("Settings About Us paragraph", settings.includes("Chronaura was created to turn the night sky into a living, personal experience."));
+check("Settings About Us paragraph", settings.includes("AuraLunis was created to turn the night sky into a living, personal experience."));
 check("Settings About card clean style reference", settings.includes("<View style={styles.aboutCard}>"));
 
-const settingsContext = read("src/state/ChronauraSettingsContext.tsx");
+const settingsContext = read("src/state/AuraLunisSettingsContext.tsx");
 check("Settings persisted with AsyncStorage", settingsContext.includes("AsyncStorage"));
 check("Settings local data sanitization", settingsContext.includes("sanitizeSettings") && settingsContext.includes("sanitizeWatchComplications"));
 check("Watch settings max four sanitized", settingsContext.includes("MAX_WATCH_COMPLICATIONS = 4"));
 
-const vaultContext = read("src/state/ChronauraVaultContext.tsx");
+const vaultContext = read("src/state/AuraLunisVaultContext.tsx");
 check("Vault persisted with AsyncStorage", vaultContext.includes("AsyncStorage"));
 check("Vault local data sanitization", vaultContext.includes("sanitizeVaultItems"));
 
@@ -138,4 +138,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Chronaura whole-app QA passed with ${passes.length} checks.`);
+console.log(`AuraLunis whole-app QA passed with ${passes.length} checks.`);
