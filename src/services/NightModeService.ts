@@ -48,20 +48,20 @@ export const NIGHT_MODE_COLORS: NightModeColors = {
 
 /** Standard mode color keys (same shape for easy swapping) */
 export const STANDARD_MODE_COLORS: NightModeColors = {
-  cosmicBlack:   "#0B0B12",
-  surface:       "#121A2C",
-  elevated:      "#1E2A44",
-  gold:          "#D4AF37",
-  gold2:         "#F3D99B",
+  cosmicBlack:   "#030816",
+  surface:       "#071225",
+  elevated:      "#0B1630",
+  gold:          "#D9A84E",
+  gold2:         "#FFF6D6",
   silver:        "#C0C6D4",
   muted:         "#A8AFBF",
   faint:         "#747D90",
   green:         "#4ADE80",
   violet:        "#7B5CF6",
-  borderGold:    "rgba(212,175,55,0.28)",
+  borderGold:    "rgba(217,168,78,0.28)",
   borderSubtle:  "rgba(192,198,212,0.15)",
   borderFaint:   "rgba(255,255,255,0.05)",
-  text:          "#F3D99B",
+  text:          "#FFF6D6",
   textDim:       "#C0C6D4",
 };
 

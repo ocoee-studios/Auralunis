@@ -332,7 +332,7 @@ const styles = StyleSheet.create({
   primary: { borderRadius: 16, marginTop: 14, paddingVertical: 13, alignItems: "center", backgroundColor: ChronauraColors.gold2 },
   primaryText: { color: "#17100A", fontWeight: "900" },
   buttonGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 },
-  secondary: { width: "48%", borderRadius: 15, paddingVertical: 11, paddingHorizontal: 8, alignItems: "center", backgroundColor: "rgba(212,175,55,0.10)", borderWidth: 1, borderColor: "rgba(212,175,55,0.20)" },
+  secondary: { width: "48%", borderRadius: 15, paddingVertical: 11, paddingHorizontal: 8, alignItems: "center", backgroundColor: "rgba(217,168,78,0.10)", borderWidth: 1, borderColor: "rgba(217,168,78,0.20)" },
   secondaryText: { color: "#FFF", fontSize: 12, fontWeight: "800" },
   footnote: { color: ChronauraColors.muted, fontSize: 11, lineHeight: 16, marginTop: 12 }
 });

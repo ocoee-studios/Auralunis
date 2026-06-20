@@ -112,9 +112,9 @@ const styles = StyleSheet.create({
   hero: {
     borderRadius: 28,
     padding: 18,
-    backgroundColor: "rgba(212,175,55,0.08)",
+    backgroundColor: "rgba(217,168,78,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.18)",
+    borderColor: "rgba(217,168,78,0.18)",
     marginBottom: 16
   },
   heroTitle: {
@@ -153,8 +153,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.07)"
   },
   categoryCardActive: {
-    backgroundColor: "rgba(212,175,55,0.12)",
-    borderColor: "rgba(212,175,55,0.28)"
+    backgroundColor: "rgba(217,168,78,0.12)",
+    borderColor: "rgba(217,168,78,0.28)"
   },
   categoryIcon: { fontSize: 24, color: ChronauraColors.gold2 },
   categoryTitle: { color: "#FFF", fontSize: 14, fontWeight: "900", marginTop: 7 },

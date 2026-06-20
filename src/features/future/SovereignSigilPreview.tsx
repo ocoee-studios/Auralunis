@@ -97,9 +97,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 15,
     marginBottom: 12,
-    backgroundColor: "rgba(212,175,55,0.06)",
+    backgroundColor: "rgba(217,168,78,0.06)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.18)"
+    borderColor: "rgba(217,168,78,0.18)"
   },
   eyebrow: {
     color: ChronauraColors.gold2,
@@ -125,9 +125,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     alignItems: "center",
     marginTop: 12,
-    backgroundColor: "rgba(212,175,55,0.13)",
+    backgroundColor: "rgba(217,168,78,0.13)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.25)"
+    borderColor: "rgba(217,168,78,0.25)"
   },
   buttonText: { color: "#FFF", fontWeight: "900" },
   note: {

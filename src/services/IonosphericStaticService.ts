@@ -85,6 +85,6 @@ export function elevationAudioLabel(devicePitch: number): string {
 export const STATIC_COLORS: Record<StaticPhase, string> = {
   "deep-static":  "#747D90",
   "approaching":  "#78C8FF",
-  "data-chime":   "#D4AF37",
+  "data-chime":   "#D9A84E",
   "locked":       "#4ADE80",
 };

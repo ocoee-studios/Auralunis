@@ -29,17 +29,17 @@ The Chronaura logo is a gold crescent "C" within an astrolabe compass:
 
 | Name | Hex | Usage |
 |---|---|---|
-| Cosmic Black | `#0B0B12` | App background |
-| Midnight Navy | `#121A2C` | Card/panel surfaces |
-| Deep Indigo | `#1E2A44` | Elevated surfaces, hover states |
-| Astral Gold | `#D4AF37` | Primary accent, buttons, borders |
+| Cosmic Black | `#030816` | App background |
+| Midnight Navy | `#071225` | Card/panel surfaces |
+| Deep Indigo | `#0B1630` | Elevated surfaces, hover states |
+| Astral Gold | `#D9A84E` | Primary accent, buttons, borders |
 | Moon Silver | `#C0C6D4` | Secondary text, moon elements |
 | Nebula Violet | `#7B5CF6` | Accent highlights, premium badges |
 
 ### Extended
 | Name | Hex | Usage |
 |---|---|---|
-| Light Gold | `#F3D99B` | Highlights, active states |
+| Light Gold | `#FFF6D6` | Highlights, active states |
 | Muted Gold | `#C7A66A` | Borders, subtle accents |
 | Muted Text | `#A8AFBF` | Body text, descriptions |
 | Faint | `#747D90` | Labels, hints |

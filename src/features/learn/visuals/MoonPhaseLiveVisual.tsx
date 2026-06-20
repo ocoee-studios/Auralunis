@@ -44,7 +44,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: "rgba(255,255,255,0.08)"
   },
   moon: { ...StyleSheet.absoluteFillObject, backgroundColor: "#F2F4FF" },
-  shadow: { position: "absolute", right: 0, top: 0, bottom: 0, backgroundColor: "#0B0B12" },
+  shadow: { position: "absolute", right: 0, top: 0, bottom: 0, backgroundColor: "#030816" },
   title: { color: "#FFF", fontSize: 19, fontWeight: "900" },
   meta: { color: ChronauraColors.gold2, fontSize: 12, marginTop: 4 },
   caption: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 18, marginTop: 8 }

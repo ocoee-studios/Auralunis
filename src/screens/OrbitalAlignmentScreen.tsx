@@ -412,7 +412,7 @@ export function OrbitalAlignmentScreen() {
                 key={m}
                 style={[
                   styles.modeBtn,
-                  isActive && { borderColor: ChronauraColors.gold, backgroundColor: "rgba(212,175,55,0.12)" },
+                  isActive && { borderColor: ChronauraColors.gold, backgroundColor: "rgba(217,168,78,0.12)" },
                   gated && { borderColor: ChronauraColors.borderSubtle, opacity: 0.6 },
                 ]}
                 onPress={() => setMode(m)}
@@ -446,7 +446,7 @@ export function OrbitalAlignmentScreen() {
                 <InfoPill label="Phase" value={sunPos.phase.replace("-", " ")} />
               </View>
               <View style={[styles.phaseBar, { marginTop: 12 }]}>
-                <View style={[styles.phaseFill, { width: `${Math.max(0, Math.min(100, (sunPos.elevation + 6) / 12 * 100))}%` as `${number}%`, backgroundColor: sunPos.isGoldenHour ? "#EF9F27" : "#D4AF37" }]} />
+                <View style={[styles.phaseFill, { width: `${Math.max(0, Math.min(100, (sunPos.elevation + 6) / 12 * 100))}%` as `${number}%`, backgroundColor: sunPos.isGoldenHour ? "#EF9F27" : "#D9A84E" }]} />
               </View>
             </View>
             {goldenEvents.map(evt => (

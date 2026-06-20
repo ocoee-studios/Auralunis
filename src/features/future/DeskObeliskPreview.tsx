@@ -56,7 +56,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: "#050711",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.20)"
+    borderColor: "rgba(217,168,78,0.20)"
   },
   clock: { color: "#FFF", fontSize: 32, fontWeight: "900" },
   meta: {

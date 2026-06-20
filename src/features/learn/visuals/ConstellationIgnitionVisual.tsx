@@ -24,7 +24,7 @@ export function ConstellationIgnitionVisual() {
           <Line
             key={i}
             x1={stars[a][0]} y1={stars[a][1]} x2={stars[b][0]} y2={stars[b][1]}
-            stroke={on ? ChronauraColors.gold : "rgba(212,175,55,0.18)"}
+            stroke={on ? ChronauraColors.gold : "rgba(217,168,78,0.18)"}
             strokeWidth={on ? 1.8 : 1}
           />
         ))}

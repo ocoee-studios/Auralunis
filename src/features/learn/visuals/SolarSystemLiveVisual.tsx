@@ -57,7 +57,7 @@ const styles = StyleSheet.create({
   orbit: {
     position: "absolute",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.18)"
+    borderColor: "rgba(217,168,78,0.18)"
   },
   planet: {
     position: "absolute",

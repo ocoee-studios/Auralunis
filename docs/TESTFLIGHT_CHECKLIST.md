@@ -52,8 +52,8 @@
 
 ### Visual
 - [ ] Cinzel font loads for brand headers
-- [ ] Gold accent color consistent (#D4AF37)
-- [ ] Dark background (#0B0B12) on all screens
+- [ ] Gold accent color consistent (#D9A84E)
+- [ ] Dark background (#030816) on all screens
 - [ ] No white flashes on screen transitions
 - [ ] GlassPanel blur visible on iOS
 - [ ] Tab bar blur visible

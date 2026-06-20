@@ -44,12 +44,12 @@ const s = StyleSheet.create({
   title: { fontSize: 22, fontWeight: "900", color: "#FFF", textAlign: "center" },
   subtitle: { fontSize: 12, color: ChronauraColors.gold2, textAlign: "center", marginTop: 4, marginBottom: 14 },
   feature: { fontSize: 12, color: ChronauraColors.silver, lineHeight: 20, marginLeft: 4 },
-  planSelected: { borderWidth: 1, borderColor: ChronauraColors.gold, borderRadius: 16, padding: 14, marginTop: 14, backgroundColor: "rgba(212,175,55,0.08)" },
-  plan: { borderWidth: 1, borderColor: "rgba(212,175,55,0.2)", borderRadius: 16, padding: 14, marginTop: 8 },
+  planSelected: { borderWidth: 1, borderColor: ChronauraColors.gold, borderRadius: 16, padding: 14, marginTop: 14, backgroundColor: "rgba(217,168,78,0.08)" },
+  plan: { borderWidth: 1, borderColor: "rgba(217,168,78,0.2)", borderRadius: 16, padding: 14, marginTop: 8 },
   badge: { fontSize: 8, letterSpacing: 1.5, color: ChronauraColors.gold, fontWeight: "800", marginBottom: 4 },
   planPrice: { fontSize: 18, fontWeight: "800", color: "#FFF" },
   planEffective: { fontSize: 11, color: ChronauraColors.muted, marginTop: 2 },
   cta: { backgroundColor: ChronauraColors.gold, borderRadius: 14, padding: 14, marginTop: 14, alignItems: "center" },
-  ctaText: { color: "#0B0B12", fontWeight: "900", fontSize: 14 },
+  ctaText: { color: "#030816", fontWeight: "900", fontSize: 14 },
   legal: { fontSize: 10, color: ChronauraColors.faint, textAlign: "center", marginTop: 12 }
 });

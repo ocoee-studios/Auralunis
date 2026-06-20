@@ -42,7 +42,7 @@ const styles = StyleSheet.create({
     marginBottom: 14,
     backgroundColor: "rgba(4,8,18,0.92)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.22)"
+    borderColor: "rgba(217,168,78,0.22)"
   },
   tag: { color: ChronauraColors.gold2, fontSize: 10, letterSpacing: 3, fontWeight: "900" },
   title: { color: "#FFF", fontSize: 23, fontWeight: "900", marginTop: 8 },
@@ -84,9 +84,9 @@ const styles = StyleSheet.create({
   moon: { position: "absolute", right: 24, top: 24, color: ChronauraColors.gold2, fontSize: 34 },
   button: {
     marginTop: 14,
-    backgroundColor: "rgba(212,175,55,0.13)",
+    backgroundColor: "rgba(217,168,78,0.13)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.26)",
+    borderColor: "rgba(217,168,78,0.26)",
     borderRadius: 16,
     paddingVertical: 12,
     alignItems: "center"

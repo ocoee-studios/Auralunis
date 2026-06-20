@@ -26,10 +26,10 @@ export interface PlanetInfo {
 
 export const PLANETS: Record<PlanetId, PlanetInfo> = {
   mercury: { id: "mercury", name: "Mercury", radarColor: "#B4B2A9", semiMajorAxisAU: 0.387, magnitude: -1.9, fact: "A day on Mercury is longer than its year." },
-  venus:   { id: "venus",   name: "Venus",   radarColor: "#F3D99B", semiMajorAxisAU: 0.723, magnitude: -4.6, fact: "Venus rotates backwards relative to most planets." },
+  venus:   { id: "venus",   name: "Venus",   radarColor: "#FFF6D6", semiMajorAxisAU: 0.723, magnitude: -4.6, fact: "Venus rotates backwards relative to most planets." },
   mars:    { id: "mars",    name: "Mars",    radarColor: "#F0997B", semiMajorAxisAU: 1.524, magnitude: -2.9, fact: "Mars has the tallest volcano in the Solar System — Olympus Mons." },
   jupiter: { id: "jupiter", name: "Jupiter", radarColor: "#EF9F27", semiMajorAxisAU: 5.203, magnitude: -2.9, fact: "Jupiter's Great Red Spot is a storm larger than Earth." },
-  saturn:  { id: "saturn",  name: "Saturn",  radarColor: "#D4AF37", semiMajorAxisAU: 9.537, magnitude: -0.5, fact: "Saturn's rings are mostly ice — some chunks are as large as houses." },
+  saturn:  { id: "saturn",  name: "Saturn",  radarColor: "#D9A84E", semiMajorAxisAU: 9.537, magnitude: -0.5, fact: "Saturn's rings are mostly ice — some chunks are as large as houses." },
   uranus:  { id: "uranus",  name: "Uranus",  radarColor: "#9FE1CB", semiMajorAxisAU: 19.19, magnitude: 5.7,  fact: "Uranus rotates on its side with a 98° axial tilt." },
   neptune: { id: "neptune", name: "Neptune", radarColor: "#85B7EB", semiMajorAxisAU: 30.07, magnitude: 7.8,  fact: "Neptune's winds are the fastest in the Solar System — 2,100 km/h." },
 };

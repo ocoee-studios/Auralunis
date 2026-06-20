@@ -24,7 +24,7 @@ export function SkeletonShimmer({ width = "100%", height = 16, borderRadius = 8 
   return (
     <Animated.View
       style={[
-        { width: width as number, height, borderRadius, backgroundColor: "rgba(212,175,55,0.12)" },
+        { width: width as number, height, borderRadius, backgroundColor: "rgba(217,168,78,0.12)" },
         style
       ]}
     />
@@ -45,9 +45,9 @@ const s = StyleSheet.create({
   card: {
     borderRadius: 20,
     padding: 16,
-    backgroundColor: "rgba(18,26,44,0.5)",
+    backgroundColor: "rgba(7,18,37,0.5)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.1)",
+    borderColor: "rgba(217,168,78,0.1)",
     marginBottom: 12,
     gap: 10
   }

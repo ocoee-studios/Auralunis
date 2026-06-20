@@ -211,8 +211,8 @@ export function HomeScreen() {
 
 function bodyColor(id: string): string {
   const map: Record<string, string> = {
-    moon: "#C0C6D4", venus: "#F3D99B", jupiter: "#EF9F27",
-    saturn: "#D4AF37", mars: "#F0997B", mercury: "#B4B2A9",
+    moon: "#C0C6D4", venus: "#FFF6D6", jupiter: "#EF9F27",
+    saturn: "#D9A84E", mars: "#F0997B", mercury: "#B4B2A9",
     uranus: "#9FE1CB", neptune: "#85B7EB",
   };
   return map[id] ?? ChronauraColors.silver;

@@ -113,8 +113,8 @@ const styles = StyleSheet.create({
   buttonText: { color: "#17100A", fontWeight: "900" },
   secondary: {
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.28)",
-    backgroundColor: "rgba(212,175,55,0.10)",
+    borderColor: "rgba(217,168,78,0.28)",
+    backgroundColor: "rgba(217,168,78,0.10)",
     borderRadius: 18,
     paddingVertical: 14,
     paddingHorizontal: 18,

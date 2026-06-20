@@ -59,14 +59,14 @@ const styles = StyleSheet.create({
     paddingVertical: 5,
     borderRadius: 999,
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.25)"
+    borderColor: "rgba(217,168,78,0.25)"
   },
   description: { color: ChronauraColors.muted, lineHeight: 20, fontSize: 13, marginTop: 8 },
   button: {
     marginTop: 14,
-    backgroundColor: "rgba(212,175,55,0.13)",
+    backgroundColor: "rgba(217,168,78,0.13)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.26)",
+    borderColor: "rgba(217,168,78,0.26)",
     borderRadius: 16,
     paddingVertical: 12,
     alignItems: "center"

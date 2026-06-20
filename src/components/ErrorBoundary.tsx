@@ -39,5 +39,5 @@ const s = StyleSheet.create({
   body: { fontSize: 14, color: ChronauraColors.silver, textAlign: "center", lineHeight: 22 },
   detail: { fontSize: 11, color: ChronauraColors.faint, textAlign: "center", marginTop: 12, marginBottom: 24 },
   button: { backgroundColor: ChronauraColors.gold, borderRadius: 14, paddingHorizontal: 32, paddingVertical: 12 },
-  buttonText: { color: "#0B0B12", fontWeight: "800", fontSize: 14 }
+  buttonText: { color: "#030816", fontWeight: "800", fontSize: 14 }
 });

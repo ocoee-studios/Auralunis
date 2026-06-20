@@ -52,7 +52,7 @@ All development done collaboratively by Mrs. Pepper (Ocoee Studios) and Claude (
 ### Phase 4 — Atmosphere Explorer (Multi-Satellite Fleet)
 
 **Files created:**
-- `src/data/AtmosphereCatalog.ts` — 6 LEO satellite registry: ISS (gold #D4AF37), Hubble (blue #78C8FF), Starlink x2 (violet #A78BFA), NOAA-20 (green #4ADE80), Terra (light gold #F3D99B). Each has NORAD ID, launch year, agency, mission, status, altitudeKm, radarColor.
+- `src/data/AtmosphereCatalog.ts` — 6 LEO satellite registry: ISS (gold #D9A84E), Hubble (blue #78C8FF), Starlink x2 (violet #A78BFA), NOAA-20 (green #4ADE80), Terra (light gold #FFF6D6). Each has NORAD ID, launch year, agency, mission, status, altitudeKm, radarColor.
 - `src/services/AtmosphereExplorerService.ts` — fleet simulation with per-satellite drift rates. `computeFleetState()` runs `calculateAlignment()` on every satellite and returns sorted by angular error. `syncLiveTLEData()` upgrades ISS and Starlink positions from Celestrak on mode entry.
 
 ---
@@ -183,11 +183,11 @@ Spec exists in `docs/LIQUID_GLASS_IMPLEMENTATION_SPEC.md`. Native SwiftUI implem
 
 | Token | Value |
 |---|---|
-| Background (Cosmic Black) | `#0B0B12` |
-| Surface (Midnight Navy) | `#121A2C` |
-| Elevated (Deep Indigo) | `#1E2A44` |
-| Astral Gold | `#D4AF37` |
-| Gold 2 | `#F3D99B` |
+| Background (Cosmic Black) | `#030816` |
+| Surface (Midnight Navy) | `#071225` |
+| Elevated (Deep Indigo) | `#0B1630` |
+| Astral Gold | `#D9A84E` |
+| Gold 2 | `#FFF6D6` |
 | Moon Silver | `#C0C6D4` |
 | Nebula Violet | `#7B5CF6` |
 | Green (success/lock) | `#4ADE80` |
@@ -205,7 +205,7 @@ Spec exists in `docs/LIQUID_GLASS_IMPLEMENTATION_SPEC.md`. Native SwiftUI implem
 - SVG source: `assets/brand/chronaura-logo-full.svg`
 - Never replace with a generic moon, compass, or simplified icon.
 - Never redraw in a different style.
-- Always on Cosmic Black (`#0B0B12`) background.
+- Always on Cosmic Black (`#030816`) background.
 - Full logo embedded in `GEMINI_HANDOFF.md` for external agent reference.
 
 ---

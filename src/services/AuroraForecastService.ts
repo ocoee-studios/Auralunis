@@ -92,7 +92,7 @@ export function computeAuroraForecast(
     chance = "likely";
     probability = 60;
     description = "Aurora possible tonight — conditions are favorable for your latitude.";
-    meterColor = "#D4AF37";
+    meterColor = "#D9A84E";
     tip = "Best between 10 PM and 2 AM. Clear northern horizon helps.";
   } else if (kpExcess >= 0) {
     chance = "possible";

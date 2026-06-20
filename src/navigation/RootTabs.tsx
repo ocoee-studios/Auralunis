@@ -48,7 +48,7 @@ export function RootTabs() {
         headerShown: false,
         tabBarStyle: {
           backgroundColor: "transparent",
-          borderTopColor: "rgba(212,175,55,0.18)",
+          borderTopColor: "rgba(217,168,78,0.18)",
           height: 82,
           paddingBottom: 18,
           paddingTop: 8,

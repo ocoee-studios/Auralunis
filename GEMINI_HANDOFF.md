@@ -13,13 +13,13 @@ Crescent-C astrolabe — three concentric rings, compass needle, N/S/E/W points,
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200">
   <defs>
     <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#F3D99B"/>
-      <stop offset="50%" stop-color="#D4AF37"/>
+      <stop offset="0%" stop-color="#FFF6D6"/>
+      <stop offset="50%" stop-color="#D9A84E"/>
       <stop offset="100%" stop-color="#C7A66A"/>
     </linearGradient>
     <radialGradient id="coreGlow" cx="50%" cy="50%" r="50%">
       <stop offset="0%" stop-color="#FFF7D7"/>
-      <stop offset="60%" stop-color="#D4AF37"/>
+      <stop offset="60%" stop-color="#D9A84E"/>
       <stop offset="100%" stop-color="#C7A66A" stop-opacity="0"/>
     </radialGradient>
     <filter id="glow">
@@ -28,33 +28,33 @@ Crescent-C astrolabe — three concentric rings, compass needle, N/S/E/W points,
     </filter>
   </defs>
   <circle cx="100" cy="100" r="88" fill="none" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.7"/>
-  <g stroke="#D4AF37" stroke-width="0.8" opacity="0.5">
+  <g stroke="#D9A84E" stroke-width="0.8" opacity="0.5">
     <line x1="100" y1="12" x2="100" y2="20"/><line x1="100" y1="180" x2="100" y2="188"/>
     <line x1="12" y1="100" x2="20" y2="100"/><line x1="180" y1="100" x2="188" y2="100"/>
   </g>
-  <circle cx="100" cy="100" r="62" fill="none" stroke="#D4AF37" stroke-width="1" opacity="0.45"/>
+  <circle cx="100" cy="100" r="62" fill="none" stroke="#D9A84E" stroke-width="1" opacity="0.45"/>
   <circle cx="100" cy="100" r="36" fill="none" stroke="#C0C6D4" stroke-width="0.8" opacity="0.25"/>
-  <line x1="100" y1="16" x2="100" y2="184" stroke="#D4AF37" stroke-width="1" opacity="0.6"/>
-  <polygon points="100,10 96,22 104,22" fill="#D4AF37" opacity="0.8"/>
-  <polygon points="100,190 96,180 104,180" fill="#D4AF37" opacity="0.5"/>
-  <line x1="16" y1="100" x2="184" y2="100" stroke="#D4AF37" stroke-width="0.5" opacity="0.25"/>
-  <text x="100" y="9" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" font-weight="bold">N</text>
-  <text x="100" y="198" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" opacity="0.6">S</text>
-  <text x="195" y="103" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" opacity="0.6">E</text>
-  <text x="5" y="103" text-anchor="middle" font-family="serif" font-size="8" fill="#D4AF37" opacity="0.6">W</text>
+  <line x1="100" y1="16" x2="100" y2="184" stroke="#D9A84E" stroke-width="1" opacity="0.6"/>
+  <polygon points="100,10 96,22 104,22" fill="#D9A84E" opacity="0.8"/>
+  <polygon points="100,190 96,180 104,180" fill="#D9A84E" opacity="0.5"/>
+  <line x1="16" y1="100" x2="184" y2="100" stroke="#D9A84E" stroke-width="0.5" opacity="0.25"/>
+  <text x="100" y="9" text-anchor="middle" font-family="serif" font-size="8" fill="#D9A84E" font-weight="bold">N</text>
+  <text x="100" y="198" text-anchor="middle" font-family="serif" font-size="8" fill="#D9A84E" opacity="0.6">S</text>
+  <text x="195" y="103" text-anchor="middle" font-family="serif" font-size="8" fill="#D9A84E" opacity="0.6">E</text>
+  <text x="5" y="103" text-anchor="middle" font-family="serif" font-size="8" fill="#D9A84E" opacity="0.6">W</text>
   <path d="M118 52 C88 62 68 88 68 118 c0 34 24 58 52 58 -8 4 -18 2 -28 0 C62 170 40 146 40 118 40 78 72 48 118 52 Z" fill="url(#goldGrad)" filter="url(#glow)"/>
   <circle cx="140" cy="116" r="8" fill="#C0C6D4" opacity="0.7"/>
-  <circle cx="144" cy="113" r="6.5" fill="#0B0B12"/>
+  <circle cx="144" cy="113" r="6.5" fill="#030816"/>
   <circle cx="100" cy="100" r="8" fill="url(#coreGlow)" filter="url(#glow)"/>
-  <circle cx="100" cy="38" r="4" fill="#D4AF37" filter="url(#glow)"/>
-  <circle cx="162" cy="100" r="4" fill="#D4AF37" filter="url(#glow)"/>
-  <circle cx="100" cy="162" r="3.5" fill="#D4AF37" opacity="0.7"/>
-  <circle cx="38" cy="100" r="3.5" fill="#D4AF37" opacity="0.7"/>
-  <text x="130" y="42" font-size="6" fill="#F3D99B" opacity="0.7">✦</text>
+  <circle cx="100" cy="38" r="4" fill="#D9A84E" filter="url(#glow)"/>
+  <circle cx="162" cy="100" r="4" fill="#D9A84E" filter="url(#glow)"/>
+  <circle cx="100" cy="162" r="3.5" fill="#D9A84E" opacity="0.7"/>
+  <circle cx="38" cy="100" r="3.5" fill="#D9A84E" opacity="0.7"/>
+  <text x="130" y="42" font-size="6" fill="#FFF6D6" opacity="0.7">✦</text>
 </svg>
 ```
 
-**Logo rules:** Never replace with generic moon/compass. Never simplify the three rings. Always on `#0B0B12`. Wordmark: CHRONAURA in Cinzel serif. Slogan: *Your time, written in the stars.*
+**Logo rules:** Never replace with generic moon/compass. Never simplify the three rings. Always on `#030816`. Wordmark: CHRONAURA in Cinzel serif. Slogan: *Your time, written in the stars.*
 
 ---
 
@@ -73,11 +73,11 @@ Crescent-C astrolabe — three concentric rings, compass needle, N/S/E/W points,
 
 | Token | Value |
 |---|---|
-| Cosmic Black (bg) | `#0B0B12` |
-| Midnight Navy (surface) | `#121A2C` |
-| Deep Indigo (elevated) | `#1E2A44` |
-| Astral Gold | `#D4AF37` |
-| Gold 2 | `#F3D99B` |
+| Cosmic Black (bg) | `#030816` |
+| Midnight Navy (surface) | `#071225` |
+| Deep Indigo (elevated) | `#0B1630` |
+| Astral Gold | `#D9A84E` |
+| Gold 2 | `#FFF6D6` |
 | Moon Silver | `#C0C6D4` |
 | Nebula Violet | `#7B5CF6` |
 | Green (lock) | `#4ADE80` |

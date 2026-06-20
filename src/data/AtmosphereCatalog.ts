@@ -44,7 +44,7 @@ export const ATMOSPHERE_CATALOG: AtmosphericSatellite[] = [
       "Continuously crewed microgravity research laboratory. Orbits Earth every 90 minutes at 17,500 mph.",
     status: "active",
     noradId: 25544,
-    radarColor: "#D4AF37", // Gold
+    radarColor: "#D9A84E", // Gold
     latitudeDegrees: 45.0,
     longitudeDegrees: -90.0,
   },
@@ -112,7 +112,7 @@ export const ATMOSPHERE_CATALOG: AtmosphericSatellite[] = [
       "Multi-instrument Earth observation platform monitoring land, ocean, and atmosphere interactions to study climate change.",
     status: "active",
     noradId: 25994,
-    radarColor: "#F3D99B", // Light gold
+    radarColor: "#FFF6D6", // Light gold
     latitudeDegrees: 10.0,
     longitudeDegrees: -30.0,
   },
@@ -137,11 +137,11 @@ export const ATMOSPHERE_CATALOG: AtmosphericSatellite[] = [
 
 /** Color legend for the radar scope legend bar */
 export const CLASS_COLORS: Record<SatelliteClass, string> = {
-  "space-station": "#D4AF37",
+  "space-station": "#D9A84E",
   "telescope": "#78C8FF",
   "starlink": "#7B5CF6",
   "weather": "#4ADE80",
-  "science": "#F3D99B",
+  "science": "#FFF6D6",
   "rocket-body": "#A8AFBF",
 };
 

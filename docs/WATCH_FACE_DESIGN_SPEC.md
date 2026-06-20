@@ -40,7 +40,7 @@
 
 ## Color Palette
 - Background: `#05070D` deep space navy
-- Primary gold: `#D4AF37`
+- Primary gold: `#D9A84E`
 - Accent gold: `#C7A66A`
 - Light gold: `#F6DC91`
 - Silver/moon: `#C0C6D4`

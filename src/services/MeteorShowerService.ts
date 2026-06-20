@@ -25,11 +25,11 @@ export interface MeteorShower {
 
 export const METEOR_SHOWERS: MeteorShower[] = [
   { id: "perseids",   name: "Perseids",    parentBody: "Comet 109P/Swift-Tuttle", peakDate: "08-12", activeWindowDays: 14, radiantRA: 46.0,  radiantDec: 58.0,  zhr: 100, radarColor: "#78C8FF", description: "The most reliable major shower. Swift bright streaks from Perseus." },
-  { id: "geminids",   name: "Geminids",    parentBody: "Asteroid 3200 Phaethon",  peakDate: "12-13", activeWindowDays: 10, radiantRA: 112.0, radiantDec: 32.5,  zhr: 150, radarColor: "#F3D99B", description: "The strongest annual shower — unusual asteroid parent, multicolored meteors." },
+  { id: "geminids",   name: "Geminids",    parentBody: "Asteroid 3200 Phaethon",  peakDate: "12-13", activeWindowDays: 10, radiantRA: 112.0, radiantDec: 32.5,  zhr: 150, radarColor: "#FFF6D6", description: "The strongest annual shower — unusual asteroid parent, multicolored meteors." },
   { id: "leonids",    name: "Leonids",     parentBody: "Comet 55P/Tempel-Tuttle", peakDate: "11-17", activeWindowDays: 6,  radiantRA: 152.0, radiantDec: 22.0,  zhr: 15,  radarColor: "#EF9F27", description: "Legendary for rare storm years. Fast, bright, with persistent trains." },
   { id: "orionids",   name: "Orionids",    parentBody: "Comet 1P/Halley",         peakDate: "10-21", activeWindowDays: 10, radiantRA: 95.0,  radiantDec: 16.0,  zhr: 25,  radarColor: "#7B5CF6", description: "Debris from Halley's Comet. Fast meteors with long persistent trains." },
   { id: "quadrantids",name: "Quadrantids", parentBody: "Asteroid 2003 EH1",       peakDate: "01-03", activeWindowDays: 4,  radiantRA: 230.0, radiantDec: 49.5,  zhr: 120, radarColor: "#4ADE80", description: "Sharp peak lasting only hours. Faint blue meteors from a defunct constellation." },
-  { id: "eta-aquariids", name: "Eta Aquariids", parentBody: "Comet 1P/Halley",   peakDate: "05-05", activeWindowDays: 10, radiantRA: 338.0, radiantDec: -1.0,  zhr: 50,  radarColor: "#D4AF37", description: "Best seen from the southern hemisphere. Second Halley shower of the year." },
+  { id: "eta-aquariids", name: "Eta Aquariids", parentBody: "Comet 1P/Halley",   peakDate: "05-05", activeWindowDays: 10, radiantRA: 338.0, radiantDec: -1.0,  zhr: 50,  radarColor: "#D9A84E", description: "Best seen from the southern hemisphere. Second Halley shower of the year." },
 ];
 
 function toRad(d: number): number { return d * Math.PI / 180; }

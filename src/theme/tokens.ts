@@ -3,26 +3,26 @@
 
 export const ChronauraColors = {
   // Primary palette (from brand guide)
-  cosmicBlack: "#0B0B12",
-  midnightNavy: "#121A2C",
-  deepIndigo: "#1E2A44",
-  gold: "#D4AF37",        // Astral Gold — primary accent
+  cosmicBlack: "#030816",
+  midnightNavy: "#071225",
+  deepIndigo: "#0B1630",
+  gold: "#D9A84E",        // Astral Gold — primary accent
   silver: "#C0C6D4",      // Moon Silver — secondary text
   violet: "#7B5CF6",      // Nebula Violet — accent highlight
 
   // Extended palette
-  gold2: "#F3D99B",       // Light gold for highlights
+  gold2: "#FFF6D6",       // Light gold for highlights
   goldDim: "#C7A66A",     // Muted gold for borders
   muted: "#A8AFBF",       // Muted text
   faint: "#747D90",       // Faint labels
 
   // Backgrounds
-  background: "#0B0B12",  // App background (Cosmic Black)
-  surface: "#121A2C",     // Card/panel surface (Midnight Navy)
-  elevated: "#1E2A44",    // Elevated surface (Deep Indigo)
+  background: "#030816",  // App background (Cosmic Black)
+  surface: "#071225",     // Card/panel surface (Midnight Navy)
+  elevated: "#0B1630",    // Elevated surface (Deep Indigo)
 
   // Borders
-  borderGold: "rgba(212,175,55,0.34)",
+  borderGold: "rgba(217,168,78,0.34)",
   borderSubtle: "rgba(192,198,212,0.12)",
   borderFaint: "rgba(255,255,255,0.06)",
 
@@ -35,7 +35,7 @@ export const ChronauraColors = {
   orange: "#EF9F27",
   blue: "#78C8FF",
   green: "#4ADE80",
-  black: "#0B0B12"
+  black: "#030816"
 } as const;
 
 export const ChronauraTypography = {
@@ -81,8 +81,8 @@ export interface ChronauraThemePalette {
 }
 
 export const ChronauraThemes: Record<string, ChronauraThemePalette> = {
-  system: { background: "#0B0B12", surface: "#121A2C", accent: "#D4AF37", text: "#F8F4EA", muted: "#A8AFBF", gradient: ["#0B0B12", "#121A2C"] },
-  midnight_gold: { background: "#0B0B12", surface: "#121A2C", accent: "#D4AF37", text: "#F8F4EA", muted: "#A8AFBF", gradient: ["#0B0B12", "#121A2C"] },
+  system: { background: "#030816", surface: "#071225", accent: "#D9A84E", text: "#F8F4EA", muted: "#A8AFBF", gradient: ["#030816", "#071225"] },
+  midnight_gold: { background: "#030816", surface: "#071225", accent: "#D9A84E", text: "#F8F4EA", muted: "#A8AFBF", gradient: ["#030816", "#071225"] },
   soft_moon: { background: "#14182A", surface: "#1E2640", accent: "#C0C6D4", text: "#F0F2F8", muted: "#8E96A8", gradient: ["#14182A", "#1E2640"] },
   deep_space: { background: "#040408", surface: "#0A0C18", accent: "#7B5CF6", text: "#E8E4F0", muted: "#6E6E8A", gradient: ["#040408", "#0A0C18"] }
 };

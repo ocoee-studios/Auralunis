@@ -29,7 +29,7 @@ function SettingRow({ title, description, value, onValueChange }: SettingRowProp
       <Switch
         value={value}
         onValueChange={onValueChange}
-        trackColor={{ false: "rgba(255,255,255,0.14)", true: "rgba(212,175,55,0.42)" }}
+        trackColor={{ false: "rgba(255,255,255,0.14)", true: "rgba(217,168,78,0.42)" }}
         thumbColor={value ? ChronauraColors.gold2 : ChronauraColors.silver}
       />
     </View>
@@ -232,12 +232,12 @@ export function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  hero: { borderRadius: 28, padding: 18, backgroundColor: "rgba(212,175,55,0.08)", borderWidth: 1, borderColor: "rgba(212,175,55,0.18)", marginBottom: 16 },
+  hero: { borderRadius: 28, padding: 18, backgroundColor: "rgba(217,168,78,0.08)", borderWidth: 1, borderColor: "rgba(217,168,78,0.18)", marginBottom: 16 },
   heroCopy: { color: ChronauraColors.silver, fontSize: 14, lineHeight: 21, marginTop: 14, textAlign: "center" },
   syncState: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 10, textAlign: "center" },
   section: { borderRadius: 24, padding: 14, backgroundColor: "rgba(255,255,255,0.04)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)", marginBottom: 14 },
   sectionTitle: { color: ChronauraColors.gold2, fontSize: 12, letterSpacing: 2, textTransform: "uppercase", fontWeight: "900", marginBottom: 10 },
-  infoCard: { borderRadius: 20, padding: 14, backgroundColor: "rgba(4,5,11,0.65)", borderWidth: 1, borderColor: "rgba(212,175,55,0.18)" },
+  infoCard: { borderRadius: 20, padding: 14, backgroundColor: "rgba(4,5,11,0.65)", borderWidth: 1, borderColor: "rgba(217,168,78,0.18)" },
   infoTitle: { color: "#FFF", fontSize: 21, fontWeight: "900" },
   infoCopy: { color: ChronauraColors.muted, fontSize: 13, lineHeight: 19, marginTop: 6 },
   settingRow: { flexDirection: "row", gap: 12, alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.06)" },
@@ -245,20 +245,20 @@ const styles = StyleSheet.create({
   settingDescription: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 17, marginTop: 3 },
   themeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 10 },
   themeTile: { width: "48%", borderRadius: 18, padding: 13, backgroundColor: "rgba(255,255,255,0.045)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)" },
-  themeTileActive: { backgroundColor: "rgba(212,175,55,0.12)", borderColor: "rgba(212,175,55,0.32)" },
+  themeTileActive: { backgroundColor: "rgba(217,168,78,0.12)", borderColor: "rgba(217,168,78,0.32)" },
   themeTitle: { color: "#FFF", fontSize: 14, fontWeight: "900" },
   themeSub: { color: ChronauraColors.muted, fontSize: 11, marginTop: 4 },
   actionButton: { backgroundColor: ChronauraColors.gold2, borderRadius: 17, paddingVertical: 13, alignItems: "center", marginTop: 14 },
   actionButtonText: { color: "#17100A", fontWeight: "900" },
-  secondaryButton: { borderRadius: 17, paddingVertical: 13, paddingHorizontal: 12, alignItems: "center", marginTop: 10, backgroundColor: "rgba(212,175,55,0.10)", borderWidth: 1, borderColor: "rgba(212,175,55,0.22)" },
+  secondaryButton: { borderRadius: 17, paddingVertical: 13, paddingHorizontal: 12, alignItems: "center", marginTop: 10, backgroundColor: "rgba(217,168,78,0.10)", borderWidth: 1, borderColor: "rgba(217,168,78,0.22)" },
   secondaryButtonText: { color: "#FFF", fontWeight: "800" },
   dangerButton: { borderRadius: 17, paddingVertical: 13, paddingHorizontal: 12, alignItems: "center", marginTop: 10, backgroundColor: "rgba(255,120,120,0.08)", borderWidth: 1, borderColor: "rgba(255,120,120,0.22)" },
   dangerButtonText: { color: "#FFD2D2", fontWeight: "800" },
   qualityLabel: { color: "#FFF", fontSize: 14, fontWeight: "800", marginTop: 12 },
   qualityDescription: { color: ChronauraColors.silver, fontSize: 12, lineHeight: 17, marginTop: 4, marginBottom: 10 },
   segmentRow: { flexDirection: "row", gap: 8, marginBottom: 12 },
-  segment: { flex: 1, paddingVertical: 10, borderRadius: 14, alignItems: "center", backgroundColor: "rgba(212,175,55,0.06)", borderWidth: 1, borderColor: "rgba(212,175,55,0.15)" },
-  segmentActive: { backgroundColor: "rgba(212,175,55,0.20)", borderColor: ChronauraColors.gold2 },
+  segment: { flex: 1, paddingVertical: 10, borderRadius: 14, alignItems: "center", backgroundColor: "rgba(217,168,78,0.06)", borderWidth: 1, borderColor: "rgba(217,168,78,0.15)" },
+  segmentActive: { backgroundColor: "rgba(217,168,78,0.20)", borderColor: ChronauraColors.gold2 },
   segmentText: { color: ChronauraColors.silver, fontSize: 13, fontWeight: "700" },
   segmentTextActive: { color: ChronauraColors.gold2 },
   localCount: { color: ChronauraColors.gold2, fontSize: 12, marginTop: 12 },
@@ -269,9 +269,9 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 14,
     marginBottom: 4,
-    backgroundColor: "rgba(212,175,55,0.08)",
+    backgroundColor: "rgba(217,168,78,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.18)"
+    borderColor: "rgba(217,168,78,0.18)"
   },
   aboutTitle: { color: "#FFF", fontSize: 18, fontWeight: "900" },
   aboutCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5 }

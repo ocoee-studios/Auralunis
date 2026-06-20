@@ -50,6 +50,6 @@ const styles = StyleSheet.create({
   active: { opacity: 1, transform: [{ scale: 1.08 }] },
   row: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
   pill: { color: ChronauraColors.silver, fontSize: 11, paddingHorizontal: 9, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
-  pillActive: { color: ChronauraColors.gold2, borderColor: "rgba(212,175,55,0.28)", backgroundColor: "rgba(212,175,55,0.1)" },
+  pillActive: { color: ChronauraColors.gold2, borderColor: "rgba(217,168,78,0.28)", backgroundColor: "rgba(217,168,78,0.1)" },
   caption: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 18, marginTop: 10 }
 });

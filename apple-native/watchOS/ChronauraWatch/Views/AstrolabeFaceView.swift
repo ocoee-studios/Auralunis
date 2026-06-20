@@ -16,10 +16,10 @@ struct AstrolabeFaceView: View {
 
     private let timer = Timer.publish(every: 1, on: .main, in: .common).autoconnect()
 
-    private let gold = Color(red: 0.83, green: 0.69, blue: 0.22)
-    private let brightGold = Color(red: 0.95, green: 0.85, blue: 0.61)
+    private let gold = Color(red: 0.85, green: 0.66, blue: 0.31)
+    private let brightGold = Color(red: 1.0, green: 0.96, blue: 0.84)
     private let silver = Color(red: 0.75, green: 0.78, blue: 0.83)
-    private let bg = Color(red: 0.043, green: 0.043, blue: 0.07)
+    private let bg = Color(red: 0.012, green: 0.031, blue: 0.086)
 
     // Planet data (populated from WatchConnectivity payload)
     private var planets: [PlanetDot] {

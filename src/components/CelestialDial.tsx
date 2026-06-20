@@ -44,9 +44,9 @@ function azToXY(azimuthDeg: number, radius: number): { x: number; y: number } {
 // Planet color map
 const BODY_COLORS: Record<string, string> = {
   moon: "#C0C6D4",
-  venus: "#F3D99B",
+  venus: "#FFF6D6",
   jupiter: "#EF9F27",
-  saturn: "#D4AF37",
+  saturn: "#D9A84E",
   mars: "#F0997B",
   mercury: "#B4B2A9",
   uranus: "#9FE1CB",

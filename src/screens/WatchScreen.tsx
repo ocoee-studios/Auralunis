@@ -47,16 +47,16 @@ function themePreview(themeId: WatchThemeId) {
     case "liquid_obsidian":
       return {
         face: "#020309",
-        border: "rgba(212,175,55,0.66)",
+        border: "rgba(217,168,78,0.66)",
         accent: "#FFF0B8",
-        soft: "rgba(212,175,55,0.18)"
+        soft: "rgba(217,168,78,0.18)"
       };
     default:
       return {
         face: "#070912",
-        border: "rgba(212,175,55,0.52)",
+        border: "rgba(217,168,78,0.52)",
         accent: ChronauraColors.gold2,
-        soft: "rgba(212,175,55,0.15)"
+        soft: "rgba(217,168,78,0.15)"
       };
   }
 }
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   faceSigil: { fontSize: 20, letterSpacing: 4 },
   faceInsight: { color: ChronauraColors.silver, fontSize: 12, lineHeight: 17, marginTop: 10, textAlign: "center", paddingHorizontal: 18 },
   faceTime: { color: "#FFF", fontSize: 38, fontWeight: "900", marginTop: 10 },
-  previewSummary: { borderRadius: 22, padding: 15, marginBottom: 12, backgroundColor: "rgba(212,175,55,0.09)", borderWidth: 1, borderColor: "rgba(212,175,55,0.20)" },
+  previewSummary: { borderRadius: 22, padding: 15, marginBottom: 12, backgroundColor: "rgba(217,168,78,0.09)", borderWidth: 1, borderColor: "rgba(217,168,78,0.20)" },
   previewTitle: { color: "#FFF", fontSize: 20, fontWeight: "900" },
   previewCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5 },
   previewMeta: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 8 },
@@ -384,13 +384,13 @@ const styles = StyleSheet.create({
   sectionCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6, marginBottom: 4 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
   tile: { width: "48%", borderRadius: 17, padding: 12, backgroundColor: "rgba(255,255,255,0.04)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
-  tileActive: { backgroundColor: "rgba(212,175,55,0.12)", borderColor: "rgba(212,175,55,0.34)" },
+  tileActive: { backgroundColor: "rgba(217,168,78,0.12)", borderColor: "rgba(217,168,78,0.34)" },
   tileTitle: { color: "#FFF", fontSize: 14, fontWeight: "900" },
   tileCopy: { color: ChronauraColors.muted, fontSize: 11, lineHeight: 16, marginTop: 5 },
   tileState: { color: ChronauraColors.silver, fontSize: 10, marginTop: 8, fontWeight: "800" },
   tileStateActive: { color: ChronauraColors.gold2 },
   complicationRow: { flexDirection: "row", gap: 10, alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.06)" },
-  complicationActive: { backgroundColor: "rgba(212,175,55,0.05)" },
+  complicationActive: { backgroundColor: "rgba(217,168,78,0.05)" },
   complicationTitle: { color: "#FFF", fontSize: 14, fontWeight: "800" },
   complicationCopy: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 17, marginTop: 3 },
   nativeNote: { color: ChronauraColors.gold2, fontSize: 10, lineHeight: 15, marginTop: 4 },

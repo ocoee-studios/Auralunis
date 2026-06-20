@@ -179,9 +179,9 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 16,
     marginBottom: 12,
-    backgroundColor: "rgba(212,175,55,0.08)",
+    backgroundColor: "rgba(217,168,78,0.08)",
     borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.20)"
+    borderColor: "rgba(217,168,78,0.20)"
   },
   skyRow: {
     flexDirection: "row",
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 54,
     left: 20,
-    backgroundColor: "rgba(18,26,44,0.88)",
+    backgroundColor: "rgba(7,18,37,0.88)",
     borderRadius: 20,
     paddingHorizontal: 16,
     paddingVertical: 8,
