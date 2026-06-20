@@ -22,6 +22,7 @@ import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherSer
 import { computeTonightScore } from "@/services/TonightScoreService";
 import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
 import { tapLight } from "@/services/HapticService";
+import { computeSkyAtOffset } from "@/services/TimeScrubService";
 import { scheduleSkyEventNotifications } from "@/services/NotificationService";
 
 function formatClock(iso: string | null): string {
@@ -31,6 +32,7 @@ function formatClock(iso: string | null): string {
 
 export function HomeScreen() {
   const [noteDraft, setNoteDraft] = useState("");
+  const [scrubOffset, setScrubOffset] = useState(0);
   const { items, addNote } = useChronauraVault();
   const { settings } = useChronauraSettings();
   const { location, status } = useObserverLocation();
@@ -55,6 +57,17 @@ export function HomeScreen() {
     () => computeTonightScore(sky, weather, settings.skyQuality),
     [sky, weather, settings.skyQuality]
   );
+
+  // ── Scrubbed sky (when user drags the dial) ──────────────────────────
+  const scrubbedSky = useMemo(() => {
+    if (scrubOffset === 0) return null;
+    return computeSkyAtOffset(location, scrubOffset);
+  }, [location, scrubOffset]);
+
+  // Use scrubbed sky when active, live sky otherwise
+  const displaySky = scrubbedSky
+    ? { ...sky, visibleBodies: sky.visibleBodies } // TODO: map scrubbedSky planets back to TonightSky format
+    : sky;
 
   // ── Golden hour ──────────────────────────────────────────────────────────
   const sunPos = useMemo(() => computeSunPosition(location), [location]);
@@ -94,16 +107,24 @@ export function HomeScreen() {
         sky={sky}
         tonightScore={tonightScore.score}
         tonightLabel={tonightScore.label}
+        onTimeScrub={setScrubOffset}
+        scrubOffsetMinutes={scrubOffset}
       />
 
       {/* Local time + observer */}
       <View style={styles.timeRow}>
         <Text style={styles.timeValue}>
-          {new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
+          {scrubOffset === 0
+            ? new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+            : new Date(Date.now() + scrubOffset * 60_000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+          }
         </Text>
         <Text style={styles.timeDot}>·</Text>
         <Text style={styles.timeLocation}>
-          {status !== "fallback" ? "Your Location" : "Default Location"}
+          {scrubOffset === 0
+            ? (status !== "fallback" ? "Your Location" : "Default Location")
+            : `${scrubOffset > 0 ? "+" : ""}${Math.round(scrubOffset / 60)}h from now`
+          }
         </Text>
       </View>
 

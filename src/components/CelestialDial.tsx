@@ -7,16 +7,18 @@
 // Planet positions come from the existing sky ephemeris data.
 // Size: 260×260 to fit comfortably above the tab bar on all iPhones.
 
-import React, { useEffect, useRef, useState } from "react";
-import { View, StyleSheet, Text } from "react-native";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Svg, {
-  Circle, Line, G, Text as SvgText, Defs, RadialGradient, Stop,
+  Circle, Line, G, Text as SvgText, Defs, RadialGradient, Stop, Path,
 } from "react-native-svg";
 import Animated, {
   useSharedValue, useAnimatedProps, withRepeat, withTiming,
-  Easing,
+  Easing, runOnJS,
 } from "react-native-reanimated";
 import { ChronauraColors } from "@/theme/tokens";
+import { tapLight } from "@/services/HapticService";
 import type { TonightSky, VisibleBody } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 
 const SIZE = 260;
@@ -64,22 +66,71 @@ interface CelestialDialProps {
   sky: TonightSky;
   tonightScore: number;
   tonightLabel: string;
+  /** Called when the user scrubs time by dragging around the dial.
+   *  offsetMinutes: 0 = now, positive = future, negative = past.
+   *  One full clockwise rotation = +12 hours (720 min). */
+  onTimeScrub?: (offsetMinutes: number) => void;
+  /** Current scrub offset for display — 0 when live */
+  scrubOffsetMinutes?: number;
 }
 
-export function CelestialDial({ sky, tonightScore, tonightLabel }: CelestialDialProps) {
+export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, scrubOffsetMinutes = 0 }: CelestialDialProps) {
+  const isScrubbing = scrubOffsetMinutes !== 0;
   const [now, setNow] = useState(new Date());
 
-  // Update clock every second
+  // Update clock every second (pause during scrub)
   useEffect(() => {
+    if (isScrubbing) return;
     const id = setInterval(() => setNow(new Date()), 1000);
     return () => clearInterval(id);
-  }, []);
+  }, [isScrubbing]);
 
-  // Clock angles
-  const hours = now.getHours() % 12 + now.getMinutes() / 60;
-  const minutes = now.getMinutes() + now.getSeconds() / 60;
-  const hourAngle = hours * 30; // 360° / 12h = 30° per hour
-  const minAngle = minutes * 6;  // 360° / 60m = 6° per minute
+  // ── Time scrub gesture ──────────────────────────────────────────────────
+  // Drag clockwise = forward in time, counter-clockwise = backward.
+  // One full rotation (360°) = 12 hours = 720 minutes.
+  // We track cumulative angle delta from the gesture start.
+  const gestureStartAngle = useSharedValue(0);
+  const cumulativeOffset = useSharedValue(scrubOffsetMinutes);
+
+  const fireTimeScrub = useCallback((mins: number) => {
+    tapLight();
+    onTimeScrub?.(mins);
+  }, [onTimeScrub]);
+
+  const panGesture = Gesture.Pan()
+    .onBegin((e) => {
+      // Compute angle of touch relative to center
+      const dx = e.x - CENTER;
+      const dy = e.y - CENTER;
+      gestureStartAngle.value = Math.atan2(dy, dx);
+      cumulativeOffset.value = scrubOffsetMinutes;
+    })
+    .onUpdate((e) => {
+      const dx = e.x - CENTER;
+      const dy = e.y - CENTER;
+      const currentAngle = Math.atan2(dy, dx);
+      let delta = currentAngle - gestureStartAngle.value;
+      // Normalize to [-PI, PI]
+      if (delta > Math.PI) delta -= 2 * Math.PI;
+      if (delta < -Math.PI) delta += 2 * Math.PI;
+      // Map: full circle (2π) = 720 minutes (12 hours)
+      const minutesDelta = (delta / (2 * Math.PI)) * 720;
+      const newOffset = Math.round((cumulativeOffset.value + minutesDelta) / 15) * 15; // snap to 15-min
+      const clamped = Math.max(-720, Math.min(720, newOffset));
+      runOnJS(fireTimeScrub)(clamped);
+    });
+
+  function resetToNow() {
+    tapLight();
+    onTimeScrub?.(0);
+  }
+
+  // Clock angles — offset by scrub amount
+  const scrubDate = new Date(now.getTime() + scrubOffsetMinutes * 60_000);
+  const hours = scrubDate.getHours() % 12 + scrubDate.getMinutes() / 60;
+  const minutes = scrubDate.getMinutes() + scrubDate.getSeconds() / 60;
+  const hourAngle = hours * 30;
+  const minAngle = minutes * 6;
 
   const hourEnd = azToXY(hourAngle, 42);
   const minEnd = azToXY(minAngle, 58);
@@ -100,8 +151,9 @@ export function CelestialDial({ sky, tonightScore, tonightLabel }: CelestialDial
   );
 
   return (
-    <View style={styles.container}>
-      <Svg width={SIZE} height={SIZE}>
+    <GestureDetector gesture={panGesture}>
+      <View style={styles.container}>
+        <Svg width={SIZE} height={SIZE}>
         <Defs>
           <RadialGradient id="dialGlow" cx="50%" cy="50%" r="50%">
             <Stop offset="0%" stopColor={ChronauraColors.gold} stopOpacity="0.08" />
@@ -246,15 +298,58 @@ export function CelestialDial({ sky, tonightScore, tonightLabel }: CelestialDial
         />
         {/* Center dot */}
         <Circle cx={CENTER} cy={CENTER} r={3.5} fill={ChronauraColors.gold} />
+
+        {/* Scrub progress arc — shows how far you've scrubbed */}
+        {isScrubbing && (
+          <Path
+            d={describeArc(CENTER, CENTER, RINGS.rim + 2, 0, (scrubOffsetMinutes / 720) * 360)}
+            stroke={scrubOffsetMinutes > 0 ? ChronauraColors.green + "55" : ChronauraColors.violet + "55"}
+            strokeWidth={3}
+            fill="none"
+            strokeLinecap="round"
+          />
+        )}
       </Svg>
 
       {/* Tonight Score overlay — centered on the dial */}
       <View style={styles.centerOverlay}>
-        <Text style={styles.scoreNum}>{tonightScore}</Text>
-        <Text style={styles.scoreLbl}>{tonightLabel.toUpperCase()}</Text>
+        {isScrubbing ? (
+          <>
+            <Text style={styles.scrubTime}>
+              {formatScrubTime(scrubDate)}
+            </Text>
+            <Text style={styles.scrubOffset}>
+              {scrubOffsetMinutes > 0 ? "+" : ""}{Math.round(scrubOffsetMinutes / 60)}h
+            </Text>
+            <TouchableOpacity onPress={resetToNow} hitSlop={20}>
+              <Text style={styles.resetBtn}>Reset to now</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <>
+            <Text style={styles.scoreNum}>{tonightScore}</Text>
+            <Text style={styles.scoreLbl}>{tonightLabel.toUpperCase()}</Text>
+          </>
+        )}
       </View>
     </View>
+    </GestureDetector>
   );
+}
+
+/** Format a date for scrub display */
+function formatScrubTime(date: Date): string {
+  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+}
+
+/** SVG arc path descriptor — for the scrub progress indicator */
+function describeArc(cx: number, cy: number, r: number, startAngle: number, endAngle: number): string {
+  const toRad = (d: number) => (d - 90) * Math.PI / 180;
+  const start = { x: cx + Math.cos(toRad(endAngle)) * r, y: cy + Math.sin(toRad(endAngle)) * r };
+  const end = { x: cx + Math.cos(toRad(startAngle)) * r, y: cy + Math.sin(toRad(startAngle)) * r };
+  const largeArc = Math.abs(endAngle - startAngle) > 180 ? 1 : 0;
+  const sweep = endAngle > startAngle ? 1 : 0;
+  return `M ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} ${sweep} ${end.x} ${end.y}`;
 }
 
 const styles = StyleSheet.create({
@@ -284,5 +379,25 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: ChronauraColors.gold,
     marginTop: 2,
+  },
+  scrubTime: {
+    fontSize: 22,
+    fontWeight: "900",
+    color: ChronauraColors.gold2,
+    lineHeight: 24,
+  },
+  scrubOffset: {
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 1,
+    color: ChronauraColors.violet,
+    marginTop: 2,
+  },
+  resetBtn: {
+    fontSize: 9,
+    fontWeight: "700",
+    color: ChronauraColors.gold,
+    marginTop: 6,
+    textDecorationLine: "underline",
   },
 });
