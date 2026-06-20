@@ -10,6 +10,11 @@ import {
   ATMOSPHERE_CATALOG,
   type AtmosphericSatellite,
 } from "@/data/AtmosphereCatalog";
+import {
+  getLiveISSPosition,
+  getLiveStarlinkPositions,
+  isSatelliteJsAvailable,
+} from "@/services/LiveTLEService";
 import { calculateAlignment, type AlignmentResult } from "@/utils/alignmentEngine";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import type { CameraPointing } from "@/features/sky-lens/ar/SkyLensProjection";
