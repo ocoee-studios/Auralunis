@@ -144,9 +144,8 @@ export function OrbitalAlignmentScreen() {
   useEffect(() => {
     if (mode !== "debris") return;
     const id = setInterval(() => {
-      simulateDebrisTick();
       // Re-propagate live TLE or advance mock
-      await tickDebrisLive().catch(() => {});
+      tickDebrisLive().catch(() => {});
       tickDebrisMock();
       const fleet = computeDebrisFleet(location, pointing);
       tickLockTimers(fleet);
@@ -188,18 +187,6 @@ export function OrbitalAlignmentScreen() {
     engine.init().catch(() => {});
     return () => { destroyIonosphericEngine().catch(() => {}); };
   }, []);
-
-  // Feed alignment score into audio engine whenever in static mode
-  useEffect(() => {
-    if (mode !== "static") {
-      getIonosphericEngine().setMuted(true);
-      return;
-    }
-    getIonosphericEngine().setMuted(audioMuted);
-    if (!audioMuted) {
-      getIonosphericEngine().update(activeScore, isLocked);
-    }
-  }, [mode, activeScore, isLocked, audioMuted]);
 
   // Chain init
   useEffect(() => {
@@ -278,6 +265,30 @@ export function OrbitalAlignmentScreen() {
 
   const statusColor = isLocked ? AuraLunisColors.green : activeScore > 65 ? activeColor : AuraLunisColors.silver;
   const statusText = isLocked ? "LOCKED" : activeScore > 65 ? "ALIGNING" : "SEARCHING";
+
+  // Feed alignment score into audio engine whenever in static mode
+  useEffect(() => {
+    if (mode !== "static") {
+      getIonosphericEngine().setMuted(true);
+      return;
+    }
+    getIonosphericEngine().setMuted(audioMuted);
+    if (!audioMuted) {
+      getIonosphericEngine().update(activeScore, isLocked);
+    }
+  }, [mode, activeScore, isLocked, audioMuted]);
+
+  // Audio engine — sync with alignment state
+  useEffect(() => {
+    if (mode !== "static") {
+      destroyIonosphericEngine();
+      return;
+    }
+    getIonosphericEngine().setMuted(audioMuted);
+    if (!audioMuted) {
+      getIonosphericEngine().update(activeScore, isLocked);
+    }
+  }, [mode, activeScore, isLocked, audioMuted]);
 
   // Haptics
   useEffect(() => {
