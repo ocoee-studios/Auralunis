@@ -13,7 +13,7 @@
 // + Horizon Scope on all radar modes
 
 import React, { useEffect, useMemo, useRef, useState, useCallback } from "react";
-import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity, Vibration } from "react-native";
 import Animated, {
   useSharedValue, useAnimatedStyle, withRepeat, withSequence,
   withTiming, withSpring, Easing,
@@ -37,6 +37,7 @@ import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/ser
 import { recordLock } from "@/services/CosmicDriftService";
 import { CosmicDriftGalaxy } from "@/components/CosmicDriftGalaxy";
 import { computeDebrisFleet, tickDebrisMock, tickDebrisLive, initDebrisLive, tickLockTimers, getTotalCatalogued, isDebrisLive } from "@/services/SpaceDebrisService";
+import { computeDecayFleet as computeReentryFleet, simulateDecayTick, getDecayFleet, formatReentryWindow, reentryAlertPattern, initReEntryLive, isReEntryLive } from "@/services/ReEntryService";
 import { getActiveShowers } from "@/services/MeteorShowerService";
 import { getDailyChain, getChainProgress, advanceChain, resetChain } from "@/services/SkyAlignmentChainService";
 import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/services/SolarWindService";
@@ -59,7 +60,7 @@ const PREMIUM_MODE_DESCRIPTIONS: Partial<Record<TrackingMode, string>> = {
 
 const MODE_LABELS: Record<TrackingMode, string> = {
   fleet: "Fleet", "deep-space": "Deep Space", train: "Train", golden: "Golden",
-  debris: "Debris", meteor: "Meteor", chain: "Chain", static: "Static",
+  debris: "Debris", meteor: "Meteor", chain: "Chain", static: "Static", reentry: "Re-Entry",
 };
 
 const SIM_LOCATION: ObserverLocation = { latitudeDegrees: 40.7128, longitudeDegrees: -74.006, altitudeMeters: 10 };
