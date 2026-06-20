@@ -1,18 +1,27 @@
+// HomeScreen.tsx
+// The living astrolabe — Chronaura's home screen designed as a single
+// interactive celestial instrument, not a stack of cards.
+//
+// Center: CelestialDial with clock hands, planet positions, sun vector, moon
+// Below: golden hour countdown, time scrub, mode shortcuts, visible bodies
+// All data from existing services (SkyEphemerisService, TonightScoreService, etc.)
+
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import {
+  Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View,
+} from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
-import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
-import { AstrolabePreview } from "@/components/AstrolabePreview";
+import { CelestialDial } from "@/components/CelestialDial";
 import { ChronauraColors } from "@/theme/tokens";
 import { useChronauraVault } from "@/state/ChronauraVaultContext";
 import { useChronauraSettings } from "@/state/ChronauraSettingsContext";
-import { TimeScrubMatrixPanel } from "@/features/aura-pro/TimeScrubMatrixPanel";
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherService";
 import { computeTonightScore } from "@/services/TonightScoreService";
-import { tapLight, tapSuccess } from "@/services/HapticService";
+import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
+import { tapLight } from "@/services/HapticService";
 import { scheduleSkyEventNotifications } from "@/services/NotificationService";
 
 function formatClock(iso: string | null): string {
@@ -21,23 +30,21 @@ function formatClock(iso: string | null): string {
 }
 
 export function HomeScreen() {
-  const [soundBathOn, setSoundBathOn] = useState(false);
   const [noteDraft, setNoteDraft] = useState("");
-  const [timeOffsetDays, setTimeOffsetDays] = useState(0);
-  const { items, addItem, addNote } = useChronauraVault();
+  const { items, addNote } = useChronauraVault();
   const { settings } = useChronauraSettings();
-
   const { location, status } = useObserverLocation();
+
+  // ── Sky data ──────────────────────────────────────────────────────────────
   const sky = useMemo(() => computeTonightSky(location), [location]);
 
   const [weather, setWeather] = useState<WeatherSnapshot>({
-    cloudPercent: 30, humidity: 50, tempCelsius: 20, description: "loading…", source: "unavailable"
+    cloudPercent: 30, humidity: 50, tempCelsius: 20, description: "loading…", source: "unavailable",
   });
   useEffect(() => {
     fetchCurrentWeather(location).then(setWeather).catch(() => {});
   }, [location]);
 
-  // Schedule sunset + moonrise local notifications when sky data is ready.
   useEffect(() => {
     if (settings.notificationsEnabled) {
       scheduleSkyEventNotifications(sky).catch(() => {});
@@ -49,199 +56,334 @@ export function HomeScreen() {
     [sky, weather, settings.skyQuality]
   );
 
-  const planetsVisible = sky.visibleBodies
-    .filter((body) => body.id !== "sun" && body.id !== "moon")
-    .map((body) => body.name);
-  const skySummary =
-    (planetsVisible.length
-      ? `${planetsVisible.join(", ")} visible now`
-      : "No naked-eye planets above the horizon") +
-    ` · Moon ${sky.moonIlluminationPercent}% · Next moonrise ${formatClock(sky.moon.riseISO)}`;
+  // ── Golden hour ──────────────────────────────────────────────────────────
+  const sunPos = useMemo(() => computeSunPosition(location), [location]);
+  const goldenEvents = useMemo(() => findNextGoldenEvents(location), [location]);
+  const nextGolden = goldenEvents[0] ?? null;
 
+  // ── Visible planets ──────────────────────────────────────────────────────
+  const visibleBodies = sky.visibleBodies.filter(
+    (b) => b.id !== "sun" && b.altitudeDegrees > 0
+  );
+  const belowBodies = sky.visibleBodies.filter(
+    (b) => b.id !== "sun" && b.altitudeDegrees <= 0
+  );
+
+  // ── Quick note ───────────────────────────────────────────────────────────
   function saveQuickNote() {
     const trimmed = noteDraft.trim();
-
-    if (!trimmed) {
-      Alert.alert("Add a note", "Write a short observation before saving it to your local prototype Vault.");
-      return;
-    }
-
+    if (!trimmed) return;
+    tapLight();
     addNote(trimmed);
     setNoteDraft("");
-    Alert.alert("Saved", "Your cosmic note was saved locally in the prototype Vault.");
+    Alert.alert("Saved", "Note saved to your Cosmic Vault.");
   }
 
   return (
-    <ScreenShell title="Living Astrolabe" subtitle="Home">
-      {/* Date display */}
+    <ScreenShell title="Chronaura" subtitle="Home">
+
+      {/* Date */}
       <Text style={styles.dateText}>
-        {new Date().toLocaleDateString("en-US", { weekday: "long", month: "long", day: "numeric", year: "numeric" }).toUpperCase()}
+        {new Date().toLocaleDateString("en-US", {
+          weekday: "long", month: "long", day: "numeric",
+        }).toUpperCase()}
       </Text>
 
-      <AstrolabePreview sky={sky} />
+      {/* ── The Celestial Dial ── */}
+      <CelestialDial
+        sky={sky}
+        tonightScore={tonightScore.score}
+        tonightLabel={tonightScore.label}
+      />
 
-      {/* Local time */}
-      <View style={styles.timeBlock}>
-        <Text style={styles.timeLabel}>LOCAL TIME</Text>
+      {/* Local time + observer */}
+      <View style={styles.timeRow}>
         <Text style={styles.timeValue}>
-          {new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+          {new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })}
         </Text>
-        <Text style={styles.timeLocation}>{status !== "fallback" ? "Your Location" : "Default Location"}</Text>
+        <Text style={styles.timeDot}>·</Text>
+        <Text style={styles.timeLocation}>
+          {status !== "fallback" ? "Your Location" : "Default Location"}
+        </Text>
       </View>
 
-      {/* Two-column: Tonight Score + Daily Alignment */}
-      <View style={styles.twoCol}>
-        <GlassPanel accent style={{ flex: 1 }}>
-          <Text style={styles.colLabel}>TONIGHT SCORE</Text>
-          <View style={styles.scoreCircle}>
-            <Text style={styles.scoreNumber}>{tonightScore.score}</Text>
-            <Text style={styles.scoreLabel}>{tonightScore.label}</Text>
+      {/* ── Golden Hour Countdown ── */}
+      {nextGolden && (
+        <View style={styles.goldenBar}>
+          <View style={styles.goldenIcon}>
+            <Text style={styles.goldenIconText}>☀</Text>
           </View>
-          <Text style={styles.colHint}>{skySummary}</Text>
-        </GlassPanel>
-        <GlassPanel style={{ flex: 1 }}>
-          <Text style={styles.colLabel}>DAILY COSMIC ALIGNMENT</Text>
-          <Text style={styles.colBody}>The cosmos support growth, focus, and meaningful change.</Text>
-        </GlassPanel>
+          <View style={styles.goldenText}>
+            <Text style={styles.goldenTitle}>
+              {nextGolden.type === "dawn" ? "GOLDEN DAWN" : "GOLDEN DUSK"}
+            </Text>
+            <Text style={styles.goldenTime}>
+              {sunPos.isGoldenHour ? "NOW" : formatCountdown(nextGolden.minutesUntil)}
+            </Text>
+            <Text style={styles.goldenSub}>
+              Sun az {Math.round(sunPos.azimuth)}° · el {sunPos.elevation.toFixed(1)}°
+            </Text>
+          </View>
+        </View>
+      )}
+
+      {/* ── Sky Summary ── */}
+      <Text style={styles.skySummary}>
+        {visibleBodies.length > 0
+          ? `${visibleBodies.map(b => b.name).join(", ")} visible`
+          : "No naked-eye planets above the horizon"}
+        {" · Moon "}
+        {sky.moonIlluminationPercent}%
+      </Text>
+
+      {/* ── Visible Bodies ── */}
+      <GlassPanel accent style={styles.bodiesCard}>
+        <Text style={styles.sectionLabel}>VISIBLE TONIGHT</Text>
+        {visibleBodies.map((body) => (
+          <View key={body.id} style={styles.bodyRow}>
+            <View style={[styles.bodyDot, { backgroundColor: bodyColor(body.id) }]} />
+            <Text style={styles.bodyName}>{body.name}</Text>
+            <Text style={styles.bodyData}>
+              az {Math.round(body.azimuthDegrees)}° · {Math.round(body.altitudeDegrees)}°
+            </Text>
+          </View>
+        ))}
+        {belowBodies.filter(b => b.id !== "moon").map((body) => (
+          <View key={body.id} style={styles.bodyRow}>
+            <View style={[styles.bodyDot, { backgroundColor: bodyColor(body.id), opacity: 0.3 }]} />
+            <Text style={[styles.bodyName, { color: ChronauraColors.faint }]}>{body.name}</Text>
+            <Text style={[styles.bodyData, { color: ChronauraColors.faint }]}>below horizon</Text>
+          </View>
+        ))}
+      </GlassPanel>
+
+      {/* ── Mode Shortcuts ── */}
+      <View style={styles.modeRow}>
+        <ModeShortcut icon="◎" label="Constellations" sub="Overlay" />
+        <ModeShortcut icon="⊹" label="AR Sky" sub="Point & find" />
+        <ModeShortcut icon="◈" label="Fleet" sub="Satellites" />
       </View>
 
-      <GlassPanel style={{ marginBottom: 12 }}>
-        <Text style={styles.noteTitle}>Cosmic Notes</Text>
-        <Text style={styles.noteCopy}>Save observations, ritual thoughts, dreams, or LifeSky moments locally.</Text>
+      {/* ── Cosmic Notes (compact) ── */}
+      <GlassPanel style={styles.notesCard}>
+        <Text style={styles.notesTitle}>Cosmic Notes</Text>
         <TextInput
           value={noteDraft}
           onChangeText={setNoteDraft}
           placeholder="What did you notice in the sky?"
-          placeholderTextColor={ChronauraColors.muted}
+          placeholderTextColor={ChronauraColors.faint}
           multiline
-          style={styles.input}
+          style={styles.noteInput}
         />
-        <Pressable style={styles.primaryButton} onPress={saveQuickNote}>
-          <Text style={styles.primaryButtonText}>Save Note to Vault</Text>
+        <Pressable style={styles.saveBtn} onPress={saveQuickNote}>
+          <Text style={styles.saveBtnText}>Save to Vault</Text>
         </Pressable>
-        <Text style={styles.vaultCount}>{items.length} locally saved prototype Vault items</Text>
+        {items.length > 0 && (
+          <Text style={styles.vaultCount}>{items.length} vault items</Text>
+        )}
       </GlassPanel>
-
-      <FeatureCard
-        title="Daily Cosmic Alignment"
-        description="A daily ritual insight tied to the current sky. Today: build structure around the ideas that keep returning."
-        actionLabel="Generate Insight"
-        onPress={() => Alert.alert("Daily Cosmic Alignment", "Saturn steadies the day. Choose one meaningful task and give it a clear boundary.")}
-      />
-
-      <FeatureCard
-        title="Celestial Alarms"
-        description="Sunrise, moonrise, Venus visible, stargazing window, and Lunar Wind-Down reminders."
-        actionLabel="Add Moonrise Alarm"
-        onPress={() => Alert.alert("Celestial Alarm", "Moonrise reminder prepared for 20 minutes before visibility. Native notifications connect during device integration.")}
-      />
-
-      <FeatureCard
-        title="Tonight’s Ritual"
-        description="Find the Moon, listen to Saturn, save one note, and begin a three-minute Astral Breath."
-        actionLabel="Begin Ritual"
-        onPress={() => Alert.alert("Tonight’s Ritual", "Step 1: open Sky Lens or Manual Sky Map and locate the Moon.")}
-      />
-
-      <TimeScrubMatrixPanel />
-
-      <FeatureCard
-        title="Cosmic Steering Wheel"
-        description={`Legacy quick-scrub shortcut offset: ${timeOffsetDays} day${Math.abs(timeOffsetDays) === 1 ? "" : "s"}.`}
-        actionLabel="Quick Scrub Forward One Day"
-        onPress={() => setTimeOffsetDays((previous) => previous + 1)}
-      />
-
-      <FeatureCard
-        title="LifeSky Timeline"
-        description="Save a meaningful moment with its exact sky-state snapshot."
-        actionLabel="Save LifeSky Moment"
-        onPress={() => {
-          addItem({ type: "lifesky", title: "LifeSky Moment", detail: `Saved at time offset ${timeOffsetDays} days.` });
-          Alert.alert("LifeSky", "A local prototype LifeSky moment was saved.");
-        }}
-      />
-
-      <FeatureCard
-        title="Astral Sound Bath"
-        description={`Resonant Geometry prototype. Current state: ${soundBathOn ? "Playing" : "Paused"}.`}
-        actionLabel={soundBathOn ? "Pause Sound Bath" : "Play Sound Bath"}
-        onPress={() => setSoundBathOn((previous) => !previous)}
-      />
-
-      <FeatureCard
-        title="Cosmic Vault"
-        description="Saved notes, LifeSky moments, lessons, captures, objects, and Astral Seals."
-        actionLabel="Review Vault Summary"
-        onPress={() => Alert.alert("Cosmic Vault", `${items.length} local prototype items are currently saved.`)}
-        status={`${items.length} items`}
-      />
     </ScreenShell>
   );
 }
 
+// ── Helpers ─────────────────────────────────────────────────────────────────
+
+function bodyColor(id: string): string {
+  const map: Record<string, string> = {
+    moon: "#C0C6D4", venus: "#F3D99B", jupiter: "#EF9F27",
+    saturn: "#D4AF37", mars: "#F0997B", mercury: "#B4B2A9",
+    uranus: "#9FE1CB", neptune: "#85B7EB",
+  };
+  return map[id] ?? ChronauraColors.silver;
+}
+
+function ModeShortcut({ icon, label, sub }: { icon: string; label: string; sub: string }) {
+  return (
+    <TouchableOpacity style={styles.modeCard}>
+      <Text style={styles.modeIcon}>{icon}</Text>
+      <Text style={styles.modeName}>{label}</Text>
+      <Text style={styles.modeSub}>{sub}</Text>
+    </TouchableOpacity>
+  );
+}
+
+// ── Styles ──────────────────────────────────────────────────────────────────
+
 const styles = StyleSheet.create({
-  summary: {
-    borderRadius: 24,
-    padding: 16,
-    backgroundColor: "rgba(212,175,55,0.10)",
-    borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.22)",
-    marginBottom: 12
+  dateText: {
+    fontSize: 10,
+    color: ChronauraColors.faint,
+    letterSpacing: 1.5,
+    fontWeight: "600",
+    marginBottom: 4,
+    textAlign: "center",
   },
-  summaryTitle: { color: "#FFF", fontSize: 21, fontWeight: "900" },
-  summaryCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6 },
-  summaryHint: { color: ChronauraColors.muted, fontSize: 11, lineHeight: 16, marginTop: 6 },
-  compactButton: {
-    marginTop: 12,
+  timeRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 6,
+    marginBottom: 10,
+  },
+  timeValue: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: ChronauraColors.gold2,
+  },
+  timeDot: {
+    color: ChronauraColors.faint,
+    fontSize: 14,
+  },
+  timeLocation: {
+    fontSize: 10,
+    color: ChronauraColors.faint,
+  },
+  goldenBar: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    backgroundColor: ChronauraColors.surface,
+    borderWidth: 1,
+    borderColor: "rgba(239,159,39,0.25)",
     borderRadius: 14,
+    padding: 10,
+    marginBottom: 10,
+  },
+  goldenIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(239,159,39,0.12)",
+    borderWidth: 1,
+    borderColor: "rgba(239,159,39,0.25)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  goldenIconText: { fontSize: 16 },
+  goldenText: { flex: 1 },
+  goldenTitle: {
+    fontSize: 9,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+    color: "#EF9F27",
+  },
+  goldenTime: {
+    fontSize: 20,
+    fontWeight: "900",
+    color: ChronauraColors.gold2,
+  },
+  goldenSub: {
+    fontSize: 9,
+    color: ChronauraColors.faint,
+    marginTop: 1,
+  },
+  skySummary: {
+    fontSize: 10,
+    color: ChronauraColors.muted,
+    textAlign: "center",
+    marginBottom: 10,
+    lineHeight: 16,
+  },
+  bodiesCard: {
+    marginBottom: 10,
+  },
+  sectionLabel: {
+    fontSize: 8,
+    fontWeight: "700",
+    letterSpacing: 2,
+    color: ChronauraColors.gold,
+    marginBottom: 8,
+  },
+  bodyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    paddingVertical: 5,
+    borderTopWidth: 1,
+    borderTopColor: ChronauraColors.borderFaint,
+  },
+  bodyDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  bodyName: {
+    fontSize: 12,
+    fontWeight: "700",
+    color: ChronauraColors.silver,
+    flex: 1,
+  },
+  bodyData: {
+    fontSize: 10,
+    color: ChronauraColors.gold,
+  },
+  modeRow: {
+    flexDirection: "row",
+    gap: 8,
+    marginBottom: 10,
+  },
+  modeCard: {
+    flex: 1,
+    backgroundColor: ChronauraColors.surface,
+    borderWidth: 1,
+    borderColor: ChronauraColors.borderGold,
+    borderRadius: 14,
+    padding: 12,
+    alignItems: "center",
+  },
+  modeIcon: {
+    fontSize: 20,
+    color: ChronauraColors.gold,
+    marginBottom: 4,
+  },
+  modeName: {
+    fontSize: 9,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    color: ChronauraColors.gold,
+    textAlign: "center",
+  },
+  modeSub: {
+    fontSize: 8,
+    color: ChronauraColors.faint,
+    marginTop: 2,
+  },
+  notesCard: {
+    marginBottom: 20,
+  },
+  notesTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: ChronauraColors.gold2,
+    marginBottom: 8,
+  },
+  noteInput: {
+    minHeight: 60,
+    borderRadius: 12,
+    padding: 10,
+    color: ChronauraColors.silver,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    borderWidth: 1,
+    borderColor: ChronauraColors.borderSubtle,
+    textAlignVertical: "top",
+    fontSize: 13,
+  },
+  saveBtn: {
+    marginTop: 10,
+    borderRadius: 12,
     paddingVertical: 10,
     alignItems: "center",
-    backgroundColor: "rgba(212,175,55,0.12)",
-    borderWidth: 1,
-    borderColor: "rgba(212,175,55,0.22)"
+    backgroundColor: ChronauraColors.gold,
   },
-  compactButtonText: { color: "#FFF", fontWeight: "800" },
-  noteCard: {
-    borderRadius: 24,
-    padding: 16,
-    backgroundColor: "rgba(255,255,255,0.055)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    marginBottom: 12
+  saveBtnText: {
+    color: ChronauraColors.cosmicBlack,
+    fontWeight: "900",
+    fontSize: 13,
   },
-  noteTitle: { color: "#FFF", fontSize: 19, fontWeight: "900" },
-  noteCopy: { color: ChronauraColors.muted, fontSize: 13, lineHeight: 19, marginTop: 5 },
-  input: {
-    minHeight: 84,
-    borderRadius: 16,
-    marginTop: 12,
-    padding: 12,
-    color: "#FFF",
-    backgroundColor: "rgba(0,0,0,0.22)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.09)",
-    textAlignVertical: "top"
+  vaultCount: {
+    color: ChronauraColors.faint,
+    fontSize: 10,
+    textAlign: "center",
+    marginTop: 8,
   },
-  primaryButton: {
-    marginTop: 12,
-    borderRadius: 16,
-    paddingVertical: 12,
-    alignItems: "center",
-    backgroundColor: ChronauraColors.gold2
-  },
-  primaryButtonText: { color: "#17100A", fontWeight: "900" },
-  vaultCount: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 10 },
-  dateText: { fontSize: 11, color: ChronauraColors.muted, letterSpacing: 0.5, fontWeight: "500" as const, marginBottom: 8 },
-  timeBlock: { alignItems: "center" as const, marginVertical: 8 },
-  timeLabel: { fontSize: 9, color: ChronauraColors.muted, letterSpacing: 1.5, textTransform: "uppercase" as const },
-  timeValue: { fontSize: 32, fontWeight: "900" as const, color: "#FFF", marginTop: 2 },
-  timeLocation: { fontSize: 10, color: ChronauraColors.muted, marginTop: 2 },
-  twoCol: { flexDirection: "row" as const, gap: 10, marginBottom: 12 },
-  colLabel: { fontSize: 8, letterSpacing: 1.5, color: ChronauraColors.gold, fontWeight: "800" as const, textTransform: "uppercase" as const, marginBottom: 8 },
-  scoreCircle: { width: 72, height: 72, borderRadius: 36, borderWidth: 2, borderColor: ChronauraColors.gold, alignItems: "center" as const, justifyContent: "center" as const, alignSelf: "center" as const, marginBottom: 8 },
-  scoreNumber: { fontSize: 26, fontWeight: "900" as const, color: ChronauraColors.gold2 },
-  scoreLabel: { fontSize: 8, color: ChronauraColors.gold, letterSpacing: 1 },
-  colHint: { fontSize: 10, color: ChronauraColors.muted, lineHeight: 15 },
-  colBody: { fontSize: 12, color: ChronauraColors.silver, lineHeight: 18, marginTop: 8 }
 });
