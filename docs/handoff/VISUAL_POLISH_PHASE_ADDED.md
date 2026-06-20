@@ -1,6 +1,6 @@
 # Visual Polish Phase Added
 
-The current master handoff now tracks the remaining work needed to make the React Native app visually match the premium Chronaura mockups:
+The current master handoff now tracks the remaining work needed to make the React Native app visually match the premium AuraLunis mockups:
 
 1. Full gold crescent-C astrolabe logo SVG.
 2. Reviewed NASA / JPL / Hubble / Webb Learn-tab imagery with credits.

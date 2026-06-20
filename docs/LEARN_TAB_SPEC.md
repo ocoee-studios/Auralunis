@@ -1,7 +1,7 @@
-# Chronaura Learn Tab Specification
+# AuraLunis Learn Tab Specification
 
 ## Purpose
-The Learn tab is the educational heart of Chronaura. It explains planets, constellations, stars, the Moon, the Solar System, Deep Sky objects, nebulae, galaxies, and the Milky Way in a beginner-friendly way.
+The Learn tab is the educational heart of AuraLunis. It explains planets, constellations, stars, the Moon, the Solar System, Deep Sky objects, nebulae, galaxies, and the Milky Way in a beginner-friendly way.
 
 ## Why it deserves its own tab
 Explore is for pointing, finding, and browsing the live sky. Learn is for understanding what the user is seeing.

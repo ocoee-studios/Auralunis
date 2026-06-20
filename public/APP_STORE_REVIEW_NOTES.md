@@ -1,4 +1,4 @@
-# App Store Review Notes — Chronaura
+# App Store Review Notes — AuraLunis
 
 > Paste the block below verbatim into the **App Review Information → Notes** field in App Store Connect before submitting.
 
@@ -6,7 +6,7 @@
 
 ## Notes for App Reviewer
 
-Chronaura is an astronomy companion app that computes real-time positions of celestial objects and orbital targets (ISS, planets, Moon) relative to the reviewer's physical location using on-device GPS and motion sensors.
+AuraLunis is an astronomy companion app that computes real-time positions of celestial objects and orbital targets (ISS, planets, Moon) relative to the reviewer's physical location using on-device GPS and motion sensors.
 
 **Testing in a static review environment:**
 
@@ -19,7 +19,7 @@ Chronaura is an astronomy companion app that computes real-time positions of cel
 4. All other tabs (Home, Watch, Learn, Settings) are fully functional without sensor access.
 
 **Subscription testing:**
-- The 7-day free trial for Chronaura Premium can be tested using a Sandbox Apple ID. No charge is applied in the Sandbox environment.
-- RevenueCat product IDs: `com.ocoee.chronaura.premium.monthly` and `com.ocoee.chronaura.premium.annual`.
+- The 7-day free trial for AuraLunis Premium can be tested using a Sandbox Apple ID. No charge is applied in the Sandbox environment.
+- RevenueCat product IDs: `com.ocoee.auralunis.premium.monthly` and `com.ocoee.auralunis.premium.annual`.
 
 **Demo credentials:** None required — the app does not use email/password sign-in.

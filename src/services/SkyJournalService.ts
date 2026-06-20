@@ -3,7 +3,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { askSkyCompanion } from "@/services/AISkyCompanionService";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
-const KEY = "chronaura.journal";
+const KEY = "auralunis.journal";
 
 export interface SkyJournalEntry {
   id: string;

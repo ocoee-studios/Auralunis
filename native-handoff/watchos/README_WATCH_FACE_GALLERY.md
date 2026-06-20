@@ -1,13 +1,13 @@
-# Chronaura Watch Face Gallery — Native Handoff
+# AuraLunis Watch Face Gallery — Native Handoff
 
 ## Product boundary
-Chronaura can provide:
-- Full-screen Chronaura layouts while the Chronaura watch app is open
+AuraLunis can provide:
+- Full-screen AuraLunis layouts while the AuraLunis watch app is open
 - Apple Watch complications for supported Apple system-face slots
-- Curated shareable Apple Watch face templates built around Chronaura complications
+- Curated shareable Apple Watch face templates built around AuraLunis complications
 - App-intent shortcuts for Sky Lens, Tonight’s Ritual, and Astral Sound Bath
 
-Chronaura cannot replace Apple’s entire system watch-face engine with unrestricted third-party system faces.
+AuraLunis cannot replace Apple’s entire system watch-face engine with unrestricted third-party system faces.
 
 ## Watch-app layouts
 - Living Astrolabe
@@ -15,7 +15,7 @@ Chronaura cannot replace Apple’s entire system watch-face engine with unrestri
 - Tonight’s Sky
 - Deep Sky Portal
 - Daily Alignment
-- Minimal Chronaura
+- Minimal AuraLunis
 - Sovereign Sigil — future prestige module
 
 ## Visual themes
@@ -35,7 +35,7 @@ Chronaura cannot replace Apple’s entire system watch-face engine with unrestri
 - Tonight’s Ritual shortcut
 - Sky Lens shortcut
 - Astral Sound Bath shortcut
-- Mini Chronaura star-dust logo
+- Mini AuraLunis star-dust logo
 
 ## Production implementation direction
 Use a watchOS target with WidgetKit complications and App Intents. Map modules only into slot families they support. Provide one signature curated setup:

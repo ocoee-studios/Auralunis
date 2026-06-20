@@ -1,10 +1,10 @@
 # GitHub Push Checklist
 
 ## Target repository
-`ocoee-studios/chronaura`
+`ocoee-studios/auralunis`
 
 ## Current status
-At the time this handoff was assembled, the connected GitHub integration did not expose `ocoee-studios/chronaura`.
+At the time this handoff was assembled, the connected GitHub integration did not expose `ocoee-studios/auralunis`.
 
 ## When the repository is visible
 Push the contents of:
@@ -16,7 +16,7 @@ to the repository root.
 The resulting repo should look like:
 
 ```text
-chronaura/
+auralunis/
 ├── App.tsx
 ├── CLAUDE.md
 ├── README.md

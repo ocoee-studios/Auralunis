@@ -42,7 +42,7 @@ Use two delivery paths:
 The iPhone native module scaffold is located at:
 
 ```text
-apple-native/iOS/ChronauraWatchSync/
+apple-native/iOS/AuraLunisWatchSync/
 ```
 
 The JavaScript wrapper is:
@@ -51,4 +51,4 @@ The JavaScript wrapper is:
 src/watchSync.ts
 ```
 
-After the iOS native project exists, register the Expo module with the iOS app target and call `syncChronauraWatch(...)` whenever the Home sky summary changes.
+After the iOS native project exists, register the Expo module with the iOS app target and call `syncAuraLunisWatch(...)` whenever the Home sky summary changes.

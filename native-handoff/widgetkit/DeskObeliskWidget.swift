@@ -30,7 +30,7 @@ struct DeskObeliskWidgetView: View {
         ZStack {
             Color.black
             VStack(alignment: .leading, spacing: 6) {
-                Text("CHRONAURA")
+                Text("AURALUNIS")
                     .font(.caption.weight(.bold))
                 Text(entry.date, style: .time)
                     .font(.system(size: 32, weight: .semibold, design: .serif))
@@ -54,7 +54,7 @@ struct DeskObeliskWidget: Widget {
         StaticConfiguration(kind: kind, provider: DeskObeliskProvider()) { entry in
             DeskObeliskWidgetView(entry: entry)
         }
-        .configurationDisplayName("Chronaura Desk Obelisk")
+        .configurationDisplayName("AuraLunis Desk Obelisk")
         .description("A Midnight Gold cosmic timepiece for StandBy.")
         .supportedFamilies([.systemSmall])
     }

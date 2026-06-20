@@ -4,14 +4,14 @@
 // Captured via react-native-view-shot (or expo-media-library screenshot).
 //
 // Includes: target name, alignment score, observer location, timestamp,
-// azimuth/elevation, Chronaura branding, and the target's radar color.
+// azimuth/elevation, AuraLunis branding, and the target's radar color.
 
 import React, { useRef } from "react";
 import {
   View, Text, StyleSheet, TouchableOpacity, Share, Platform, Alert,
 } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 export interface LockShareData {
   targetName: string;
@@ -41,8 +41,8 @@ function MiniRadar({ color }: { color: string }) {
       <Circle cx={C} cy={C} r={30} stroke={color + "22"} strokeWidth={0.5} strokeDasharray="3 3" fill="none" />
       <Line x1={10} y1={C} x2={90} y2={C} stroke={color + "22"} strokeWidth={0.5} />
       <Line x1={C} y1={10} x2={C} y2={90} stroke={color + "22"} strokeWidth={0.5} />
-      <Circle cx={C} cy={C} r={8} stroke={ChronauraColors.green} strokeWidth={1.5} fill="none" />
-      <Circle cx={C} cy={C} r={4} fill={ChronauraColors.green} />
+      <Circle cx={C} cy={C} r={8} stroke={AuraLunisColors.green} strokeWidth={1.5} fill="none" />
+      <Circle cx={C} cy={C} r={4} fill={AuraLunisColors.green} />
     </Svg>
   );
 }
@@ -74,15 +74,15 @@ export function LockShareCard({ data, onClose }: LockShareCardProps) {
 
   async function handleShare() {
     const message = [
-      `I just locked onto ${data.targetName} with Chronaura.`,
+      `I just locked onto ${data.targetName} with AuraLunis.`,
       `${data.alignmentScore}% alignment · az ${data.azimuth}° · el ${data.elevation}°`,
       `${data.locationLabel} · ${formatTimestamp(data.timestamp)}`,
       "",
-      "ocoeestudios.com/chronaura",
+      "ocoeestudios.com/auralunis",
     ].join("\n");
 
     try {
-      await Share.share({ message, title: `Chronaura Lock — ${data.targetName}` });
+      await Share.share({ message, title: `AuraLunis Lock — ${data.targetName}` });
     } catch {
       Alert.alert("Share", "Could not open the share sheet.");
     }
@@ -93,7 +93,7 @@ export function LockShareCard({ data, onClose }: LockShareCardProps) {
       <View style={styles.card} ref={cardRef} collapsable={false}>
         {/* Top brand bar */}
         <View style={styles.brandRow}>
-          <Text style={styles.brandName}>CHRONAURA</Text>
+          <Text style={styles.brandName}>AURALUNIS</Text>
           <Text style={styles.brandTag}>THE INTERACTIVE ASTRAL CLOCK</Text>
         </View>
 
@@ -109,7 +109,7 @@ export function LockShareCard({ data, onClose }: LockShareCardProps) {
 
         {/* Score */}
         <Text style={styles.score}>{data.alignmentScore}%</Text>
-        <Text style={[styles.lockedLabel, { color: ChronauraColors.green }]}>LOCKED</Text>
+        <Text style={[styles.lockedLabel, { color: AuraLunisColors.green }]}>LOCKED</Text>
 
         {/* Target name */}
         <Text style={[styles.targetName, { color: data.targetColor }]}>{data.targetName}</Text>
@@ -131,7 +131,7 @@ export function LockShareCard({ data, onClose }: LockShareCardProps) {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>ocoeestudios.com/chronaura</Text>
+        <Text style={styles.footer}>ocoeestudios.com/auralunis</Text>
       </View>
 
       {/* Action buttons */}
@@ -162,27 +162,27 @@ const styles = StyleSheet.create({
     width: "100%", maxWidth: 340,
     backgroundColor: "#05070D",
     borderRadius: 24,
-    borderWidth: 1, borderColor: ChronauraColors.borderGold,
+    borderWidth: 1, borderColor: AuraLunisColors.borderGold,
     padding: 24, alignItems: "center",
   },
   brandRow: { alignItems: "center", marginBottom: 16 },
-  brandName: { color: ChronauraColors.gold, fontSize: 12, fontWeight: "900", letterSpacing: 5 },
-  brandTag: { color: ChronauraColors.faint, fontSize: 7, fontWeight: "700", letterSpacing: 2, marginTop: 3 },
+  brandName: { color: AuraLunisColors.gold, fontSize: 12, fontWeight: "900", letterSpacing: 5 },
+  brandTag: { color: AuraLunisColors.faint, fontSize: 7, fontWeight: "700", letterSpacing: 2, marginTop: 3 },
   typeBadge: { borderWidth: 1, borderRadius: 8, paddingHorizontal: 12, paddingVertical: 4, marginBottom: 16 },
   typeBadgeText: { fontSize: 9, fontWeight: "800", letterSpacing: 2 },
-  score: { color: ChronauraColors.green, fontSize: 48, fontWeight: "900", lineHeight: 52 },
+  score: { color: AuraLunisColors.green, fontSize: 48, fontWeight: "900", lineHeight: 52 },
   lockedLabel: { fontSize: 11, fontWeight: "800", letterSpacing: 4, marginBottom: 10 },
   targetName: { fontSize: 18, fontWeight: "900", textAlign: "center", marginBottom: 16, lineHeight: 24 },
   pillRow: { flexDirection: "row", gap: 8, marginBottom: 16, width: "100%" },
-  pill: { flex: 1, backgroundColor: ChronauraColors.elevated, borderRadius: 10, padding: 10, alignItems: "center" },
-  pillLabel: { color: ChronauraColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 1 },
-  pillValue: { color: ChronauraColors.silver, fontSize: 13, fontWeight: "800", marginTop: 3 },
+  pill: { flex: 1, backgroundColor: AuraLunisColors.elevated, borderRadius: 10, padding: 10, alignItems: "center" },
+  pillLabel: { color: AuraLunisColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 1 },
+  pillValue: { color: AuraLunisColors.silver, fontSize: 13, fontWeight: "800", marginTop: 3 },
   metaRow: { alignItems: "center", gap: 4, marginBottom: 16 },
-  metaText: { color: ChronauraColors.faint, fontSize: 10 },
-  footer: { color: ChronauraColors.gold + "77", fontSize: 9, letterSpacing: 1 },
+  metaText: { color: AuraLunisColors.faint, fontSize: 10 },
+  footer: { color: AuraLunisColors.gold + "77", fontSize: 9, letterSpacing: 1 },
   actions: { flexDirection: "row", gap: 12, marginTop: 16 },
-  shareBtn: { backgroundColor: ChronauraColors.gold, borderRadius: 14, paddingHorizontal: 32, paddingVertical: 13 },
-  shareBtnText: { color: ChronauraColors.cosmicBlack, fontSize: 15, fontWeight: "900" },
-  closeBtn: { borderWidth: 1, borderColor: ChronauraColors.borderSubtle, borderRadius: 14, paddingHorizontal: 24, paddingVertical: 13 },
-  closeBtnText: { color: ChronauraColors.silver, fontSize: 15, fontWeight: "700" },
+  shareBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingHorizontal: 32, paddingVertical: 13 },
+  shareBtnText: { color: AuraLunisColors.cosmicBlack, fontSize: 15, fontWeight: "900" },
+  closeBtn: { borderWidth: 1, borderColor: AuraLunisColors.borderSubtle, borderRadius: 14, paddingHorizontal: 24, paddingVertical: 13 },
+  closeBtnText: { color: AuraLunisColors.silver, fontSize: 15, fontWeight: "700" },
 });

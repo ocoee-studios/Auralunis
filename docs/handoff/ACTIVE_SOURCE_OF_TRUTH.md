@@ -1,7 +1,7 @@
-# Chronaura Active Source of Truth
+# AuraLunis Active Source of Truth
 
 ## Brand
-- Name: Chronaura
+- Name: AuraLunis
 - Descriptor: The Interactive Astral Clock
 - Slogan: Your time, written in the stars.
 - Studio: Ocoee Studios
@@ -53,14 +53,14 @@
 - Apple Watch Ultra Taptic Crown — future concept
 
 ## Legal placeholders
-- https://ocoee-studios.com/chronaura/privacy
-- https://ocoee-studios.com/chronaura/terms
-- https://ocoee-studios.com/chronaura/support
+- https://ocoee-studios.com/auralunis/privacy
+- https://ocoee-studios.com/auralunis/terms
+- https://ocoee-studios.com/auralunis/support
 
 These remain placeholders until published and verified.
 
 ## Required visual-polish phase
-- Production SVG: `active-react-native-repo/assets/brand/chronaura-logo-full.svg`
+- Production SVG: `active-react-native-repo/assets/brand/auralunis-logo-full.svg`
 - Learn photography manifest: `active-react-native-repo/assets/learn/ASSET_MANIFEST.csv`
 - Native Mac build notes: `active-react-native-repo/docs/MAC_BUILD_AND_WATCH_HANDOFF.md`
 - NASA image review notes: `active-react-native-repo/docs/NASA_IMAGE_USAGE_NOTES.md`

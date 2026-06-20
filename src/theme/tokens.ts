@@ -1,7 +1,7 @@
-// Chronaura Design System — from the approved brand guide.
+// AuraLunis Design System — from the approved brand guide.
 // Colors, typography, and spacing tokens used across all screens.
 
-export const ChronauraColors = {
+export const AuraLunisColors = {
   // Primary palette (from brand guide)
   cosmicBlack: "#030816",
   midnightNavy: "#071225",
@@ -38,7 +38,7 @@ export const ChronauraColors = {
   black: "#030816"
 } as const;
 
-export const ChronauraTypography = {
+export const AuraLunisTypography = {
   // Display (brand name, screen titles)
   display: {
     fontFamily: "Cinzel_400Regular",      // Google Fonts: Cinzel
@@ -52,7 +52,7 @@ export const ChronauraTypography = {
   }
 } as const;
 
-export const ChronauraSpacing = {
+export const AuraLunisSpacing = {
   xs: 4,
   sm: 8,
   md: 14,
@@ -64,14 +64,14 @@ export const ChronauraSpacing = {
   buttonRadius: 14
 } as const;
 
-export const ChronauraTaglines = [
+export const AuraLunisTaglines = [
   "Time moves. The cosmos remembers.",
   "Your time. Written in the stars.",
   "Explore time. Align with the universe.",
   "The universe is now in your hands."
 ] as const;
 
-export interface ChronauraThemePalette {
+export interface AuraLunisThemePalette {
   background: string;
   surface: string;
   accent: string;
@@ -80,14 +80,14 @@ export interface ChronauraThemePalette {
   gradient: string[];
 }
 
-export const ChronauraThemes: Record<string, ChronauraThemePalette> = {
+export const AuraLunisThemes: Record<string, AuraLunisThemePalette> = {
   system: { background: "#030816", surface: "#071225", accent: "#D9A84E", text: "#F8F4EA", muted: "#A8AFBF", gradient: ["#030816", "#071225"] },
   midnight_gold: { background: "#030816", surface: "#071225", accent: "#D9A84E", text: "#F8F4EA", muted: "#A8AFBF", gradient: ["#030816", "#071225"] },
   soft_moon: { background: "#14182A", surface: "#1E2640", accent: "#C0C6D4", text: "#F0F2F8", muted: "#8E96A8", gradient: ["#14182A", "#1E2640"] },
   deep_space: { background: "#040408", surface: "#0A0C18", accent: "#7B5CF6", text: "#E8E4F0", muted: "#6E6E8A", gradient: ["#040408", "#0A0C18"] }
 };
 
-export const ChronauraPricing = {
+export const AuraLunisPricing = {
   // Monthly — no trial (direct charge nudges users toward annual)
   monthly: "$6.99/month",
   monthlySubtitle: "Billed monthly · Cancel anytime",

@@ -1,8 +1,8 @@
 import SwiftUI
 
 @main
-struct ChronauraWatchApp: App {
-    @StateObject private var connectivity = ChronauraWatchConnectivityBridge()
+struct AuraLunisWatchApp: App {
+    @StateObject private var connectivity = AuraLunisWatchConnectivityBridge()
 
     var body: some Scene {
         WindowGroup {

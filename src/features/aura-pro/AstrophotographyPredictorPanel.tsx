@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import {
   astroPhotoScenarios,
   getAstroPhotoScenario
@@ -88,14 +88,14 @@ const styles = StyleSheet.create({
     borderColor: "rgba(98,207,255,0.18)"
   },
   eyebrow: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 10,
     letterSpacing: 2.2,
     fontWeight: "900"
   },
   title: { color: "#FFF", fontSize: 21, fontWeight: "900", marginTop: 7 },
   copy: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 13,
     lineHeight: 19,
     marginTop: 6
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(98,207,255,0.13)",
     borderColor: "rgba(98,207,255,0.28)"
   },
-  scenarioName: { color: ChronauraColors.muted, fontSize: 10, fontWeight: "800" },
+  scenarioName: { color: AuraLunisColors.muted, fontSize: 10, fontWeight: "800" },
   scenarioNameActive: { color: "#FFF" },
   scoreCard: {
     flexDirection: "row",
@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     backgroundColor: "rgba(0,0,0,0.20)"
   },
-  score: { color: ChronauraColors.gold2, fontSize: 42, fontWeight: "900" },
+  score: { color: AuraLunisColors.gold2, fontSize: 42, fontWeight: "900" },
   scoreLabel: {
     color: "#FFF",
     fontSize: 10,
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
     fontWeight: "900"
   },
   scoreCopy: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 12,
     lineHeight: 17,
     marginTop: 4
@@ -148,8 +148,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.07)"
   },
   metricValue: { color: "#FFF", fontSize: 16, fontWeight: "900" },
-  metricLabel: { color: ChronauraColors.muted, fontSize: 10, marginTop: 3 },
-  targetsTitle: { color: ChronauraColors.gold2, fontSize: 11, fontWeight: "900", marginTop: 12 },
+  metricLabel: { color: AuraLunisColors.muted, fontSize: 10, marginTop: 3 },
+  targetsTitle: { color: AuraLunisColors.gold2, fontSize: 11, fontWeight: "900", marginTop: 12 },
   targets: { color: "#FFF", fontSize: 12, lineHeight: 18, marginTop: 4 },
-  note: { color: ChronauraColors.muted, fontSize: 11, lineHeight: 16, marginTop: 8 }
+  note: { color: AuraLunisColors.muted, fontSize: 11, lineHeight: 16, marginTop: 8 }
 });

@@ -1,4 +1,4 @@
-# Chronaura — Full App Handoff for Gemini
+# AuraLunis — Full App Handoff for Gemini
 
 > **Last updated:** Session 8 (monetization + live TLE pipeline)
 > Read this before suggesting any code changes. Much of what you might suggest is already built.
@@ -54,16 +54,16 @@ Crescent-C astrolabe — three concentric rings, compass needle, N/S/E/W points,
 </svg>
 ```
 
-**Logo rules:** Never replace with generic moon/compass. Never simplify the three rings. Always on `#030816`. Wordmark: CHRONAURA in Cinzel serif. Slogan: *Your time, written in the stars.*
+**Logo rules:** Never replace with generic moon/compass. Never simplify the three rings. Always on `#030816`. Wordmark: AURALUNIS in Cinzel serif. Slogan: *Your time, written in the stars.*
 
 ---
 
 ## App Identity
 
-- **Name:** Chronaura — The Interactive Astral Clock
+- **Name:** AuraLunis — The Interactive Astral Clock
 - **Developer:** Ocoee Studios (Mrs. Pepper, founder)
-- **Bundle ID:** `com.ocoee.chronaura`
-- **GitHub:** `jamiebzzz-stack/chronaura` (private)
+- **Bundle ID:** `com.ocoee.auralunis`
+- **GitHub:** `jamiebzzz-stack/auralunis` (private)
 - **Stack:** React Native / Expo SDK 51 / TypeScript
 - **Commits:** 60+
 
@@ -100,16 +100,16 @@ OrbitalAlignmentScreen opens as a full-screen modal from the Sky tab — not a s
 
 | Product | Price | Trial |
 |---|---|---|
-| Chronaura Premium monthly | $6.99/mo | ❌ No trial — direct charge |
-| Chronaura Premium annual | $39.99/yr | ✅ 7-day free trial (annual only) |
+| AuraLunis Premium monthly | $6.99/mo | ❌ No trial — direct charge |
+| AuraLunis Premium annual | $39.99/yr | ✅ 7-day free trial (annual only) |
 | Founders Lifetime | $99.99 one-time | ❌ No trial |
 
 RevenueCat product IDs:
-- `com.ocoee.chronaura.premium.monthly`
-- `com.ocoee.chronaura.premium.annual`
-- `com.ocoee.chronaura.lifetime.founders`
+- `com.ocoee.auralunis.premium.monthly`
+- `com.ocoee.auralunis.premium.annual`
+- `com.ocoee.auralunis.lifetime.founders`
 
-Entitlement: `chronaura_premium` (all three products unlock this)
+Entitlement: `auralunis_premium` (all three products unlock this)
 
 **Do not suggest changing these prices or adding more tiers.**
 
@@ -194,8 +194,8 @@ Gate implementation: `isModeGated(mode)` in `src/features/paywall/MonetizationCa
 - **Audio still needs:** 6 MP3 files per `assets/audio/README.md` (brown noise, pink noise, chimes at 220/440/528 Hz). Generate with Audacity. Then uncomment `require()` lines in the engine.
 
 ### Native modules (Swift)
-- `apple-native/iOS/ChronauraHaptics/ChronauraHapticsModule.swift` — Expo Module, CoreHaptics
-- `apple-native/watchOS/ChronauraWatch/Haptics/ChronauraWatchHapticsEngine.swift`
+- `apple-native/iOS/AuraLunisHaptics/AuraLunisHapticsModule.swift` — Expo Module, CoreHaptics
+- `apple-native/watchOS/AuraLunisWatch/Haptics/AuraLunisWatchHapticsEngine.swift`
 - `src/modules/WatchHaptics.ts` — JS bridge
 
 ### Monetization
@@ -207,8 +207,8 @@ Gate implementation: `isModeGated(mode)` in `src/features/paywall/MonetizationCa
 - `src/components/CosmicDriftGalaxy.tsx` — rotating SVG particle cloud of lock history
 
 ### App Store compliance
-- `public/PRIVACY.md` — host at `ocoeestudios.com/chronaura/privacy`
-- `public/TERMS.md` — host at `ocoeestudios.com/chronaura/terms`
+- `public/PRIVACY.md` — host at `ocoeestudios.com/auralunis/privacy`
+- `public/TERMS.md` — host at `ocoeestudios.com/auralunis/terms`
 - `public/APP_STORE_REVIEW_NOTES.md` — paste into App Store Connect review notes
 - Simulation Mode built into `OrbitalAlignmentScreen` for static lab testing
 
@@ -236,7 +236,7 @@ Gate implementation: `isModeGated(mode)` in `src/features/paywall/MonetizationCa
 | TLE propagation stays in service layer, never in `alignmentEngine.ts` | Engine is pure math — no network/format awareness |
 | `SpatialTarget` has no `tleLine1/tleLine2` fields | Propagation output (lat/lon/alt) is what the engine needs |
 | Reanimated shared values for radar blips | UI thread only — no JS bridge jank |
-| Expo Modules pattern for Swift native code | Matches existing `ChronauraWatchSyncModule` pattern, auto-registers |
+| Expo Modules pattern for Swift native code | Matches existing `AuraLunisWatchSyncModule` pattern, auto-registers |
 | AsyncStorage for Cosmic Drift, not encrypted vault | Lock history is celebration data, not sensitive |
 | 2h Celestrak cache | TLEs update every few hours — more frequent = battery waste |
 | Daily chain seeded from date hash | Same challenge for all users without a server |
@@ -261,11 +261,11 @@ src/
 ├── services/CosmicDriftService.ts       ← lock history, 5-event free cap
 ├── features/paywall/MonetizationCatalog.ts ← pricing, gates, feature lists
 ├── features/paywall/ThreeTierPaywallModal.tsx ← three-tier paywall UI
-└── theme/tokens.ts                      ← ChronauraColors, ChronauraPricing
+└── theme/tokens.ts                      ← AuraLunisColors, AuraLunisPricing
 
 apple-native/
-├── iOS/ChronauraHaptics/ChronauraHapticsModule.swift
-└── watchOS/ChronauraWatch/Haptics/ChronauraWatchHapticsEngine.swift
+├── iOS/AuraLunisHaptics/AuraLunisHapticsModule.swift
+└── watchOS/AuraLunisWatch/Haptics/AuraLunisWatchHapticsEngine.swift
 
 public/
 ├── PRIVACY.md

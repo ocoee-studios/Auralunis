@@ -4,7 +4,7 @@
 
 This bundle contains all current-session code and handoff materials, but it does not contain the earlier raw asset library:
 
-`chronaura_ops_team_master_handoff_COMPLETE.zip`
+`auralunis_ops_team_master_handoff_COMPLETE.zip`
 
 That earlier ZIP must be provided separately if Claude needs the approved production vectors and graphics.
 
@@ -15,7 +15,7 @@ Import approved files into:
 `active-react-native-repo/assets/`
 
 Expected categories:
-- Chronaura logo lockup SVG
+- AuraLunis logo lockup SVG
 - App icon SVG
 - Icon Composer layers
 - Watch lockup and Watch graphics

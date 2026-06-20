@@ -1,6 +1,6 @@
 import SwiftUI
 
-private struct ChronauraRingGlassModifier: ViewModifier {
+private struct AuraLunisRingGlassModifier: ViewModifier {
     let tint: Color
 
     @ViewBuilder
@@ -17,7 +17,7 @@ private struct ChronauraRingGlassModifier: ViewModifier {
 }
 
 extension View {
-    func chronauraRingGlass(tint: Color) -> some View {
-        modifier(ChronauraRingGlassModifier(tint: tint))
+    func auralunisRingGlass(tint: Color) -> some View {
+        modifier(AuraLunisRingGlassModifier(tint: tint))
     }
 }

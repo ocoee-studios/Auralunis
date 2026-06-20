@@ -28,7 +28,7 @@ The React Native source contains the screens, state, navigation, design language
 - Keep Desk Obelisk and advanced watch concepts future-only until built.
 
 ## Assets
-- Import the approved Chronaura logo lockup SVG.
+- Import the approved AuraLunis logo lockup SVG.
 - Import app icon SVG and Icon Composer layers.
 - Import Watch graphics.
 - Replace placeholder drawn astrolabe marks only where the approved brand assets require it.

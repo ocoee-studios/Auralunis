@@ -2,7 +2,7 @@
 // Bigger text, guided challenges, celebration animations.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KEY = "chronaura.teaching";
+const KEY = "auralunis.teaching";
 
 export interface TeachingChallenge {
   id: string;

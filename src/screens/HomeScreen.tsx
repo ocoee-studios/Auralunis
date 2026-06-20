@@ -1,5 +1,5 @@
 // HomeScreen.tsx
-// The living astrolabe — Chronaura's home screen designed as a single
+// The living astrolabe — AuraLunis's home screen designed as a single
 // interactive celestial instrument, not a stack of cards.
 //
 // Center: CelestialDial with clock hands, planet positions, sun vector, moon
@@ -13,9 +13,9 @@ import {
 import { ScreenShell } from "@/components/ScreenShell";
 import { GlassPanel } from "@/components/GlassPanel";
 import { CelestialDial } from "@/components/CelestialDial";
-import { ChronauraColors } from "@/theme/tokens";
-import { useChronauraVault } from "@/state/ChronauraVaultContext";
-import { useChronauraSettings } from "@/state/ChronauraSettingsContext";
+import { AuraLunisColors } from "@/theme/tokens";
+import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
+import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherService";
@@ -33,8 +33,8 @@ function formatClock(iso: string | null): string {
 export function HomeScreen() {
   const [noteDraft, setNoteDraft] = useState("");
   const [scrubOffset, setScrubOffset] = useState(0);
-  const { items, addNote } = useChronauraVault();
-  const { settings } = useChronauraSettings();
+  const { items, addNote } = useAuraLunisVault();
+  const { settings } = useAuraLunisSettings();
   const { location, status } = useObserverLocation();
 
   // ── Sky data ──────────────────────────────────────────────────────────────
@@ -93,7 +93,7 @@ export function HomeScreen() {
   }
 
   return (
-    <ScreenShell title="Chronaura" subtitle="Home">
+    <ScreenShell title="AuraLunis" subtitle="Home">
 
       {/* Date */}
       <Text style={styles.dateText}>
@@ -172,8 +172,8 @@ export function HomeScreen() {
         {belowBodies.filter(b => b.id !== "moon").map((body) => (
           <View key={body.id} style={styles.bodyRow}>
             <View style={[styles.bodyDot, { backgroundColor: bodyColor(body.id), opacity: 0.3 }]} />
-            <Text style={[styles.bodyName, { color: ChronauraColors.faint }]}>{body.name}</Text>
-            <Text style={[styles.bodyData, { color: ChronauraColors.faint }]}>below horizon</Text>
+            <Text style={[styles.bodyName, { color: AuraLunisColors.faint }]}>{body.name}</Text>
+            <Text style={[styles.bodyData, { color: AuraLunisColors.faint }]}>below horizon</Text>
           </View>
         ))}
       </GlassPanel>
@@ -192,7 +192,7 @@ export function HomeScreen() {
           value={noteDraft}
           onChangeText={setNoteDraft}
           placeholder="What did you notice in the sky?"
-          placeholderTextColor={ChronauraColors.faint}
+          placeholderTextColor={AuraLunisColors.faint}
           multiline
           style={styles.noteInput}
         />
@@ -215,7 +215,7 @@ function bodyColor(id: string): string {
     saturn: "#D9A84E", mars: "#F0997B", mercury: "#B4B2A9",
     uranus: "#9FE1CB", neptune: "#85B7EB",
   };
-  return map[id] ?? ChronauraColors.silver;
+  return map[id] ?? AuraLunisColors.silver;
 }
 
 function ModeShortcut({ icon, label, sub }: { icon: string; label: string; sub: string }) {
@@ -233,7 +233,7 @@ function ModeShortcut({ icon, label, sub }: { icon: string; label: string; sub: 
 const styles = StyleSheet.create({
   dateText: {
     fontSize: 10,
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     letterSpacing: 1.5,
     fontWeight: "600",
     marginBottom: 4,
@@ -249,21 +249,21 @@ const styles = StyleSheet.create({
   timeValue: {
     fontSize: 16,
     fontWeight: "900",
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
   },
   timeDot: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 14,
   },
   timeLocation: {
     fontSize: 10,
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
   },
   goldenBar: {
     flexDirection: "row",
     alignItems: "center",
     gap: 10,
-    backgroundColor: ChronauraColors.surface,
+    backgroundColor: AuraLunisColors.surface,
     borderWidth: 1,
     borderColor: "rgba(239,159,39,0.25)",
     borderRadius: 14,
@@ -291,16 +291,16 @@ const styles = StyleSheet.create({
   goldenTime: {
     fontSize: 20,
     fontWeight: "900",
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
   },
   goldenSub: {
     fontSize: 9,
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     marginTop: 1,
   },
   skySummary: {
     fontSize: 10,
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     textAlign: "center",
     marginBottom: 10,
     lineHeight: 16,
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     fontSize: 8,
     fontWeight: "700",
     letterSpacing: 2,
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
     marginBottom: 8,
   },
   bodyRow: {
@@ -321,7 +321,7 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingVertical: 5,
     borderTopWidth: 1,
-    borderTopColor: ChronauraColors.borderFaint,
+    borderTopColor: AuraLunisColors.borderFaint,
   },
   bodyDot: {
     width: 7,
@@ -331,12 +331,12 @@ const styles = StyleSheet.create({
   bodyName: {
     fontSize: 12,
     fontWeight: "700",
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     flex: 1,
   },
   bodyData: {
     fontSize: 10,
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
   },
   modeRow: {
     flexDirection: "row",
@@ -345,28 +345,28 @@ const styles = StyleSheet.create({
   },
   modeCard: {
     flex: 1,
-    backgroundColor: ChronauraColors.surface,
+    backgroundColor: AuraLunisColors.surface,
     borderWidth: 1,
-    borderColor: ChronauraColors.borderGold,
+    borderColor: AuraLunisColors.borderGold,
     borderRadius: 14,
     padding: 12,
     alignItems: "center",
   },
   modeIcon: {
     fontSize: 20,
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
     marginBottom: 4,
   },
   modeName: {
     fontSize: 9,
     fontWeight: "700",
     letterSpacing: 0.5,
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
     textAlign: "center",
   },
   modeSub: {
     fontSize: 8,
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     marginTop: 2,
   },
   notesCard: {
@@ -375,17 +375,17 @@ const styles = StyleSheet.create({
   notesTitle: {
     fontSize: 14,
     fontWeight: "800",
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     marginBottom: 8,
   },
   noteInput: {
     minHeight: 60,
     borderRadius: 12,
     padding: 10,
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     backgroundColor: "rgba(0,0,0,0.2)",
     borderWidth: 1,
-    borderColor: ChronauraColors.borderSubtle,
+    borderColor: AuraLunisColors.borderSubtle,
     textAlignVertical: "top",
     fontSize: 13,
   },
@@ -394,15 +394,15 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 10,
     alignItems: "center",
-    backgroundColor: ChronauraColors.gold,
+    backgroundColor: AuraLunisColors.gold,
   },
   saveBtnText: {
-    color: ChronauraColors.cosmicBlack,
+    color: AuraLunisColors.cosmicBlack,
     fontWeight: "900",
     fontSize: 13,
   },
   vaultCount: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 10,
     textAlign: "center",
     marginTop: 8,

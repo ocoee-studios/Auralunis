@@ -1,7 +1,7 @@
 // Tracks nightly completion for the 30 Nights beginner path.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KEY = "chronaura.streak";
+const KEY = "auralunis.streak";
 
 interface StreakState {
   completedNights: string[]; // ISO date strings

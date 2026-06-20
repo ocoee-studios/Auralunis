@@ -1,4 +1,4 @@
-# Chronaura Liquid Glass Implementation Spec
+# AuraLunis Liquid Glass Implementation Spec
 
 ## Design principle
 Apply Liquid Glass **selectively** — the central astrolabe, gold typography,

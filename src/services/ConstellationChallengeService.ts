@@ -2,7 +2,7 @@
 // app scores accuracy against actual constellation geometry.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KEY = "chronaura.constellation_challenge";
+const KEY = "auralunis.constellation_challenge";
 
 export interface ConstellationChallenge {
   constellationId: string;

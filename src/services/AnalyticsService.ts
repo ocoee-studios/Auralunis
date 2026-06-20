@@ -29,7 +29,7 @@ interface AnalyticsEvent {
   timestamp: string;
 }
 
-const EVENT_LOG_KEY = "chronaura.analytics.paywall_events";
+const EVENT_LOG_KEY = "auralunis.analytics.paywall_events";
 const MAX_LOCAL_EVENTS = 200;
 
 async function appendLocalEvent(event: AnalyticsEvent): Promise<void> {

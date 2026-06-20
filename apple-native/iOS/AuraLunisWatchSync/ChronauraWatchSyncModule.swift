@@ -1,8 +1,8 @@
 import ExpoModulesCore
 
-public final class ChronauraWatchSyncModule: Module {
+public final class AuraLunisWatchSyncModule: Module {
     public func definition() -> ModuleDefinition {
-        Name("ChronauraWatchSync")
+        Name("AuraLunisWatchSync")
 
         Function("syncWatch") {
             (
@@ -10,14 +10,14 @@ public final class ChronauraWatchSyncModule: Module {
                 tonightScore: Int,
                 nextEvent: String
             ) in
-            let payload = ChronauraPhoneWatchPayload(
+            let payload = AuraLunisPhoneWatchPayload(
                 moonPhase: moonPhase,
                 tonightScore: tonightScore,
                 nextEvent: nextEvent,
                 updatedAt: Date()
             )
 
-            try ChronauraWatchSyncManager.shared.sync(payload)
+            try AuraLunisWatchSyncManager.shared.sync(payload)
         }
     }
 }

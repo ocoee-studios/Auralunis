@@ -48,7 +48,7 @@ export async function askSkyCompanion(
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 300,
-        system: `You are Chronaura's Sky Companion — a warm, knowledgeable astronomy guide. Answer concisely (2-4 sentences). Use the observer's real sky data: ${context}`,
+        system: `You are AuraLunis's Sky Companion — a warm, knowledgeable astronomy guide. Answer concisely (2-4 sentences). Use the observer's real sky data: ${context}`,
         messages: [{ role: "user", content: question }]
       })
     });

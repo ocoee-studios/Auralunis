@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import {
   getSatelliteFixture,
   loadSatelliteOverlay
@@ -43,7 +43,7 @@ export function SatelliteThermalOverlayPanel() {
     } catch {
       Alert.alert(
         "Orbital overlay unavailable",
-        "Chronaura could not refresh the satellite overlay. The safe fixture view remains available."
+        "AuraLunis could not refresh the satellite overlay. The safe fixture view remains available."
       );
     } finally {
       setLoading(false);
@@ -127,14 +127,14 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,176,122,0.17)"
   },
   eyebrow: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 10,
     letterSpacing: 2.2,
     fontWeight: "900"
   },
   title: { color: "#FFF", fontSize: 21, fontWeight: "900", marginTop: 7 },
   copy: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 13,
     lineHeight: 19,
     marginTop: 6
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,176,122,0.14)",
     borderColor: "rgba(255,176,122,0.28)"
   },
-  modeText: { color: ChronauraColors.muted, fontSize: 11, fontWeight: "800" },
+  modeText: { color: AuraLunisColors.muted, fontSize: 11, fontWeight: "800" },
   modeTextActive: { color: "#FFF" },
   map: {
     height: 178,
@@ -177,25 +177,25 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 12,
     top: 10,
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     fontSize: 9,
     letterSpacing: 1.5
   },
   orbitPoint: {
     position: "absolute",
-    backgroundColor: ChronauraColors.orange,
-    shadowColor: ChronauraColors.orange,
+    backgroundColor: AuraLunisColors.orange,
+    shadowColor: AuraLunisColors.orange,
     shadowOpacity: 0.8,
     shadowRadius: 7
   },
   source: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 11,
     fontWeight: "800",
     marginTop: 10
   },
   note: {
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     fontSize: 11,
     lineHeight: 16,
     marginTop: 4

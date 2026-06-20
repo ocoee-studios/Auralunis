@@ -10,7 +10,7 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from "react-native";
-import { ChronauraColors, ChronauraPricing } from "@/theme/tokens";
+import { AuraLunisColors, AuraLunisPricing } from "@/theme/tokens";
 import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 interface PremiumModeGateProps {
@@ -45,7 +45,7 @@ export function PremiumModeGate({ modeName, modeDescription, onUpgrade }: Premiu
 
       {/* Pricing hint */}
       <Text style={styles.pricingHint}>
-        From {ChronauraPricing.annualMonthly}/mo · {ChronauraPricing.trial} on annual
+        From {AuraLunisPricing.annualMonthly}/mo · {AuraLunisPricing.trial} on annual
       </Text>
 
       {/* CTA */}
@@ -63,10 +63,10 @@ export function PremiumModeGate({ modeName, modeDescription, onUpgrade }: Premiu
 const styles = StyleSheet.create({
   container: {
     width: "100%",
-    backgroundColor: ChronauraColors.surface,
+    backgroundColor: AuraLunisColors.surface,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: ChronauraColors.borderGold,
+    borderColor: AuraLunisColors.borderGold,
     padding: 24,
     alignItems: "center",
     marginTop: 12,
@@ -77,17 +77,17 @@ const styles = StyleSheet.create({
   },
   lockIcon: {
     fontSize: 32,
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
   },
   title: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 18,
     fontWeight: "800",
     textAlign: "center",
     letterSpacing: 0.5,
   },
   title2: {
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
     fontSize: 11,
     fontWeight: "700",
     letterSpacing: 2,
@@ -96,7 +96,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   description: {
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     fontSize: 13,
     textAlign: "center",
     lineHeight: 20,
@@ -108,17 +108,17 @@ const styles = StyleSheet.create({
     marginBottom: 18,
   },
   valueLine: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 12,
     fontWeight: "600",
   },
   pricingHint: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 11,
     marginBottom: 16,
   },
   ctaButton: {
-    backgroundColor: ChronauraColors.gold,
+    backgroundColor: AuraLunisColors.gold,
     borderRadius: 14,
     paddingHorizontal: 32,
     paddingVertical: 13,
@@ -127,13 +127,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   ctaText: {
-    color: ChronauraColors.cosmicBlack,
+    color: AuraLunisColors.cosmicBlack,
     fontSize: 15,
     fontWeight: "900",
     letterSpacing: 0.5,
   },
   footerNote: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 10,
     textAlign: "center",
     lineHeight: 16,

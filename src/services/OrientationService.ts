@@ -1,5 +1,5 @@
 // Locks the app to portrait orientation.
-// Chronaura's UI is designed for portrait only.
+// AuraLunis's UI is designed for portrait only.
 
 let ScreenOrientation: { lockAsync: (lock: number) => Promise<void> } | null = null;
 try {

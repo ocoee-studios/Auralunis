@@ -1,11 +1,11 @@
-# Chronaura Privacy Policy
+# AuraLunis Privacy Policy
 
 **Last updated:** June 2, 2026
-**Developer:** Ocoee Studios (com.ocoee.chronaura)
+**Developer:** Ocoee Studios (com.ocoee.auralunis)
 
-## What Chronaura collects and why
+## What AuraLunis collects and why
 
-Chronaura is designed to keep your data local. The app processes the following
+AuraLunis is designed to keep your data local. The app processes the following
 information to deliver its features, and does not sell or share personal data
 with third parties for advertising.
 
@@ -17,7 +17,7 @@ or analyzed unless you explicitly choose to capture and save an image.
 ### Location (Sky computation)
 Your device location is used to calculate the positions of the Sun, Moon,
 planets, and satellites above your sky. Location data is processed on-device and
-is not transmitted to any server. If you decline location access, Chronaura uses
+is not transmitted to any server. If you decline location access, AuraLunis uses
 a neutral default location.
 
 ### Motion sensors (Sky Lens alignment)
@@ -26,24 +26,24 @@ overlay with the direction your phone is pointing. Sensor data is processed
 on-device in real time and is not stored or transmitted.
 
 ### Weather (Tonight Score)
-If you provide an OpenWeatherMap API key, Chronaura sends your approximate
+If you provide an OpenWeatherMap API key, AuraLunis sends your approximate
 coordinates to the OpenWeatherMap service to retrieve current cloud cover for the
 Tonight Score. No other personal data is included in this request. Without an API
-key, Chronaura uses a default weather estimate.
+key, AuraLunis uses a default weather estimate.
 
 ### Vault (notes and captures)
 Your Cosmic Notes, sky captures, and Vault items are stored locally on your
 device, encrypted with a key held in your device's secure enclave (Keychain on
-iOS, Keystore on Android). Chronaura does not have access to the encryption key
+iOS, Keystore on Android). AuraLunis does not have access to the encryption key
 and cannot read your Vault data remotely.
 
 ### Subscriptions
 Subscription purchases are processed through Apple's App Store (or Google Play)
-via RevenueCat. Chronaura does not process or store payment information directly.
+via RevenueCat. AuraLunis does not process or store payment information directly.
 RevenueCat's privacy policy applies to subscription management data.
 
 ### Notifications
-If you enable notifications, Chronaura schedules local alerts for sky events
+If you enable notifications, AuraLunis schedules local alerts for sky events
 (sunset, moonrise) computed on-device. No notification data is sent to or
 received from a remote server.
 
@@ -60,7 +60,7 @@ persist in your backup until you remove it.
 
 ## Children's privacy
 
-Chronaura is not directed at children under 13 and does not knowingly collect
+AuraLunis is not directed at children under 13 and does not knowingly collect
 personal information from children.
 
 ## Changes to this policy

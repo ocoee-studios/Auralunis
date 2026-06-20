@@ -1,8 +1,8 @@
-# Chronaura watchOS Implementation Handoff
+# AuraLunis watchOS Implementation Handoff
 
 ## Goal
 
-Add an Apple-native watchOS companion app target in Xcode and build the first working Chronaura astrolabe face in SwiftUI.
+Add an Apple-native watchOS companion app target in Xcode and build the first working AuraLunis astrolabe face in SwiftUI.
 
 ## Platform correction
 
@@ -17,7 +17,7 @@ For the SwiftUI Watch app:
 The starter code in:
 
 ```text
-apple-native/watchOS/ChronauraWatch/
+apple-native/watchOS/AuraLunisWatch/
 ```
 
 uses a conditional SwiftUI glass modifier and a pre-watchOS-26 fallback.
@@ -33,7 +33,7 @@ File → New → Target → watchOS App
 Name the target:
 
 ```text
-ChronauraWatch
+AuraLunisWatch
 ```
 
 Recommended choices:
@@ -41,7 +41,7 @@ Recommended choices:
 - Interface: SwiftUI
 - Language: Swift
 - Include Widget Extension: Yes, if adding Smart Stack / complication surfaces in the same pass
-- Companion iOS app: the generated Chronaura iOS app target
+- Companion iOS app: the generated AuraLunis iOS app target
 
 Copy the Swift starter files into the generated watchOS app target.
 
@@ -59,7 +59,7 @@ Build the face from the approved reference image and brand guide:
 - restrained Liquid Glass ring treatment on watchOS 26+
 - readable non-glass fallback on older watchOS versions
 
-Do not use a generic Apple Watch face template. Preserve the Chronaura crescent-C astrolabe identity.
+Do not use a generic Apple Watch face template. Preserve the AuraLunis crescent-C astrolabe identity.
 
 ## WatchConnectivity
 
@@ -78,8 +78,8 @@ See:
 
 ```text
 docs/WATCHCONNECTIVITY_PAYLOAD_CONTRACT.md
-apple-native/iOS/ChronauraWatchSync/
-apple-native/watchOS/ChronauraWatch/Connectivity/
+apple-native/iOS/AuraLunisWatchSync/
+apple-native/watchOS/AuraLunisWatch/Connectivity/
 ```
 
 ## Digital Crown behavior
@@ -105,7 +105,7 @@ The starter face uses SwiftUI `digitalCrownRotation` plus explicit `WKInterfaceD
 
 A real Apple Watch should show:
 
-- Chronaura astrolabe rings
+- AuraLunis astrolabe rings
 - crescent moon
 - compass labels
 - Moon phase

@@ -1,7 +1,7 @@
-# Chronaura Apple Watch Handoff
+# AuraLunis Apple Watch Handoff
 
 ## Approved visual direction
-- Chronaura logo prominent on watch face
+- AuraLunis logo prominent on watch face
 - Midnight Gold astrolabe interface
 - Moon / solar / lunar stats
 - Time scrub

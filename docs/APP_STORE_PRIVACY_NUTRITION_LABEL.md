@@ -1,9 +1,9 @@
-# Chronaura — App Store Privacy Nutrition Label
+# AuraLunis — App Store Privacy Nutrition Label
 
 ## Overview
 
 Apple requires a privacy "nutrition label" in App Store Connect before submission.
-This document maps every data type Chronaura collects, why, and whether it's
+This document maps every data type AuraLunis collects, why, and whether it's
 linked to the user's identity. Use this to fill in the App Store Connect
 Privacy section.
 
@@ -43,7 +43,7 @@ Privacy section.
 | **Linked to identity** | No |
 | **Used for tracking** | No |
 | **Purpose** | App Functionality |
-| **Details** | RevenueCat generates an anonymous `$RCAnonymousID` to manage subscription state. No Apple ID, email, or name is collected by Chronaura. If the user does not subscribe, no identifier is generated. |
+| **Details** | RevenueCat generates an anonymous `$RCAnonymousID` to manage subscription state. No Apple ID, email, or name is collected by AuraLunis. If the user does not subscribe, no identifier is generated. |
 
 ### 4. Usage Data
 
@@ -54,7 +54,7 @@ Privacy section.
 | **Linked to identity** | No |
 | **Used for tracking** | No |
 | **Purpose** | Analytics |
-| **Details** | Chronaura tracks: paywall impressions, purchase taps, plan toggles (monthly/annual), continue-free taps, and session counts. All analytics are processed locally via AnalyticsService. No data is sent to third-party analytics services at launch. |
+| **Details** | AuraLunis tracks: paywall impressions, purchase taps, plan toggles (monthly/annual), continue-free taps, and session counts. All analytics are processed locally via AnalyticsService. No data is sent to third-party analytics services at launch. |
 
 ### 5. Diagnostics
 
@@ -106,7 +106,7 @@ Per RevenueCat's documentation:
 - Apple ID
 - Payment method details
 - Location data
-- Device IDFA (unless you explicitly enable it — Chronaura does not)
+- Device IDFA (unless you explicitly enable it — AuraLunis does not)
 - Any Vault, journal, or observation data
 
 ### RevenueCat data processing
@@ -146,7 +146,7 @@ If the user enables the AI Sky Companion (Claude API):
 | **Linked to identity** | No |
 | **Used for tracking** | No |
 | **Purpose** | App Functionality |
-| **Details** | The user's sky question + current sky context (planet positions, moon phase) is sent to Anthropic's API. No name, email, or account info is sent. Queries are not stored by Chronaura after the response is received. See Anthropic's API privacy policy. |
+| **Details** | The user's sky question + current sky context (planet positions, moon phase) is sent to Anthropic's API. No name, email, or account info is sent. Queries are not stored by AuraLunis after the response is received. See Anthropic's API privacy policy. |
 
 If AI Sky Companion is included at launch, add:
 - **User Content** → Other User Content → App Functionality → Linked to Identity: No

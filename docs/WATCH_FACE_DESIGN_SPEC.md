@@ -1,6 +1,6 @@
-# Chronaura Watch Face — Design Specification
+# AuraLunis Watch Face — Design Specification
 
-**Reference:** `docs/Chronaura_Watch_Face_Target.png`
+**Reference:** `docs/AuraLunis_Watch_Face_Target.png`
 **Platform:** watchOS (Apple Watch Ultra shown in reference)
 **Design language:** Liquid Glass + Midnight Gold
 
@@ -8,11 +8,11 @@
 
 ### Top Bar
 - Date: `THU 29 MAY` (left)
-- Chronaura logo icon (center, small)
+- AuraLunis logo icon (center, small)
 - Time: `10:09 PM` (right)
 
 ### Brand
-- "CHRONAURA" in display serif (Cinzel)
+- "AURALUNIS" in display serif (Cinzel)
 - "THE INTERACTIVE ASTRAL CLOCK" subtitle
 
 ### Central Astrolabe

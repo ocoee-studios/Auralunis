@@ -1,9 +1,9 @@
 import React from "react";
 import { Image, StyleSheet, Text, View } from "react-native";
-import { ChronauraBrand } from "@/data/brand";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisBrand } from "@/data/brand";
+import { AuraLunisColors } from "@/theme/tokens";
 
-const stardustEmblem = require("../../assets/logo/chronaura-stardust-emblem.png");
+const stardustEmblem = require("../../assets/logo/auralunis-stardust-emblem.png");
 
 type Props = {
   size?: number;
@@ -24,15 +24,15 @@ export function LogoMark({
         source={stardustEmblem}
         style={{ width: size, height: size }}
         resizeMode="contain"
-        accessibilityLabel="Chronaura star-dust celestial emblem"
+        accessibilityLabel="AuraLunis star-dust celestial emblem"
       />
       {showWordmark ? (
         <View style={centered && styles.centeredWordmarkContainer}>
-          <Text style={[styles.wordmark, centered && styles.centeredText]}>{ChronauraBrand.wordmark}</Text>
-          <Text style={[styles.tagline, centered && styles.centeredText]}>{ChronauraBrand.tagline}</Text>
+          <Text style={[styles.wordmark, centered && styles.centeredText]}>{AuraLunisBrand.wordmark}</Text>
+          <Text style={[styles.tagline, centered && styles.centeredText]}>{AuraLunisBrand.tagline}</Text>
           {showDescriptor ? (
             <Text style={[styles.descriptor, centered && styles.centeredText]}>
-              {ChronauraBrand.descriptor}
+              {AuraLunisBrand.descriptor}
             </Text>
           ) : null}
         </View>
@@ -47,19 +47,19 @@ const styles = StyleSheet.create({
   centeredWordmarkContainer: { alignItems: "center" },
   centeredText: { textAlign: "center" },
   wordmark: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 17,
     letterSpacing: 4,
     fontWeight: "800"
   },
   tagline: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 10,
     marginTop: 3,
     fontStyle: "italic"
   },
   descriptor: {
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     fontSize: 8,
     letterSpacing: 1.7,
     marginTop: 5,

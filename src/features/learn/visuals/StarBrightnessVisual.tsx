@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 export function StarBrightnessVisual() {
   const [tick, setTick] = useState(0);
@@ -28,8 +28,8 @@ export function StarBrightnessVisual() {
 
 const styles = StyleSheet.create({
   card: { borderRadius: 28, padding: 16, backgroundColor: "rgba(255,255,255,0.055)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", marginBottom: 14 },
-  label: { color: ChronauraColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
+  label: { color: AuraLunisColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
   row: { flexDirection: "row", alignItems: "center", justifyContent: "space-evenly", marginTop: 16, marginBottom: 4 },
   star: { width: 28, height: 28, borderRadius: 14, shadowColor: "#FFF", shadowOpacity: 0.7, shadowRadius: 14 },
-  caption: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 18, marginTop: 10 }
+  caption: { color: AuraLunisColors.muted, fontSize: 12, lineHeight: 18, marginTop: 10 }
 });

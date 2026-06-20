@@ -2,10 +2,10 @@ import React from "react";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { ChronauraColors, ChronauraTypography } from "@/theme/tokens";
+import { AuraLunisColors, AuraLunisTypography } from "@/theme/tokens";
 import { LogoMark } from "@/components/LogoMark";
 import { StarDust } from "@/components/StarDust";
-import { useChronauraSettings } from "@/state/ChronauraSettingsContext";
+import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 
 type Props = {
   title: string;
@@ -14,17 +14,17 @@ type Props = {
 };
 
 export function ScreenShell({ title, subtitle, children }: Props) {
-  const { palette } = useChronauraSettings();
+  const { palette } = useAuraLunisSettings();
   const insets = useSafeAreaInsets();
 
   return (
     <LinearGradient colors={palette.gradient} style={styles.root}>
-      <StarDust count={12} color={ChronauraColors.gold} opacity={0.18} />
+      <StarDust count={12} color={AuraLunisColors.gold} opacity={0.18} />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}>
-        {/* Brand header matching mockup: [Logo] CHRONAURA */}
+        {/* Brand header matching mockup: [Logo] AURALUNIS */}
         <View style={styles.brandBar}>
           <LogoMark size={32} />
-          <Text style={styles.brandName}>CHRONAURA</Text>
+          <Text style={styles.brandName}>AURALUNIS</Text>
           <View style={{ flex: 1 }} />
         </View>
         {/* Screen title */}
@@ -48,14 +48,14 @@ const styles = StyleSheet.create({
     marginBottom: 12
   },
   brandName: {
-    fontFamily: ChronauraTypography.display.fontFamily,
+    fontFamily: AuraLunisTypography.display.fontFamily,
     fontSize: 18,
     letterSpacing: 3,
-    color: ChronauraColors.gold
+    color: AuraLunisColors.gold
   },
   header: { marginBottom: 16 },
   subtitle: {
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
     fontSize: 11,
     letterSpacing: 2,
     textTransform: "uppercase",

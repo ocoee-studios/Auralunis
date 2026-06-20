@@ -11,17 +11,17 @@
 
 import { Platform } from "react-native";
 
-const APP_GROUP_ID = "group.com.ocoee.chronaura";
+const APP_GROUP_ID = "group.com.ocoee.auralunis";
 
 // Keys matching ISSPassWidget.swift and TonightScoreWidget.swift
 const KEYS = {
-  issRise:      "chronaura.iss.nextRiseISO",
-  issDirection: "chronaura.iss.direction",
-  issPeak:      "chronaura.iss.peakElevation",
-  issDuration:  "chronaura.iss.durationMin",
-  tonightScore: "chronaura.tonight.score",
-  tonightLabel: "chronaura.tonight.label",
-  moonPercent:  "chronaura.tonight.moonPercent",
+  issRise:      "auralunis.iss.nextRiseISO",
+  issDirection: "auralunis.iss.direction",
+  issPeak:      "auralunis.iss.peakElevation",
+  issDuration:  "auralunis.iss.durationMin",
+  tonightScore: "auralunis.tonight.score",
+  tonightLabel: "auralunis.tonight.label",
+  moonPercent:  "auralunis.tonight.moonPercent",
 } as const;
 
 // Lazy-load the native SharedGroupPreferences module
@@ -48,7 +48,7 @@ function getSharedDefaults(): {
           setSharedDefault?: (key: string, value: string, group: string) => Promise<void>;
         }>;
       };
-      const bridge = NativeModulesProxy["ChronauraWidgetBridge"];
+      const bridge = NativeModulesProxy["AuraLunisWidgetBridge"];
       if (bridge?.setSharedDefault) {
         return {
           setItem: (key, value, groupId) => bridge.setSharedDefault!(key, value, groupId),

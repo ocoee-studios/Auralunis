@@ -12,23 +12,23 @@ const GestureHandlerRootView = RNGestureHandlerRootView as unknown as React.Comp
 import { NavigationContainer } from "@react-navigation/native";
 import { RootTabs } from "@/navigation/RootTabs";
 import { ThreeTierPaywallModal } from "@/features/paywall/ThreeTierPaywallModal";
-import { ChronauraSettingsProvider } from "@/state/ChronauraSettingsContext";
-import { ChronauraVaultProvider } from "@/state/ChronauraVaultContext";
+import { AuraLunisSettingsProvider } from "@/state/AuraLunisSettingsContext";
+import { AuraLunisVaultProvider } from "@/state/AuraLunisVaultContext";
 import { OnboardingFlow } from "@/features/onboarding/OnboardingFlow";
 import {
   configureRevenueCat,
-  purchaseChronauraTier,
-  restoreChronauraPurchases
+  purchaseAuraLunisTier,
+  restoreAuraLunisPurchases
 } from "@/services/RevenueCatService";
 import type {
 } from "@/features/paywall/MonetizationCatalog";
 import { configureNotificationHandler } from "@/services/NotificationService";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
-import { useChronauraFonts } from "@/theme/useFonts";
+import { useAuraLunisFonts } from "@/theme/useFonts";
 import { PaywallNavigationProvider, usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { recordSession } from "@/services/ReviewPromptService";
 
-const ONBOARDING_SEEN_KEY = "chronaura.onboarding.seen";
+const ONBOARDING_SEEN_KEY = "auralunis.onboarding.seen";
 
 // Bridges the global PaywallNavigationContext to App.tsx's local paywallVisible state.
 // Mounted inside PaywallNavigationProvider so it can read the context.
@@ -100,12 +100,12 @@ export default function App() {
 
   async function handlePurchase(planId: string) {
     try {
-      const result = await purchaseChronauraTier(planId as never, planId.includes("annual") ? "annual" as never : "monthly" as never);
+      const result = await purchaseAuraLunisTier(planId as never, planId.includes("annual") ? "annual" as never : "monthly" as never);
 
       if (result.status === "purchased") {
         trackPaywallEvent("purchase_complete", { planId, productId: result.productId });
         setPaywallVisible(false);
-        Alert.alert("Welcome to Chronaura Premium", "Your membership is active.");
+        Alert.alert("Welcome to AuraLunis Premium", "Your membership is active.");
         return;
       }
 
@@ -136,7 +136,7 @@ export default function App() {
 
   async function handleRestorePurchases() {
     try {
-      const result = await restoreChronauraPurchases();
+      const result = await restoreAuraLunisPurchases();
 
       if (result.status === "not_configured") {
         Alert.alert(
@@ -148,7 +148,7 @@ export default function App() {
 
       Alert.alert(
         "Purchases restored",
-        "Chronaura refreshed the membership status for this App Store account."
+        "AuraLunis refreshed the membership status for this App Store account."
       );
     } catch {
       Alert.alert(
@@ -168,8 +168,8 @@ export default function App() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <PaywallNavigationProvider>
-        <ChronauraSettingsProvider>
-          <ChronauraVaultProvider>
+        <AuraLunisSettingsProvider>
+          <AuraLunisVaultProvider>
             <NavigationContainer>
               <RootTabs />
             </NavigationContainer>
@@ -186,8 +186,8 @@ export default function App() {
             onComplete={handleOnboardingComplete}
             onOpenPaywall={handleOnboardingOpenPaywall}
           />
-          </ChronauraVaultProvider>
-        </ChronauraSettingsProvider>
+          </AuraLunisVaultProvider>
+        </AuraLunisSettingsProvider>
       </PaywallNavigationProvider>
     </GestureHandlerRootView>
   );

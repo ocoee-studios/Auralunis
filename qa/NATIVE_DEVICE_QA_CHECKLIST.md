@@ -1,4 +1,4 @@
-# Chronaura Native Device QA Checklist
+# AuraLunis Native Device QA Checklist
 
 Tester:
 Device:
@@ -11,7 +11,7 @@ Weather / sky conditions:
 
 ## Install and launch
 - [ ] Internal development build installs successfully
-- [ ] Chronaura opens without crash
+- [ ] AuraLunis opens without crash
 - [ ] Star-dust app icon appears
 - [ ] Splash screen appears correctly
 - [ ] Bottom navigation shows Home / Sky / Watch / Learn / Settings

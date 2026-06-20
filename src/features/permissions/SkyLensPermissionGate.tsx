@@ -1,7 +1,7 @@
 import React from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { useCameraPermissions } from "expo-camera";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { LogoMark } from "@/components/LogoMark";
 
 type Props = {
@@ -35,7 +35,7 @@ export function SkyLensPermissionGate({ onGranted, onDenied, onManualMap }: Prop
     } catch {
       Alert.alert(
         "Camera access unavailable",
-        "Chronaura could not open the native permission prompt. The Manual Sky Map is available instead."
+        "AuraLunis could not open the native permission prompt. The Manual Sky Map is available instead."
       );
       openManualFallback();
     }
@@ -61,7 +61,7 @@ export function SkyLensPermissionGate({ onGranted, onDenied, onManualMap }: Prop
       <LogoMark size={102} showWordmark showDescriptor centered />
       <Text style={styles.title}>Map the sky through your camera</Text>
       <Text style={styles.body}>
-        Chronaura uses your camera to overlay stars, planets, constellations,
+        AuraLunis uses your camera to overlay stars, planets, constellations,
         and alignment guides onto your real sky view. Your camera is active only
         while Sky Lens is open. Nothing is saved unless you capture it.
       </Text>
@@ -81,7 +81,7 @@ export function SkyLensPermissionGate({ onGranted, onDenied, onManualMap }: Prop
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: ChronauraColors.black,
+    backgroundColor: AuraLunisColors.black,
     padding: 28,
     alignItems: "center",
     justifyContent: "center"
@@ -95,7 +95,7 @@ const styles = StyleSheet.create({
     marginTop: 28
   },
   body: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 15,
     lineHeight: 22,
     textAlign: "center",
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
     marginBottom: 24
   },
   button: {
-    backgroundColor: ChronauraColors.gold2,
+    backgroundColor: AuraLunisColors.gold2,
     borderRadius: 18,
     paddingVertical: 15,
     paddingHorizontal: 18,
@@ -124,5 +124,5 @@ const styles = StyleSheet.create({
   },
   secondaryText: { color: "#FFF", fontWeight: "800" },
   textButton: { marginTop: 12, padding: 10 },
-  textButtonText: { color: ChronauraColors.silver, fontWeight: "800" }
+  textButtonText: { color: AuraLunisColors.silver, fontWeight: "800" }
 });

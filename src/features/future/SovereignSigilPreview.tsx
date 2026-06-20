@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Path } from "react-native-svg";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { generateSovereignSigilPreview } from "@/features/future/SovereignSigilService";
 import type { SovereignSigilRender } from "@/features/future/SovereignSigilTypes";
 
@@ -16,7 +16,7 @@ export function SovereignSigilPreview() {
     setGenerationFailed(false);
 
     generateSovereignSigilPreview(
-      "chronaura-local-preview-salt",
+      "auralunis-local-preview-salt",
       "normalized-birth-sky-preview-hash",
       nonce
     )
@@ -50,7 +50,7 @@ export function SovereignSigilPreview() {
             cx="60"
             cy="60"
             r="43"
-            stroke={ChronauraColors.gold}
+            stroke={AuraLunisColors.gold}
             strokeWidth="0.8"
             opacity="0.5"
             fill="none"
@@ -59,7 +59,7 @@ export function SovereignSigilPreview() {
             cx="60"
             cy="60"
             r="28"
-            stroke={ChronauraColors.silver}
+            stroke={AuraLunisColors.silver}
             strokeWidth="0.6"
             opacity="0.35"
             fill="none"
@@ -68,7 +68,7 @@ export function SovereignSigilPreview() {
             <Path
               key={path.id}
               d={path.d}
-              stroke={ChronauraColors.gold2}
+              stroke={AuraLunisColors.gold2}
               strokeWidth={path.strokeWidth}
               opacity={path.opacity}
               fill="none"
@@ -102,21 +102,21 @@ const styles = StyleSheet.create({
     borderColor: "rgba(217,168,78,0.18)"
   },
   eyebrow: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 10,
     letterSpacing: 2.2,
     fontWeight: "900"
   },
   title: { color: "#FFF", fontSize: 21, fontWeight: "900", marginTop: 7 },
   copy: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 13,
     lineHeight: 19,
     marginTop: 6
   },
   preview: { alignItems: "center", marginTop: 8 },
   fingerprint: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 11,
     textAlign: "center"
   },
@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
   },
   buttonText: { color: "#FFF", fontWeight: "900" },
   note: {
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     fontSize: 11,
     lineHeight: 16,
     marginTop: 8

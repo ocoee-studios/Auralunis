@@ -6,7 +6,7 @@ struct TapticAstrolabeCrownView: View {
 
     var body: some View {
         VStack {
-            Text("CHRONAURA")
+            Text("AURALUNIS")
                 .font(.caption.weight(.bold))
             Text("\(Int(scrubValue)) d")
                 .font(.title2.monospacedDigit())

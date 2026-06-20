@@ -1,7 +1,7 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import * as Haptics from "expo-haptics";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 type Props = {
   title: string;
@@ -53,7 +53,7 @@ const styles = StyleSheet.create({
   top: { flexDirection: "row", justifyContent: "space-between", gap: 12, alignItems: "center" },
   title: { color: "#FFF", fontSize: 18, fontWeight: "800", flex: 1 },
   status: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 11,
     paddingHorizontal: 8,
     paddingVertical: 5,
@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(217,168,78,0.25)"
   },
-  description: { color: ChronauraColors.muted, lineHeight: 20, fontSize: 13, marginTop: 8 },
+  description: { color: AuraLunisColors.muted, lineHeight: 20, fontSize: 13, marginTop: 8 },
   button: {
     marginTop: 14,
     backgroundColor: "rgba(217,168,78,0.13)",

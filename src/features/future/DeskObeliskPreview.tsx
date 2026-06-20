@@ -1,7 +1,7 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { LogoMark } from "@/components/LogoMark";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 export function DeskObeliskPreview() {
   return (
@@ -35,14 +35,14 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.08)"
   },
   eyebrow: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 10,
     letterSpacing: 2.2,
     fontWeight: "900"
   },
   title: { color: "#FFF", fontSize: 21, fontWeight: "900", marginTop: 7 },
   copy: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 13,
     lineHeight: 19,
     marginTop: 6
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
   },
   clock: { color: "#FFF", fontSize: 32, fontWeight: "900" },
   meta: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 10,
     letterSpacing: 1.2,
     marginTop: 4

@@ -50,7 +50,7 @@ struct SovereignSigilWidgetView: View {
         .containerBackground(for: .widget) {
             Color.black
         }
-        .accessibilityLabel("Chronaura Sovereign Sigil \(entry.seedFingerprint)")
+        .accessibilityLabel("AuraLunis Sovereign Sigil \(entry.seedFingerprint)")
     }
 }
 
@@ -64,7 +64,7 @@ struct SovereignSigilWidget: Widget {
         ) { entry in
             SovereignSigilWidgetView(entry: entry)
         }
-        .configurationDisplayName("Chronaura Sovereign Sigil")
+        .configurationDisplayName("AuraLunis Sovereign Sigil")
         .description("A local-safe Midnight Gold collector crest.")
         .supportedFamilies([.systemSmall])
     }

@@ -4,7 +4,7 @@
 - [ ] Learn tab appears in bottom navigation
 - [ ] Learn tab opens without crashing
 - [ ] User can switch between Learn and all other tabs
-- [ ] Learn tab uses Chronaura logo header and Midnight Gold style
+- [ ] Learn tab uses AuraLunis logo header and Midnight Gold style
 
 ## Categories
 - [ ] Solar System category opens

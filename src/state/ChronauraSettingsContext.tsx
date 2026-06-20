@@ -1,9 +1,9 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
-  defaultChronauraSettings,
-  type ChronauraSettingsState,
-  type ChronauraThemeMode,
+  defaultAuraLunisSettings,
+  type AuraLunisSettingsState,
+  type AuraLunisThemeMode,
   type SkyQuality
 } from "@/features/settings/SettingsTypes";
 import {
@@ -15,25 +15,25 @@ import {
   type WatchFaceId,
   type WatchThemeId
 } from "@/features/watch/WatchFaceCatalog";
-import { ChronauraThemes, type ChronauraThemePalette } from "@/theme/tokens";
+import { AuraLunisThemes, type AuraLunisThemePalette } from "@/theme/tokens";
 
-const SETTINGS_STORAGE_KEY = "chronaura.settings.v2";
+const SETTINGS_STORAGE_KEY = "auralunis.settings.v2";
 const MAX_WATCH_COMPLICATIONS = 4;
 
 type SettingsContextValue = {
-  settings: ChronauraSettingsState;
+  settings: AuraLunisSettingsState;
   hydrated: boolean;
-  palette: ChronauraThemePalette;
-  updateSetting: <K extends keyof ChronauraSettingsState>(
+  palette: AuraLunisThemePalette;
+  updateSetting: <K extends keyof AuraLunisSettingsState>(
     key: K,
-    value: ChronauraSettingsState[K]
+    value: AuraLunisSettingsState[K]
   ) => void;
   resetSettings: () => Promise<void>;
 };
 
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
 
-const validThemeModes: ChronauraThemeMode[] = ["system", "midnight_gold", "soft_moon", "deep_space"];
+const validThemeModes: AuraLunisThemeMode[] = ["system", "midnight_gold", "soft_moon", "deep_space"];
 const validWatchFaceIds = new Set<WatchFaceId>(watchFaceOptions.map((item) => item.id));
 const validWatchThemeIds = new Set<WatchThemeId>(watchThemeOptions.map((item) => item.id));
 const validComplicationIds = new Set<WatchComplicationId>(
@@ -56,83 +56,83 @@ function sanitizeWatchComplications(value: unknown): WatchComplicationId[] {
   return unique.length > 0 ? unique : defaultWatchComplications;
 }
 
-function sanitizeSettings(value: unknown): ChronauraSettingsState {
-  if (!value || typeof value !== "object") return defaultChronauraSettings;
+function sanitizeSettings(value: unknown): AuraLunisSettingsState {
+  if (!value || typeof value !== "object") return defaultAuraLunisSettings;
 
-  const saved = value as Partial<ChronauraSettingsState>;
+  const saved = value as Partial<AuraLunisSettingsState>;
 
   return {
-    ...defaultChronauraSettings,
+    ...defaultAuraLunisSettings,
     themeMode:
       typeof saved.themeMode === "string" &&
-      validThemeModes.includes(saved.themeMode as ChronauraThemeMode)
-        ? (saved.themeMode as ChronauraThemeMode)
-        : defaultChronauraSettings.themeMode,
+      validThemeModes.includes(saved.themeMode as AuraLunisThemeMode)
+        ? (saved.themeMode as AuraLunisThemeMode)
+        : defaultAuraLunisSettings.themeMode,
     skyQuality:
       typeof saved.skyQuality === "string" &&
       (["urban", "suburban", "rural"] as readonly string[]).includes(saved.skyQuality)
         ? (saved.skyQuality as SkyQuality)
-        : defaultChronauraSettings.skyQuality,
+        : defaultAuraLunisSettings.skyQuality,
     notificationsEnabled: isBoolean(saved.notificationsEnabled)
       ? saved.notificationsEnabled
-      : defaultChronauraSettings.notificationsEnabled,
+      : defaultAuraLunisSettings.notificationsEnabled,
     celestialAlarmsEnabled: isBoolean(saved.celestialAlarmsEnabled)
       ? saved.celestialAlarmsEnabled
-      : defaultChronauraSettings.celestialAlarmsEnabled,
+      : defaultAuraLunisSettings.celestialAlarmsEnabled,
     tonightRitualRemindersEnabled: isBoolean(saved.tonightRitualRemindersEnabled)
       ? saved.tonightRitualRemindersEnabled
-      : defaultChronauraSettings.tonightRitualRemindersEnabled,
+      : defaultAuraLunisSettings.tonightRitualRemindersEnabled,
     skyLensCalibrationRemindersEnabled: isBoolean(saved.skyLensCalibrationRemindersEnabled)
       ? saved.skyLensCalibrationRemindersEnabled
-      : defaultChronauraSettings.skyLensCalibrationRemindersEnabled,
+      : defaultAuraLunisSettings.skyLensCalibrationRemindersEnabled,
     localFirstVaultEnabled: isBoolean(saved.localFirstVaultEnabled)
       ? saved.localFirstVaultEnabled
-      : defaultChronauraSettings.localFirstVaultEnabled,
+      : defaultAuraLunisSettings.localFirstVaultEnabled,
     cloudSyncEnabled: isBoolean(saved.cloudSyncEnabled)
       ? saved.cloudSyncEnabled
-      : defaultChronauraSettings.cloudSyncEnabled,
+      : defaultAuraLunisSettings.cloudSyncEnabled,
     aiOracleOptIn: isBoolean(saved.aiOracleOptIn)
       ? saved.aiOracleOptIn
-      : defaultChronauraSettings.aiOracleOptIn,
+      : defaultAuraLunisSettings.aiOracleOptIn,
     cameraPermissionExplained: isBoolean(saved.cameraPermissionExplained)
       ? saved.cameraPermissionExplained
-      : defaultChronauraSettings.cameraPermissionExplained,
+      : defaultAuraLunisSettings.cameraPermissionExplained,
     locationPermissionExplained: isBoolean(saved.locationPermissionExplained)
       ? saved.locationPermissionExplained
-      : defaultChronauraSettings.locationPermissionExplained,
+      : defaultAuraLunisSettings.locationPermissionExplained,
     photoSavePermissionExplained: isBoolean(saved.photoSavePermissionExplained)
       ? saved.photoSavePermissionExplained
-      : defaultChronauraSettings.photoSavePermissionExplained,
+      : defaultAuraLunisSettings.photoSavePermissionExplained,
     motionPermissionExplained: isBoolean(saved.motionPermissionExplained)
       ? saved.motionPermissionExplained
-      : defaultChronauraSettings.motionPermissionExplained,
+      : defaultAuraLunisSettings.motionPermissionExplained,
     watchSyncEnabled: isBoolean(saved.watchSyncEnabled)
       ? saved.watchSyncEnabled
-      : defaultChronauraSettings.watchSyncEnabled,
+      : defaultAuraLunisSettings.watchSyncEnabled,
     widgetsEnabled: isBoolean(saved.widgetsEnabled)
       ? saved.widgetsEnabled
-      : defaultChronauraSettings.widgetsEnabled,
+      : defaultAuraLunisSettings.widgetsEnabled,
     soundBathAutoplayEnabled: isBoolean(saved.soundBathAutoplayEnabled)
       ? saved.soundBathAutoplayEnabled
-      : defaultChronauraSettings.soundBathAutoplayEnabled,
+      : defaultAuraLunisSettings.soundBathAutoplayEnabled,
     selectedWatchFaceId:
       typeof saved.selectedWatchFaceId === "string" &&
       validWatchFaceIds.has(saved.selectedWatchFaceId as WatchFaceId)
         ? (saved.selectedWatchFaceId as WatchFaceId)
-        : defaultChronauraSettings.selectedWatchFaceId,
+        : defaultAuraLunisSettings.selectedWatchFaceId,
     selectedWatchThemeId:
       typeof saved.selectedWatchThemeId === "string" &&
       validWatchThemeIds.has(saved.selectedWatchThemeId as WatchThemeId)
         ? (saved.selectedWatchThemeId as WatchThemeId)
-        : defaultChronauraSettings.selectedWatchThemeId,
+        : defaultAuraLunisSettings.selectedWatchThemeId,
     selectedWatchComplicationIds: sanitizeWatchComplications(
       saved.selectedWatchComplicationIds
     )
   };
 }
 
-export function ChronauraSettingsProvider({ children }: { children: React.ReactNode }) {
-  const [settings, setSettings] = useState<ChronauraSettingsState>(defaultChronauraSettings);
+export function AuraLunisSettingsProvider({ children }: { children: React.ReactNode }) {
+  const [settings, setSettings] = useState<AuraLunisSettingsState>(defaultAuraLunisSettings);
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -168,7 +168,7 @@ export function ChronauraSettingsProvider({ children }: { children: React.ReactN
   }, [hydrated, settings]);
 
   const value = useMemo<SettingsContextValue>(() => {
-    const palette = ChronauraThemes[settings.themeMode] ?? ChronauraThemes.midnight_gold;
+    const palette = AuraLunisThemes[settings.themeMode] ?? AuraLunisThemes.midnight_gold;
 
     return {
       settings,
@@ -183,7 +183,7 @@ export function ChronauraSettingsProvider({ children }: { children: React.ReactN
         );
       },
       resetSettings: async () => {
-        setSettings(defaultChronauraSettings);
+        setSettings(defaultAuraLunisSettings);
         await AsyncStorage.removeItem(SETTINGS_STORAGE_KEY);
       }
     };
@@ -192,11 +192,11 @@ export function ChronauraSettingsProvider({ children }: { children: React.ReactN
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 }
 
-export function useChronauraSettings() {
+export function useAuraLunisSettings() {
   const context = useContext(SettingsContext);
 
   if (!context) {
-    throw new Error("useChronauraSettings must be used inside ChronauraSettingsProvider");
+    throw new Error("useAuraLunisSettings must be used inside AuraLunisSettingsProvider");
   }
 
   return context;

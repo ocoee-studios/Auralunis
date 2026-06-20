@@ -1,6 +1,6 @@
 # Ephemeris integration
 
-Chronaura now computes real sky positions with
+AuraLunis now computes real sky positions with
 [`astronomy-engine`](https://github.com/cosinekitty/astronomy) (MIT, pure
 JavaScript/TypeScript, no native build step, reference-grade accuracy).
 

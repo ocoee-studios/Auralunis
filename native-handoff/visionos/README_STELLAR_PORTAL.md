@@ -1,4 +1,4 @@
-# Chronaura Stellar Portal — visionOS Future Target
+# AuraLunis Stellar Portal — visionOS Future Target
 
 Future-only visionOS module for passthrough spatial portal experiences.
 

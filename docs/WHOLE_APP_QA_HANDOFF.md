@@ -1,4 +1,4 @@
-# Chronaura Whole-App QA Handoff
+# AuraLunis Whole-App QA Handoff
 
 ## Active tabs checked
 - Home

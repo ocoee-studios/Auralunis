@@ -4,7 +4,7 @@ export type WatchFaceId =
   | "tonights_sky"
   | "deep_sky_portal"
   | "daily_alignment"
-  | "minimal_chronaura"
+  | "minimal_auralunis"
   | "sovereign_sigil";
 
 export type WatchThemeId =
@@ -24,7 +24,7 @@ export type WatchComplicationId =
   | "tonights_ritual"
   | "sky_lens_shortcut"
   | "sound_bath_shortcut"
-  | "chronaura_logo";
+  | "auralunis_logo";
 
 export interface WatchFaceOption {
   id: WatchFaceId;
@@ -55,7 +55,7 @@ export const watchFaceOptions: WatchFaceOption[] = [
   {
     id: "living_astrolabe",
     name: "Living Astrolabe",
-    description: "Rotating Midnight Gold rings, Chronaura emblem, Moon status, and Tonight Score.",
+    description: "Rotating Midnight Gold rings, AuraLunis emblem, Moon status, and Tonight Score.",
     bestFor: "Signature everyday face"
   },
   {
@@ -84,8 +84,8 @@ export const watchFaceOptions: WatchFaceOption[] = [
     bestFor: "Daily ritual"
   },
   {
-    id: "minimal_chronaura",
-    name: "Minimal Chronaura",
+    id: "minimal_auralunis",
+    name: "Minimal AuraLunis",
     description: "Clean time, star-dust logo, Moon icon, and one selected complication.",
     bestFor: "Elegant everyday use"
   },
@@ -103,7 +103,7 @@ export const watchThemeOptions: WatchThemeOption[] = [
   {
     id: "midnight_gold",
     name: "Midnight Gold",
-    description: "The signature obsidian, gold-leaf, and stardust Chronaura style."
+    description: "The signature obsidian, gold-leaf, and stardust AuraLunis style."
   },
   {
     id: "moon_silver",
@@ -194,8 +194,8 @@ export const watchComplicationOptions: WatchComplicationOption[] = [
     nativeNote: "Use as an app-intent shortcut complication."
   },
   {
-    id: "chronaura_logo",
-    name: "Mini Chronaura Logo",
+    id: "auralunis_logo",
+    name: "Mini AuraLunis Logo",
     shortLabel: "Logo",
     description: "A star-dust emblem complication for minimal layouts.",
     nativeNote: "Best for circular or graphic-corner slots."

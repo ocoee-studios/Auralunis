@@ -1,7 +1,7 @@
-# Chronaura — App Store Listing Draft
+# AuraLunis — App Store Listing Draft
 
 ## App name
-Chronaura
+AuraLunis
 
 ## Subtitle (30 chars max)
 Interactive Astral Clock
@@ -12,7 +12,7 @@ Moon phase, planets, constellations, satellites, all computed for your exact spo
 
 ## Description
 
-Chronaura turns your phone into a living astral clock. Point it at the sky and
+AuraLunis turns your phone into a living astral clock. Point it at the sky and
 see the Moon, planets, constellations, and satellites overlaid on your camera
 view — computed in real time for your exact location and time.
 
@@ -21,7 +21,7 @@ Your home screen is an all-sky dial that plots what's above the horizon right
 now. Moon phase, visible planets, rise and set times — all live, all real.
 
 SKY LENS
-Open the camera and Chronaura labels what you see: Jupiter, Venus, the Moon,
+Open the camera and AuraLunis labels what you see: Jupiter, Venus, the Moon,
 Orion's belt. A compass-aligned overlay points you toward the brightest objects.
 No internet needed — the astronomy engine runs on your device.
 
@@ -57,8 +57,8 @@ time-scrub, sound bath, advanced watch gallery.
 cancelled at least 24 hours before the end of the current period. Manage
 subscriptions in Settings > Apple ID > Subscriptions.
 
-Privacy Policy: https://ocoeestudios.com/chronaura/privacy
-Terms of Use: https://ocoeestudios.com/chronaura/terms
+Privacy Policy: https://ocoeestudios.com/auralunis/privacy
+Terms of Use: https://ocoeestudios.com/auralunis/terms
 
 ## Keywords (100 chars max, comma-separated)
 astronomy,stargazing,sky,moon,planets,constellations,telescope,satellite,night,space

@@ -1,4 +1,4 @@
-# Chronaura Sky Lens Accuracy Plan
+# AuraLunis Sky Lens Accuracy Plan
 
 ## Honest target
 We should not claim the AR overlay is “100% accurate” until real-device outdoor tests prove it. The goal is:

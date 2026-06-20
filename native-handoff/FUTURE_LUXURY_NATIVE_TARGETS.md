@@ -1,4 +1,4 @@
-# Chronaura Future Luxury Native Targets
+# AuraLunis Future Luxury Native Targets
 
 ## Desk Obelisk
 - WidgetKit `systemSmall` widget handoff scaffold

@@ -1,4 +1,4 @@
-# Chronaura Widgets / StandBy
+# AuraLunis Widgets / StandBy
 
 ## Portal Stack Widgets
 - Moon phase

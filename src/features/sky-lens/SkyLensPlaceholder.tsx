@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, Text, View } from "react-native";
 import { CameraView } from "expo-camera";
 
 type LayoutEvent = { nativeEvent: { layout: { width: number; height: number } } };
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 import { useDevicePointing } from "@/features/sky-lens/ar/useDevicePointing";
@@ -12,9 +12,9 @@ import { DEFAULT_FOV, projectTarget } from "@/features/sky-lens/ar/SkyLensProjec
 type Props = { onClose: () => void };
 
 function bodyColor(id: string) {
-  if (id === "moon") return ChronauraColors.silver;
-  if (id === "sun") return ChronauraColors.gold;
-  return ChronauraColors.gold2;
+  if (id === "moon") return AuraLunisColors.silver;
+  if (id === "sun") return AuraLunisColors.gold;
+  return AuraLunisColors.gold2;
 }
 
 function directionArrow(bearingDegrees: number) {
@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8
   },
-  hudText: { color: ChronauraColors.gold2, fontSize: 13, fontWeight: "900" },
+  hudText: { color: AuraLunisColors.gold2, fontSize: 13, fontWeight: "900" },
   hudSub: { color: "#E7ECF8", fontSize: 11, marginTop: 2 },
   guide: {
     position: "absolute",

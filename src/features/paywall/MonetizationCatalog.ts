@@ -1,13 +1,13 @@
 // MonetizationCatalog.ts
-// Chronaura pricing — optimized for launch.
+// AuraLunis pricing — optimized for launch.
 // Three products: Monthly (no trial), Annual (7-day trial), Lifetime Founders (one-time).
 // Trial is ANNUAL ONLY — prevents weekend trial-and-cancel on monthly.
 
 export const RevenueCatIds = {
   products: {
-    premiumMonthly:    "com.ocoee.chronaura.premium.monthly",
-    premiumAnnual:     "com.ocoee.chronaura.premium.annual",
-    lifetimeFounders:  "com.ocoee.chronaura.lifetime.founders",
+    premiumMonthly:    "com.ocoee.auralunis.premium.monthly",
+    premiumAnnual:     "com.ocoee.auralunis.premium.annual",
+    lifetimeFounders:  "com.ocoee.auralunis.lifetime.founders",
   },
   packages: {
     premiumMonthly:    "premium_monthly",
@@ -15,7 +15,7 @@ export const RevenueCatIds = {
     lifetimeFounders:  "lifetime_founders",
   },
   // All three products unlock this single entitlement
-  entitlement: "chronaura_premium",
+  entitlement: "auralunis_premium",
 } as const;
 
 export interface PlanOption {
@@ -39,7 +39,7 @@ export const plans: PlanOption[] = [
   {
     id: "premium_annual",
     productId: RevenueCatIds.products.premiumAnnual,
-    name: "Chronaura Premium",
+    name: "AuraLunis Premium",
     interval: "annual",
     displayPrice: "$39.99/year",
     subtitle: "$3.33/month, billed annually",
@@ -50,7 +50,7 @@ export const plans: PlanOption[] = [
   {
     id: "premium_monthly",
     productId: RevenueCatIds.products.premiumMonthly,
-    name: "Chronaura Premium",
+    name: "AuraLunis Premium",
     interval: "monthly",
     displayPrice: "$6.99/month",
     subtitle: "Billed monthly · Cancel anytime",
@@ -76,7 +76,7 @@ export const plans: PlanOption[] = [
 /** Tracking modes accessible on the free tier */
 export const FREE_TRACKING_MODES = ["fleet", "deep-space", "golden", "meteor"] as const;
 
-/** Tracking modes that require chronaura_premium */
+/** Tracking modes that require auralunis_premium */
 export const PREMIUM_TRACKING_MODES = ["train", "debris", "reentry", "chain", "static"] as const;
 
 export type FreeTrackingMode    = typeof FREE_TRACKING_MODES[number];

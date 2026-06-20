@@ -3,9 +3,9 @@
 Place the production files here:
 
 ```text
-chronaura-logo-full.svg
-chronaura-lockup.svg
-chronaura-app-icon.svg
+auralunis-logo-full.svg
+auralunis-lockup.svg
+auralunis-app-icon.svg
 icon-composer/
 watch/
 ```

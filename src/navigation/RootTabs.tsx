@@ -2,7 +2,7 @@ import React from "react";
 import { Platform, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Ionicons } from "@expo/vector-icons";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { SkyScreen } from "@/screens/SkyScreen";
 import { WatchScreen } from "@/screens/WatchScreen";
@@ -55,8 +55,8 @@ export function RootTabs() {
           position: "absolute"
         },
         tabBarBackground: () => <TabBarBackground />,
-        tabBarActiveTintColor: ChronauraColors.gold2,
-        tabBarInactiveTintColor: ChronauraColors.muted,
+        tabBarActiveTintColor: AuraLunisColors.gold2,
+        tabBarInactiveTintColor: AuraLunisColors.muted,
         tabBarIcon: ({ color, size }: { color: string; size: number }) => (
           <Ionicons name={icons[route.name]} color={color} size={size} />
         )

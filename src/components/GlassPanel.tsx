@@ -5,7 +5,7 @@
 
 import React, { type ReactNode } from "react";
 import { Platform, StyleSheet, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 // expo-blur typed accessor (same resolution pattern as other Expo packages).
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   accentBorder: {
     borderWidth: 1,
-    borderColor: ChronauraColors.gold
+    borderColor: AuraLunisColors.gold
   },
   // Subtle light reflection along the top edge — mimics Liquid Glass refraction.
   innerGlow: {

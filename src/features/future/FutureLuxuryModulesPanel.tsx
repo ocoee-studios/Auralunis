@@ -1,6 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 const modules = [
   ["Desk Obelisk", "WidgetKit StandBy extension scaffold added"],
@@ -39,14 +39,14 @@ const styles = StyleSheet.create({
     borderColor: "rgba(139,116,255,0.18)"
   },
   eyebrow: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 10,
     letterSpacing: 2.2,
     fontWeight: "900"
   },
   title: { color: "#FFF", fontSize: 20, fontWeight: "900", marginTop: 7 },
   copy: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 13,
     lineHeight: 19,
     marginTop: 5
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   },
   rowTitle: { color: "#FFF", fontSize: 14, fontWeight: "800" },
   rowCopy: {
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     fontSize: 11,
     lineHeight: 16,
     marginTop: 3

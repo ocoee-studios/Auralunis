@@ -1,14 +1,14 @@
-# Chronaura Watch Face Gallery Specification
+# AuraLunis Watch Face Gallery Specification
 
 ## Goal
-Let users personalize the Chronaura Watch experience while respecting Apple Watch platform rules.
+Let users personalize the AuraLunis Watch experience while respecting Apple Watch platform rules.
 
 ## Added to Watch tab
 - Watch-app face gallery
 - Watch-specific theme selector
 - Complication picker with a maximum of four saved modules
 - Signature curated setup reset
-- Persistent selection through Chronaura Settings storage
+- Persistent selection through AuraLunis Settings storage
 - Native watchOS handoff notes
 
 ## Default curated setup
@@ -21,4 +21,4 @@ Let users personalize the Chronaura Watch experience while respecting Apple Watc
   - Sky Lens Shortcut
 
 ## Platform boundary
-The gallery controls the full-screen Chronaura watch app layout. Real Apple Watch system faces remain Apple-controlled; Chronaura provides complications and curated templates around supported slots.
+The gallery controls the full-screen AuraLunis watch app layout. Real Apple Watch system faces remain Apple-controlled; AuraLunis provides complications and curated templates around supported slots.

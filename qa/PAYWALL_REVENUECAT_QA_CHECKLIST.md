@@ -1,4 +1,4 @@
-# Chronaura Paywall + RevenueCat QA Checklist
+# AuraLunis Paywall + RevenueCat QA Checklist
 
 Tester:
 Build:
@@ -21,7 +21,7 @@ Date:
 - [ ] Trial copy says eligible new subscribers
 
 ## App Store Connect
-- [ ] One `Chronaura Memberships` subscription group exists
+- [ ] One `AuraLunis Memberships` subscription group exists
 - [ ] Horizon+ products are Level 3
 - [ ] Aura Pro products are Level 2
 - [ ] Sovereign product is Level 1
@@ -33,7 +33,7 @@ Date:
 - [ ] `horizon_plus` entitlement exists
 - [ ] `aura_pro` entitlement exists
 - [ ] `sovereign` entitlement exists
-- [ ] `chronaura_launch` offering exists
+- [ ] `auralunis_launch` offering exists
 - [ ] Horizon+ and Aura Pro launch packages appear in current offering
 - [ ] Sovereign package is withheld from public launch offering
 - [ ] Public iOS SDK key added to app config

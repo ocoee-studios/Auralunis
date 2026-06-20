@@ -1,11 +1,11 @@
-# Chronaura Native / Device Follow-Up Runbook
+# AuraLunis Native / Device Follow-Up Runbook
 
 ## Goal
 Move the repaired React Native / Expo scaffold onto a real iPhone so the camera, location, compass, motion sensors, haptics, photo saving, and outdoor Sky Lens calibration can be checked honestly.
 
 ## Stage 1 — Mac preflight
 
-Open Terminal in the Chronaura project folder and run:
+Open Terminal in the AuraLunis project folder and run:
 
 ```bash
 chmod +x ./scripts/bootstrap-native-device.sh
@@ -17,7 +17,7 @@ The script:
 2. aligns dependencies to the Expo SDK,
 3. installs `expo-dev-client`,
 4. runs `expo-doctor`,
-5. runs the Chronaura QA suites.
+5. runs the AuraLunis QA suites.
 
 ## Stage 2 — Expo account and internal development build
 
@@ -34,7 +34,7 @@ Install the internal development build on the physical iPhone using the installa
 npm run start:dev-client
 ```
 
-Open the installed Chronaura development app on the iPhone and connect it to the local development server.
+Open the installed AuraLunis development app on the iPhone and connect it to the local development server.
 
 ## Stage 4 — In-app device diagnostics
 
@@ -76,7 +76,7 @@ Test both branches:
 - Reset camera permission in iPhone Settings if needed.
 - Open Sky Lens again.
 - Decline the prompt.
-- Confirm Chronaura opens Manual Sky Map instead of a dead end.
+- Confirm AuraLunis opens Manual Sky Map instead of a dead end.
 
 ## Stage 6 — Outdoor Sky Lens calibration
 

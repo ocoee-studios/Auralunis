@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 export function ConstellationIgnitionVisual() {
   const [on, setOn] = useState(true);
@@ -24,7 +24,7 @@ export function ConstellationIgnitionVisual() {
           <Line
             key={i}
             x1={stars[a][0]} y1={stars[a][1]} x2={stars[b][0]} y2={stars[b][1]}
-            stroke={on ? ChronauraColors.gold : "rgba(217,168,78,0.18)"}
+            stroke={on ? AuraLunisColors.gold : "rgba(217,168,78,0.18)"}
             strokeWidth={on ? 1.8 : 1}
           />
         ))}
@@ -39,6 +39,6 @@ export function ConstellationIgnitionVisual() {
 
 const styles = StyleSheet.create({
   card: { borderRadius: 28, padding: 16, backgroundColor: "rgba(255,255,255,0.055)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", marginBottom: 14 },
-  label: { color: ChronauraColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
-  caption: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 18, marginTop: 8 }
+  label: { color: AuraLunisColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
+  caption: { color: AuraLunisColors.muted, fontSize: 12, lineHeight: 18, marginTop: 8 }
 });

@@ -1,10 +1,10 @@
 import type { WatchComplicationId, WatchFaceId, WatchThemeId } from "@/features/watch/WatchFaceCatalog";
 
-export type ChronauraThemeMode = "system" | "midnight_gold" | "soft_moon" | "deep_space";
+export type AuraLunisThemeMode = "system" | "midnight_gold" | "soft_moon" | "deep_space";
 export type SkyQuality = "urban" | "suburban" | "rural";
 
-export interface ChronauraSettingsState {
-  themeMode: ChronauraThemeMode;
+export interface AuraLunisSettingsState {
+  themeMode: AuraLunisThemeMode;
   skyQuality: SkyQuality;
   notificationsEnabled: boolean;
   celestialAlarmsEnabled: boolean;
@@ -25,7 +25,7 @@ export interface ChronauraSettingsState {
   selectedWatchComplicationIds: WatchComplicationId[];
 }
 
-export const defaultChronauraSettings: ChronauraSettingsState = {
+export const defaultAuraLunisSettings: AuraLunisSettingsState = {
   themeMode: "midnight_gold",
   skyQuality: "suburban",
   notificationsEnabled: true,

@@ -9,7 +9,7 @@ import {
   Modal, Pressable, ScrollView, StyleSheet,
   Text, TouchableOpacity, View,
 } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import {
   plans,
   premiumFeatures,
@@ -50,7 +50,7 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase }: Props) {
           <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
 
             {/* Header */}
-            <Text style={styles.eyebrow}>CHRONAURA PREMIUM</Text>
+            <Text style={styles.eyebrow}>AURALUNIS PREMIUM</Text>
             <Text style={styles.headline}>Unlock the Full Cosmos</Text>
             <Text style={styles.sub}>
               Live satellite tracking · Cosmic Drift galaxy · All 9 modes
@@ -137,7 +137,7 @@ function PlanCard({
       <View style={styles.planLeft}>
         <View style={[styles.radio, selected && styles.radioSelected]} />
         <View>
-          <Text style={[styles.planName, selected && { color: ChronauraColors.gold2 }]}>
+          <Text style={[styles.planName, selected && { color: AuraLunisColors.gold2 }]}>
             {plan.name}
             {plan.interval === "lifetime" ? " — Founders" : ""}
           </Text>
@@ -151,7 +151,7 @@ function PlanCard({
         {plan.anchorPrice && (
           <Text style={styles.anchorPrice}>{plan.anchorPrice}</Text>
         )}
-        <Text style={[styles.planPrice, selected && { color: ChronauraColors.gold }]}>
+        <Text style={[styles.planPrice, selected && { color: AuraLunisColors.gold }]}>
           {plan.displayPrice}
         </Text>
         {plan.badge && (
@@ -166,35 +166,35 @@ function PlanCard({
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "flex-end" },
-  sheet: { backgroundColor: ChronauraColors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "92%", borderTopWidth: 1, borderColor: ChronauraColors.borderGold },
+  sheet: { backgroundColor: AuraLunisColors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "92%", borderTopWidth: 1, borderColor: AuraLunisColors.borderGold },
   content: { padding: 24, paddingBottom: 48 },
-  eyebrow: { color: ChronauraColors.gold, fontSize: 10, fontWeight: "800", letterSpacing: 3, textAlign: "center", marginBottom: 6 },
-  headline: { color: ChronauraColors.gold2, fontSize: 24, fontWeight: "900", textAlign: "center", marginBottom: 6 },
-  sub: { color: ChronauraColors.muted, fontSize: 13, textAlign: "center", lineHeight: 20, marginBottom: 22 },
-  planCard: { backgroundColor: ChronauraColors.elevated, borderRadius: 14, borderWidth: 1, borderColor: ChronauraColors.borderSubtle, padding: 14, marginBottom: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  planCardSelected: { borderColor: ChronauraColors.gold, backgroundColor: "rgba(217,168,78,0.1)" },
-  planCardHighlight: { borderColor: ChronauraColors.borderGold },
+  eyebrow: { color: AuraLunisColors.gold, fontSize: 10, fontWeight: "800", letterSpacing: 3, textAlign: "center", marginBottom: 6 },
+  headline: { color: AuraLunisColors.gold2, fontSize: 24, fontWeight: "900", textAlign: "center", marginBottom: 6 },
+  sub: { color: AuraLunisColors.muted, fontSize: 13, textAlign: "center", lineHeight: 20, marginBottom: 22 },
+  planCard: { backgroundColor: AuraLunisColors.elevated, borderRadius: 14, borderWidth: 1, borderColor: AuraLunisColors.borderSubtle, padding: 14, marginBottom: 10, flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
+  planCardSelected: { borderColor: AuraLunisColors.gold, backgroundColor: "rgba(217,168,78,0.1)" },
+  planCardHighlight: { borderColor: AuraLunisColors.borderGold },
   planLeft: { flexDirection: "row", alignItems: "flex-start", gap: 12, flex: 1 },
-  radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: ChronauraColors.faint, marginTop: 2, flexShrink: 0 },
-  radioSelected: { borderColor: ChronauraColors.gold, backgroundColor: ChronauraColors.gold },
-  planName: { color: ChronauraColors.silver, fontSize: 14, fontWeight: "700" },
-  planSubtitle: { color: ChronauraColors.faint, fontSize: 11, marginTop: 2 },
-  trialBadge: { color: ChronauraColors.green, fontSize: 10, fontWeight: "700", marginTop: 4 },
+  radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: AuraLunisColors.faint, marginTop: 2, flexShrink: 0 },
+  radioSelected: { borderColor: AuraLunisColors.gold, backgroundColor: AuraLunisColors.gold },
+  planName: { color: AuraLunisColors.silver, fontSize: 14, fontWeight: "700" },
+  planSubtitle: { color: AuraLunisColors.faint, fontSize: 11, marginTop: 2 },
+  trialBadge: { color: AuraLunisColors.green, fontSize: 10, fontWeight: "700", marginTop: 4 },
   planRight: { alignItems: "flex-end", gap: 4 },
-  anchorPrice: { color: ChronauraColors.faint, fontSize: 11, textDecorationLine: "line-through" },
-  planPrice: { color: ChronauraColors.silver, fontSize: 15, fontWeight: "800" },
+  anchorPrice: { color: AuraLunisColors.faint, fontSize: 11, textDecorationLine: "line-through" },
+  planPrice: { color: AuraLunisColors.silver, fontSize: 15, fontWeight: "800" },
   badge: { backgroundColor: "rgba(217,168,78,0.2)", borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2 },
-  badgeText: { color: ChronauraColors.gold, fontSize: 8, fontWeight: "800", letterSpacing: 1 },
-  cta: { backgroundColor: ChronauraColors.gold, borderRadius: 16, padding: 16, alignItems: "center", marginVertical: 20 },
-  ctaText: { color: ChronauraColors.cosmicBlack, fontSize: 16, fontWeight: "900", letterSpacing: 0.5 },
+  badgeText: { color: AuraLunisColors.gold, fontSize: 8, fontWeight: "800", letterSpacing: 1 },
+  cta: { backgroundColor: AuraLunisColors.gold, borderRadius: 16, padding: 16, alignItems: "center", marginVertical: 20 },
+  ctaText: { color: AuraLunisColors.cosmicBlack, fontSize: 16, fontWeight: "900", letterSpacing: 0.5 },
   ctaSub: { color: "rgba(11,11,18,0.7)", fontSize: 11, marginTop: 3 },
-  sectionLabel: { color: ChronauraColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 },
-  featureRow: { flexDirection: "row", gap: 10, paddingVertical: 6, borderTopWidth: 1, borderTopColor: ChronauraColors.borderFaint },
-  featureCheck: { color: ChronauraColors.gold, fontSize: 11, marginTop: 1 },
-  featureText: { color: ChronauraColors.silver, fontSize: 12, flex: 1, lineHeight: 18 },
+  sectionLabel: { color: AuraLunisColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 },
+  featureRow: { flexDirection: "row", gap: 10, paddingVertical: 6, borderTopWidth: 1, borderTopColor: AuraLunisColors.borderFaint },
+  featureCheck: { color: AuraLunisColors.gold, fontSize: 11, marginTop: 1 },
+  featureText: { color: AuraLunisColors.silver, fontSize: 12, flex: 1, lineHeight: 18 },
   footer: { flexDirection: "row", justifyContent: "center", gap: 8, marginTop: 20, marginBottom: 10 },
-  footerLink: { color: ChronauraColors.faint, fontSize: 11 },
-  footerDot: { color: ChronauraColors.faint, fontSize: 11 },
+  footerLink: { color: AuraLunisColors.faint, fontSize: 11 },
+  footerDot: { color: AuraLunisColors.faint, fontSize: 11 },
   skipBtn: { alignItems: "center", paddingVertical: 8 },
-  skipText: { color: ChronauraColors.faint, fontSize: 12 },
+  skipText: { color: AuraLunisColors.faint, fontSize: 12 },
 });

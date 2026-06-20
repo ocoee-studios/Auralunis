@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import Svg, { Circle, Line } from "react-native-svg";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import {
   computeTonightSky,
   type TonightSky
@@ -29,9 +29,9 @@ function dotRadius(magnitude?: number) {
 }
 
 function bodyColor(id: string) {
-  if (id === "moon") return ChronauraColors.silver;
-  if (id === "sun") return ChronauraColors.gold;
-  return ChronauraColors.gold2;
+  if (id === "moon") return AuraLunisColors.silver;
+  if (id === "sun") return AuraLunisColors.gold;
+  return AuraLunisColors.gold2;
 }
 
 export function AstrolabePreview({ sky }: Props) {
@@ -41,7 +41,7 @@ export function AstrolabePreview({ sky }: Props) {
     <View style={styles.wrap}>
       <View style={styles.board}>
         <Svg width={SIZE} height={SIZE} style={StyleSheet.absoluteFillObject}>
-          <Circle cx={CENTER} cy={CENTER} r={RADIUS} fill="rgba(217,168,78,0.04)" stroke={ChronauraColors.gold} strokeWidth={1.5} />
+          <Circle cx={CENTER} cy={CENTER} r={RADIUS} fill="rgba(217,168,78,0.04)" stroke={AuraLunisColors.gold} strokeWidth={1.5} />
           <Circle cx={CENTER} cy={CENTER} r={(RADIUS * 2) / 3} fill="none" stroke="rgba(192,198,212,0.18)" strokeWidth={1} />
           <Circle cx={CENTER} cy={CENTER} r={RADIUS / 3} fill="none" stroke="rgba(192,198,212,0.18)" strokeWidth={1} />
           <Line x1={CENTER} y1={CENTER - RADIUS} x2={CENTER} y2={CENTER + RADIUS} stroke="rgba(192,198,212,0.12)" strokeWidth={0.5} />
@@ -50,7 +50,7 @@ export function AstrolabePreview({ sky }: Props) {
             const { x, y } = project(body.azimuthDegrees, body.altitudeDegrees);
             return <Circle key={body.id} cx={x} cy={y} r={dotRadius(body.magnitude)} fill={bodyColor(body.id)} />;
           })}
-          <Circle cx={CENTER} cy={CENTER} r={2} fill={ChronauraColors.muted} />
+          <Circle cx={CENTER} cy={CENTER} r={2} fill={AuraLunisColors.muted} />
         </Svg>
 
         <Text style={[styles.cardinal, { top: 0, left: CENTER - 6 }]}>N</Text>
@@ -78,6 +78,6 @@ export function AstrolabePreview({ sky }: Props) {
 const styles = StyleSheet.create({
   wrap: { height: 250, alignItems: "center", justifyContent: "center" },
   board: { width: SIZE, height: SIZE, position: "relative" },
-  cardinal: { position: "absolute", color: ChronauraColors.muted, fontSize: 11, fontWeight: "700" },
-  bodyLabel: { position: "absolute", color: ChronauraColors.silver, fontSize: 9 }
+  cardinal: { position: "absolute", color: AuraLunisColors.muted, fontSize: 11, fontWeight: "700" },
+  bodyLabel: { position: "absolute", color: AuraLunisColors.silver, fontSize: 9 }
 });

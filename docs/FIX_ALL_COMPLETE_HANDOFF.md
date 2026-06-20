@@ -1,4 +1,4 @@
-# Chronaura Fix-All Complete Handoff
+# AuraLunis Fix-All Complete Handoff
 
 Generated: 2026-05-29T22:45:40
 
@@ -10,7 +10,7 @@ Generated: 2026-05-29T22:45:40
 - Settings
 
 ## Fixed in the scaffold
-- Approved star-dust Chronaura logo assets added and used by `LogoMark`.
+- Approved star-dust AuraLunis logo assets added and used by `LogoMark`.
 - App icon, adaptive icon, and splash screen updated.
 - Expo camera permission hook updated to named `useCameraPermissions`.
 - Manual Sky Map fallback added.
@@ -21,7 +21,7 @@ Generated: 2026-05-29T22:45:40
 - Prototype Notes / Vault items persist locally.
 - First-open 7-day trial popup preserved.
 - Unsupported `fontWeight: "850"` values removed.
-- Duplicate Chronaura brand source removed.
+- Duplicate AuraLunis brand source removed.
 - Active tab navigation refactored to the approved five-tab structure.
 - Lightweight strict TypeScript syntax pass completed successfully with local external-library stubs.
 

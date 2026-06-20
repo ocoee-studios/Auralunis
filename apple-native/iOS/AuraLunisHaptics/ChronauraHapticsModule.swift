@@ -1,4 +1,4 @@
-// ChronauraHapticsModule.swift
+// AuraLunisHapticsModule.swift
 // Expo Module that exposes CoreHaptics compass-tick and lock-pulse patterns
 // to the React Native layer. Registered automatically by Expo Modules Core.
 //
@@ -9,12 +9,12 @@
 import ExpoModulesCore
 import CoreHaptics
 
-public final class ChronauraHapticsModule: Module {
+public final class AuraLunisHapticsModule: Module {
 
     private var engine: CHHapticEngine?
 
     public func definition() -> ModuleDefinition {
-        Name("ChronauraHaptics")
+        Name("AuraLunisHaptics")
 
         // Called once when the module is loaded
         OnCreate {
@@ -43,11 +43,11 @@ public final class ChronauraHapticsModule: Module {
                 try? self?.engine?.start()
             }
             engine?.stoppedHandler = { reason in
-                print("[ChronauraHaptics] Engine stopped: \(reason)")
+                print("[AuraLunisHaptics] Engine stopped: \(reason)")
             }
             try engine?.start()
         } catch {
-            print("[ChronauraHaptics] Failed to start engine: \(error)")
+            print("[AuraLunisHaptics] Failed to start engine: \(error)")
         }
     }
 
@@ -68,7 +68,7 @@ public final class ChronauraHapticsModule: Module {
             let player = try engine.makePlayer(with: pattern)
             try player.start(atTime: CHHapticTimeImmediate)
         } catch {
-            print("[ChronauraHaptics] compassTick failed: \(error)")
+            print("[AuraLunisHaptics] compassTick failed: \(error)")
         }
     }
 
@@ -88,7 +88,7 @@ public final class ChronauraHapticsModule: Module {
             let player = try engine.makePlayer(with: pattern)
             try player.start(atTime: CHHapticTimeImmediate)
         } catch {
-            print("[ChronauraHaptics] lockPulse failed: \(error)")
+            print("[AuraLunisHaptics] lockPulse failed: \(error)")
         }
     }
 }

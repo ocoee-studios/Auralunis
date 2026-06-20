@@ -16,7 +16,7 @@ import Animated, {
   withSequence,
   withTiming,
 } from "react-native-reanimated";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 export interface RadarBlip {
   id: string;
@@ -126,7 +126,7 @@ function AnimatedBlip({ blip, onPress }: { blip: RadarBlip; onPress: () => void 
 // ── Main component ────────────────────────────────────────────────────────────
 export function SpaceRadarGrid({ blips, alignmentScore, isLocked, onBlipPress, devicePitch = 0, showHorizon = false }: SpaceRadarGridProps) {
   const activeBlip = blips.find(b => b.isActive);
-  const lockColor = isLocked ? ChronauraColors.green : activeBlip?.color ?? ChronauraColors.gold;
+  const lockColor = isLocked ? AuraLunisColors.green : activeBlip?.color ?? AuraLunisColors.gold;
 
   const hy = showHorizon ? horizonY(devicePitch) : -1;
   const groundHeight = showHorizon ? Math.max(0, RADAR_SIZE - hy) : 0;
@@ -157,12 +157,12 @@ export function SpaceRadarGrid({ blips, alignmentScore, isLocked, onBlipPress, d
         )}
 
         <Circle cx={CENTER} cy={CENTER} r={CENTER - 2} fill="url(#radarGlow)" />
-        <Circle cx={CENTER} cy={CENTER} r={CENTER - 2} stroke={ChronauraColors.borderGold} strokeWidth={1.5} fill="none" />
-        <Circle cx={CENTER} cy={CENTER} r={CENTER * 0.62} stroke={ChronauraColors.borderSubtle} strokeWidth={1} strokeDasharray="4 4" fill="none" />
-        <Circle cx={CENTER} cy={CENTER} r={CENTER * 0.3} stroke={ChronauraColors.borderSubtle} strokeWidth={1} strokeDasharray="3 5" fill="none" />
+        <Circle cx={CENTER} cy={CENTER} r={CENTER - 2} stroke={AuraLunisColors.borderGold} strokeWidth={1.5} fill="none" />
+        <Circle cx={CENTER} cy={CENTER} r={CENTER * 0.62} stroke={AuraLunisColors.borderSubtle} strokeWidth={1} strokeDasharray="4 4" fill="none" />
+        <Circle cx={CENTER} cy={CENTER} r={CENTER * 0.3} stroke={AuraLunisColors.borderSubtle} strokeWidth={1} strokeDasharray="3 5" fill="none" />
 
-        <Line x1={16} y1={CENTER} x2={RADAR_SIZE - 16} y2={CENTER} stroke={ChronauraColors.borderSubtle} strokeWidth={1} />
-        <Line x1={CENTER} y1={16} x2={CENTER} y2={RADAR_SIZE - 16} stroke={ChronauraColors.borderSubtle} strokeWidth={1} />
+        <Line x1={16} y1={CENTER} x2={RADAR_SIZE - 16} y2={CENTER} stroke={AuraLunisColors.borderSubtle} strokeWidth={1} />
+        <Line x1={CENTER} y1={16} x2={CENTER} y2={RADAR_SIZE - 16} stroke={AuraLunisColors.borderSubtle} strokeWidth={1} />
 
         {/* Horizon curve */}
         {horizonPath && (

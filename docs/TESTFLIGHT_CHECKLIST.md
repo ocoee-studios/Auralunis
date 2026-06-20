@@ -1,4 +1,4 @@
-# Chronaura — TestFlight Checklist
+# AuraLunis — TestFlight Checklist
 
 ## Before uploading to TestFlight
 

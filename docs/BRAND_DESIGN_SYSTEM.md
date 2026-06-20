@@ -1,13 +1,13 @@
-# Chronaura Brand & Design System
+# AuraLunis Brand & Design System
 
 ## References
-- `docs/brand_reference/Chronaura_Brand_Guide.png` — full brand bible
-- `docs/brand_reference/Chronaura_All_Screens_Target.png` — all 5 screen targets
-- `docs/Chronaura_Watch_Face_Target.png` — watch face design
+- `docs/brand_reference/AuraLunis_Brand_Guide.png` — full brand bible
+- `docs/brand_reference/AuraLunis_All_Screens_Target.png` — all 5 screen targets
+- `docs/AuraLunis_Watch_Face_Target.png` — watch face design
 
 ## Logo
-The Chronaura logo is a gold crescent "C" within an astrolabe compass:
-- **C** = Chronaura (the letter)
+The AuraLunis logo is a gold crescent "C" within an astrolabe compass:
+- **C** = AuraLunis (the letter)
 - **Crescent moon** = the Moon, cycles, time
 - **Sun burst center** = the Sun, time/light
 - **Compass rings** = orbits, planets, guidance
@@ -15,15 +15,15 @@ The Chronaura logo is a gold crescent "C" within an astrolabe compass:
 - **Gold spheres** at compass points = celestial bodies
 
 ### Logo variations
-1. Full wordmark: logo + "CHRONAURA" + "THE INTERACTIVE ASTRAL CLOCK"
-2. Compact: logo + "CHRONAURA" (no subtitle)
+1. Full wordmark: logo + "AURALUNIS" + "THE INTERACTIVE ASTRAL CLOCK"
+2. Compact: logo + "AURALUNIS" (no subtitle)
 3. Monochrome: white/silver version for dark backgrounds
 4. Icon only: the crescent C compass (used as app icon)
 
 ### Logo files needed (not yet created as vector)
-- [ ] `chronaura-logo-full.svg` — full astrolabe illustration for in-app use
-- [ ] `chronaura-logo-compact.svg` — compact version for headers
-- [ ] `chronaura-logo-mono.svg` — monochrome version
+- [ ] `auralunis-logo-full.svg` — full astrolabe illustration for in-app use
+- [ ] `auralunis-logo-compact.svg` — compact version for headers
+- [ ] `auralunis-logo-mono.svg` — monochrome version
 
 ## Color Palette
 
@@ -48,7 +48,7 @@ The Chronaura logo is a gold crescent "C" within an astrolabe compass:
 
 | Role | Font | Weight | Usage |
 |---|---|---|---|
-| Display | Cinzel | Regular (400) | "CHRONAURA" headers, screen titles |
+| Display | Cinzel | Regular (400) | "AURALUNIS" headers, screen titles |
 | Display bold | Cinzel | Bold (700) | Emphasis, scores |
 | Body | Montserrat | Light (300) | Descriptions, long text |
 | Body | Montserrat | Regular (400) | Labels, cards |

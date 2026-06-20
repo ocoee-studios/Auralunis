@@ -1,8 +1,8 @@
-# Chronaura Visual Polish Phase
+# AuraLunis Visual Polish Phase
 
 ## Purpose
 
-This phase closes the visual gap between the React Native scaffold and the approved Chronaura mockups.
+This phase closes the visual gap between the React Native scaffold and the approved AuraLunis mockups.
 
 The current app structure is correct. The next work is to merge the production brand illustration, add carefully sourced astronomy photography, validate the native iOS build on a real device, and create the watchOS companion target.
 
@@ -11,7 +11,7 @@ The current app structure is correct. The next work is to merge the production b
 Create or import:
 
 ```text
-assets/brand/chronaura-logo-full.svg
+assets/brand/auralunis-logo-full.svg
 ```
 
 This should be the complete Midnight Gold crescent-C astrolabe illustration used in the approved mockups.
@@ -19,8 +19,8 @@ This should be the complete Midnight Gold crescent-C astrolabe illustration used
 Also preserve:
 
 ```text
-assets/brand/chronaura-lockup.svg
-assets/brand/chronaura-app-icon.svg
+assets/brand/auralunis-lockup.svg
+assets/brand/auralunis-app-icon.svg
 assets/brand/icon-composer/
 assets/brand/watch/
 ```
@@ -73,7 +73,7 @@ For every image, record:
 - whether a NASA logo, employee, or identifiable person appears
 - approval status for in-app educational use
 
-Use editorial, factual framing only. Do not imply NASA endorsement of Chronaura.
+Use editorial, factual framing only. Do not imply NASA endorsement of AuraLunis.
 
 ## 3. Native Mac build and iPhone validation
 
@@ -115,14 +115,14 @@ The Watch experience requires an Apple-native watchOS companion target.
 Create in Xcode:
 
 ```text
-ChronauraWatch
+AuraLunisWatch
 ```
 
 Use SwiftUI for the watchOS interface.
 
 Launch scope:
 
-- Chronaura lockup
+- AuraLunis lockup
 - Midnight Gold face
 - Moon phase
 - Tonight Score

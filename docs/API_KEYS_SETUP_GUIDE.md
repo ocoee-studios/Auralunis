@@ -1,11 +1,11 @@
-# Chronaura — API Keys Setup Guide
+# AuraLunis — API Keys Setup Guide
 
 ## Required Keys
 
 ### 1. RevenueCat (subscriptions)
 1. Create account at https://app.revenuecat.com
-2. Create a new project: "Chronaura"
-3. Add an "Apple App Store" app with bundle ID: `com.ocoee.chronaura`
+2. Create a new project: "AuraLunis"
+3. Add an "Apple App Store" app with bundle ID: `com.ocoee.auralunis`
 4. Go to API Keys → copy the **Public SDK Key** (starts with `appl_`)
 5. In `app.json`, set:
    ```json
@@ -14,11 +14,11 @@
    }
    ```
 6. In App Store Connect → In-App Purchases, create:
-   - `com.ocoee.chronaura.premium.monthly` — $6.99/month auto-renewable
-   - `com.ocoee.chronaura.premium.annual` — $39.99/year auto-renewable
+   - `com.ocoee.auralunis.premium.monthly` — $6.99/month auto-renewable
+   - `com.ocoee.auralunis.premium.annual` — $39.99/year auto-renewable
    - Both with 7-day free trial
 7. In RevenueCat → Products, import both products
-8. Create an Entitlement: `chronaura_premium`
+8. Create an Entitlement: `auralunis_premium`
 9. Create an Offering: `default` with both packages
 
 ### 2. OpenWeatherMap (weather for Tonight Score)

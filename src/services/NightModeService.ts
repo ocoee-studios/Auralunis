@@ -5,7 +5,7 @@
 // The eye's rod cells are least sensitive to wavelengths > 620nm.
 //
 // This service provides a complete color token override map. The UI applies
-// these via a React context wrapper that swaps ChronauraColors on toggle.
+// these via a React context wrapper that swaps AuraLunisColors on toggle.
 
 export interface NightModeColors {
   cosmicBlack: string;

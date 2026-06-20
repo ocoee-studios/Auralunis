@@ -7,7 +7,7 @@ import WatchKit
 // Crown scrub shifts the sky ±12 hours.
 
 struct AstrolabeFaceView: View {
-    @EnvironmentObject private var connectivity: ChronauraWatchConnectivityBridge
+    @EnvironmentObject private var connectivity: AuraLunisWatchConnectivityBridge
 
     @State private var scrubHours = 0.0
     @State private var lastHapticHour = 0
@@ -286,5 +286,5 @@ private struct PlanetDot {
 
 #Preview {
     AstrolabeFaceView()
-        .environmentObject(ChronauraWatchConnectivityBridge())
+        .environmentObject(AuraLunisWatchConnectivityBridge())
 }

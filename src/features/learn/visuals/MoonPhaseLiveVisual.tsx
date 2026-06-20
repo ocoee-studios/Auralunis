@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 const PHASES = ["New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous", "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent"];
 
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     borderRadius: 28, padding: 16, backgroundColor: "rgba(255,255,255,0.055)",
     borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", marginBottom: 14
   },
-  label: { color: ChronauraColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
+  label: { color: AuraLunisColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
   row: { flexDirection: "row", alignItems: "center", gap: 16, marginTop: 10 },
   moonShell: {
     width: 92, height: 92, borderRadius: 46, overflow: "hidden", backgroundColor: "#161b2d",
@@ -46,6 +46,6 @@ const styles = StyleSheet.create({
   moon: { ...StyleSheet.absoluteFillObject, backgroundColor: "#F2F4FF" },
   shadow: { position: "absolute", right: 0, top: 0, bottom: 0, backgroundColor: "#030816" },
   title: { color: "#FFF", fontSize: 19, fontWeight: "900" },
-  meta: { color: ChronauraColors.gold2, fontSize: 12, marginTop: 4 },
-  caption: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 18, marginTop: 8 }
+  meta: { color: AuraLunisColors.gold2, fontSize: 12, marginTop: 4 },
+  caption: { color: AuraLunisColors.muted, fontSize: 12, lineHeight: 18, marginTop: 8 }
 });

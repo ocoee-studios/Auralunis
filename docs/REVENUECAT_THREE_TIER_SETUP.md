@@ -1,4 +1,4 @@
-# Chronaura RevenueCat Three-Tier Setup
+# AuraLunis RevenueCat Three-Tier Setup
 
 ## Product strategy
 
@@ -26,7 +26,7 @@
 
 Create one subscription group:
 
-`Chronaura Memberships`
+`AuraLunis Memberships`
 
 Use levels:
 1. Sovereign
@@ -37,11 +37,11 @@ Place monthly and annual products for the same tier at the same level.
 
 ## App Store product IDs
 
-- `com.ocoee.chronaura.horizon.monthly`
-- `com.ocoee.chronaura.horizon.annual`
-- `com.ocoee.chronaura.aura.monthly`
-- `com.ocoee.chronaura.aura.annual`
-- `com.ocoee.chronaura.sovereign.annual`
+- `com.ocoee.auralunis.horizon.monthly`
+- `com.ocoee.auralunis.horizon.annual`
+- `com.ocoee.auralunis.aura.monthly`
+- `com.ocoee.auralunis.aura.annual`
+- `com.ocoee.auralunis.sovereign.annual`
 
 Confirm the identifiers before creating products in App Store Connect.
 
@@ -55,7 +55,7 @@ Confirm the identifiers before creating products in App Store Connect.
 
 Create:
 
-`chronaura_launch`
+`auralunis_launch`
 
 Add custom packages:
 - `horizon_monthly`
@@ -97,7 +97,7 @@ A user is eligible for only one introductory offer per App Store subscription gr
 2. Add the 7-day introductory free trials.
 3. Import products into RevenueCat.
 4. Attach products to entitlements.
-5. Create the `chronaura_launch` offering.
+5. Create the `auralunis_launch` offering.
 6. Add the four launch packages.
 7. Add the RevenueCat public iOS SDK key to `app.json`.
 8. Run the internal-development build.

@@ -1,4 +1,4 @@
-# Terms of Use (EULA) — Chronaura
+# Terms of Use (EULA) — AuraLunis
 
 **Last updated:** June 2026  
 **Developer:** Ocoee Studios · admin@ocoeestudios.com
@@ -7,11 +7,11 @@
 
 ## 1. Acceptance of Terms
 
-By downloading or using the Chronaura application ("Service"), you agree to be bound by these Terms of Use. If you do not agree, do not use the Service.
+By downloading or using the AuraLunis application ("Service"), you agree to be bound by these Terms of Use. If you do not agree, do not use the Service.
 
 ## 2. Description of Service
 
-Chronaura is an astronomy companion app for iOS and watchOS. It computes real-time positions of the Sun, Moon, planets, and orbital objects (such as the International Space Station) relative to your physical location using on-device sensors, GPS, and published orbital element data.
+AuraLunis is an astronomy companion app for iOS and watchOS. It computes real-time positions of the Sun, Moon, planets, and orbital objects (such as the International Space Station) relative to your physical location using on-device sensors, GPS, and published orbital element data.
 
 ## 3. Safety Notice
 
@@ -25,19 +25,19 @@ Ocoee Studios is not liable for physical injury, property damage, or legal infra
 
 ## 4. Accuracy Disclaimer
 
-Sky positions are computed using astronomy-engine and publicly available NORAD Two-Line Element (TLE) data. While Chronaura uses high-precision orbital elements, we do not warrant the absolute accuracy of real-time satellite trajectories, atmospheric interference corrections, or local horizon calculations. **Do not rely on Chronaura for navigation, aviation, or any safety-critical decisions.**
+Sky positions are computed using astronomy-engine and publicly available NORAD Two-Line Element (TLE) data. While AuraLunis uses high-precision orbital elements, we do not warrant the absolute accuracy of real-time satellite trajectories, atmospheric interference corrections, or local horizon calculations. **Do not rely on AuraLunis for navigation, aviation, or any safety-critical decisions.**
 
 ## 5. Subscriptions and Billing
 
 Premium features are offered via auto-renewable subscriptions processed through Apple In-App Purchases:
 
-- **Chronaura Premium:** $6.99/month or $39.99/year with a 7-day free trial.
+- **AuraLunis Premium:** $6.99/month or $39.99/year with a 7-day free trial.
 
 Payment is charged to your Apple ID at confirmation of purchase. Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current billing period. Manage or cancel subscriptions in **iOS Settings → Apple ID → Subscriptions**.
 
 ## 6. Telemetry and Privacy
 
-All sensor mathematics, spatial angle calculations, and GPS computations occur on-device in sandboxed memory. No permanent background location data is transmitted to remote servers. See our Privacy Policy at ocoeestudios.com/chronaura/privacy for full details.
+All sensor mathematics, spatial angle calculations, and GPS computations occur on-device in sandboxed memory. No permanent background location data is transmitted to remote servers. See our Privacy Policy at ocoeestudios.com/auralunis/privacy for full details.
 
 ## 7. AI Companion
 
@@ -45,7 +45,7 @@ AI Sky Companion responses are generated for educational and recreational purpos
 
 ## 8. Intellectual Property
 
-The Chronaura name, logo, design system, and original content are owned by Ocoee Studios. You retain ownership of any content you create and store in your personal Vault.
+The AuraLunis name, logo, design system, and original content are owned by Ocoee Studios. You retain ownership of any content you create and store in your personal Vault.
 
 ## 9. Limitation of Liability
 

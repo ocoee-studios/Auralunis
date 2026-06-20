@@ -16,7 +16,7 @@ import { DEFAULT_OBSERVER } from "@/features/sky-lens/ephemeris/SkyEphemerisServ
 // while keeping on-screen positions live.
 
 const CACHE_TTL_MS = 2 * 60 * 60 * 1000;
-const CACHE_PREFIX = "chronaura.celestrak.elements.v2";
+const CACHE_PREFIX = "auralunis.celestrak.elements.v2";
 const MAX_POINTS = 48;
 
 interface SatelliteElementSet {

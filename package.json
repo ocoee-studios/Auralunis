@@ -1,5 +1,5 @@
 {
-  "name": "chronaura-native-test-build",
+  "name": "auralunis-native-test-build",
   "version": "0.1.0",
   "private": true,
   "main": "node_modules/expo/AppEntry.js",

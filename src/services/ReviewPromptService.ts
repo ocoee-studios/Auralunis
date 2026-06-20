@@ -2,8 +2,8 @@
 // the native iOS/Android review dialog (limited to 3 prompts per year by Apple).
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const SESSION_KEY = "chronaura.sessions";
-const PROMPTED_KEY = "chronaura.review.prompted";
+const SESSION_KEY = "auralunis.sessions";
+const PROMPTED_KEY = "auralunis.review.prompted";
 const PROMPT_AFTER = 5;
 
 let StoreReview: { requestReview: () => Promise<void> } | null = null;

@@ -1,4 +1,4 @@
-# Chronaura — Claude Build Session Notes
+# AuraLunis — Claude Build Session Notes
 
 > **Purpose:** Running record of every feature, service, and architectural decision made during AI-assisted development sessions. Updated after each major session. Use this to orient any new AI agent or developer picking up the project.
 
@@ -8,7 +8,7 @@
 
 All development done collaboratively by Mrs. Pepper (Ocoee Studios) and Claude (Anthropic). Claude serves as primary developer — writing, committing, and pushing all code. Gemini (Google) provides feature ideation only; all implementation is done here.
 
-**Repository:** `jamiebzzz-stack/chronaura` (private)
+**Repository:** `jamiebzzz-stack/auralunis` (private)
 **Stack:** React Native / Expo SDK 51 / TypeScript
 **Total commits:** ~60+ across all sessions
 
@@ -32,18 +32,18 @@ All development done collaboratively by Mrs. Pepper (Ocoee Studios) and Claude (
 ### Phase 2 — CoreHaptics Native Modules
 
 **Files created:**
-- `apple-native/iOS/ChronauraHaptics/ChronauraHapticsModule.swift` — Expo Module (matches `ExpoModulesCore` pattern). Two CoreHaptics patterns: `triggerCompassTick()` (transient, intensity 0.6, sharpness 0.8) and `triggerLockPulse()` (continuous 0.4s, intensity 1.0, sharpness 0.4).
-- `apple-native/watchOS/ChronauraWatch/Haptics/ChronauraWatchHapticsEngine.swift` — standalone CoreHaptics engine for the watchOS target. `respondToScore()` convenience method for WatchConnectivity receive handler.
-- `src/modules/WatchHaptics.ts` — JS interface. Lazy-loads via `requireNativeModule("ChronauraHaptics")`. iOS-only guard. Safe in Expo Go.
+- `apple-native/iOS/AuraLunisHaptics/AuraLunisHapticsModule.swift` — Expo Module (matches `ExpoModulesCore` pattern). Two CoreHaptics patterns: `triggerCompassTick()` (transient, intensity 0.6, sharpness 0.8) and `triggerLockPulse()` (continuous 0.4s, intensity 1.0, sharpness 0.4).
+- `apple-native/watchOS/AuraLunisWatch/Haptics/AuraLunisWatchHapticsEngine.swift` — standalone CoreHaptics engine for the watchOS target. `respondToScore()` convenience method for WatchConnectivity receive handler.
+- `src/modules/WatchHaptics.ts` — JS interface. Lazy-loads via `requireNativeModule("AuraLunisHaptics")`. iOS-only guard. Safe in Expo Go.
 
-**Note for Xcode:** Add `ChronauraHapticsModule.swift` to iOS app target Compile Sources. Link `CoreHaptics.framework`. Expo Modules Core handles registration — no AppDelegate changes needed.
+**Note for Xcode:** Add `AuraLunisHapticsModule.swift` to iOS app target Compile Sources. Link `CoreHaptics.framework`. Expo Modules Core handles registration — no AppDelegate changes needed.
 
 ---
 
 ### Phase 3 — App Store Compliance
 
 **Files created:**
-- `public/PRIVACY.md` — full privacy policy covering orbital alignment, motion sensors, GPS, anonymized analytics. Includes App Store nutrition label table. Host at `ocoeestudios.com/chronaura/privacy`.
+- `public/PRIVACY.md` — full privacy policy covering orbital alignment, motion sensors, GPS, anonymized analytics. Includes App Store nutrition label table. Host at `ocoeestudios.com/auralunis/privacy`.
 - `public/TERMS.md` — EULA with orbital alignment safety notice, correct pricing, TLE accuracy disclaimer.
 - `public/APP_STORE_REVIEW_NOTES.md` — paste into App Store Connect review notes. Explains Simulation Mode for static lab testing.
 
@@ -154,7 +154,7 @@ The `IonosphericAudioEngine` is fully wired but needs 6 MP3 files. Generate with
 `ReEntryService.ts` is mocked. Wire to Space-Track TIP (Tracking and Impact Prediction) messages when ready. The service interface is already designed for it.
 
 ### Xcode native build
-Run `npx expo prebuild` on your Mac. `ChronauraHapticsModule.swift` is in `apple-native/iOS/ChronauraHaptics/` — Expo Modules Core registers it automatically. Also add `CoreHaptics.framework` to the iOS target.
+Run `npx expo prebuild` on your Mac. `AuraLunisHapticsModule.swift` is in `apple-native/iOS/AuraLunisHaptics/` — Expo Modules Core registers it automatically. Also add `CoreHaptics.framework` to the iOS target.
 
 ### Quantum Intercept (intentionally deferred)
 Needs a real-time server/WebSocket backend to match observers globally. Not buildable client-only. Worth building after launch when there are users to connect.
@@ -170,7 +170,7 @@ Spec exists in `docs/LIQUID_GLASS_IMPLEMENTATION_SPEC.md`. Native SwiftUI implem
 |---|---|
 | TLE propagation in service layer, not alignment engine | alignmentEngine is pure math — no network/format awareness. Keeps it unit-testable. |
 | Reanimated shared values for radar blips | Runs on UI thread — no JS bridge jank even at 60fps |
-| Expo Modules pattern for CoreHaptics | Matches existing `ChronauraWatchSyncModule` pattern. Auto-registered. |
+| Expo Modules pattern for CoreHaptics | Matches existing `AuraLunisWatchSyncModule` pattern. Auto-registered. |
 | AsyncStorage for Cosmic Drift (not encrypted vault) | Lock history is celebration data, not sensitive. Vault encryption reserved for private notes. |
 | 2h Celestrak cache | TLEs update every few hours — more frequent fetching wastes battery |
 | Keplerian ephemeris for planets (not API) | On-device, no network dependency, ~1° accuracy is sufficient for "point at Jupiter" |
@@ -202,7 +202,7 @@ Spec exists in `docs/LIQUID_GLASS_IMPLEMENTATION_SPEC.md`. Native SwiftUI implem
 ## Logo Rules (do not break)
 
 - The logo is a **crescent-C astrolabe** — three concentric rings, compass needle, N/S/E/W cardinal points, central gold starburst, small moon icon on the ring, gold spheres at cardinal points.
-- SVG source: `assets/brand/chronaura-logo-full.svg`
+- SVG source: `assets/brand/auralunis-logo-full.svg`
 - Never replace with a generic moon, compass, or simplified icon.
 - Never redraw in a different style.
 - Always on Cosmic Black (`#030816`) background.
@@ -215,13 +215,13 @@ Spec exists in `docs/LIQUID_GLASS_IMPLEMENTATION_SPEC.md`. Native SwiftUI implem
 | Tier | Price |
 |---|---|
 | Horizon Free | Free forever |
-| Chronaura Premium monthly | $6.99/month |
-| Chronaura Premium annual | $39.99/year (7-day trial) |
+| AuraLunis Premium monthly | $6.99/month |
+| AuraLunis Premium annual | $39.99/year (7-day trial) |
 | Aura Pro | Coming Later — do not enable |
 | Sovereign | Waitlist — do not enable |
 
-RevenueCat entitlement: `chronaura_premium`
-Product IDs: `com.ocoee.chronaura.premium.monthly` / `.premium.annual`
+RevenueCat entitlement: `auralunis_premium`
+Product IDs: `com.ocoee.auralunis.premium.monthly` / `.premium.annual`
 
 ---
 

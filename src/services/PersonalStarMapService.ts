@@ -4,7 +4,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
-const KEY = "chronaura.starmap";
+const KEY = "auralunis.starmap";
 
 export interface LifeStar {
   id: string;

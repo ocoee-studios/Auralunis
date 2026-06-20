@@ -26,7 +26,7 @@ try {
   // Fonts not available — system fallbacks used.
 }
 
-export function useChronauraFonts(): boolean {
+export function useAuraLunisFonts(): boolean {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {

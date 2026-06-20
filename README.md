@@ -1,4 +1,4 @@
-# Chronaura
+# AuraLunis
 
 Interactive Astral Clock — a React Native (Expo) app that turns your phone into
 a real-time astronomical instrument.

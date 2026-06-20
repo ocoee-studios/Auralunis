@@ -7,7 +7,7 @@ type WatchSyncPayload = {
   nextEvent: string;
 };
 
-type ChronauraWatchSyncNativeModule = {
+type AuraLunisWatchSyncNativeModule = {
   syncWatch: (
     moonPhase: string,
     tonightScore: number,
@@ -15,11 +15,11 @@ type ChronauraWatchSyncNativeModule = {
   ) => void;
 };
 
-const nativeModule = NativeModules.ChronauraWatchSync as
-  | ChronauraWatchSyncNativeModule
+const nativeModule = NativeModules.AuraLunisWatchSync as
+  | AuraLunisWatchSyncNativeModule
   | undefined;
 
-export function syncChronauraWatch(payload: WatchSyncPayload) {
+export function syncAuraLunisWatch(payload: WatchSyncPayload) {
   if (!nativeModule) {
     return;
   }

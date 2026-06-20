@@ -20,7 +20,7 @@ const Random = ExpoCrypto as unknown as {
   getRandomBytes: (byteCount: number) => Uint8Array;
 };
 
-const VAULT_KEY_ID = "chronaura.vault.encryptionKey";
+const VAULT_KEY_ID = "auralunis.vault.encryptionKey";
 const ENCRYPTED_PREFIX = "enc:1:"; // format version marker
 
 function toBase64(bytes: Uint8Array): string {

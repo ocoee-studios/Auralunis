@@ -1,27 +1,27 @@
 {
   "expo": {
-    "name": "Chronaura",
-    "slug": "chronaura",
+    "name": "AuraLunis",
+    "slug": "auralunis",
     "version": "1.0.0",
     "orientation": "portrait",
-    "scheme": "chronaura",
+    "scheme": "auralunis",
     "userInterfaceStyle": "dark",
     "assetBundlePatterns": [
       "**/*"
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ocoee.chronaura",
+      "bundleIdentifier": "com.ocoee.auralunis",
       "infoPlist": {
-        "NSCameraUsageDescription": "Chronaura uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view.",
-        "NSLocationWhenInUseUsageDescription": "Chronaura uses your location to calculate the sky, moon, planets, and visible events above you.",
-        "NSPhotoLibraryAddUsageDescription": "Chronaura saves sky captures and cosmic time-lapse exports only when you choose to save them.",
-        "NSMotionUsageDescription": "Chronaura uses motion sensors to align the sky lens with the direction your phone is pointing.",
-        "NSHealthShareUsageDescription": "Chronaura can optionally use Apple Watch heart-rate data to pulse ambient visuals during wind-down experiences."
+        "NSCameraUsageDescription": "AuraLunis uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view.",
+        "NSLocationWhenInUseUsageDescription": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you.",
+        "NSPhotoLibraryAddUsageDescription": "AuraLunis saves sky captures and cosmic time-lapse exports only when you choose to save them.",
+        "NSMotionUsageDescription": "AuraLunis uses motion sensors to align the sky lens with the direction your phone is pointing.",
+        "NSHealthShareUsageDescription": "AuraLunis can optionally use Apple Watch heart-rate data to pulse ambient visuals during wind-down experiences."
       }
     },
     "android": {
-      "package": "com.ocoee.chronaura",
+      "package": "com.ocoee.auralunis",
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION",
@@ -29,7 +29,7 @@
         "BODY_SENSORS"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo/chronaura-adaptive-foreground.png",
+        "foregroundImage": "./assets/logo/auralunis-adaptive-foreground.png",
         "backgroundColor": "#050B14"
       }
     },
@@ -37,32 +37,32 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Chronaura uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view."
+          "cameraPermission": "AuraLunis uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view."
         }
       ],
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "Chronaura uses your location to calculate the sky, moon, planets, and visible events above you."
+          "locationAlwaysAndWhenInUsePermission": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you."
         }
       ],
       [
         "expo-media-library",
         {
-          "savePhotosPermission": "Chronaura saves sky captures and cosmic time-lapse exports only when you choose to save them."
+          "savePhotosPermission": "AuraLunis saves sky captures and cosmic time-lapse exports only when you choose to save them."
         }
       ],
       [
         "expo-sensors",
         {
-          "motionPermission": "Chronaura uses motion sensors to align Sky Lens with the direction your phone is pointing."
+          "motionPermission": "AuraLunis uses motion sensors to align Sky Lens with the direction your phone is pointing."
         }
       ],
       "expo-notifications"
     ],
-    "icon": "./assets/logo/chronaura-app-icon.png",
+    "icon": "./assets/logo/auralunis-app-icon.png",
     "splash": {
-      "image": "./assets/logo/chronaura-splash.png",
+      "image": "./assets/logo/auralunis-splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#050B14"
     },

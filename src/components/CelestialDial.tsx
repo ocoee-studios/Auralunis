@@ -17,7 +17,7 @@ import Animated, {
   useSharedValue, useAnimatedProps, withRepeat, withTiming,
   Easing, runOnJS,
 } from "react-native-reanimated";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 import type { TonightSky, VisibleBody } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 
@@ -156,8 +156,8 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
         <Svg width={SIZE} height={SIZE}>
         <Defs>
           <RadialGradient id="dialGlow" cx="50%" cy="50%" r="50%">
-            <Stop offset="0%" stopColor={ChronauraColors.gold} stopOpacity="0.08" />
-            <Stop offset="100%" stopColor={ChronauraColors.gold} stopOpacity="0" />
+            <Stop offset="0%" stopColor={AuraLunisColors.gold} stopOpacity="0.08" />
+            <Stop offset="100%" stopColor={AuraLunisColors.gold} stopOpacity="0" />
           </RadialGradient>
         </Defs>
 
@@ -165,10 +165,10 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
         <Circle cx={CENTER} cy={CENTER} r={RINGS.rim + 2} fill="url(#dialGlow)" />
 
         {/* Orbital rings */}
-        <Circle cx={CENTER} cy={CENTER} r={RINGS.inner} stroke={ChronauraColors.borderSubtle} strokeWidth={0.5} fill="none" />
-        <Circle cx={CENTER} cy={CENTER} r={RINGS.mid} stroke={ChronauraColors.borderSubtle} strokeWidth={0.5} fill="none" />
-        <Circle cx={CENTER} cy={CENTER} r={RINGS.outer} stroke={ChronauraColors.borderSubtle} strokeWidth={0.5} fill="none" />
-        <Circle cx={CENTER} cy={CENTER} r={RINGS.rim} stroke={ChronauraColors.borderGold} strokeWidth={1.2} fill="none" />
+        <Circle cx={CENTER} cy={CENTER} r={RINGS.inner} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} fill="none" />
+        <Circle cx={CENTER} cy={CENTER} r={RINGS.mid} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} fill="none" />
+        <Circle cx={CENTER} cy={CENTER} r={RINGS.outer} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} fill="none" />
+        <Circle cx={CENTER} cy={CENTER} r={RINGS.rim} stroke={AuraLunisColors.borderGold} strokeWidth={1.2} fill="none" />
 
         {/* Tick marks — every 15° */}
         {Array.from({ length: 24 }).map((_, i) => {
@@ -182,7 +182,7 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
             <Line
               key={`tick-${i}`}
               x1={start.x} y1={start.y} x2={end.x} y2={end.y}
-              stroke={isMajor ? ChronauraColors.gold : ChronauraColors.borderSubtle}
+              stroke={isMajor ? AuraLunisColors.gold : AuraLunisColors.borderSubtle}
               strokeWidth={isMajor ? 1.5 : isMinor30 ? 0.8 : 0.4}
             />
           );
@@ -201,7 +201,7 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
               textAnchor="middle"
               fontSize={10}
               fontWeight="700"
-              fill={ChronauraColors.gold + "88"}
+              fill={AuraLunisColors.gold + "88"}
             >
               {label}
             </SvgText>
@@ -219,7 +219,7 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
               textAnchor="middle"
               fontSize={8}
               fontWeight="500"
-              fill={ChronauraColors.faint + "55"}
+              fill={AuraLunisColors.faint + "55"}
             >
               {hour}
             </SvgText>
@@ -230,7 +230,7 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
         <Line
           x1={CENTER} y1={CENTER}
           x2={sunPos.x} y2={sunPos.y}
-          stroke={ChronauraColors.gold}
+          stroke={AuraLunisColors.gold}
           strokeWidth={1.2}
           strokeDasharray="3,5"
           opacity={0.3}
@@ -259,7 +259,7 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
 
         {/* Planets */}
         {planets.map((body) => {
-          const color = BODY_COLORS[body.id] ?? ChronauraColors.silver;
+          const color = BODY_COLORS[body.id] ?? AuraLunisColors.silver;
           const ring = bodyRing(body.id);
           const pos = azToXY(body.azimuthDegrees, ring);
           const isAbove = body.altitudeDegrees > 0;
@@ -282,7 +282,7 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
         <Line
           x1={CENTER} y1={CENTER}
           x2={hourEnd.x} y2={hourEnd.y}
-          stroke={ChronauraColors.gold}
+          stroke={AuraLunisColors.gold}
           strokeWidth={2.5}
           strokeLinecap="round"
           opacity={0.7}
@@ -291,19 +291,19 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
         <Line
           x1={CENTER} y1={CENTER}
           x2={minEnd.x} y2={minEnd.y}
-          stroke={ChronauraColors.gold2}
+          stroke={AuraLunisColors.gold2}
           strokeWidth={1.5}
           strokeLinecap="round"
           opacity={0.5}
         />
         {/* Center dot */}
-        <Circle cx={CENTER} cy={CENTER} r={3.5} fill={ChronauraColors.gold} />
+        <Circle cx={CENTER} cy={CENTER} r={3.5} fill={AuraLunisColors.gold} />
 
         {/* Scrub progress arc — shows how far you've scrubbed */}
         {isScrubbing && (
           <Path
             d={describeArc(CENTER, CENTER, RINGS.rim + 2, 0, (scrubOffsetMinutes / 720) * 360)}
-            stroke={scrubOffsetMinutes > 0 ? ChronauraColors.green + "55" : ChronauraColors.violet + "55"}
+            stroke={scrubOffsetMinutes > 0 ? AuraLunisColors.green + "55" : AuraLunisColors.violet + "55"}
             strokeWidth={3}
             fill="none"
             strokeLinecap="round"
@@ -370,33 +370,33 @@ const styles = StyleSheet.create({
   scoreNum: {
     fontSize: 28,
     fontWeight: "900",
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
     lineHeight: 30,
   },
   scoreLbl: {
     fontSize: 7,
     fontWeight: "700",
     letterSpacing: 2,
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
     marginTop: 2,
   },
   scrubTime: {
     fontSize: 22,
     fontWeight: "900",
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     lineHeight: 24,
   },
   scrubOffset: {
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 1,
-    color: ChronauraColors.violet,
+    color: AuraLunisColors.violet,
     marginTop: 2,
   },
   resetBtn: {
     fontSize: 9,
     fontWeight: "700",
-    color: ChronauraColors.gold,
+    color: AuraLunisColors.gold,
     marginTop: 6,
     textDecorationLine: "underline",
   },

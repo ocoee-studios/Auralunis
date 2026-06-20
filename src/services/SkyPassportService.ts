@@ -1,7 +1,7 @@
 // Sky Passport — gold-foil stamp collection for celestial events witnessed.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KEY = "chronaura.passport";
+const KEY = "auralunis.passport";
 
 export interface SkyStamp {
   id: string;

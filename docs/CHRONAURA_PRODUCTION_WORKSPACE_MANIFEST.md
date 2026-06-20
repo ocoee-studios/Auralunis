@@ -1,26 +1,26 @@
-# Chronaura Production Workspace Manifest
+# AuraLunis Production Workspace Manifest
 
 This manifest preserves the complete future ecosystem vision while keeping launch scope clean.
 
 ## Production workspace direction
 
 ```text
-chronaura-production-workspace/
+auralunis-production-workspace/
 ├── ios/
-│   ├── ChronauraWidget/             # Live Portal & StandBy Obelisk extensions
-│   └── ChronauraRadarModule/        # Future CoreBluetooth / UWB bridges
+│   ├── AuraLunisWidget/             # Live Portal & StandBy Obelisk extensions
+│   └── AuraLunisRadarModule/        # Future CoreBluetooth / UWB bridges
 ├── watchos/
-│   └── ChronauraWatchExtension/     # Taptic Crown / Watch face systems
+│   └── AuraLunisWatchExtension/     # Taptic Crown / Watch face systems
 ├── visionos/
-│   └── ChronauraSpatialPortal/      # Future visionOS Stellar Portal target
+│   └── AuraLunisSpatialPortal/      # Future visionOS Stellar Portal target
 └── src/
     ├── components/
     │   ├── DynamicSpaceCanvas.tsx   # Future Three.js / WebGL core
-    │   └── ChronauraARLens.tsx      # Point-to-sky HUD / light-bleed shader direction
+    │   └── AuraLunisARLens.tsx      # Point-to-sky HUD / light-bleed shader direction
     ├── config/
-    │   └── ChronauraCodex.ts        # Solar System, constellations, stars, deep-sky encyclopedia
+    │   └── AuraLunisCodex.ts        # Solar System, constellations, stars, deep-sky encyclopedia
     └── services/
-        ├── ChronauraDatabase.ts     # Encrypted local vault direction
+        ├── AuraLunisDatabase.ts     # Encrypted local vault direction
         └── OracleService.ts         # Spatial-to-AI vector packaging direction
 ```
 
@@ -47,7 +47,7 @@ The launch app should stay focused on:
 - Daily rituals
 - Notes/Vault
 - Settings
-- Affordable Chronaura+ paywall
+- Affordable AuraLunis+ paywall
 
 ## Pricing boundary
 

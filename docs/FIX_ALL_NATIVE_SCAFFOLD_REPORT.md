@@ -1,4 +1,4 @@
-# Chronaura Native Scaffold — Fix-All Pass
+# AuraLunis Native Scaffold — Fix-All Pass
 
 ## Fixed
 - Refactored active bottom navigation to Home / Sky / Watch / Learn / Settings.

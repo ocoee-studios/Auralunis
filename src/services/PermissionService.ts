@@ -27,7 +27,7 @@ async function requestWithFallback(
 
     Alert.alert(
       `${name} Access Needed`,
-      `Chronaura needs ${name.toLowerCase()} access for this feature. You can enable it in Settings.`,
+      `AuraLunis needs ${name.toLowerCase()} access for this feature. You can enable it in Settings.`,
       [
         { text: "Not Now", style: "cancel" },
         { text: "Open Settings", onPress: openSettings }

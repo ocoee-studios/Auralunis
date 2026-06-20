@@ -1,4 +1,4 @@
-# Chronaura Device QA Checklist
+# AuraLunis Device QA Checklist
 
 ## General
 - [ ] App launches on iPhone simulator

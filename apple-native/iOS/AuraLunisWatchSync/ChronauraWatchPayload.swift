@@ -1,6 +1,6 @@
 import Foundation
 
-struct ChronauraPhoneWatchPayload {
+struct AuraLunisPhoneWatchPayload {
     let moonPhase: String
     let tonightScore: Int
     let nextEvent: String

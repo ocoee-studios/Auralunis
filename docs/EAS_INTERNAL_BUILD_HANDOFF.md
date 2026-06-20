@@ -1,4 +1,4 @@
-# Chronaura EAS Internal Development Build Handoff
+# AuraLunis EAS Internal Development Build Handoff
 
 ## Added files
 - `eas.json`

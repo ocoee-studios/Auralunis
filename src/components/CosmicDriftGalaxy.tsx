@@ -22,7 +22,7 @@ import Animated, {
   Easing,
 } from "react-native-reanimated";
 import { getLockEntries, type LockEntry } from "@/services/CosmicDriftService";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 const AnimatedG = Animated.createAnimatedComponent(G);
 
@@ -168,7 +168,7 @@ export function CosmicDriftGalaxy({ refreshTrigger = 0 }: CosmicDriftGalaxyProps
         onRequestClose={() => setSelected(null)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalCard, { borderColor: selected?.targetColor ?? ChronauraColors.borderGold }]}>
+          <View style={[styles.modalCard, { borderColor: selected?.targetColor ?? AuraLunisColors.borderGold }]}>
             <View style={styles.modalHeader}>
               <Text style={[styles.modalTarget, { color: selected?.targetColor }]}>
                 {selected?.targetName}
@@ -184,14 +184,14 @@ export function CosmicDriftGalaxy({ refreshTrigger = 0 }: CosmicDriftGalaxyProps
             <View style={styles.modalDivider} />
 
             <View style={styles.pillRow}>
-              <ModalPill label="Azimuth" value={`${selected?.azimuth}°`} color={selected?.targetColor ?? ChronauraColors.gold} />
-              <ModalPill label="Elevation" value={`${selected?.elevation}°`} color={selected?.targetColor ?? ChronauraColors.gold} />
-              <ModalPill label="Altitude" value={`${selected?.altitudeKm} km`} color={selected?.targetColor ?? ChronauraColors.gold} />
+              <ModalPill label="Azimuth" value={`${selected?.azimuth}°`} color={selected?.targetColor ?? AuraLunisColors.gold} />
+              <ModalPill label="Elevation" value={`${selected?.elevation}°`} color={selected?.targetColor ?? AuraLunisColors.gold} />
+              <ModalPill label="Altitude" value={`${selected?.altitudeKm} km`} color={selected?.targetColor ?? AuraLunisColors.gold} />
             </View>
             <View style={[styles.pillRow, { marginTop: 8 }]}>
-              <ModalPill label="Lat" value={`${selected?.observerLat.toFixed(3)}°`} color={selected?.targetColor ?? ChronauraColors.gold} />
-              <ModalPill label="Lon" value={`${selected?.observerLon.toFixed(3)}°`} color={selected?.targetColor ?? ChronauraColors.gold} />
-              <ModalPill label="Type" value={selected?.targetType ?? "—"} color={selected?.targetColor ?? ChronauraColors.gold} />
+              <ModalPill label="Lat" value={`${selected?.observerLat.toFixed(3)}°`} color={selected?.targetColor ?? AuraLunisColors.gold} />
+              <ModalPill label="Lon" value={`${selected?.observerLon.toFixed(3)}°`} color={selected?.targetColor ?? AuraLunisColors.gold} />
+              <ModalPill label="Type" value={selected?.targetType ?? "—"} color={selected?.targetColor ?? AuraLunisColors.gold} />
             </View>
           </View>
         </View>
@@ -212,29 +212,29 @@ function ModalPill({ label, value, color }: { label: string; value: string; colo
 const styles = StyleSheet.create({
   container: { alignItems: "center", width: "100%" },
   svg: { alignSelf: "center" },
-  count: { color: ChronauraColors.gold, fontSize: 13, fontWeight: "800", marginTop: 4 },
-  hint: { color: ChronauraColors.faint, fontSize: 10, marginTop: 2, marginBottom: 14 },
+  count: { color: AuraLunisColors.gold, fontSize: 13, fontWeight: "800", marginTop: 4 },
+  hint: { color: AuraLunisColors.faint, fontSize: 10, marginTop: 2, marginBottom: 14 },
   empty: { alignItems: "center", padding: 32, gap: 10 },
-  emptyTitle: { color: ChronauraColors.silver, fontSize: 16, fontWeight: "700" },
-  emptyBody: { color: ChronauraColors.faint, fontSize: 13, textAlign: "center", lineHeight: 20 },
+  emptyTitle: { color: AuraLunisColors.silver, fontSize: 16, fontWeight: "700" },
+  emptyBody: { color: AuraLunisColors.faint, fontSize: 13, textAlign: "center", lineHeight: 20 },
   logCard: {
     width: "100%",
-    backgroundColor: ChronauraColors.surface,
+    backgroundColor: AuraLunisColors.surface,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: ChronauraColors.borderGold,
+    borderColor: AuraLunisColors.borderGold,
     padding: 14,
   },
-  logTitle: { color: ChronauraColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 },
-  logRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8, borderTopWidth: 1, borderTopColor: ChronauraColors.borderFaint },
+  logTitle: { color: AuraLunisColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 8 },
+  logRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 8, borderTopWidth: 1, borderTopColor: AuraLunisColors.borderFaint },
   logDot: { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
   logMeta: { flex: 1 },
-  logName: { color: ChronauraColors.silver, fontSize: 12, fontWeight: "700" },
-  logDate: { color: ChronauraColors.faint, fontSize: 10, marginTop: 1 },
-  logLocation: { color: ChronauraColors.gold, fontSize: 10, fontWeight: "600" },
+  logName: { color: AuraLunisColors.silver, fontSize: 12, fontWeight: "700" },
+  logDate: { color: AuraLunisColors.faint, fontSize: 10, marginTop: 1 },
+  logLocation: { color: AuraLunisColors.gold, fontSize: 10, fontWeight: "600" },
   modalOverlay: { flex: 1, backgroundColor: "rgba(11,11,18,0.88)", justifyContent: "flex-end" },
   modalCard: {
-    backgroundColor: ChronauraColors.surface,
+    backgroundColor: AuraLunisColors.surface,
     borderTopLeftRadius: 24,
     borderTopRightRadius: 24,
     borderWidth: 1,
@@ -244,12 +244,12 @@ const styles = StyleSheet.create({
   },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 6 },
   modalTarget: { fontSize: 18, fontWeight: "800", flex: 1 },
-  modalClose: { color: ChronauraColors.faint, fontSize: 16, padding: 4 },
-  modalDate: { color: ChronauraColors.silver, fontSize: 13, fontWeight: "600", marginBottom: 4 },
-  modalLocation: { color: ChronauraColors.muted, fontSize: 12, marginBottom: 14 },
-  modalDivider: { height: 1, backgroundColor: ChronauraColors.borderSubtle, marginBottom: 14 },
+  modalClose: { color: AuraLunisColors.faint, fontSize: 16, padding: 4 },
+  modalDate: { color: AuraLunisColors.silver, fontSize: 13, fontWeight: "600", marginBottom: 4 },
+  modalLocation: { color: AuraLunisColors.muted, fontSize: 12, marginBottom: 14 },
+  modalDivider: { height: 1, backgroundColor: AuraLunisColors.borderSubtle, marginBottom: 14 },
   pillRow: { flexDirection: "row", gap: 8 },
-  pill: { flex: 1, backgroundColor: ChronauraColors.elevated, borderRadius: 10, padding: 10 },
-  pillLabel: { color: ChronauraColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" },
+  pill: { flex: 1, backgroundColor: AuraLunisColors.elevated, borderRadius: 10, padding: 10 },
+  pillLabel: { color: AuraLunisColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" },
   pillValue: { fontSize: 12, fontWeight: "800", marginTop: 3 },
 });

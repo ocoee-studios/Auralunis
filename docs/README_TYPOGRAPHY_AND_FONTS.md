@@ -1,4 +1,4 @@
-# Chronaura Typography and Font Handoff
+# AuraLunis Typography and Font Handoff
 
 Generated: 2026-05-30T01:01:55+00:00
 
@@ -34,7 +34,7 @@ assets/fonts/
 ```
 
 Then load them with the Expo font-loading approach chosen by the engineering team
-and map them into the Chronaura theme layer.
+and map them into the AuraLunis theme layer.
 
 ## What is already in this handoff
 

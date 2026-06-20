@@ -4,10 +4,10 @@
 // written by the React Native app via expo-shared-group.
 //
 // Data keys (written by ISSPassService.ts via app group bridge):
-//   chronaura.iss.nextRiseISO    — ISO 8601 timestamp of next rise
-//   chronaura.iss.direction      — compass direction string ("NW → SE")
-//   chronaura.iss.peakElevation  — peak elevation in degrees
-//   chronaura.iss.durationMin    — pass duration in minutes
+//   auralunis.iss.nextRiseISO    — ISO 8601 timestamp of next rise
+//   auralunis.iss.direction      — compass direction string ("NW → SE")
+//   auralunis.iss.peakElevation  — peak elevation in degrees
+//   auralunis.iss.durationMin    — pass duration in minutes
 
 import WidgetKit
 import SwiftUI
@@ -26,7 +26,7 @@ struct ISSPassEntry: TimelineEntry {
 // MARK: - Provider
 
 struct ISSPassProvider: TimelineProvider {
-    private let appGroupID = "group.com.ocoee.chronaura"
+    private let appGroupID = "group.com.ocoee.auralunis"
 
     func placeholder(in context: Context) -> ISSPassEntry {
         ISSPassEntry(date: Date(), riseDate: Date().addingTimeInterval(5400), direction: "NW → SE", peakElevation: 62, durationMin: 5, isStale: false)
@@ -53,10 +53,10 @@ struct ISSPassProvider: TimelineProvider {
             return ISSPassEntry(date: Date(), riseDate: nil, direction: "—", peakElevation: 0, durationMin: 0, isStale: true)
         }
 
-        let isoString = defaults.string(forKey: "chronaura.iss.nextRiseISO") ?? ""
-        let direction = defaults.string(forKey: "chronaura.iss.direction") ?? "—"
-        let peak = defaults.integer(forKey: "chronaura.iss.peakElevation")
-        let dur = defaults.integer(forKey: "chronaura.iss.durationMin")
+        let isoString = defaults.string(forKey: "auralunis.iss.nextRiseISO") ?? ""
+        let direction = defaults.string(forKey: "auralunis.iss.direction") ?? "—"
+        let peak = defaults.integer(forKey: "auralunis.iss.peakElevation")
+        let dur = defaults.integer(forKey: "auralunis.iss.durationMin")
 
         let formatter = ISO8601DateFormatter()
         let riseDate = formatter.date(from: isoString)
@@ -97,7 +97,7 @@ struct ISSPassWidgetView: View {
                 }
 
                 if entry.isStale {
-                    Text("Open Chronaura\nto update")
+                    Text("Open AuraLunis\nto update")
                         .font(.system(size: 10))
                         .multilineTextAlignment(.center)
                         .foregroundColor(.gray)

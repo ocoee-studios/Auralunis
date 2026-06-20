@@ -1,5 +1,5 @@
 // src/modules/WatchHaptics.ts
-// JS interface for the ChronauraHapticsModule Expo native module.
+// JS interface for the AuraLunisHapticsModule Expo native module.
 // Falls back silently on Android or if CoreHaptics is unavailable.
 //
 // Usage:
@@ -19,7 +19,7 @@ function getNativeModule() {
         triggerLockPulse: () => void;
       };
     };
-    return requireNativeModule("ChronauraHaptics");
+    return requireNativeModule("AuraLunisHaptics");
   } catch {
     return null;
   }

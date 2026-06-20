@@ -1,17 +1,17 @@
-// ChronauraWatchHapticsEngine.swift
+// AuraLunisWatchHapticsEngine.swift
 // Standalone CoreHaptics engine for the watchOS target.
 // Called directly from SwiftUI watch views when the phone sends
 // an alignment score update via WatchConnectivity.
 //
-// Drop this file into the ChronauraWatch watchOS Extension target.
+// Drop this file into the AuraLunisWatch watchOS Extension target.
 // It does NOT bridge to React Native — it runs purely on-Watch.
 
 import WatchKit
 import CoreHaptics
 
-final class ChronauraWatchHapticsEngine {
+final class AuraLunisWatchHapticsEngine {
 
-    static let shared = ChronauraWatchHapticsEngine()
+    static let shared = AuraLunisWatchHapticsEngine()
 
     private var engine: CHHapticEngine?
 

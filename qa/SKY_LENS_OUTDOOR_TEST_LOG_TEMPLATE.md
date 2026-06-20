@@ -1,4 +1,4 @@
-# Chronaura Sky Lens Outdoor Test Log
+# AuraLunis Sky Lens Outdoor Test Log
 
 Tester:
 Device:
@@ -11,7 +11,7 @@ Sky conditions:
 Compass calibration performed:
 Manual Sky Map fallback tested:
 
-| Object | Visible to tester? | Chronaura target opened? | Apparent overlay error | Pass / Warn / Fail | Notes |
+| Object | Visible to tester? | AuraLunis target opened? | Apparent overlay error | Pass / Warn / Fail | Notes |
 |---|---:|---:|---:|---|---|
 | Moon |  |  |  |  |  |
 | Venus |  |  |  |  |  |

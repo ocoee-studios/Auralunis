@@ -1,7 +1,7 @@
-# CLAUDE.md — Chronaura Project Context
+# CLAUDE.md — AuraLunis Project Context
 
 ## What this is
-Chronaura is "The Interactive Astral Clock" — a React Native (Expo SDK 51) app
+AuraLunis is "The Interactive Astral Clock" — a React Native (Expo SDK 51) app
 for iOS that tracks the real sky (Sun, Moon, planets, satellites) through a
 camera-aligned AR overlay and a 9-mode orbital tracking radar, with watch
 faces, learn content, and an encrypted vault for sky notes.
@@ -15,18 +15,18 @@ Home · Sky · Watch · Learn · Settings
 
 ## Pricing (locked — source of truth)
 - **Horizon Free** — always free
-- **Chronaura Premium monthly** — $6.99/month (no trial)
-- **Chronaura Premium annual** — $39.99/year (7-day free trial, annual only)
+- **AuraLunis Premium monthly** — $6.99/month (no trial)
+- **AuraLunis Premium annual** — $39.99/year (7-day free trial, annual only)
 - **Founders Lifetime** — $99.99 one-time purchase
 - **Aura Pro** — Coming Later (do NOT enable purchase flows)
 - **Sovereign** — Waitlist, Coming Later (do NOT enable purchase flows)
 
 RevenueCat product IDs:
-- `com.ocoee.chronaura.premium.monthly`
-- `com.ocoee.chronaura.premium.annual`
-- `com.ocoee.chronaura.lifetime.founders`
+- `com.ocoee.auralunis.premium.monthly`
+- `com.ocoee.auralunis.premium.annual`
+- `com.ocoee.auralunis.lifetime.founders`
 
-Entitlement: `chronaura_premium` (all three products unlock this)
+Entitlement: `auralunis_premium` (all three products unlock this)
 
 The first-open paywall (`ThreeTierPaywallModal`) shows these three options
 only — Monthly, Annual, and Lifetime Founders. It does NOT show Aura Pro
@@ -77,11 +77,11 @@ npm run qa:all      # full test suite
 - `src/screens/OrbitalAlignmentScreen.tsx` — 9-mode tracking hub
 - `src/features/paywall/MonetizationCatalog.ts` — pricing, gates, features
 - `src/features/paywall/ThreeTierPaywallModal.tsx` — paywall UI
-- `src/theme/tokens.ts` — ChronauraColors, ChronauraPricing
+- `src/theme/tokens.ts` — AuraLunisColors, AuraLunisPricing
 
 ## Contact
 - admin@ocoeestudios.com
 - manager@ocoeestudios.com
 
 ## GitHub
-`jamiebzzz-stack/chronaura` (private)
+`jamiebzzz-stack/auralunis` (private)

@@ -3,9 +3,9 @@
 // default and is never auto-switched — only explicit user choice.
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
-import type { ChronauraThemeMode } from "@/features/settings/SettingsTypes";
+import type { AuraLunisThemeMode } from "@/features/settings/SettingsTypes";
 
-export function computeAutoTheme(location: ObserverLocation): ChronauraThemeMode {
+export function computeAutoTheme(location: ObserverLocation): AuraLunisThemeMode {
   const sky = computeTonightSky(location);
   const sun = sky.bodies.find((b) => b.id === "sun");
   if (!sun) return "midnight_gold";

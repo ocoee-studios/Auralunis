@@ -1,4 +1,4 @@
-# Chronaura Learn Tab — Live Visuals Spec
+# AuraLunis Learn Tab — Live Visuals Spec
 
 ## Goal
 Replace flat educational pages with beautiful living visual modules.

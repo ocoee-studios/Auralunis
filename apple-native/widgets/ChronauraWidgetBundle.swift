@@ -2,7 +2,7 @@ import WidgetKit
 import SwiftUI
 
 @main
-struct ChronauraWidgetBundle: WidgetBundle {
+struct AuraLunisWidgetBundle: WidgetBundle {
     var body: some Widget {
         TonightScoreWidget()
         MoonPhaseWidget()

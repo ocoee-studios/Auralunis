@@ -2,7 +2,7 @@
 
 ## Permission flow
 - [ ] App does not ask for camera on first launch
-- [ ] Opening Sky Lens shows Chronaura pre-permission screen
+- [ ] Opening Sky Lens shows AuraLunis pre-permission screen
 - [ ] Native camera prompt appears after user continues
 - [ ] Denied camera permission shows fallback
 - [ ] Accepted camera permission opens Sky Lens

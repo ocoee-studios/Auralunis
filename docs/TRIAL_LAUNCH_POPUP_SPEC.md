@@ -1,7 +1,7 @@
-# Chronaura 7-Day Trial Launch Popup
+# AuraLunis 7-Day Trial Launch Popup
 
 ## Purpose
-Show a polished Chronaura+ offer when the user first opens the app.
+Show a polished AuraLunis+ offer when the user first opens the app.
 
 ## Behavior
 - Show on first open.

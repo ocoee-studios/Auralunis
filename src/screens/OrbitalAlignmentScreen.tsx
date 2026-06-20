@@ -1,4 +1,4 @@
-// OrbitalAlignmentScreen.tsx — Chronaura Telemetry Hub
+// OrbitalAlignmentScreen.tsx — AuraLunis Telemetry Hub
 // Eight tracking modes unified under one screen:
 //   fleet       Atmosphere Explorer (LEO satellites)
 //   deep-space  Planetary ephemeris (Solar System)
@@ -42,7 +42,7 @@ import { getDailyChain, getChainProgress, advanceChain, resetChain } from "@/ser
 import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/services/SolarWindService";
 import { computeStaticParams, elevationAudioLabel, STATIC_COLORS } from "@/services/IonosphericStaticService";
 import { getIonosphericEngine, destroyIonosphericEngine } from "@/services/IonosphericAudioEngine";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { RadarTutorial } from "@/features/onboarding/RadarTutorial";
 import { LockShareCard, type LockShareData } from "@/components/LockShareCard";
 import { isModeGated, FREE_DRIFT_EVENT_LIMIT, type TrackingMode } from "@/features/paywall/MonetizationCatalog";
@@ -272,10 +272,10 @@ export function OrbitalAlignmentScreen() {
       const score = Math.max(0, Math.round(100 * (1 - s.angularError / 90)));
       return { activeScore: score, isLocked: s.angularError < 3.5, activeColor: s.shower.radarColor, activeName: s.shower.name, activeAzimuth: Math.round(s.azimuth), activeElevation: Math.round(s.altitude * 10) / 10, activeAltKm: 80 };
     }
-    return { activeScore: 0, isLocked: false, activeColor: ChronauraColors.gold, activeName: "—", activeAzimuth: 0, activeElevation: 0, activeAltKm: 0 };
+    return { activeScore: 0, isLocked: false, activeColor: AuraLunisColors.gold, activeName: "—", activeAzimuth: 0, activeElevation: 0, activeAltKm: 0 };
   }, [mode, fleetState, activePlanet, trainBlips, debrisFleet, activeShowers, pointing]);
 
-  const statusColor = isLocked ? ChronauraColors.green : activeScore > 65 ? activeColor : ChronauraColors.silver;
+  const statusColor = isLocked ? AuraLunisColors.green : activeScore > 65 ? activeColor : AuraLunisColors.silver;
   const statusText = isLocked ? "LOCKED" : activeScore > 65 ? "ALIGNING" : "SEARCHING";
 
   // Haptics
@@ -360,7 +360,7 @@ export function OrbitalAlignmentScreen() {
   if (!isReady) {
     return (
       <View style={[styles.screen, styles.center]}>
-        <Text style={styles.title}>CHRONAURA TELEMETRY</Text>
+        <Text style={styles.title}>AURALUNIS TELEMETRY</Text>
         <View style={styles.loadingCard}>
           <Text style={styles.loadingTitle}>Acquiring telemetry…</Text>
           <Text style={styles.loadingDetail}>GPS: {gpsStatus === "loading" ? "acquiring" : gpsStatus}</Text>
@@ -394,7 +394,7 @@ export function OrbitalAlignmentScreen() {
           </View>
         )}
 
-        <Text style={styles.title}>CHRONAURA TELEMETRY</Text>
+        <Text style={styles.title}>AURALUNIS TELEMETRY</Text>
 
         {simMode && (
           <TouchableOpacity style={styles.simBanner} onPress={() => setSimMode(false)}>
@@ -412,13 +412,13 @@ export function OrbitalAlignmentScreen() {
                 key={m}
                 style={[
                   styles.modeBtn,
-                  isActive && { borderColor: ChronauraColors.gold, backgroundColor: "rgba(217,168,78,0.12)" },
-                  gated && { borderColor: ChronauraColors.borderSubtle, opacity: 0.6 },
+                  isActive && { borderColor: AuraLunisColors.gold, backgroundColor: "rgba(217,168,78,0.12)" },
+                  gated && { borderColor: AuraLunisColors.borderSubtle, opacity: 0.6 },
                 ]}
                 onPress={() => setMode(m)}
               >
                 {gated && <Text style={styles.modeLock}>◈ </Text>}
-                <Text style={[styles.modeBtnText, isActive && { color: ChronauraColors.gold }, gated && { color: ChronauraColors.faint }]}>
+                <Text style={[styles.modeBtnText, isActive && { color: AuraLunisColors.gold }, gated && { color: AuraLunisColors.faint }]}>
                   {MODE_LABELS[m]}
                 </Text>
               </TouchableOpacity>
@@ -430,7 +430,7 @@ export function OrbitalAlignmentScreen() {
         {isModeGated(mode) && !isPremium && (
           <PremiumModeGate
             modeName={MODE_LABELS[mode]}
-            modeDescription={PREMIUM_MODE_DESCRIPTIONS[mode] ?? "This mode requires Chronaura Premium."}
+            modeDescription={PREMIUM_MODE_DESCRIPTIONS[mode] ?? "This mode requires AuraLunis Premium."}
             onUpgrade={refreshEntitlement}
           />
         )}
@@ -483,13 +483,13 @@ export function OrbitalAlignmentScreen() {
             <Text style={[styles.cardVal, { fontSize: 11, marginBottom: 10 }]}>{chainProgress.chain.description}</Text>
             {chainProgress.chain.targets.map((t, i) => (
               <View key={t.id} style={styles.chainRow}>
-                <View style={[styles.chainDot, { backgroundColor: i < chainProgress.currentIndex ? ChronauraColors.green : i === chainProgress.currentIndex ? t.color : ChronauraColors.elevated }]} />
-                <Text style={[styles.chainName, { color: i < chainProgress.currentIndex ? ChronauraColors.green : i === chainProgress.currentIndex ? t.color : ChronauraColors.faint }]}>{t.name}</Text>
-                {i < chainProgress.currentIndex && <Text style={{ color: ChronauraColors.green, fontSize: 12 }}>✓</Text>}
+                <View style={[styles.chainDot, { backgroundColor: i < chainProgress.currentIndex ? AuraLunisColors.green : i === chainProgress.currentIndex ? t.color : AuraLunisColors.elevated }]} />
+                <Text style={[styles.chainName, { color: i < chainProgress.currentIndex ? AuraLunisColors.green : i === chainProgress.currentIndex ? t.color : AuraLunisColors.faint }]}>{t.name}</Text>
+                {i < chainProgress.currentIndex && <Text style={{ color: AuraLunisColors.green, fontSize: 12 }}>✓</Text>}
                 {i === chainProgress.currentIndex && <Text style={{ color: t.color, fontSize: 10, fontWeight: "800" }}>CURRENT</Text>}
               </View>
             ))}
-            {chainProgress.completedAt && <Text style={[styles.note, { color: ChronauraColors.green, marginTop: 8 }]}>Chain complete! +{chainProgress.chain.reward} XP</Text>}
+            {chainProgress.completedAt && <Text style={[styles.note, { color: AuraLunisColors.green, marginTop: 8 }]}>Chain complete! +{chainProgress.chain.reward} XP</Text>}
             {!chainProgress.completedAt && chainProgress.currentIndex < chainProgress.chain.targets.length && (
               <Text style={[styles.note, { marginTop: 8 }]}>Lock onto {chainProgress.chain.targets[chainProgress.currentIndex]?.name} to advance</Text>
             )}
@@ -594,12 +594,12 @@ export function OrbitalAlignmentScreen() {
                 <Text style={styles.cardLabel}>Debris Objects · {debrisFleet.length} Tracked</Text>
                 {debrisFleet.map(s => (
                   <View key={s.object.id} style={styles.listRow}>
-                    <View style={[styles.dot, { backgroundColor: s.catalogued ? ChronauraColors.green : "#FF3B30" }]} />
+                    <View style={[styles.dot, { backgroundColor: s.catalogued ? AuraLunisColors.green : "#FF3B30" }]} />
                     <View style={{ flex: 1 }}>
                       <Text style={styles.listName}>{s.object.name}</Text>
                       <Text style={styles.listSub}>{s.object.origin} · {s.object.debrisYear}</Text>
                     </View>
-                    <Text style={[styles.listScore, { color: s.catalogued ? ChronauraColors.green : "#FF3B30" }]}>{s.catalogued ? "✓" : `${s.alignment.alignmentScore}%`}</Text>
+                    <Text style={[styles.listScore, { color: s.catalogued ? AuraLunisColors.green : "#FF3B30" }]}>{s.catalogued ? "✓" : `${s.alignment.alignmentScore}%`}</Text>
                   </View>
                 ))}
               </View>
@@ -628,10 +628,10 @@ export function OrbitalAlignmentScreen() {
         )}
 
         {/* Cosmic Drift */}
-        <TouchableOpacity style={[styles.card, { borderColor: ChronauraColors.violet + "55" }]} onPress={() => setShowDrift(v => !v)}>
+        <TouchableOpacity style={[styles.card, { borderColor: AuraLunisColors.violet + "55" }]} onPress={() => setShowDrift(v => !v)}>
           <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
-            <Text style={[styles.cardLabel, { color: ChronauraColors.violet }]}>✦ COSMIC DRIFT GALAXY</Text>
-            <Text style={[styles.cardLabel, { color: ChronauraColors.violet }]}>{showDrift ? "▲" : "▼"}</Text>
+            <Text style={[styles.cardLabel, { color: AuraLunisColors.violet }]}>✦ COSMIC DRIFT GALAXY</Text>
+            <Text style={[styles.cardLabel, { color: AuraLunisColors.violet }]}>{showDrift ? "▲" : "▼"}</Text>
           </View>
           {!showDrift && <Text style={styles.listSub}>Your personal lock history — tap to expand</Text>}
         </TouchableOpacity>
@@ -675,53 +675,53 @@ function InfoPill({ label, value }: { label: string; value: string }) {
 }
 
 const styles = StyleSheet.create({
-  screen: { flex: 1, backgroundColor: ChronauraColors.cosmicBlack },
+  screen: { flex: 1, backgroundColor: AuraLunisColors.cosmicBlack },
   scroll: { flex: 1 },
   center: { alignItems: "center", justifyContent: "center", paddingHorizontal: 24 },
   container: { alignItems: "center", paddingTop: 52, paddingHorizontal: 14, paddingBottom: 20 },
-  title: { color: ChronauraColors.gold, fontSize: 12, fontWeight: "800", letterSpacing: 4, marginBottom: 10 },
-  auraBar: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: ChronauraColors.surface, borderRadius: 12, borderWidth: 1, padding: 10, marginBottom: 10 },
+  title: { color: AuraLunisColors.gold, fontSize: 12, fontWeight: "800", letterSpacing: 4, marginBottom: 10 },
+  auraBar: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, backgroundColor: AuraLunisColors.surface, borderRadius: 12, borderWidth: 1, padding: 10, marginBottom: 10 },
   auraDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
   auraTitle: { fontSize: 9, fontWeight: "800", letterSpacing: 1.5 },
-  auraDesc: { fontSize: 10, color: ChronauraColors.faint, marginTop: 2 },
-  simBanner: { backgroundColor: ChronauraColors.deepIndigo, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 5, marginBottom: 10, borderWidth: 1, borderColor: ChronauraColors.borderSubtle },
-  simBannerText: { color: ChronauraColors.silver, fontSize: 9, fontWeight: "700", letterSpacing: 1.5 },
+  auraDesc: { fontSize: 10, color: AuraLunisColors.faint, marginTop: 2 },
+  simBanner: { backgroundColor: AuraLunisColors.deepIndigo, borderRadius: 8, paddingHorizontal: 14, paddingVertical: 5, marginBottom: 10, borderWidth: 1, borderColor: AuraLunisColors.borderSubtle },
+  simBannerText: { color: AuraLunisColors.silver, fontSize: 9, fontWeight: "700", letterSpacing: 1.5 },
   modeGrid: { flexDirection: "row", flexWrap: "wrap", gap: 6, marginBottom: 12, width: "100%", justifyContent: "center" },
-  modeBtn: { borderWidth: 1, borderColor: ChronauraColors.borderSubtle, borderRadius: 9, paddingHorizontal: 10, paddingVertical: 5 },
-  modeBtnText: { color: ChronauraColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 1 },
-  modeLock: { color: ChronauraColors.gold, fontSize: 8, fontWeight: "800" },
+  modeBtn: { borderWidth: 1, borderColor: AuraLunisColors.borderSubtle, borderRadius: 9, paddingHorizontal: 10, paddingVertical: 5 },
+  modeBtnText: { color: AuraLunisColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 1 },
+  modeLock: { color: AuraLunisColors.gold, fontSize: 8, fontWeight: "800" },
   badge: { borderWidth: 1.5, borderRadius: 20, paddingHorizontal: 16, paddingVertical: 3, marginBottom: 4, alignSelf: "center" },
   badgeText: { fontSize: 9, fontWeight: "800", letterSpacing: 3 },
-  tapHint: { color: ChronauraColors.faint, fontSize: 9, marginBottom: 8 },
+  tapHint: { color: AuraLunisColors.faint, fontSize: 9, marginBottom: 8 },
   scoreRow: { width: "100%", flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 10 },
   scoreVal: { fontSize: 17, fontWeight: "900", width: 46, textAlign: "right" },
-  scoreTrack: { flex: 1, height: 4, backgroundColor: ChronauraColors.elevated, borderRadius: 2, overflow: "hidden" },
+  scoreTrack: { flex: 1, height: 4, backgroundColor: AuraLunisColors.elevated, borderRadius: 2, overflow: "hidden" },
   scoreFill: { height: "100%", borderRadius: 2 },
-  card: { width: "100%", backgroundColor: ChronauraColors.surface, borderRadius: 14, borderWidth: 1, borderColor: ChronauraColors.borderGold, padding: 13, marginBottom: 9 },
-  cardLabel: { color: ChronauraColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 },
-  cardVal: { fontSize: 13, fontWeight: "800", color: ChronauraColors.gold2, marginBottom: 7 },
+  card: { width: "100%", backgroundColor: AuraLunisColors.surface, borderRadius: 14, borderWidth: 1, borderColor: AuraLunisColors.borderGold, padding: 13, marginBottom: 9 },
+  cardLabel: { color: AuraLunisColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 },
+  cardVal: { fontSize: 13, fontWeight: "800", color: AuraLunisColors.gold2, marginBottom: 7 },
   activeHeader: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 7 },
   dot: { width: 8, height: 8, borderRadius: 4, flexShrink: 0 },
   pills: { flexDirection: "row", flexWrap: "wrap", gap: 6 },
-  pill: { backgroundColor: ChronauraColors.elevated, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 6, flex: 1 },
-  pillLabel: { color: ChronauraColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" },
-  pillVal: { color: ChronauraColors.silver, fontSize: 11, fontWeight: "700", marginTop: 2 },
-  listRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 7, borderTopWidth: 1, borderTopColor: ChronauraColors.borderFaint },
-  listName: { color: ChronauraColors.silver, fontSize: 12, fontWeight: "700" },
-  listSub: { color: ChronauraColors.faint, fontSize: 10, marginTop: 1 },
+  pill: { backgroundColor: AuraLunisColors.elevated, borderRadius: 8, paddingHorizontal: 9, paddingVertical: 6, flex: 1 },
+  pillLabel: { color: AuraLunisColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 1, textTransform: "uppercase" },
+  pillVal: { color: AuraLunisColors.silver, fontSize: 11, fontWeight: "700", marginTop: 2 },
+  listRow: { flexDirection: "row", alignItems: "center", gap: 8, paddingVertical: 7, borderTopWidth: 1, borderTopColor: AuraLunisColors.borderFaint },
+  listName: { color: AuraLunisColors.silver, fontSize: 12, fontWeight: "700" },
+  listSub: { color: AuraLunisColors.faint, fontSize: 10, marginTop: 1 },
   listScore: { fontSize: 11, fontWeight: "700", marginRight: 3 },
-  arrow: { color: ChronauraColors.faint, fontSize: 15 },
-  chainRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 7, borderTopWidth: 1, borderTopColor: ChronauraColors.borderFaint },
+  arrow: { color: AuraLunisColors.faint, fontSize: 15 },
+  chainRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 7, borderTopWidth: 1, borderTopColor: AuraLunisColors.borderFaint },
   chainDot: { width: 10, height: 10, borderRadius: 5, flexShrink: 0 },
   chainName: { flex: 1, fontSize: 12, fontWeight: "700" },
-  phaseBar: { width: "100%", height: 4, backgroundColor: ChronauraColors.elevated, borderRadius: 2, overflow: "hidden" },
+  phaseBar: { width: "100%", height: 4, backgroundColor: AuraLunisColors.elevated, borderRadius: 2, overflow: "hidden" },
   phaseFill: { height: "100%", borderRadius: 2 },
-  note: { color: ChronauraColors.faint, fontSize: 10, lineHeight: 16, marginTop: 6 },
+  note: { color: AuraLunisColors.faint, fontSize: 10, lineHeight: 16, marginTop: 6 },
   loadingCard: { alignItems: "center", gap: 8, marginBottom: 24 },
-  loadingTitle: { color: ChronauraColors.silver, fontSize: 15, fontWeight: "700" },
-  loadingDetail: { color: ChronauraColors.faint, fontSize: 12 },
-  simCard: { width: "100%", backgroundColor: ChronauraColors.surface, borderRadius: 14, borderWidth: 1, borderColor: ChronauraColors.borderSubtle, padding: 16, alignItems: "center", gap: 10 },
-  simCardTitle: { color: ChronauraColors.silver, fontSize: 13, fontWeight: "700" },
-  simBtn: { backgroundColor: ChronauraColors.deepIndigo, borderRadius: 11, paddingHorizontal: 18, paddingVertical: 9, borderWidth: 1, borderColor: ChronauraColors.borderGold },
-  simBtnText: { color: ChronauraColors.gold2, fontSize: 12, fontWeight: "700" },
+  loadingTitle: { color: AuraLunisColors.silver, fontSize: 15, fontWeight: "700" },
+  loadingDetail: { color: AuraLunisColors.faint, fontSize: 12 },
+  simCard: { width: "100%", backgroundColor: AuraLunisColors.surface, borderRadius: 14, borderWidth: 1, borderColor: AuraLunisColors.borderSubtle, padding: 16, alignItems: "center", gap: 10 },
+  simCardTitle: { color: AuraLunisColors.silver, fontSize: 13, fontWeight: "700" },
+  simBtn: { backgroundColor: AuraLunisColors.deepIndigo, borderRadius: 11, paddingHorizontal: 18, paddingVertical: 9, borderWidth: 1, borderColor: AuraLunisColors.borderGold },
+  simBtnText: { color: AuraLunisColors.gold2, fontSize: 12, fontWeight: "700" },
 });

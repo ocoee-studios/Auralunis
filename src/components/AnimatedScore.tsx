@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import { StyleSheet, Text } from "react-native";
 import Animated, { useSharedValue, useAnimatedProps, withTiming, Easing } from "react-native-reanimated";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 const AnimatedText = Animated.createAnimatedComponent(Text);
 
@@ -31,5 +31,5 @@ export function AnimatedScore({ score, size = 26 }: Props) {
 }
 
 const s = StyleSheet.create({
-  score: { fontWeight: "900", color: ChronauraColors.gold2, textAlign: "center" }
+  score: { fontWeight: "900", color: AuraLunisColors.gold2, textAlign: "center" }
 });

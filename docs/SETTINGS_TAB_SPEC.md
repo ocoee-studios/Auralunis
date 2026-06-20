@@ -1,4 +1,4 @@
-# Chronaura Settings Tab Specification
+# AuraLunis Settings Tab Specification
 
 ## Purpose
 The Settings tab is the app control center. It should not be buried inside More.
@@ -14,7 +14,7 @@ The Settings tab is the app control center. It should not be buried inside More.
 - Help + About
 
 ## Important settings
-- Chronaura+ subscription management
+- AuraLunis+ subscription management
 - Theme / visual mode
 - Notification master switch
 - Celestial Alarms
@@ -39,4 +39,4 @@ Settings should eventually persist using local storage or secure storage. This n
 
 
 ## Logo placement
-The Settings page must show the Chronaura logo prominently at the top of the page using the full logo lockup. The logo should not be hidden only in the general app header.
+The Settings page must show the AuraLunis logo prominently at the top of the page using the full logo lockup. The logo should not be hidden only in the general app header.

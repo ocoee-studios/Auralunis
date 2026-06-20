@@ -1,24 +1,24 @@
-# Chronaura Approved Brand Board — Source of Truth
+# AuraLunis Approved Brand Board — Source of Truth
 
 ## Approved reference image
 
 Use:
 
 ```text
-assets/brand/reference/chronaura-approved-brand-board.png
+assets/brand/reference/auralunis-approved-brand-board.png
 ```
 
-as the visual source of truth for the final Chronaura identity.
+as the visual source of truth for the final AuraLunis identity.
 
 ## Required logo treatments derived from this board
 
 Create or import:
 
 ```text
-assets/brand/chronaura-logo-full.svg
-assets/brand/chronaura-lockup.svg
-assets/brand/chronaura-app-icon.svg
-assets/brand/watch/chronaura-watch-mark.svg
+assets/brand/auralunis-logo-full.svg
+assets/brand/auralunis-lockup.svg
+assets/brand/auralunis-app-icon.svg
+assets/brand/watch/auralunis-watch-mark.svg
 ```
 
 ## Visual rules
@@ -32,7 +32,7 @@ Preserve the exact design language shown in the approved board:
 - compass-style axis lines
 - central starburst
 - small orbital accents
-- refined serif Chronaura wordmark
+- refined serif AuraLunis wordmark
 - slogan: `YOUR TIME, WRITTEN IN THE STARS.`
 - descriptor: `THE INTERACTIVE ASTRAL CLOCK`
 - gold sparkle field and restrained cosmic texture

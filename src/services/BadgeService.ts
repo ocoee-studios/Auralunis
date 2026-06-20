@@ -1,7 +1,7 @@
 // Sky achievement badges. Tracked in AsyncStorage, displayed in the Vault.
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const KEY = "chronaura.badges";
+const KEY = "auralunis.badges";
 
 export interface Badge {
   id: string;

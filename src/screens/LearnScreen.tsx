@@ -3,7 +3,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { GlassPanel } from "@/components/GlassPanel";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { learnCategories, learnTopics } from "@/features/learn/LearnCatalog";
 import type { LearnCategoryId } from "@/features/learn/LearnTypes";
 import { SolarSystemLiveVisual } from "@/features/learn/visuals/SolarSystemLiveVisual";
@@ -124,13 +124,13 @@ const styles = StyleSheet.create({
     letterSpacing: -0.8
   },
   heroCopy: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 14,
     lineHeight: 21,
     marginTop: 8
   },
   sectionLabel: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 11,
     letterSpacing: 2,
     textTransform: "uppercase",
@@ -156,13 +156,13 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(217,168,78,0.12)",
     borderColor: "rgba(217,168,78,0.28)"
   },
-  categoryIcon: { fontSize: 24, color: ChronauraColors.gold2 },
+  categoryIcon: { fontSize: 24, color: AuraLunisColors.gold2 },
   categoryTitle: { color: "#FFF", fontSize: 14, fontWeight: "900", marginTop: 7 },
-  categoryDescription: { color: ChronauraColors.muted, fontSize: 11, lineHeight: 15, marginTop: 5 },
+  categoryDescription: { color: AuraLunisColors.muted, fontSize: 11, lineHeight: 15, marginTop: 5 },
   selectedHeader: {
     marginTop: 4,
     marginBottom: 10
   },
   selectedTitle: { color: "#FFF", fontSize: 23, fontWeight: "900", letterSpacing: -0.7 },
-  selectedCopy: { color: ChronauraColors.muted, fontSize: 13, lineHeight: 19, marginTop: 4 }
+  selectedCopy: { color: AuraLunisColors.muted, fontSize: 13, lineHeight: 19, marginTop: 4 }
 });

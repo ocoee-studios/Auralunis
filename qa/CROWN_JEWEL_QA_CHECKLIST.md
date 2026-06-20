@@ -32,6 +32,6 @@
 - [ ] watchOS target listed
 - [ ] visionOS target listed
 - [ ] DynamicSpaceCanvas listed
-- [ ] ChronauraARLens listed
-- [ ] ChronauraDatabase listed
+- [ ] AuraLunisARLens listed
+- [ ] AuraLunisDatabase listed
 - [ ] OracleService listed

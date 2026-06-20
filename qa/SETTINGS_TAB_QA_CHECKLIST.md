@@ -41,4 +41,4 @@
 
 ## Help
 - [ ] Q&A / Help opens
-- [ ] About Chronaura opens
+- [ ] About AuraLunis opens

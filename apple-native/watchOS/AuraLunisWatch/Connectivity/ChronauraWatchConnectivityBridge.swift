@@ -2,8 +2,8 @@ import Foundation
 import WatchConnectivity
 
 @MainActor
-final class ChronauraWatchConnectivityBridge: NSObject, ObservableObject {
-    @Published private(set) var payload: ChronauraWatchPayload = .preview
+final class AuraLunisWatchConnectivityBridge: NSObject, ObservableObject {
+    @Published private(set) var payload: AuraLunisWatchPayload = .preview
     @Published private(set) var activationState: WCSessionActivationState = .notActivated
 
     private let session: WCSession? = WCSession.isSupported() ? .default : nil
@@ -15,7 +15,7 @@ final class ChronauraWatchConnectivityBridge: NSObject, ObservableObject {
     }
 
     private func apply(_ dictionary: [String: Any]) {
-        guard let decoded = ChronauraWatchPayload(dictionary: dictionary) else {
+        guard let decoded = AuraLunisWatchPayload(dictionary: dictionary) else {
             return
         }
 
@@ -23,7 +23,7 @@ final class ChronauraWatchConnectivityBridge: NSObject, ObservableObject {
     }
 }
 
-extension ChronauraWatchConnectivityBridge: WCSessionDelegate {
+extension AuraLunisWatchConnectivityBridge: WCSessionDelegate {
     nonisolated func session(
         _ session: WCSession,
         activationDidCompleteWith activationState: WCSessionActivationState,

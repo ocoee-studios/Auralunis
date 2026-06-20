@@ -5,7 +5,7 @@ import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisSer
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import type { TonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 
-const KEY = "chronaura.birthSky";
+const KEY = "auralunis.birthSky";
 
 export interface BirthSkyProfile {
   birthday: string;

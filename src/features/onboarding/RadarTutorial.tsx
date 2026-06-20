@@ -13,10 +13,10 @@ import Animated, {
 } from "react-native-reanimated";
 import Svg, { Circle, Line, Defs, RadialGradient, Stop } from "react-native-svg";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 
-const TUTORIAL_KEY = "chronaura.radar_tutorial.seen";
+const TUTORIAL_KEY = "auralunis.radar_tutorial.seen";
 const { width: SCREEN_W } = Dimensions.get("window");
 
 interface RadarTutorialProps {
@@ -88,15 +88,15 @@ function RadarIllustration({ type }: { type: TutorialPage["illustration"] }) {
     ],
   }));
 
-  const lockColor = type === "lock" ? ChronauraColors.green : ChronauraColors.gold;
+  const lockColor = type === "lock" ? AuraLunisColors.green : AuraLunisColors.gold;
 
   if (type === "modes") {
     return (
       <View style={styles.modesGrid}>
         {["Fleet", "Deep Space", "Train", "Golden", "Debris", "Meteor", "Chain", "Static", "Re-Entry"].map((name, i) => (
-          <View key={name} style={[styles.modeChip, i > 3 && { borderColor: ChronauraColors.gold + "55" }]}>
+          <View key={name} style={[styles.modeChip, i > 3 && { borderColor: AuraLunisColors.gold + "55" }]}>
             {i > 3 && <Text style={styles.modeLock}>◈</Text>}
-            <Text style={[styles.modeChipText, i > 3 && { color: ChronauraColors.faint }]}>{name}</Text>
+            <Text style={[styles.modeChipText, i > 3 && { color: AuraLunisColors.faint }]}>{name}</Text>
           </View>
         ))}
       </View>
@@ -113,10 +113,10 @@ function RadarIllustration({ type }: { type: TutorialPage["illustration"] }) {
           </RadialGradient>
         </Defs>
         <Circle cx={C} cy={C} r={C - 2} fill="url(#tg)" />
-        <Circle cx={C} cy={C} r={C - 2} stroke={ChronauraColors.borderGold} strokeWidth={1} fill="none" />
-        <Circle cx={C} cy={C} r={C * 0.55} stroke={ChronauraColors.borderSubtle} strokeWidth={0.5} strokeDasharray="3 3" fill="none" />
-        <Line x1={12} y1={C} x2={SIZE - 12} y2={C} stroke={ChronauraColors.borderSubtle} strokeWidth={0.5} />
-        <Line x1={C} y1={12} x2={C} y2={SIZE - 12} stroke={ChronauraColors.borderSubtle} strokeWidth={0.5} />
+        <Circle cx={C} cy={C} r={C - 2} stroke={AuraLunisColors.borderGold} strokeWidth={1} fill="none" />
+        <Circle cx={C} cy={C} r={C * 0.55} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} strokeDasharray="3 3" fill="none" />
+        <Line x1={12} y1={C} x2={SIZE - 12} y2={C} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} />
+        <Line x1={C} y1={12} x2={C} y2={SIZE - 12} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} />
         <Circle cx={C} cy={C} r={8} stroke={lockColor} strokeWidth={1.5} fill="none" />
         <Circle cx={C} cy={C} r={2} fill={lockColor} />
       </Svg>
@@ -196,22 +196,22 @@ export function RadarTutorial({ forceShow, onComplete }: RadarTutorialProps) {
 
 const styles = StyleSheet.create({
   overlay: { flex: 1, backgroundColor: "rgba(11,11,18,0.92)", justifyContent: "center", alignItems: "center", padding: 24 },
-  card: { width: "100%", maxWidth: 360, backgroundColor: ChronauraColors.surface, borderRadius: 28, borderWidth: 1, borderColor: ChronauraColors.borderGold, padding: 28, alignItems: "center" },
+  card: { width: "100%", maxWidth: 360, backgroundColor: AuraLunisColors.surface, borderRadius: 28, borderWidth: 1, borderColor: AuraLunisColors.borderGold, padding: 28, alignItems: "center" },
   dots: { flexDirection: "row", gap: 8, marginBottom: 20 },
-  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: ChronauraColors.elevated },
-  dotActive: { backgroundColor: ChronauraColors.gold, width: 24 },
-  subtitle: { color: ChronauraColors.gold, fontSize: 9, fontWeight: "800", letterSpacing: 3, marginBottom: 6 },
-  title: { color: ChronauraColors.gold2, fontSize: 22, fontWeight: "900", textAlign: "center", marginBottom: 16 },
+  dot: { width: 8, height: 8, borderRadius: 4, backgroundColor: AuraLunisColors.elevated },
+  dotActive: { backgroundColor: AuraLunisColors.gold, width: 24 },
+  subtitle: { color: AuraLunisColors.gold, fontSize: 9, fontWeight: "800", letterSpacing: 3, marginBottom: 6 },
+  title: { color: AuraLunisColors.gold2, fontSize: 22, fontWeight: "900", textAlign: "center", marginBottom: 16 },
   illustrationContainer: { marginBottom: 20, alignItems: "center" },
   illustrationWrap: { width: 160, height: 160 },
   tutorialBlip: { position: "absolute", width: 16, height: 16, borderRadius: 8, shadowOpacity: 0.6, shadowRadius: 8, elevation: 5 },
-  body: { color: ChronauraColors.silver, fontSize: 14, lineHeight: 22, textAlign: "center", marginBottom: 24 },
-  nextBtn: { backgroundColor: ChronauraColors.gold, borderRadius: 14, paddingHorizontal: 32, paddingVertical: 13, width: "100%", alignItems: "center" },
-  nextBtnText: { color: ChronauraColors.cosmicBlack, fontSize: 15, fontWeight: "900" },
+  body: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 22, textAlign: "center", marginBottom: 24 },
+  nextBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingHorizontal: 32, paddingVertical: 13, width: "100%", alignItems: "center" },
+  nextBtnText: { color: AuraLunisColors.cosmicBlack, fontSize: 15, fontWeight: "900" },
   skipBtn: { marginTop: 14 },
-  skipText: { color: ChronauraColors.faint, fontSize: 12 },
+  skipText: { color: AuraLunisColors.faint, fontSize: 12 },
   modesGrid: { flexDirection: "row", flexWrap: "wrap", gap: 6, justifyContent: "center", paddingHorizontal: 8 },
-  modeChip: { borderWidth: 1, borderColor: ChronauraColors.borderSubtle, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, flexDirection: "row", alignItems: "center", gap: 3 },
-  modeChipText: { color: ChronauraColors.silver, fontSize: 10, fontWeight: "700" },
-  modeLock: { color: ChronauraColors.gold, fontSize: 8 },
+  modeChip: { borderWidth: 1, borderColor: AuraLunisColors.borderSubtle, borderRadius: 8, paddingHorizontal: 10, paddingVertical: 5, flexDirection: "row", alignItems: "center", gap: 3 },
+  modeChipText: { color: AuraLunisColors.silver, fontSize: 10, fontWeight: "700" },
+  modeLock: { color: AuraLunisColors.gold, fontSize: 8 },
 });

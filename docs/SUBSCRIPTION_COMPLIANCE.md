@@ -1,4 +1,4 @@
-# Chronaura — Apple Subscription Compliance
+# AuraLunis — Apple Subscription Compliance
 
 ## Required by Apple (App Review Guidelines 3.1.2)
 
@@ -24,23 +24,23 @@ The paywall must clearly state:
 ### Terms of Use link
 - Must be accessible from the paywall
 - Must be accessible from Settings
-- URL: ocoeestudios.com/chronaura/terms
+- URL: ocoeestudios.com/auralunis/terms
 
 ### Privacy Policy link
 - Must be accessible from the paywall
 - Must be accessible from Settings
 - Must be entered in App Store Connect
-- URL: ocoeestudios.com/chronaura/privacy
+- URL: ocoeestudios.com/auralunis/privacy
 
 ## RevenueCat Product IDs
 
 | Product | ID | Type |
 |---|---|---|
-| Premium Monthly | `com.ocoee.chronaura.premium.monthly` | Auto-renewable |
-| Premium Annual | `com.ocoee.chronaura.premium.annual` | Auto-renewable |
+| Premium Monthly | `com.ocoee.auralunis.premium.monthly` | Auto-renewable |
+| Premium Annual | `com.ocoee.auralunis.premium.annual` | Auto-renewable |
 
 ## Entitlement
-`chronaura_premium` — grants access to all premium features.
+`auralunis_premium` — grants access to all premium features.
 
 ## Offering
 `default` — contains both monthly and annual packages.

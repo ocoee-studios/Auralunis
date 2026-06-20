@@ -1,6 +1,6 @@
-# Chronaura — Encryption Export Compliance
+# AuraLunis — Encryption Export Compliance
 
-## Does Chronaura use encryption?
+## Does AuraLunis use encryption?
 **Yes.** The Cosmic Vault uses NaCl secretbox (XSalsa20-Poly1305) via the
 tweetnacl library for encrypting user journal entries and observations.
 
@@ -14,7 +14,7 @@ When submitting to App Store Connect, you'll be asked:
 **"Does your app qualify for any exemptions?"**
 → **Yes — exemption (b)(1)**
 
-The encryption in Chronaura qualifies for the exemption because:
+The encryption in AuraLunis qualifies for the exemption because:
 - It is used solely for **protecting user data on-device** (personal journal entries)
 - It does not implement proprietary encryption algorithms
 - It uses **standard, published algorithms** (XSalsa20-Poly1305 via NaCl)

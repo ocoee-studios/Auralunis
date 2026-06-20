@@ -1,7 +1,7 @@
 // SatelliteDataCard.tsx
 // Retro data card modal displayed when the user taps a satellite blip
 // on the radar scope. Shows launch year, agency, mission, status, NORAD ID.
-// Styled with the Chronaura Midnight Gold design system.
+// Styled with the AuraLunis Midnight Gold design system.
 
 import React, { useEffect, useRef } from "react";
 import {
@@ -12,7 +12,7 @@ import {
   Animated,
   ScrollView,
 } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import {
   type AtmosphericSatellite,
   CLASS_LABELS,
@@ -27,9 +27,9 @@ interface SatelliteDataCardProps {
 }
 
 const STATUS_COLORS: Record<AtmosphericSatellite["status"], string> = {
-  active: ChronauraColors.green,
-  partial: ChronauraColors.gold,
-  decommissioned: ChronauraColors.muted,
+  active: AuraLunisColors.green,
+  partial: AuraLunisColors.gold,
+  decommissioned: AuraLunisColors.muted,
 };
 
 const STATUS_LABELS: Record<AtmosphericSatellite["status"], string> = {
@@ -162,7 +162,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(11,11,18,0.75)",
   },
   card: {
-    backgroundColor: ChronauraColors.surface,
+    backgroundColor: AuraLunisColors.surface,
     borderTopLeftRadius: 28,
     borderTopRightRadius: 28,
     borderWidth: 1,
@@ -194,7 +194,7 @@ const styles = StyleSheet.create({
     letterSpacing: 1.5,
   },
   shortName: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 12,
     fontWeight: "700",
     letterSpacing: 2,
@@ -203,11 +203,11 @@ const styles = StyleSheet.create({
     padding: 4,
   },
   closeBtnText: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 16,
   },
   fullName: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 20,
     fontWeight: "800",
     marginBottom: 10,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   norad: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 11,
     marginLeft: "auto" as unknown as number,
     fontVariantNumeric: "tabular-nums" as never,
@@ -241,13 +241,13 @@ const styles = StyleSheet.create({
   },
   pill: {
     flex: 1,
-    backgroundColor: ChronauraColors.elevated,
+    backgroundColor: AuraLunisColors.elevated,
     borderRadius: 10,
     borderWidth: 1,
     padding: 10,
   },
   pillLabel: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 9,
     fontWeight: "700",
     letterSpacing: 1.5,
@@ -260,24 +260,24 @@ const styles = StyleSheet.create({
   },
   divider: {
     height: 1,
-    backgroundColor: ChronauraColors.borderSubtle,
+    backgroundColor: AuraLunisColors.borderSubtle,
     marginVertical: 14,
   },
   agencyLabel: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 9,
     fontWeight: "700",
     letterSpacing: 2,
     marginBottom: 4,
   },
   agencyValue: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 13,
     fontWeight: "600",
     marginBottom: 12,
   },
   missionLabel: {
-    color: ChronauraColors.faint,
+    color: AuraLunisColors.faint,
     fontSize: 9,
     fontWeight: "700",
     letterSpacing: 2,
@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     maxHeight: 80,
   },
   missionText: {
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     fontSize: 13,
     lineHeight: 20,
   },

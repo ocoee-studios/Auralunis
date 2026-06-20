@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 import { buildTimeScrubSnapshot } from "@/features/aura-pro/TimeScrubMatrixService";
 
 const increments = [-30, -7, -1, 1, 7, 30];
@@ -101,14 +101,14 @@ const styles = StyleSheet.create({
     borderColor: "rgba(139,116,255,0.18)"
   },
   eyebrow: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 10,
     letterSpacing: 2.2,
     fontWeight: "900"
   },
   title: { color: "#FFF", fontSize: 21, fontWeight: "900", marginTop: 7 },
   copy: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 13,
     lineHeight: 19,
     marginTop: 6
@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.07)"
   },
   date: { color: "#FFF", fontSize: 20, fontWeight: "900" },
-  offset: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 4 },
+  offset: { color: AuraLunisColors.gold2, fontSize: 11, marginTop: 4 },
   orbitStage: {
     height: 145,
     borderRadius: 18,
@@ -138,9 +138,9 @@ const styles = StyleSheet.create({
     marginLeft: -11,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: ChronauraColors.gold2
+    backgroundColor: AuraLunisColors.gold2
   },
-  retrogradePlanet: { backgroundColor: ChronauraColors.orange },
+  retrogradePlanet: { backgroundColor: AuraLunisColors.orange },
   planetText: { color: "#17100A", fontSize: 10, fontWeight: "900" },
   incrementRow: { flexDirection: "row", gap: 6, marginTop: 10 },
   increment: {
@@ -164,19 +164,19 @@ const styles = StyleSheet.create({
   },
   resetText: { color: "#FFF", fontWeight: "800" },
   retrogradeTitle: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 11,
     fontWeight: "900",
     marginTop: 12
   },
   retrogradeRow: {
-    color: ChronauraColors.silver,
+    color: AuraLunisColors.silver,
     fontSize: 12,
     lineHeight: 18,
     marginTop: 4
   },
   note: {
-    color: ChronauraColors.muted,
+    color: AuraLunisColors.muted,
     fontSize: 11,
     lineHeight: 16,
     marginTop: 8

@@ -4,13 +4,13 @@
 // The particle galaxy is derived from the entry set: position, color, and
 // cluster size all encode real data from the moment of lock.
 //
-// Storage: AsyncStorage under "chronaura.cosmic_drift.entries"
+// Storage: AsyncStorage under "auralunis.cosmic_drift.entries"
 // No encryption needed — this is celebration data, not sensitive.
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { FREE_DRIFT_EVENT_LIMIT } from "@/features/paywall/MonetizationCatalog";
 
-const STORAGE_KEY = "chronaura.cosmic_drift.entries";
+const STORAGE_KEY = "auralunis.cosmic_drift.entries";
 
 export type TargetType = "satellite" | "planet" | "starlink-train";
 

@@ -7,7 +7,7 @@
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "baseUrl": "/mnt/data/chronaura_native_test_build",
+    "baseUrl": "/mnt/data/auralunis_native_test_build",
     "paths": {
       "@/*": [
         "src/*"
@@ -20,11 +20,11 @@
     "noEmit": true
   },
   "files": [
-    "/mnt/data/chronaura_native_test_build/qa/typescript-stub-harness/chronaura-stubs.d.ts"
+    "/mnt/data/auralunis_native_test_build/qa/typescript-stub-harness/auralunis-stubs.d.ts"
   ],
   "include": [
-    "/mnt/data/chronaura_native_test_build/App.tsx",
-    "/mnt/data/chronaura_native_test_build/src/**/*.ts",
-    "/mnt/data/chronaura_native_test_build/src/**/*.tsx"
+    "/mnt/data/auralunis_native_test_build/App.tsx",
+    "/mnt/data/auralunis_native_test_build/src/**/*.ts",
+    "/mnt/data/auralunis_native_test_build/src/**/*.tsx"
   ]
 }

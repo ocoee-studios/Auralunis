@@ -1,4 +1,4 @@
-# Chronaura Aura Pro Utility Expansion
+# AuraLunis Aura Pro Utility Expansion
 
 ## Added phone-side utilities
 

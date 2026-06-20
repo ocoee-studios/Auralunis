@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 export function SolarSystemLiveVisual() {
   const [step, setStep] = useState(0);
@@ -18,7 +18,7 @@ export function SolarSystemLiveVisual() {
         {[42, 62, 86, 112].map((size, i) => (
           <View key={size} style={[styles.orbit, { width: size * 2, height: size * 2, borderRadius: size }]} />
         ))}
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 8) * 42, left: 154 + Math.cos(step / 8) * 42, backgroundColor: ChronauraColors.gold2 }]} />
+        <View style={[styles.planet, { top: 96 + Math.sin(step / 8) * 42, left: 154 + Math.cos(step / 8) * 42, backgroundColor: AuraLunisColors.gold2 }]} />
         <View style={[styles.planet, { top: 96 + Math.sin(step / 10 + 1.2) * 62, left: 154 + Math.cos(step / 10 + 1.2) * 62, backgroundColor: "#d0d8ff" }]} />
         <View style={[styles.planet, { top: 96 + Math.sin(step / 12 + 2.1) * 86, left: 154 + Math.cos(step / 12 + 2.1) * 86, backgroundColor: "#62CFFF" }]} />
         <View style={[styles.planet, { top: 96 + Math.sin(step / 14 + 2.8) * 112, left: 154 + Math.cos(step / 14 + 2.8) * 112, backgroundColor: "#FFB07A" }]} />
@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(255,255,255,0.08)",
     marginBottom: 14
   },
-  label: { color: ChronauraColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
+  label: { color: AuraLunisColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
   center: {
     marginTop: 12,
     height: 260,
@@ -49,8 +49,8 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 14,
-    backgroundColor: ChronauraColors.gold2,
-    shadowColor: ChronauraColors.gold,
+    backgroundColor: AuraLunisColors.gold2,
+    shadowColor: AuraLunisColors.gold,
     shadowOpacity: 0.9,
     shadowRadius: 16
   },
@@ -65,5 +65,5 @@ const styles = StyleSheet.create({
     height: 10,
     borderRadius: 5
   },
-  caption: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 18, marginTop: 8 }
+  caption: { color: AuraLunisColors.muted, fontSize: 12, lineHeight: 18, marginTop: 8 }
 });

@@ -1,7 +1,7 @@
 {
   "generated_at": "2026-05-29T23:27:27",
   "status": "PASS",
-  "about_us_paragraph": "Chronaura was created to turn the night sky into a living, personal experience. Blending astronomy, thoughtful design, and quiet daily rituals, we help you slow down, look up, and feel more connected to the universe around you.",
+  "about_us_paragraph": "AuraLunis was created to turn the night sky into a living, personal experience. Blending astronomy, thoughtful design, and quiet daily rituals, we help you slow down, look up, and feel more connected to the universe around you.",
   "missing_required": [],
   "checks": {
     "about_us_title_present": true,
@@ -13,7 +13,7 @@
   },
   "node_static_qa": {
     "status": "PASS",
-    "stdout": "PASS App.tsx\nPASS src/navigation/RootTabs.tsx\nPASS src/screens/HomeScreen.tsx\nPASS src/screens/SkyScreen.tsx\nPASS src/screens/WatchScreen.tsx\nPASS src/features/watch/WatchFaceCatalog.ts\nPASS native-handoff/watchos/README_WATCH_FACE_GALLERY.md\nPASS docs/ABOUT_US_SETTINGS_SPEC.md\nPASS src/screens/LearnScreen.tsx\nPASS src/screens/SettingsScreen.tsx\nPASS src/components/LogoMark.tsx\nPASS src/components/ScreenShell.tsx\nPASS src/features/paywall/TrialLaunchModal.tsx\nPASS src/features/permissions/SkyLensPermissionGate.tsx\nPASS src/features/sky-lens/ManualSkyMap.tsx\nPASS src/features/archive/DeepSkyCatalog.ts\nPASS src/state/ChronauraSettingsContext.tsx\nPASS src/state/ChronauraVaultContext.tsx\nPASS src/data/brand.ts\nPASS src/data/sourceOfTruth.ts\nPASS assets/logo/chronaura-stardust-emblem.png\nPASS assets/logo/chronaura-stardust-lockup.png\nPASS assets/logo/chronaura-app-icon.png\nPASS assets/logo/chronaura-splash.png\nPASS app.json\nPASS package.json\nPASS approved five-tab navigation\nPASS expo-camera permission hook\nPASS SkyScreen deep-sky/manual-map scaffold\nPASS watch face gallery, theme selector, and complication picker\nPASS settings persistence\nPASS settings about us section\nPASS prototype vault persistence\nPASS supported font weights\nPASS app icon config\nPASS splash config\nChronaura approved five-tab static QA passed.\n",
+    "stdout": "PASS App.tsx\nPASS src/navigation/RootTabs.tsx\nPASS src/screens/HomeScreen.tsx\nPASS src/screens/SkyScreen.tsx\nPASS src/screens/WatchScreen.tsx\nPASS src/features/watch/WatchFaceCatalog.ts\nPASS native-handoff/watchos/README_WATCH_FACE_GALLERY.md\nPASS docs/ABOUT_US_SETTINGS_SPEC.md\nPASS src/screens/LearnScreen.tsx\nPASS src/screens/SettingsScreen.tsx\nPASS src/components/LogoMark.tsx\nPASS src/components/ScreenShell.tsx\nPASS src/features/paywall/TrialLaunchModal.tsx\nPASS src/features/permissions/SkyLensPermissionGate.tsx\nPASS src/features/sky-lens/ManualSkyMap.tsx\nPASS src/features/archive/DeepSkyCatalog.ts\nPASS src/state/AuraLunisSettingsContext.tsx\nPASS src/state/AuraLunisVaultContext.tsx\nPASS src/data/brand.ts\nPASS src/data/sourceOfTruth.ts\nPASS assets/logo/auralunis-stardust-emblem.png\nPASS assets/logo/auralunis-stardust-lockup.png\nPASS assets/logo/auralunis-app-icon.png\nPASS assets/logo/auralunis-splash.png\nPASS app.json\nPASS package.json\nPASS approved five-tab navigation\nPASS expo-camera permission hook\nPASS SkyScreen deep-sky/manual-map scaffold\nPASS watch face gallery, theme selector, and complication picker\nPASS settings persistence\nPASS settings about us section\nPASS prototype vault persistence\nPASS supported font weights\nPASS app icon config\nPASS splash config\nAuraLunis approved five-tab static QA passed.\n",
     "stderr": ""
   }
 }

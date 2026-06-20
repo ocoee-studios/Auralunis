@@ -5,7 +5,7 @@ import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import * as Haptics from "expo-haptics";
 import { Accelerometer, Gyroscope, Magnetometer } from "expo-sensors";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 type DiagnosticStatus = "idle" | "pass" | "warn" | "fail";
 
@@ -318,21 +318,21 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(98,207,255,0.18)"
   },
-  eyebrow: { color: ChronauraColors.gold2, fontSize: 10, letterSpacing: 2.4, fontWeight: "900" },
+  eyebrow: { color: AuraLunisColors.gold2, fontSize: 10, letterSpacing: 2.4, fontWeight: "900" },
   title: { color: "#FFF", fontSize: 22, fontWeight: "900", marginTop: 7 },
-  copy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5, marginBottom: 8 },
+  copy: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5, marginBottom: 8 },
   row: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 10, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.06)" },
   rowTitle: { color: "#FFF", fontSize: 14, fontWeight: "800" },
-  rowCopy: { color: ChronauraColors.muted, fontSize: 11, lineHeight: 16, marginTop: 3 },
+  rowCopy: { color: AuraLunisColors.muted, fontSize: 11, lineHeight: 16, marginTop: 3 },
   status: { minWidth: 58, overflow: "hidden", borderRadius: 999, paddingVertical: 5, paddingHorizontal: 7, textAlign: "center", fontSize: 10, fontWeight: "900" },
-  statusIdle: { color: ChronauraColors.silver, backgroundColor: "rgba(255,255,255,0.06)" },
-  statusPass: { color: "#17100A", backgroundColor: ChronauraColors.green },
-  statusWarn: { color: "#17100A", backgroundColor: ChronauraColors.orange },
+  statusIdle: { color: AuraLunisColors.silver, backgroundColor: "rgba(255,255,255,0.06)" },
+  statusPass: { color: "#17100A", backgroundColor: AuraLunisColors.green },
+  statusWarn: { color: "#17100A", backgroundColor: AuraLunisColors.orange },
   statusFail: { color: "#FFF", backgroundColor: "rgba(255,105,105,0.72)" },
-  primary: { borderRadius: 16, marginTop: 14, paddingVertical: 13, alignItems: "center", backgroundColor: ChronauraColors.gold2 },
+  primary: { borderRadius: 16, marginTop: 14, paddingVertical: 13, alignItems: "center", backgroundColor: AuraLunisColors.gold2 },
   primaryText: { color: "#17100A", fontWeight: "900" },
   buttonGrid: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 8 },
   secondary: { width: "48%", borderRadius: 15, paddingVertical: 11, paddingHorizontal: 8, alignItems: "center", backgroundColor: "rgba(217,168,78,0.10)", borderWidth: 1, borderColor: "rgba(217,168,78,0.20)" },
   secondaryText: { color: "#FFF", fontSize: 12, fontWeight: "800" },
-  footnote: { color: ChronauraColors.muted, fontSize: 11, lineHeight: 16, marginTop: 12 }
+  footnote: { color: AuraLunisColors.muted, fontSize: 11, lineHeight: 16, marginTop: 12 }
 });

@@ -2,7 +2,7 @@ import React, { createContext, useContext, useEffect, useMemo, useState } from "
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { decryptVault, encryptVault, isEncrypted } from "@/services/VaultEncryption";
 
-const VAULT_STORAGE_KEY = "chronaura.vault.prototype.v2";
+const VAULT_STORAGE_KEY = "auralunis.vault.prototype.v2";
 
 export type VaultItemType = "note" | "lifesky" | "capture" | "seal" | "lesson" | "archive";
 
@@ -51,7 +51,7 @@ function sanitizeVaultItems(value: unknown): VaultItem[] {
   });
 }
 
-export function ChronauraVaultProvider({ children }: { children: React.ReactNode }) {
+export function AuraLunisVaultProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<VaultItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
 
@@ -133,11 +133,11 @@ export function ChronauraVaultProvider({ children }: { children: React.ReactNode
   return <VaultContext.Provider value={value}>{children}</VaultContext.Provider>;
 }
 
-export function useChronauraVault() {
+export function useAuraLunisVault() {
   const context = useContext(VaultContext);
 
   if (!context) {
-    throw new Error("useChronauraVault must be used inside ChronauraVaultProvider");
+    throw new Error("useAuraLunisVault must be used inside AuraLunisVaultProvider");
   }
 
   return context;

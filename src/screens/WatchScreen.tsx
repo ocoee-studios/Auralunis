@@ -5,8 +5,8 @@ import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
 import { LogoMark } from "@/components/LogoMark";
-import { ChronauraColors } from "@/theme/tokens";
-import { useChronauraSettings } from "@/state/ChronauraSettingsContext";
+import { AuraLunisColors } from "@/theme/tokens";
+import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { DeskObeliskPreview } from "@/features/future/DeskObeliskPreview";
 import { SovereignSigilPreview } from "@/features/future/SovereignSigilPreview";
 import {
@@ -55,7 +55,7 @@ function themePreview(themeId: WatchThemeId) {
       return {
         face: "#070912",
         border: "rgba(217,168,78,0.52)",
-        accent: ChronauraColors.gold2,
+        accent: AuraLunisColors.gold2,
         soft: "rgba(217,168,78,0.15)"
       };
   }
@@ -104,11 +104,11 @@ function FaceBody({
           <Text style={styles.faceInsight}>Choose one meaningful task and give it a clear boundary.</Text>
         </>
       );
-    case "minimal_chronaura":
+    case "minimal_auralunis":
       return (
         <>
           <LogoMark size={66} />
-          <Text style={styles.faceTitle}>CHRONAURA</Text>
+          <Text style={styles.faceTitle}>AURALUNIS</Text>
           <Text style={styles.faceTime}>4:42</Text>
           <Text style={styles.faceSmall}>☾ 78% · Venus visible</Text>
         </>
@@ -125,7 +125,7 @@ function FaceBody({
       return (
         <>
           <LogoMark size={76} />
-          <Text style={styles.faceTitle}>CHRONAURA</Text>
+          <Text style={styles.faceTitle}>AURALUNIS</Text>
           <Text style={styles.facePrimary}>91</Text>
           <Text style={styles.faceSmall}>Tonight Score · ☾ Waning Gibbous</Text>
         </>
@@ -134,7 +134,7 @@ function FaceBody({
 }
 
 export function WatchScreen() {
-  const { settings, updateSetting } = useChronauraSettings();
+  const { settings, updateSetting } = useAuraLunisSettings();
   const selectedFace = watchFaceOptions.find((face) => face.id === settings.selectedWatchFaceId) ?? watchFaceOptions[0];
   const selectedTheme = watchThemeOptions.find((theme) => theme.id === settings.selectedWatchThemeId) ?? watchThemeOptions[0];
   const previewTheme = themePreview(selectedTheme.id);
@@ -205,9 +205,9 @@ export function WatchScreen() {
 
       <GlassPanel style={{ marginBottom: 14 }}>
         <Text style={styles.sectionLabel}>WATCH APP FACE GALLERY</Text>
-        <Text style={styles.sectionTitle}>Choose your Chronaura display</Text>
+        <Text style={styles.sectionTitle}>Choose your AuraLunis display</Text>
         <Text style={styles.sectionCopy}>
-          These layouts control the full-screen Chronaura experience when the watch app is open.
+          These layouts control the full-screen AuraLunis experience when the watch app is open.
         </Text>
 
         <View style={styles.grid}>
@@ -291,7 +291,7 @@ export function WatchScreen() {
 
       <FeatureCard
         title="Apple Watch Companion Sync"
-        description={`Sync the selected Chronaura watch-app face, theme, Moon stats, Tonight Score, and next event. Current sync: ${settings.watchSyncEnabled ? "On" : "Off"}.`}
+        description={`Sync the selected AuraLunis watch-app face, theme, Moon stats, Tonight Score, and next event. Current sync: ${settings.watchSyncEnabled ? "On" : "Off"}.`}
         actionLabel={settings.watchSyncEnabled ? "Disable Watch Sync" : "Enable Watch Sync"}
         onPress={() => updateSetting("watchSyncEnabled", !settings.watchSyncEnabled)}
       />
@@ -365,37 +365,37 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.32,
     shadowRadius: 18
   },
-  faceTitle: { color: ChronauraColors.gold2, fontSize: 12, letterSpacing: 2.4, marginTop: 7, textAlign: "center", fontWeight: "800" },
+  faceTitle: { color: AuraLunisColors.gold2, fontSize: 12, letterSpacing: 2.4, marginTop: 7, textAlign: "center", fontWeight: "800" },
   facePrimary: { color: "#FFF", fontSize: 38, fontWeight: "900", marginTop: 10 },
   facePrimarySmall: { color: "#FFF", fontSize: 18, fontWeight: "900", marginTop: 12, textAlign: "center" },
-  faceSmall: { color: ChronauraColors.silver, fontSize: 10, lineHeight: 15, marginTop: 7, textAlign: "center", paddingHorizontal: 14 },
+  faceSmall: { color: AuraLunisColors.silver, fontSize: 10, lineHeight: 15, marginTop: 7, textAlign: "center", paddingHorizontal: 14 },
   faceMoonLarge: { fontSize: 68, lineHeight: 78 },
   faceGalaxy: { fontSize: 28, letterSpacing: 5 },
   faceSigil: { fontSize: 20, letterSpacing: 4 },
-  faceInsight: { color: ChronauraColors.silver, fontSize: 12, lineHeight: 17, marginTop: 10, textAlign: "center", paddingHorizontal: 18 },
+  faceInsight: { color: AuraLunisColors.silver, fontSize: 12, lineHeight: 17, marginTop: 10, textAlign: "center", paddingHorizontal: 18 },
   faceTime: { color: "#FFF", fontSize: 38, fontWeight: "900", marginTop: 10 },
   previewSummary: { borderRadius: 22, padding: 15, marginBottom: 12, backgroundColor: "rgba(217,168,78,0.09)", borderWidth: 1, borderColor: "rgba(217,168,78,0.20)" },
   previewTitle: { color: "#FFF", fontSize: 20, fontWeight: "900" },
-  previewCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5 },
-  previewMeta: { color: ChronauraColors.gold2, fontSize: 11, marginTop: 8 },
+  previewCopy: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5 },
+  previewMeta: { color: AuraLunisColors.gold2, fontSize: 11, marginTop: 8 },
   section: { borderRadius: 24, padding: 14, backgroundColor: "rgba(255,255,255,0.045)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)", marginBottom: 14 },
-  sectionLabel: { color: ChronauraColors.gold2, fontSize: 10, letterSpacing: 2.3, fontWeight: "900" },
+  sectionLabel: { color: AuraLunisColors.gold2, fontSize: 10, letterSpacing: 2.3, fontWeight: "900" },
   sectionTitle: { color: "#FFF", fontSize: 20, fontWeight: "900", marginTop: 7 },
-  sectionCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6, marginBottom: 4 },
+  sectionCopy: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6, marginBottom: 4 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
   tile: { width: "48%", borderRadius: 17, padding: 12, backgroundColor: "rgba(255,255,255,0.04)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
   tileActive: { backgroundColor: "rgba(217,168,78,0.12)", borderColor: "rgba(217,168,78,0.34)" },
   tileTitle: { color: "#FFF", fontSize: 14, fontWeight: "900" },
-  tileCopy: { color: ChronauraColors.muted, fontSize: 11, lineHeight: 16, marginTop: 5 },
-  tileState: { color: ChronauraColors.silver, fontSize: 10, marginTop: 8, fontWeight: "800" },
-  tileStateActive: { color: ChronauraColors.gold2 },
+  tileCopy: { color: AuraLunisColors.muted, fontSize: 11, lineHeight: 16, marginTop: 5 },
+  tileState: { color: AuraLunisColors.silver, fontSize: 10, marginTop: 8, fontWeight: "800" },
+  tileStateActive: { color: AuraLunisColors.gold2 },
   complicationRow: { flexDirection: "row", gap: 10, alignItems: "center", paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: "rgba(255,255,255,0.06)" },
   complicationActive: { backgroundColor: "rgba(217,168,78,0.05)" },
   complicationTitle: { color: "#FFF", fontSize: 14, fontWeight: "800" },
-  complicationCopy: { color: ChronauraColors.muted, fontSize: 12, lineHeight: 17, marginTop: 3 },
-  nativeNote: { color: ChronauraColors.gold2, fontSize: 10, lineHeight: 15, marginTop: 4 },
-  complicationState: { width: 28, height: 28, borderRadius: 14, textAlign: "center", paddingTop: 4, color: ChronauraColors.silver, borderWidth: 1, borderColor: "rgba(255,255,255,0.14)", fontWeight: "900" },
-  complicationStateActive: { color: "#17100A", backgroundColor: ChronauraColors.gold2, borderColor: ChronauraColors.gold2 },
-  primaryButton: { borderRadius: 17, paddingVertical: 14, alignItems: "center", backgroundColor: ChronauraColors.gold2, marginBottom: 14 },
+  complicationCopy: { color: AuraLunisColors.muted, fontSize: 12, lineHeight: 17, marginTop: 3 },
+  nativeNote: { color: AuraLunisColors.gold2, fontSize: 10, lineHeight: 15, marginTop: 4 },
+  complicationState: { width: 28, height: 28, borderRadius: 14, textAlign: "center", paddingTop: 4, color: AuraLunisColors.silver, borderWidth: 1, borderColor: "rgba(255,255,255,0.14)", fontWeight: "900" },
+  complicationStateActive: { color: "#17100A", backgroundColor: AuraLunisColors.gold2, borderColor: AuraLunisColors.gold2 },
+  primaryButton: { borderRadius: 17, paddingVertical: 14, alignItems: "center", backgroundColor: AuraLunisColors.gold2, marginBottom: 14 },
   primaryButtonText: { color: "#17100A", fontWeight: "900" }
 });

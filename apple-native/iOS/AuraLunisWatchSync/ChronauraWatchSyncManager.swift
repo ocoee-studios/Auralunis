@@ -1,8 +1,8 @@
 import Foundation
 import WatchConnectivity
 
-final class ChronauraWatchSyncManager: NSObject {
-    static let shared = ChronauraWatchSyncManager()
+final class AuraLunisWatchSyncManager: NSObject {
+    static let shared = AuraLunisWatchSyncManager()
 
     private let session: WCSession? = WCSession.isSupported() ? .default : nil
 
@@ -12,7 +12,7 @@ final class ChronauraWatchSyncManager: NSObject {
         session?.activate()
     }
 
-    func sync(_ payload: ChronauraPhoneWatchPayload) throws {
+    func sync(_ payload: AuraLunisPhoneWatchPayload) throws {
         guard let session else {
             return
         }
@@ -31,7 +31,7 @@ final class ChronauraWatchSyncManager: NSObject {
     }
 }
 
-extension ChronauraWatchSyncManager: WCSessionDelegate {
+extension AuraLunisWatchSyncManager: WCSessionDelegate {
     func session(
         _ session: WCSession,
         activationDidCompleteWith activationState: WCSessionActivationState,

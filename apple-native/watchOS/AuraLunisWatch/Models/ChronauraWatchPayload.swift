@@ -1,12 +1,12 @@
 import Foundation
 
-struct ChronauraWatchPayload: Codable, Equatable {
+struct AuraLunisWatchPayload: Codable, Equatable {
     var moonPhase: String
     var tonightScore: Int
     var nextEvent: String
     var updatedAt: Date
 
-    static let preview = ChronauraWatchPayload(
+    static let preview = AuraLunisWatchPayload(
         moonPhase: "Waxing Gibbous",
         tonightScore: 91,
         nextEvent: "Venus visible in 1h 18m",

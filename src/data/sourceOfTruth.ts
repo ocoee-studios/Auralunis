@@ -40,7 +40,7 @@ export const SourceOfTruth = {
       "Light Pollution + AstroPhoto Predictor"
     ],
     Watch: [
-      "Chronaura Watch Face",
+      "AuraLunis Watch Face",
       "Moon Complication",
       "Tonight Score Complication",
       "Watch Face Gallery",

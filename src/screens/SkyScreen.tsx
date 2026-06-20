@@ -7,8 +7,8 @@ import { SkyLensPermissionGate } from "@/features/permissions/SkyLensPermissionG
 import { SkyLensPlaceholder } from "@/features/sky-lens/SkyLensPlaceholder";
 import { ManualSkyMap } from "@/features/sky-lens/ManualSkyMap";
 import { featuredDeepSkyObjects } from "@/features/archive/DeepSkyCatalog";
-import { ChronauraColors } from "@/theme/tokens";
-import { useChronauraVault } from "@/state/ChronauraVaultContext";
+import { AuraLunisColors } from "@/theme/tokens";
+import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { SatelliteThermalOverlayPanel } from "@/features/aura-pro/SatelliteThermalOverlayPanel";
 import { AstrophotographyPredictorPanel } from "@/features/aura-pro/AstrophotographyPredictorPanel";
 import { computeTonightSky, findBody } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
@@ -21,7 +21,7 @@ export function SkyScreen() {
   const [manualMapOpen, setManualMapOpen] = useState(false);
   const [galaxyModeOn, setGalaxyModeOn] = useState(false);
   const [alignmentOpen, setAlignmentOpen] = useState(false);
-  const { addItem } = useChronauraVault();
+  const { addItem } = useAuraLunisVault();
 
   const { location, status } = useObserverLocation();
   const sky = useMemo(() => computeTonightSky(location), [location]);
@@ -60,7 +60,7 @@ export function SkyScreen() {
       ) : null}
 
       <FeatureCard
-        title="Chronaura Sky Lens"
+        title="AuraLunis Sky Lens"
         description="Privacy-safe AR-style viewer with gold overlays, Find Mode, X-Ray Lens, Birth Overlay, guided tour, and capture."
         actionLabel="Open Sky Lens"
         onPress={() => setShowPermission(true)}
@@ -135,7 +135,7 @@ export function SkyScreen() {
         <Text style={styles.sectionLabel}>DEEP SKY HIGHLIGHTS</Text>
         <Text style={styles.sectionTitle}>Nebulae, galaxies, clusters, and remnants</Text>
         <Text style={styles.sectionCopy}>
-          Most deep-sky objects need dark skies, binoculars, or a telescope. Chronaura shows their true sky location honestly.
+          Most deep-sky objects need dark skies, binoculars, or a telescope. AuraLunis shows their true sky location honestly.
         </Text>
       </GlassPanel>
 
@@ -172,9 +172,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(98,207,255,0.18)"
   },
-  sectionLabel: { color: ChronauraColors.gold2, fontSize: 10, letterSpacing: 2.4, fontWeight: "900" },
+  sectionLabel: { color: AuraLunisColors.gold2, fontSize: 10, letterSpacing: 2.4, fontWeight: "900" },
   sectionTitle: { color: "#FFF", fontSize: 20, fontWeight: "900", marginTop: 8 },
-  sectionCopy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6 },
+  sectionCopy: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6 },
   skyCard: {
     borderRadius: 24,
     padding: 16,
@@ -193,9 +193,9 @@ const styles = StyleSheet.create({
     borderTopColor: "rgba(255,255,255,0.06)"
   },
   skyName: { color: "#FFF", fontSize: 14, fontWeight: "700" },
-  skyVal: { color: ChronauraColors.gold2, fontSize: 13, fontVariant: ["tabular-nums"] },
-  skyValDim: { color: ChronauraColors.muted, fontSize: 13 },
-  skyHint: { color: ChronauraColors.muted, fontSize: 11, marginTop: 10 },
+  skyVal: { color: AuraLunisColors.gold2, fontSize: 13, fontVariant: ["tabular-nums"] },
+  skyValDim: { color: AuraLunisColors.muted, fontSize: 13 },
+  skyHint: { color: AuraLunisColors.muted, fontSize: 11, marginTop: 10 },
   backButton: {
     position: "absolute",
     top: 54,
@@ -205,10 +205,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
-    borderColor: ChronauraColors.borderGold,
+    borderColor: AuraLunisColors.borderGold,
   },
   backButtonText: {
-    color: ChronauraColors.gold2,
+    color: AuraLunisColors.gold2,
     fontSize: 14,
     fontWeight: "700",
   },

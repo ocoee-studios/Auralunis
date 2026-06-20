@@ -1,6 +1,6 @@
 import React from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { ChronauraColors } from "@/theme/tokens";
+import { AuraLunisColors } from "@/theme/tokens";
 
 type Props = {
   onClose: () => void;
@@ -44,9 +44,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(217,168,78,0.22)"
   },
-  tag: { color: ChronauraColors.gold2, fontSize: 10, letterSpacing: 3, fontWeight: "900" },
+  tag: { color: AuraLunisColors.gold2, fontSize: 10, letterSpacing: 3, fontWeight: "900" },
   title: { color: "#FFF", fontSize: 23, fontWeight: "900", marginTop: 8 },
-  copy: { color: ChronauraColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6 },
+  copy: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6 },
   map: {
     height: 260,
     marginTop: 14,
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     height: 8,
     borderRadius: 4,
     backgroundColor: "#FFF7D0",
-    shadowColor: ChronauraColors.gold2,
+    shadowColor: AuraLunisColors.gold2,
     shadowOpacity: 0.9,
     shadowRadius: 8
   },
@@ -79,9 +79,9 @@ const styles = StyleSheet.create({
   s3: { left: 152, top: 121 },
   s4: { right: 86, top: 70 },
   s5: { right: 54, bottom: 48 },
-  orion: { position: "absolute", left: 110, top: 140, color: ChronauraColors.gold2, fontSize: 11, letterSpacing: 2 },
-  milkyWayText: { position: "absolute", right: 24, bottom: 24, color: ChronauraColors.silver, fontSize: 10, letterSpacing: 1.6 },
-  moon: { position: "absolute", right: 24, top: 24, color: ChronauraColors.gold2, fontSize: 34 },
+  orion: { position: "absolute", left: 110, top: 140, color: AuraLunisColors.gold2, fontSize: 11, letterSpacing: 2 },
+  milkyWayText: { position: "absolute", right: 24, bottom: 24, color: AuraLunisColors.silver, fontSize: 10, letterSpacing: 1.6 },
+  moon: { position: "absolute", right: 24, top: 24, color: AuraLunisColors.gold2, fontSize: 34 },
   button: {
     marginTop: 14,
     backgroundColor: "rgba(217,168,78,0.13)",

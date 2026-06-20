@@ -1,4 +1,4 @@
-# Chronaura Crown-Jewel Feature Spec
+# AuraLunis Crown-Jewel Feature Spec
 
 ## 1. Aura Ambient Spatial Audio Room Casting
 

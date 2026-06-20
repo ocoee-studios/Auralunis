@@ -1,13 +1,13 @@
 # Legal, Privacy, and Launch Pages TODO
 
 ## Privacy Policy
-- [ ] Host at `ocoeestudios.com/chronaura/privacy`
+- [ ] Host at `ocoeestudios.com/auralunis/privacy`
 - [ ] Draft in `docs/PRIVACY_POLICY.md` (done — review and finalize)
 - [ ] Add URL to app.json `ios.infoPlist` and App Store listing
 
 ## Terms of Use
 - [ ] Draft terms of use
-- [ ] Host at `ocoeestudios.com/chronaura/terms`
+- [ ] Host at `ocoeestudios.com/auralunis/terms`
 - [ ] Add URL to App Store listing
 
 ## Support Page

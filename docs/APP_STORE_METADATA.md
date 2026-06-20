@@ -1,7 +1,7 @@
-# Chronaura — App Store Metadata
+# AuraLunis — App Store Metadata
 
 ## App Name
-Chronaura: Interactive Astral Clock
+AuraLunis: Interactive Astral Clock
 
 ## Subtitle (30 chars max)
 Your Time, Written in the Stars
@@ -10,9 +10,9 @@ Your Time, Written in the Stars
 Explore tonight's sky with real astronomy, AI companion, and encrypted personal vault. 88 constellations. Eclipse predictions. Birth sky profiles. NASA sonification.
 
 ## Description
-Chronaura is a premium astronomy companion that turns the night sky into a personal experience.
+AuraLunis is a premium astronomy companion that turns the night sky into a personal experience.
 
-Unlike basic stargazing apps, Chronaura computes real planetary positions using astronomical algorithms — not generic sky maps. It tells you what's actually above you right now, scores tonight's viewing conditions, and guides you through meaningful stargazing rituals.
+Unlike basic stargazing apps, AuraLunis computes real planetary positions using astronomical algorithms — not generic sky maps. It tells you what's actually above you right now, scores tonight's viewing conditions, and guides you through meaningful stargazing rituals.
 
 WHAT MAKES IT DIFFERENT
 
@@ -72,7 +72,7 @@ Secondary: Weather
 
 ## App Review Notes
 ```
-Chronaura is an astronomy companion app. Key features to test:
+AuraLunis is an astronomy companion app. Key features to test:
 
 1. HOME: Tap to see Tonight Score (computed from weather + moon). 
    The astrolabe shows real planetary positions.
@@ -86,9 +86,9 @@ Chronaura is an astronomy companion app. Key features to test:
    RevenueCat sandbox: test with sandbox Apple ID.
    Restore Purchases button is on the Membership screen.
 
-Subscription: Chronaura Premium
-- Monthly: $6.99/month (com.ocoee.chronaura.premium.monthly)
-- Annual: $39.99/year (com.ocoee.chronaura.premium.annual)
+Subscription: AuraLunis Premium
+- Monthly: $6.99/month (com.ocoee.auralunis.premium.monthly)
+- Annual: $39.99/year (com.ocoee.auralunis.premium.annual)
 - Both include 7-day free trial.
 
 No login required. Location permission is optional but recommended.
@@ -96,4 +96,4 @@ Demo credentials: N/A (no account system).
 ```
 
 ## What's New (v1.0)
-Welcome to Chronaura — your Interactive Astral Clock. This is the first release.
+Welcome to AuraLunis — your Interactive Astral Clock. This is the first release.

@@ -7,7 +7,7 @@ import Purchases, {
 import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
 
 type BillingPeriod = "monthly" | "annual";
-type ChronauraPaidTierId = string;
+type AuraLunisPaidTierId = string;
 
 type ConfigureResult =
   | { status: "configured" }
@@ -62,8 +62,8 @@ export async function getCurrentPackages(): Promise<PurchasesPackage[]> {
   return offerings.current?.availablePackages ?? [];
 }
 
-export async function purchaseChronauraTier(
-  tierId: ChronauraPaidTierId,
+export async function purchaseAuraLunisTier(
+  tierId: AuraLunisPaidTierId,
   billingPeriod: BillingPeriod
 ): Promise<{
   status: "purchased" | "cancelled" | "not_configured" | "not_available";
@@ -111,7 +111,7 @@ export async function purchaseChronauraTier(
   }
 }
 
-export async function restoreChronauraPurchases(): Promise<{
+export async function restoreAuraLunisPurchases(): Promise<{
   status: "restored" | "not_configured";
   customerInfo?: CustomerInfo;
 }> {
@@ -125,7 +125,7 @@ export async function restoreChronauraPurchases(): Promise<{
   return { status: "restored", customerInfo };
 }
 
-export async function openChronauraSubscriptionManagement(): Promise<{
+export async function openAuraLunisSubscriptionManagement(): Promise<{
   status: "opened" | "missing_url" | "not_configured";
 }> {
   const configuration = await configureRevenueCat();
@@ -143,7 +143,7 @@ export async function openChronauraSubscriptionManagement(): Promise<{
   return { status: "opened" };
 }
 
-export function hasChronauraEntitlement(
+export function hasAuraLunisEntitlement(
   customerInfo: CustomerInfo,
   entitlementId:
     | typeof RevenueCatIds.entitlement
