@@ -14,9 +14,10 @@ import { SkyLensCanvas } from "./SkyLensCanvas";
 import { SkyLensLayerBar } from "./SkyLensLayerBar";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
+import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
-import { skyGradient, type SelectedObject } from "./SkyLensVisual";
+import { skyGradient, starColor, type SelectedObject } from "./SkyLensVisual";
 
 type Props = { onClose: () => void };
 
@@ -143,6 +144,26 @@ export function SkyLensScreen({ onClose }: Props) {
   const sunAltitude = sky.bodies.find((b) => b.id === "sun")?.altitudeDegrees ?? -90;
   const skyColors = skyGradient(sunAltitude);
 
+  // Bright on-screen stars projected for the twinkle overlay (View-based, crash-safe).
+  const twinkleStars = useMemo<TwinkleTarget[]>(() => {
+    const out: TwinkleTarget[] = [];
+    for (const s of sky.stars) {
+      if (!s.aboveHorizon || s.magnitude > 2.2) continue;
+      const p = projectTarget(pointing, s.azimuthDegrees, s.altitudeDegrees, fov, box);
+      if (!p.onScreen) continue;
+      out.push({
+        id: s.id,
+        x: p.x,
+        y: p.y,
+        size: Math.max(2.5, 6 - s.magnitude),
+        color: starColor(s.id, s.magnitude),
+        offset: (s.id.charCodeAt(0) % 10) / 10
+      });
+      if (out.length >= 14) break;
+    }
+    return out;
+  }, [sky.stars, pointing, fov, box]);
+
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
   return (
@@ -184,6 +205,8 @@ export function SkyLensScreen({ onClose }: Props) {
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>
+          {/* Crash-safe twinkle: View-opacity animation over the bright stars */}
+          <TwinkleOverlay targets={twinkleStars} nightMode={nightMode} />
         </View>
       </GestureDetector>
 
