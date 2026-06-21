@@ -58,21 +58,23 @@ export function SkyScreen() {
     return <SkyLensScreen onClose={() => setSkyLensOpen(false)} />;
   }
 
+  // Orbital Alignment also takes over the full screen. It used to render as an
+  // absoluteFill overlay INSIDE ScreenShell's ScrollView, which positioned it
+  // under the brand header and let it scroll — that's why it looked off.
+  if (alignmentOpen) {
+    return (
+      <View style={styles.alignmentRoot}>
+        <OrbitalAlignmentScreen />
+        <TouchableOpacity style={styles.backButton} onPress={() => setAlignmentOpen(false)}>
+          <Text style={styles.backButtonText}>← Sky</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
     <ScreenShell title="Sky Lens + Archive" subtitle="Sky">
       {manualMapOpen ? <ManualSkyMap onClose={() => setManualMapOpen(false)} /> : null}
-      {alignmentOpen ? (
-        <View style={StyleSheet.absoluteFillObject}>
-          <OrbitalAlignmentScreen />
-          {/* Back button overlaid at top-left */}
-          <TouchableOpacity
-            style={styles.backButton}
-            onPress={() => setAlignmentOpen(false)}
-          >
-            <Text style={styles.backButtonText}>← Sky</Text>
-          </TouchableOpacity>
-        </View>
-      ) : null}
 
       <FeatureCard
         title="AuraLunis Sky Lens"
@@ -211,6 +213,7 @@ const styles = StyleSheet.create({
   skyVal: { color: AuraLunisColors.gold2, fontSize: 13, fontVariant: ["tabular-nums"] },
   skyValDim: { color: AuraLunisColors.muted, fontSize: 13 },
   skyHint: { color: AuraLunisColors.muted, fontSize: 11, marginTop: 10 },
+  alignmentRoot: { flex: 1, backgroundColor: AuraLunisColors.cosmicBlack },
   backButton: {
     position: "absolute",
     top: 54,
