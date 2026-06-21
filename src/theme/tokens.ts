@@ -35,7 +35,8 @@ export const AuraLunisColors = {
   orange: "#EF9F27",
   blue: "#78C8FF",
   green: "#4ADE80",
-  black: "#030816"
+  black: "#030816",
+  starlight: "#FFF6D6"
 } as const;
 
 export const AuraLunisTypography = {
