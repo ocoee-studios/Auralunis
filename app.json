@@ -17,7 +17,51 @@
         "NSLocationWhenInUseUsageDescription": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you.",
         "NSPhotoLibraryAddUsageDescription": "AuraLunis saves sky captures and cosmic time-lapse exports only when you choose to save them.",
         "NSMotionUsageDescription": "AuraLunis uses motion sensors to align the sky lens with the direction your phone is pointing.",
-        "NSHealthShareUsageDescription": "AuraLunis can optionally use Apple Watch heart-rate data to pulse ambient visuals during wind-down experiences."
+        "NSHealthShareUsageDescription": "AuraLunis reads sleep and heart rate data to show how the cosmos affects your body.",
+        "NSHealthUpdateUsageDescription": "AuraLunis logs stargazing sessions as mindfulness minutes in Apple Health."
+      },
+      "privacyManifests": {
+        "NSPrivacyAccessedAPITypes": [
+          {
+            "NSPrivacyAccessedAPIType": "NSPrivacyAccessedAPICategoryUserDefaults",
+            "NSPrivacyAccessedAPITypeReasons": [
+              "CA92.1"
+            ]
+          }
+        ],
+        "NSPrivacyCollectedDataTypes": [
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePreciseLocation",
+            "NSPrivacyCollectedDataTypeLinked": false,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeHealth",
+            "NSPrivacyCollectedDataTypeLinked": false,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          },
+          {
+            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePurchaseHistory",
+            "NSPrivacyCollectedDataTypeLinked": true,
+            "NSPrivacyCollectedDataTypeTracking": false,
+            "NSPrivacyCollectedDataTypePurposes": [
+              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
+            ]
+          }
+        ],
+        "NSPrivacyTracking": false
+      },
+      "entitlements": {
+        "com.apple.developer.healthkit": true,
+        "com.apple.developer.healthkit.access": [
+          "health-records"
+        ]
       }
     },
     "android": {

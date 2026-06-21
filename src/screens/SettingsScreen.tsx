@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, Image, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, Image, Linking, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import { GlassPanel } from "@/components/GlassPanel";
 import { ScreenShell } from "@/components/ScreenShell";
 import { LogoMark } from "@/components/LogoMark";
@@ -222,6 +222,15 @@ export function SettingsScreen() {
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("About AuraLunis", `${AuraLunisBrand.name} · ${AuraLunisBrand.descriptor}\n${AuraLunisBrand.tagline}`)}>
           <Text style={styles.secondaryButtonText}>About AuraLunis</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton} onPress={() => Linking.openURL("https://ocoeestudios.com/auralunis/privacy")}>
+          <Text style={styles.secondaryButtonText}>Privacy Policy</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton} onPress={() => Linking.openURL("https://ocoeestudios.com/auralunis/terms")}>
+          <Text style={styles.secondaryButtonText}>Terms of Use</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton} onPress={() => Linking.openURL("mailto:support@ocoeestudios.com")}>
+          <Text style={styles.secondaryButtonText}>Contact Support</Text>
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => resetSettings().then(() => Alert.alert("Settings", "Local settings reset to safe defaults."))}>
           <Text style={styles.secondaryButtonText}>Reset Settings</Text>
