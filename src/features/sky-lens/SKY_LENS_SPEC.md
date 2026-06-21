@@ -458,3 +458,113 @@ Ship Greek in v1, add others as premium content drops.
 - v1.0: Greek art only (ship with Sky Lens Phase 1)
 - v1.1: Chinese + Norse (two most visually distinct)
 - v1.2: Aboriginal + Polynesian (require cultural consultation)
+
+---
+
+## Milky Way — Full Color Render (not just a band)
+
+### What SkyView Does
+SkyView renders the Milky Way as a photorealistic panoramic texture —
+the galactic core glows warm gold/amber, dust lanes are visible as dark
+ribbons, star clouds create depth. It looks like a real long-exposure
+photo projected onto the sky.
+
+### What AuraLunis Must Do (minimum SkyView parity)
+The Milky Way CANNOT be a simple semi-transparent band. It must be a
+full-color astronomical render that makes people gasp.
+
+### Implementation: Panoramic Texture Projection
+
+#### Asset: Milky Way Panorama
+- Source: ESA/Gaia DR3 all-sky map or NASA/ESO public domain panorama
+- Format: Equirectangular projection PNG (4096×2048 or 8192×4096)
+- Covers the full celestial sphere in galactic coordinates
+- Shows: galactic core, dust lanes, Magellanic clouds, star fields
+
+Several public domain options:
+- ESO/S. Brunier Milky Way panorama (Creative Commons)
+- NASA/COBE all-sky survey
+- Axel Mellinger's all-sky mosaic (free for non-commercial, license for commercial)
+
+#### AuraLunis Color Twist
+Instead of the standard white/blue astronomical color:
+- Tint the panorama toward our Midnight Gold palette
+- Galactic core: warm amber/gold (#D9A84E tinted)
+- Dust lanes: deep cosmic black (#030816)
+- Star clouds: starlight (#FFF6D6 tinted)
+- Edge regions: subtle silver (#C0C6D4)
+
+This makes the Milky Way instantly "AuraLunis" — warm gold instead
+of cold blue. Nobody else has a gold Milky Way.
+
+#### Rendering Pipeline
+```typescript
+// 1. Load panorama texture (once, at Sky Lens init)
+const milkyWayTexture = require('@/assets/sky/milkyway-panorama.png');
+
+// 2. For each frame, compute which portion of the panorama is visible
+//    based on device pointing direction (az/alt → galactic l/b → texture UV)
+
+// 3. Project visible portion onto screen coordinates using existing
+//    SkyLensProjection.ts math
+
+// 4. Render as Image behind all other overlays but above camera feed
+
+interface MilkyWayRenderer {
+  // Convert equatorial (RA/Dec) to galactic (l/b) coordinates
+  equatorialToGalactic(ra: number, dec: number): { l: number; b: number };
+  
+  // Map galactic coordinates to panorama texture UV
+  galacticToUV(l: number, b: number): { u: number; v: number };
+  
+  // Get visible texture region for current FOV
+  getVisibleRegion(pointing: SkyPointing, fov: FOV): TextureRegion;
+  
+  // Render the visible region to screen
+  render(region: TextureRegion, screen: ScreenDimensions): void;
+}
+```
+
+#### Performance
+- Panorama loaded once into GPU texture memory
+- Only the visible FOV region is rendered each frame (~10% of full panorama)
+- Use React Native's Image component with transform for positioning
+- OR use expo-gl (WebGL) for hardware-accelerated texture mapping
+- Target: zero frame drops when panning across the galactic core
+
+#### Opacity Control
+- Slider in layer drawer: 0% (invisible) to 100% (full brightness)
+- Default: 40% opacity (visible but doesn't overwhelm constellation lines)
+- In Night Vision mode: Milky Way tinted deep red
+- In camera mode: blended with live camera feed
+- In planetarium mode (no camera): full opacity, stunning
+
+#### Galactic Core Highlight
+When pointing at the galactic center (Sagittarius region):
+- Subtle gold glow pulse around the core
+- Info card: "Galactic Center · 26,000 light years away"
+- Sagittarius A* marker (supermassive black hole location)
+- Best viewing: show tonight's galactic center rise/set times
+
+#### Planetarium Mode (bonus)
+Toggle camera off → pure black background + Milky Way panorama
+at full opacity. Turns the phone into a portable planetarium.
+Pan around the full sky without needing to be outside.
+Indoor stargazing for cloudy nights or classrooms.
+
+### File Structure
+```
+assets/sky/
+├── milkyway-panorama.png         # Full equirectangular panorama (4096×2048)
+├── milkyway-panorama-gold.png    # AuraLunis gold-tinted version
+└── milkyway-panorama-red.png     # Night vision red version
+
+src/features/sky-lens/layers/
+└── MilkyWayLayer.tsx             # Panorama texture projection + rendering
+```
+
+### Priority
+- v1.0: Ship with the gold-tinted panorama. This is a must-have, not a nice-to-have.
+  The Milky Way IS the night sky. Without it, Sky Lens looks empty.
+- Use ESO/Brunier panorama (CC license) or NASA public domain source.
+- Gold tint applied as a post-process or pre-baked into the asset.
