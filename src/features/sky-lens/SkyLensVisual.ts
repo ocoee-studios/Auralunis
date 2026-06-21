@@ -103,6 +103,19 @@ export function constellationColor(id: string): string {
   return CONSTELLATION_TINTS[h % CONSTELLATION_TINTS.length];
 }
 
+// Dynamic atmospheric sky gradient (Phase 1) — the real sky isn't flat black.
+// 4 vertical stops (zenith → mid → 30°alt → horizon) chosen by the Sun's altitude
+// from the ephemeris, per VISUAL_QUALITY_SPEC: navy overhead → indigo → violet/gold
+// near the horizon, brightening through twilight into golden hour and daytime blue.
+export function skyGradient(sunAltitudeDegrees: number): readonly [string, string, string, string] {
+  const a = sunAltitudeDegrees;
+  if (a < -18) return ["#030816", "#061028", "#0A1535", "#121D3A"]; // deep night
+  if (a < -12) return ["#050D1E", "#0D1A38", "#1A254A", "#2A2855"]; // astronomical twilight
+  if (a < -6) return ["#0A1428", "#1A2548", "#2D2E5A", "#8B5A30"]; // nautical twilight (violet→amber)
+  if (a < 6) return ["#142040", "#2A3060", "#5A4060", "#EF7B27"]; // golden hour / civil
+  return ["#1E4FA0", "#2E6FC0", "#5A9FD4", "#BFD8EA"]; // daytime blue
+}
+
 export type SelectedKind = "star" | "planet" | "moon" | "constellation";
 
 export interface SelectedFact {
