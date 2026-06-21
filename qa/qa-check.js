@@ -46,8 +46,8 @@ const required = [
   "src/data/sourceOfTruth.ts",
   "assets/logo/chronaura-stardust-emblem.png",
   "assets/logo/chronaura-stardust-lockup.png",
-  "assets/logo/chronaura-app-icon.png",
-  "assets/logo/chronaura-splash.png",
+  "assets/logo/auralunis-app-icon.png",
+  "assets/logo/auralunis-splash.png",
   "app.json",
   "package.json"
 ];
@@ -123,7 +123,7 @@ for (const term of [
   "tonights_sky",
   "deep_sky_portal",
   "daily_alignment",
-  "minimal_chronaura",
+  "minimal_auralunis",
   "sovereign_sigil",
   "moon_phase",
   "tonight_score",
@@ -191,9 +191,9 @@ for (const full of allSourceFiles) {
 if (!failed) pass("supported font weights");
 
 const app = JSON.parse(fs.readFileSync(path.join(root, "app.json"), "utf8"));
-if (app.expo.icon !== "./assets/logo/chronaura-app-icon.png") fail("app icon config");
+if (app.expo.icon !== "./assets/logo/auralunis-app-icon.png") fail("app icon config");
 else pass("app icon config");
-if (!app.expo.splash || app.expo.splash.image !== "./assets/logo/chronaura-splash.png") fail("splash config");
+if (!app.expo.splash || app.expo.splash.image !== "./assets/logo/auralunis-splash.png") fail("splash config");
 else pass("splash config");
 
 if (failed) process.exit(1);

@@ -42,8 +42,8 @@ const required = [
   "src/state/AuraLunisVaultContext.tsx",
   "src/components/LogoMark.tsx",
   "assets/logo/chronaura-stardust-emblem.png",
-  "assets/logo/chronaura-app-icon.png",
-  "assets/logo/chronaura-splash.png",
+  "assets/logo/auralunis-app-icon.png",
+  "assets/logo/auralunis-splash.png",
   "docs/ABOUT_US_SETTINGS_SPEC.md"
 ];
 
@@ -79,10 +79,10 @@ for (const term of ["WATCH APP FACE GALLERY", "THEME SELECTOR", "COMPLICATION PI
   check(`Watch: ${term}`, watch.includes(term));
 }
 const catalog = read("src/features/watch/WatchFaceCatalog.ts");
-for (const term of ["living_astrolabe", "moon_keeper", "tonights_sky", "deep_sky_portal", "daily_alignment", "minimal_chronaura", "sovereign_sigil"]) {
+for (const term of ["living_astrolabe", "moon_keeper", "tonights_sky", "deep_sky_portal", "daily_alignment", "minimal_auralunis", "sovereign_sigil"]) {
   check(`Watch face: ${term}`, catalog.includes(term));
 }
-for (const term of ["moon_phase", "tonight_score", "moonrise_countdown", "next_event", "visible_planet", "daily_alignment", "tonights_ritual", "sky_lens_shortcut", "sound_bath_shortcut", "chronaura_logo"]) {
+for (const term of ["moon_phase", "tonight_score", "moonrise_countdown", "next_event", "visible_planet", "daily_alignment", "tonights_ritual", "sky_lens_shortcut", "sound_bath_shortcut", "auralunis_logo"]) {
   check(`Watch complication: ${term}`, catalog.includes(term));
 }
 
@@ -114,8 +114,8 @@ const shell = read("src/components/ScreenShell.tsx");
 check("Theme gradient tuple preserved", shell.includes("colors={palette.gradient}"));
 
 const appConfig = JSON.parse(read("app.json"));
-check("App icon configured", appConfig.expo.icon === "./assets/logo/chronaura-app-icon.png");
-check("Splash configured", appConfig.expo.splash && appConfig.expo.splash.image === "./assets/logo/chronaura-splash.png");
+check("App icon configured", appConfig.expo.icon === "./assets/logo/auralunis-app-icon.png");
+check("Splash configured", appConfig.expo.splash && appConfig.expo.splash.image === "./assets/logo/auralunis-splash.png");
 
 const allTsFiles = [];
 function collect(dir) {
