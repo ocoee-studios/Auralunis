@@ -12,11 +12,13 @@ import {
 } from "../ephemeris/StarPositions";
 import { computeMilkyWay, type MilkyWayBand } from "../ephemeris/MilkyWay";
 import { BRIGHT_STARS } from "../data/brightStars";
+import { DOME_STARS } from "../data/skyDome";
 import { CONSTELLATION_LINES } from "../data/constellationLines";
 
 export interface SkyData {
   when: Date;
   stars: HorizontalStar[];
+  domeStars: HorizontalStar[];
   constellations: HorizontalConstellation[];
   bodies: SkyBody[];
   milkyWay: MilkyWayBand;
@@ -41,6 +43,7 @@ export function useSkyData(location: ObserverLocation, refreshMs = 20000): SkyDa
     return {
       when: now,
       stars: computeStarPositions(BRIGHT_STARS, location, now),
+      domeStars: computeStarPositions(DOME_STARS, location, now),
       constellations: computeConstellationPositions(CONSTELLATION_LINES, location, now),
       bodies: sky.bodies,
       milkyWay: computeMilkyWay(location, now),

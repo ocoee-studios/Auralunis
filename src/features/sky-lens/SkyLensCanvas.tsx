@@ -5,6 +5,7 @@ import { projectTarget, type CameraPointing, type CameraFov } from "./ar/SkyLens
 import { GridLayer } from "./layers/GridLayer";
 import { ConstellationLayer } from "./layers/ConstellationLayer";
 import { StarLayer } from "./layers/StarLayer";
+import { DomeStarLayer } from "./layers/DomeStarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer } from "./layers/MoonLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
@@ -55,6 +56,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           nightMode={nightMode}
           onSelect={onSelect}
         />
+      )}
+      {/* Dense background field behind the named bright stars */}
+      {activeLayers.has("stars") && (
+        <DomeStarLayer stars={sky.domeStars} project={project} palette={palette} nightMode={nightMode} />
       )}
       {activeLayers.has("stars") && (
         <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} onSelect={onSelect} />
