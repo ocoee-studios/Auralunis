@@ -13,6 +13,7 @@ import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
 import { SkyLensLayerBar } from "./SkyLensLayerBar";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
+import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
 import type { SelectedObject } from "./SkyLensVisual";
@@ -157,16 +158,18 @@ export function SkyLensScreen({ onClose }: Props) {
           )}
           {nightMode && <View style={styles.nightFilter} pointerEvents="none" />}
 
-          <SkyLensCanvas
-            box={box}
-            pointing={pointing}
-            sky={sky}
-            fov={fov}
-            activeLayers={active}
-            nightMode={nightMode}
-            milkyWayBoost={milkyWayBoost}
-            onSelect={setSelected}
-          />
+          <SkyLensErrorBoundary>
+            <SkyLensCanvas
+              box={box}
+              pointing={pointing}
+              sky={sky}
+              fov={fov}
+              activeLayers={active}
+              nightMode={nightMode}
+              milkyWayBoost={milkyWayBoost}
+              onSelect={setSelected}
+            />
+          </SkyLensErrorBoundary>
         </View>
       </GestureDetector>
 
