@@ -30,8 +30,15 @@ export function useDevicePointing(updateMs = 120, magneticDeclinationDegrees = 0
   useEffect(() => {
     Sensors.Accelerometer.setUpdateInterval(updateMs);
     Sensors.Magnetometer.setUpdateInterval(updateMs);
-    const accelSub = Sensors.Accelerometer.addListener((reading) => setAccelerometer(reading));
-    const magSub = Sensors.Magnetometer.addListener((reading) => setMagnetometer(reading));
+    // Exponential smoothing damps the raw sensor jitter so the overlay glides
+    // instead of twitching — that high-frequency jitter is what reads as "laggy".
+    const ema = (prev: Vec3, next: SensorReading, a = 0.3): Vec3 => ({
+      x: prev.x + (next.x - prev.x) * a,
+      y: prev.y + (next.y - prev.y) * a,
+      z: prev.z + (next.z - prev.z) * a,
+    });
+    const accelSub = Sensors.Accelerometer.addListener((r) => setAccelerometer((prev) => ema(prev, r)));
+    const magSub = Sensors.Magnetometer.addListener((r) => setMagnetometer((prev) => (prev ? ema(prev, r) : r)));
 
     return () => {
       accelSub.remove();

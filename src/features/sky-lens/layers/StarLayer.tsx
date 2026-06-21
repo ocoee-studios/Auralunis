@@ -1,12 +1,13 @@
 import React from "react";
 import { Circle, G, Text as SvgText } from "react-native-svg";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
-import { magnitudeToRadius, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+import { magnitudeToRadius, starColor, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
 
 type Props = {
   stars: HorizontalStar[];
   project: ProjectFn;
   palette: SkyPalette;
+  nightMode: boolean;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -14,7 +15,7 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
-export function StarLayer({ stars, project, palette, onSelect }: Props) {
+export function StarLayer({ stars, project, palette, nightMode, onSelect }: Props) {
   return (
     <G>
       {stars.map((star) => {
@@ -23,6 +24,10 @@ export function StarLayer({ stars, project, palette, onSelect }: Props) {
         if (!p.onScreen) return null;
 
         const r = magnitudeToRadius(star.magnitude);
+        // Night Mode stays monochrome red for dark adaptation; otherwise stars
+        // take their spectral color, and the brightest get a soft colored glow.
+        const color = nightMode ? palette.star : starColor(star.id, star.magnitude);
+        const bright = !nightMode && star.magnitude < 1.6;
         const labeled = star.name !== undefined && star.magnitude <= LABEL_MAG_LIMIT;
 
         return (
@@ -47,7 +52,8 @@ export function StarLayer({ stars, project, palette, onSelect }: Props) {
                 })
               }
             />
-            <Circle cx={p.x} cy={p.y} r={r} fill={palette.star} />
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.22} />}
+            <Circle cx={p.x} cy={p.y} r={r} fill={color} />
             {labeled && (
               <SvgText
                 x={p.x + r + 3}

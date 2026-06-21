@@ -49,7 +49,7 @@ export function SkyLensCanvas({ box, pointing, sky, activeLayers, nightMode, onS
         />
       )}
       {activeLayers.has("stars") && (
-        <StarLayer stars={sky.stars} project={project} palette={palette} onSelect={onSelect} />
+        <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} onSelect={onSelect} />
       )}
       {activeLayers.has("planets") && (
         <PlanetLayer

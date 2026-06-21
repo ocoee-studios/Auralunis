@@ -12,11 +12,16 @@ import { SkyLensCanvas } from "./SkyLensCanvas";
 import { SkyLensLayerBar } from "./SkyLensLayerBar";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
+import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
 import type { SelectedObject } from "./SkyLensVisual";
 
 type Props = { onClose: () => void };
 
 type LayoutEvent = { nativeEvent: { layout: { width: number; height: number } } };
+
+// Screen-space bearing (0=right, 90=down, …) → an arrow glyph for the Moon finder.
+const ARROWS = ["→", "↘", "↓", "↙", "←", "↖", "↑", "↗"];
+const arrowFor = (bearingDegrees: number) => ARROWS[Math.round(bearingDegrees / 45) % 8];
 
 // Full-screen AR Sky Lens (Phase 1): live camera feed with the Stars,
 // Constellations, Planets, Moon, and Grid layers projected over it, a toggle
@@ -81,6 +86,17 @@ export function SkyLensScreen({ onClose }: Props) {
     [available, pointing.azimuthDegrees, pointing.altitudeDegrees]
   );
 
+  // Moon finder: tells you where the Moon is (or that it's below the horizon) so
+  // it's never a mystery why you can't see it.
+  const moonFinder = useMemo(() => {
+    const moon = sky.bodies.find((b) => b.id === "moon");
+    if (!moon) return null;
+    if (!moon.aboveHorizon) return "☾  The Moon is below the horizon right now";
+    const p = projectTarget(pointing, moon.azimuthDegrees, moon.altitudeDegrees, DEFAULT_FOV, box);
+    if (p.onScreen) return null; // it's in view — no need to point you to it
+    return p.behind ? "☾  Turn around for the Moon ↻" : `☾  Pan ${arrowFor(p.bearingDegrees)} to the Moon`;
+  }, [sky.bodies, pointing, box]);
+
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
   return (
@@ -117,6 +133,13 @@ export function SkyLensScreen({ onClose }: Props) {
         </TouchableOpacity>
       </View>
 
+      {/* Moon finder banner (hidden while an info card is open) */}
+      {!selected && moonFinder && (
+        <View style={[styles.finder, { bottom: insets.bottom + 82 }]} pointerEvents="none">
+          <Text style={[styles.finderText, { color: accent }]}>{moonFinder}</Text>
+        </View>
+      )}
+
       {/* Bottom controls */}
       <View style={[styles.bottom, { paddingBottom: insets.bottom + 6 }]} pointerEvents="box-none">
         {selected ? (
@@ -144,6 +167,16 @@ export function SkyLensScreen({ onClose }: Props) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#000" },
   nightFilter: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
+  finder: { position: "absolute", left: 0, right: 0, alignItems: "center" },
+  finderText: {
+    backgroundColor: "rgba(7,18,37,0.78)",
+    fontSize: 13,
+    fontWeight: "800",
+    paddingHorizontal: 16,
+    paddingVertical: 9,
+    borderRadius: 18,
+    overflow: "hidden"
+  },
   topBar: {
     position: "absolute",
     top: 0,

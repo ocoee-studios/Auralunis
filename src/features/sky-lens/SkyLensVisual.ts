@@ -63,6 +63,35 @@ export function magnitudeToRadius(magnitude: number): number {
   return Math.max(0.9, Math.min(4.6, r));
 }
 
+// Approximate spectral colors for the brightest named stars (by spectral class),
+// so the sky reads colorful rather than uniform white. Default is a soft
+// blue-white that cools slightly with magnitude.
+const STAR_COLORS: Record<string, string> = {
+  // blue / blue-white (O/B/A)
+  rigel: "#AEC6FF", bellatrix: "#BFD3FF", alnilam: "#AEC6FF", alnitak: "#AEC6FF",
+  mintaka: "#AEC6FF", saiph: "#BFD3FF", spica: "#A9C2FF", achernar: "#B6CCFF",
+  hadar: "#AEC6FF", acrux: "#AEC6FF", mimosa: "#AEC6FF", regulus: "#C4D6FF",
+  algol: "#C4D6FF", vega: "#CFE0FF", sirius: "#CFE6FF", deneb: "#DCE8FF",
+  castor: "#CFE0FF", adhara: "#AEC6FF", alkaid: "#BFD3FF", elnath: "#D6E2FF",
+  peacock: "#BFD3FF", mirzam: "#BFD3FF",
+  // white (A/F)
+  altair: "#F4F7FF", canopus: "#FBFBF0", procyon: "#F8F8FF", fomalhaut: "#EAF0FF",
+  caph: "#FFF6E0", polaris: "#FAF7EC",
+  // yellow (G)
+  capella: "#FFE9A8", "rigil-kent": "#FFF1D6",
+  // orange (K)
+  arcturus: "#FFC074", aldebaran: "#FFB061", pollux: "#FFC890", dubhe: "#FFD9A8",
+  alphard: "#FFC890", hamal: "#FFD0A0", kochab: "#FFCE9E", suhail: "#FFC074",
+  menkent: "#FFCE9E", enif: "#FFC890",
+  // red (M)
+  betelgeuse: "#FF8C5A", antares: "#FF7E52", gacrux: "#FF9E6B", scheat: "#FFB089",
+  mirach: "#FFB089",
+};
+
+export function starColor(id: string, magnitude: number): string {
+  return STAR_COLORS[id] ?? (magnitude < 2 ? "#F2F6FF" : magnitude < 3.2 ? "#E6EEFF" : "#D7E2FF");
+}
+
 export type SelectedKind = "star" | "planet" | "moon" | "constellation";
 
 export interface SelectedFact {
