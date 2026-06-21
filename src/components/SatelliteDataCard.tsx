@@ -233,7 +233,7 @@ const styles = StyleSheet.create({
     color: AuraLunisColors.faint,
     fontSize: 11,
     marginLeft: "auto" as unknown as number,
-    fontVariantNumeric: "tabular-nums" as never,
+    fontVariant: ["tabular-nums"],
   },
   pillRow: {
     flexDirection: "row",
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
     marginTop: 3,
-    fontVariantNumeric: "tabular-nums" as never,
+    fontVariant: ["tabular-nums"],
   },
   divider: {
     height: 1,

@@ -19,7 +19,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
-import type { TonightSky, VisibleBody } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
+import type { TonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 
 const SIZE = 260;
 const CENTER = SIZE / 2;

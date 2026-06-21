@@ -18,6 +18,7 @@ export function AnimatedScore({ score, size = 26 }: Props) {
   }, [score]);
 
   const animatedProps = useAnimatedProps(() => ({
+    // @ts-expect-error — Reanimated text animation uses non-standard text prop
     text: `${Math.round(progress.value)}`
   }));
 

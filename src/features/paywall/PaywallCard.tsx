@@ -23,7 +23,7 @@ export function PaywallCard({ onSelectPlan }: Props) {
         <Pressable style={s.planSelected} onPress={() => onSelectPlan?.(annual.id)}>
           <Text style={s.badge}>{annual.badge}</Text>
           <Text style={s.planPrice}>{AuraLunisPricing.annual}</Text>
-          <Text style={s.planEffective}>{annual.effectiveMonthly} effective</Text>
+          <Text style={s.planEffective}>{AuraLunisPricing.annualMonthly} effective</Text>
         </Pressable>
 
         <Pressable style={s.plan} onPress={() => onSelectPlan?.(monthly.id)}>
