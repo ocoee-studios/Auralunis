@@ -1,5 +1,7 @@
 import React, { useState } from "react";
-import { Alert, Image, Linking, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, Image, Linking, Modal, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { TermsScreen } from "@/screens/TermsScreen";
+import { PrivacyScreen } from "@/screens/PrivacyScreen";
 import { GlassPanel } from "@/components/GlassPanel";
 import { ScreenShell } from "@/components/ScreenShell";
 import { LogoMark } from "@/components/LogoMark";
@@ -49,6 +51,7 @@ export function SettingsScreen() {
   const { settings, hydrated, updateSetting, resetSettings } = useAuraLunisSettings();
   const { items, clearPrototypeVault } = useAuraLunisVault();
   const [deviceDiagnosticsOpen, setDeviceDiagnosticsOpen] = useState(false);
+  const [legalModal, setLegalModal] = useState<"terms" | "privacy" | null>(null);
 
 
   async function handleRestorePurchases() {
@@ -243,10 +246,10 @@ export function SettingsScreen() {
         <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("About AuraLunis", `${AuraLunisBrand.name} · ${AuraLunisBrand.descriptor}\n${AuraLunisBrand.tagline}`)}>
           <Text style={styles.secondaryButtonText}>About AuraLunis</Text>
         </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={() => Linking.openURL("https://ocoeestudios.com/auralunis/privacy")}>
+        <Pressable style={styles.secondaryButton} onPress={() => setLegalModal("privacy")}>
           <Text style={styles.secondaryButtonText}>Privacy Policy</Text>
         </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={() => Linking.openURL("https://ocoeestudios.com/auralunis/terms")}>
+        <Pressable style={styles.secondaryButton} onPress={() => setLegalModal("terms")}>
           <Text style={styles.secondaryButtonText}>Terms of Use</Text>
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => Linking.openURL("mailto:support@ocoeestudios.com")}>
@@ -269,6 +272,19 @@ export function SettingsScreen() {
         <Text style={styles.brandVersion}>v1.0.0 · Ocoee Studios</Text>
         <Text style={styles.brandEmail}>admin@ocoeestudios.com</Text>
       </View>
+      {/* Legal modals — in-app, no web hosting needed */}
+      <Modal visible={legalModal !== null} animationType="slide" presentationStyle="pageSheet">
+        <View style={{ flex: 1, backgroundColor: AuraLunisColors.cosmicBlack }}>
+          <Pressable
+            style={{ padding: 16, paddingTop: 20, alignItems: "flex-end" }}
+            onPress={() => setLegalModal(null)}
+          >
+            <Text style={{ color: AuraLunisColors.gold, fontSize: 16, fontWeight: "700" }}>Done</Text>
+          </Pressable>
+          {legalModal === "terms" && <TermsScreen />}
+          {legalModal === "privacy" && <PrivacyScreen />}
+        </View>
+      </Modal>
     </ScreenShell>
   );
 }
