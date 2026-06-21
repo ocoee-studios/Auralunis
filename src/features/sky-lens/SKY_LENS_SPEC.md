@@ -276,3 +276,72 @@ src/features/sky-lens/
 - `expo-camera` API changed in SDK 52+: use `CameraView` not `Camera`
 - `expo-sensors` API is stable across SDK 51-54
 - Test after upgrade: camera preview + DeviceMotion subscription simultaneously
+
+---
+
+## Additional Layers & Features (Phase 2+)
+
+### Weather & Atmosphere Layers
+- `layer_clouds` — Cloud forecast overlay showing clear patches and movement
+- `layer_light_pollution` — Bortle scale heat map, sky quality in every direction
+- `layer_aurora` — Green shimmer band on northern horizon when Kp is elevated
+- `layer_jet_stream` — Animated upper atmosphere wind flow lines
+
+### Time Layers
+- `layer_rise_set_paths` — Arc lines showing Sun/Moon/planet travel paths tonight
+- `layer_golden_hour` — Sky gradient preview showing color timing and direction
+- `layer_eclipse_path` — Shadow track projection during upcoming eclipses
+- `layer_meteor_radiant` — Radiant point + hourly rate during active showers
+
+### Deep Sky Expansion
+- Andromeda Galaxy (M31) rendered at actual angular size (6× Moon diameter)
+- Orion Nebula (M42) sword region highlight
+- Pleiades cluster outline (Seven Sisters)
+- Double star indicators (Albireo, Mizar/Alcor)
+- Variable star pulsing animations matching real periods
+- Magnitude filter slider: naked eye (mag 6) → telescope (mag 10+)
+
+### Satellite Expansion
+- `layer_starlink_train` — Exact line-of-pearls for upcoming train passes
+- `layer_iridium_flares` — Flash point prediction with countdown timer
+- `layer_debris_field` — Space-Track debris density visualization (premium)
+- `layer_reentry` — Projected re-entry path when objects are decaying
+- Tiangong, Hubble, and other station tracking beyond ISS
+
+### Cultural Sky Stories
+- `layer_culture_greek` — Greek mythology constellation art overlaid on stars
+- `layer_culture_aboriginal` — Aboriginal Australian Emu in the Sky, etc.
+- `layer_culture_chinese` — Chinese star mansions (二十八宿)
+- `layer_culture_norse` — Norse mythology star lore
+- `layer_culture_polynesian` — Polynesian navigation stars
+- Toggle between cultures to see the same stars through different eyes
+
+### Photography Assist
+- `layer_framing` — Rule-of-thirds grid sized to phone camera
+- `layer_mw_framing` — Milky Way core with "best shot" framing suggestion
+- `layer_star_trail_preview` — Predicted circular trails for 30-min exposure
+- `layer_stacking_targets` — Circles highlighting ideal deep sky targets tonight
+
+### Interactive Modes
+- **Time scrub** — Slide finger to fast-forward/rewind sky by hours
+- **Pinch zoom** — Zoom into dense star fields, constellation details expand
+- **Compass lock** — Tap cardinal direction, view snaps and holds
+- **Horizon panorama** — Slow 360° pan stitches a labeled panoramic sky map
+- **Comparison mode** — Split screen: tonight vs any date (birthday, eclipse, solstice)
+- **Star color mode** — Show actual stellar colors (blue giants, red dwarfs, yellow suns)
+- **Zodiac belt** — Show which sign Sun/Moon/planets are currently transiting
+- **Celestial reference lines** — Equator, ecliptic, galactic plane all toggleable
+
+### Layer Organization UI
+Layers grouped into categories for the layer picker:
+- **Essentials**: Stars, Constellations, Planets, Moon, Grid
+- **Satellites**: ISS, Fleet, Starlink Trains, Debris, Re-entry
+- **Deep Sky**: Messier, Named Nebulae, Galaxies, Clusters
+- **Atmosphere**: Clouds, Light Pollution, Aurora, Jet Stream
+- **Time**: Rise/Set Paths, Golden Hour, Meteor Radiants, Eclipse
+- **Culture**: Greek, Aboriginal, Chinese, Norse, Polynesian
+- **Photo**: Framing, MW Core, Star Trails, Stacking Targets
+- **Reference**: Ecliptic, Zodiac, Equator, Galactic Plane
+
+Each category is a collapsible section in a slide-up drawer.
+Individual layers toggle independently within each category.
