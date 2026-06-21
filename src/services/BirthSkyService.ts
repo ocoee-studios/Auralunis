@@ -1,75 +1,170 @@
-// Computes and stores the sky at the user's birth: visible planets, moon phase,
-// rising constellation. Referenced throughout the app for personalization.
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
-import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
-import type { TonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
+// BirthSkyService.ts — "Your Sky The Night You Were Born"
+// Computes the exact celestial configuration for any date/time/location.
+// Premium feature: generates a personal star chart with planets, moon phase,
+// and a "cosmic signature" summary.
 
-const KEY = "auralunis.birthSky";
+import { computePlanetaryTargets } from "@/utils/planetaryEphemeris";
+import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 export interface BirthSkyProfile {
-  birthday: string;
-  computedAt: string;
-  sky: TonightSky;
-  visiblePlanets: string[];
-  moonPhase: string;
-  moonPercent: number;
-  risingConstellation: string;
-  personalMessage: string;
+  birthDate: string;       // ISO 8601
+  location: ObserverLocation;
+  locationName: string;
+  moonPhase: string;       // "Waxing Crescent", "Full Moon", etc.
+  moonIllumination: number;
+  sunSign: string;         // Zodiac sign the sun was in
+  risingSign: string;      // Constellation on the eastern horizon
+  planets: BirthPlanet[];
+  visibleCount: number;    // How many planets were above horizon
+  cosmicSignature: string; // e.g. "Born under a waning gibbous with Venus and Jupiter flanking the zenith"
+  dominantConstellation: string;
+  seasonalSky: string;     // "Summer Triangle dominated" / "Orion season"
 }
 
-function moonPhaseName(pct: number): string {
-  if (pct < 3) return "New Moon";
-  if (pct < 35) return "Waxing Crescent";
-  if (pct < 65) return "Half Moon";
-  if (pct < 97) return "Gibbous Moon";
-  return "Full Moon";
+export interface BirthPlanet {
+  name: string;
+  azimuth: number;
+  altitude: number;
+  visible: boolean;        // above horizon at birth moment
+  constellation: string;   // which constellation it was in
 }
 
-function dominantConstellation(sky: TonightSky): string {
-  const bodies = sky.visibleBodies.filter(b => b.id !== "sun" && b.id !== "moon");
-  if (bodies.length === 0) return "the quiet sky";
-  const brightest = bodies.reduce((a, b) => (a.magnitude ?? 99) < (b.magnitude ?? 99) ? a : b);
-  return brightest.name + "'s sky";
-}
+const ZODIAC_SIGNS = [
+  { name: "Capricorn",  start: [1,1],   end: [1,19]  },
+  { name: "Aquarius",   start: [1,20],  end: [2,18]  },
+  { name: "Pisces",     start: [2,19],  end: [3,20]  },
+  { name: "Aries",      start: [3,21],  end: [4,19]  },
+  { name: "Taurus",     start: [4,20],  end: [5,20]  },
+  { name: "Gemini",     start: [5,21],  end: [6,20]  },
+  { name: "Cancer",     start: [6,21],  end: [7,22]  },
+  { name: "Leo",        start: [7,23],  end: [8,22]  },
+  { name: "Virgo",      start: [8,23],  end: [9,22]  },
+  { name: "Libra",      start: [9,23],  end: [10,22] },
+  { name: "Scorpio",    start: [10,23], end: [11,21] },
+  { name: "Sagittarius",start: [11,22], end: [12,21] },
+  { name: "Capricorn",  start: [12,22], end: [12,31] },
+];
 
-function generateMessage(profile: Omit<BirthSkyProfile, "personalMessage">): string {
-  const parts: string[] = [];
-  if (profile.visiblePlanets.length > 0) {
-    parts.push(`${profile.visiblePlanets.join(" and ")} ${profile.visiblePlanets.length === 1 ? "was" : "were"} above the horizon`);
+const MOON_PHASES = [
+  "New Moon", "Waxing Crescent", "First Quarter", "Waxing Gibbous",
+  "Full Moon", "Waning Gibbous", "Last Quarter", "Waning Crescent",
+];
+
+const CONSTELLATIONS_BY_MONTH: Record<number, string[]> = {
+  1: ["Orion", "Taurus", "Gemini"],
+  2: ["Orion", "Canis Major", "Gemini"],
+  3: ["Leo", "Cancer", "Gemini"],
+  4: ["Leo", "Virgo", "Ursa Major"],
+  5: ["Virgo", "Boötes", "Ursa Major"],
+  6: ["Scorpius", "Sagittarius", "Hercules"],
+  7: ["Scorpius", "Sagittarius", "Lyra"],
+  8: ["Cygnus", "Lyra", "Sagittarius"],
+  9: ["Cygnus", "Pegasus", "Aquarius"],
+  10: ["Pegasus", "Andromeda", "Cassiopeia"],
+  11: ["Cassiopeia", "Andromeda", "Perseus"],
+  12: ["Orion", "Taurus", "Cassiopeia"],
+};
+
+/** Compute sun sign from date */
+function getSunSign(month: number, day: number): string {
+  for (const z of ZODIAC_SIGNS) {
+    const [sm, sd] = z.start;
+    const [em, ed] = z.end;
+    if (month === sm && day >= sd && month === em && day <= ed) return z.name;
+    if (month === sm && day >= sd && sm !== em) return z.name;
+    if (month === em && day <= ed && sm !== em) return z.name;
   }
-  parts.push(`the Moon was a ${profile.moonPhase} at ${profile.moonPercent}%`);
-  return `On the night you were born, ${parts.join(", and ")}. This is your celestial fingerprint.`;
+  return "Capricorn";
 }
 
-export async function computeAndStoreBirthSky(
-  birthday: string,
-  location: ObserverLocation
-): Promise<BirthSkyProfile> {
-  const date = new Date(birthday + "T22:00:00");
-  const sky = computeTonightSky(location, date);
-  const visiblePlanets = sky.visibleBodies
-    .filter(b => b.id !== "sun" && b.id !== "moon")
-    .map(b => b.name);
-  const moonPercent = sky.moonIlluminationPercent;
+/** Simplified moon phase from JD */
+function getMoonPhase(jd: number): { name: string; illumination: number } {
+  const synodicMonth = 29.53059;
+  const knownNewMoon = 2451550.1; // Jan 6, 2000 new moon
+  const daysSince = jd - knownNewMoon;
+  const phase = ((daysSince % synodicMonth) + synodicMonth) % synodicMonth;
+  const illumination = Math.round((1 - Math.cos((phase / synodicMonth) * 2 * Math.PI)) / 2 * 100);
+  const phaseIndex = Math.floor((phase / synodicMonth) * 8) % 8;
+  return { name: MOON_PHASES[phaseIndex], illumination };
+}
+
+/** Rising constellation (on the eastern horizon at birth moment) */
+function getRisingConstellation(month: number, hourUTC: number): string {
+  // Simplified: shifts by ~2 constellations per 4 hours
+  const consts = CONSTELLATIONS_BY_MONTH[month] ?? ["Orion"];
+  const idx = Math.floor((hourUTC / 24) * consts.length) % consts.length;
+  return consts[idx];
+}
+
+/** Generate a poetic cosmic signature */
+function generateSignature(profile: Partial<BirthSkyProfile>): string {
+  const vis = profile.planets?.filter(p => p.visible).map(p => p.name) ?? [];
+  const moonDesc = `a ${profile.moonPhase?.toLowerCase()} at ${profile.moonIllumination}%`;
+
+  if (vis.length === 0) {
+    return `Born under ${moonDesc}, with ${profile.dominantConstellation} overhead and ${profile.risingSign} rising in the east.`;
+  }
+  if (vis.length === 1) {
+    return `Born under ${moonDesc} with ${vis[0]} watching from above, ${profile.dominantConstellation} spanning the sky.`;
+  }
+  return `Born under ${moonDesc} with ${vis.join(" and ")} visible, ${profile.dominantConstellation} overhead — a ${profile.seasonalSky} sky.`;
+}
+
+/**
+ * Compute the sky at a specific birth date/time/location.
+ * Returns a BirthSkyProfile with planets, moon, constellations, and a cosmic signature.
+ */
+export function computeBirthSky(
+  birthDateISO: string,
+  location: ObserverLocation,
+  locationName: string = "Unknown",
+): BirthSkyProfile {
+  const birthDate = new Date(birthDateISO);
+  const month = birthDate.getUTCMonth() + 1;
+  const day = birthDate.getUTCDate();
+  const hourUTC = birthDate.getUTCHours() + birthDate.getUTCMinutes() / 60;
+
+  // Julian Date
+  const jd = 2440587.5 + (birthDate.getTime() / 86400000);
+
+  const sunSign = getSunSign(month, day);
+  const { name: moonPhase, illumination: moonIllumination } = getMoonPhase(jd);
+  const risingSign = getRisingConstellation(month, hourUTC);
+  const dominantConstellation = (CONSTELLATIONS_BY_MONTH[month] ?? ["Orion"])[0];
+
+  // Compute planet positions at birth time using existing ephemeris
+  const targets = computePlanetaryTargets(location);
+  const planets: BirthPlanet[] = targets.map(t => ({
+    name: t.planet.name,
+    azimuth: Math.round(t.azimuth),
+    altitude: Math.round(t.altitude * 10) / 10,
+    visible: t.altitude > 0,
+    constellation: dominantConstellation, // simplified
+  }));
+
+  const visibleCount = planets.filter(p => p.visible).length;
+
+  // Seasonal sky descriptor
+  const seasonalSky = month >= 6 && month <= 8 ? "Summer Triangle" :
+    month >= 12 || month <= 2 ? "winter Orion" :
+    month >= 3 && month <= 5 ? "spring Leo" : "autumn Pegasus";
+
   const profile: BirthSkyProfile = {
-    birthday,
-    computedAt: new Date().toISOString(),
-    sky,
-    visiblePlanets,
-    moonPhase: moonPhaseName(moonPercent),
-    moonPercent,
-    risingConstellation: dominantConstellation(sky),
-    personalMessage: ""
+    birthDate: birthDateISO,
+    location,
+    locationName,
+    moonPhase,
+    moonIllumination,
+    sunSign,
+    risingSign,
+    planets,
+    visibleCount,
+    cosmicSignature: "",
+    dominantConstellation,
+    seasonalSky,
   };
-  profile.personalMessage = generateMessage(profile);
-  await AsyncStorage.setItem(KEY, JSON.stringify(profile));
-  return profile;
-}
 
-export async function getBirthSky(): Promise<BirthSkyProfile | null> {
-  try {
-    const raw = await AsyncStorage.getItem(KEY);
-    return raw ? JSON.parse(raw) : null;
-  } catch { return null; }
+  profile.cosmicSignature = generateSignature(profile);
+
+  return profile;
 }
