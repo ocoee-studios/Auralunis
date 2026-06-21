@@ -367,3 +367,213 @@ When tapping any planet, the info card shows:
 │  [Save to Vault] [Share Card]    │
 └──────────────────────────────────┘
 ```
+
+---
+
+## Atmospheric Sky (not flat black — a living canvas)
+
+### The Problem
+Every astronomy app renders the sky as flat black. That's wrong.
+The real night sky has color — deep navy overhead, indigo at mid-sky,
+violet-gold near the horizon. AuraLunis should show this.
+
+### Dynamic Sky Gradient
+Background gradient changes based on sun altitude (computed from ephemeris):
+
+#### Deep Night (sun < -18°)
+```
+Zenith:   #030816 (cosmic black)
+   ↓
+Mid-sky:  #061028 (deep navy)
+   ↓
+30° alt:  #0A1535 (dark indigo)
+   ↓
+Horizon:  #121D3A (navy with hint of warmth)
+```
+
+#### Astronomical Twilight (sun -18° to -12°)
+```
+Zenith:   #050D1E
+   ↓
+Mid-sky:  #0D1A38
+   ↓
+30° alt:  #1A254A (indigo)
+   ↓
+Horizon:  #2A2855 (purple-indigo)
+```
+
+#### Nautical Twilight (sun -12° to -6°)
+```
+Zenith:   #0A1428
+   ↓
+Mid-sky:  #1A2548 (deep blue)
+   ↓
+30° alt:  #2D2E5A (violet)
+   ↓
+Horizon:  #4A3058 → #8B5A30 (violet to amber)
+```
+
+#### Golden Hour / Civil Twilight (sun -6° to 0°)
+```
+Zenith:   #142040
+   ↓
+Mid-sky:  #2A3060 (twilight blue)
+   ↓
+30° alt:  #5A4060 (dusty violet)
+   ↓
+Horizon:  #D9A84E → #EF7B27 (gold to amber fire)
+```
+
+The gradient transitions SMOOTHLY between these states as the sun moves.
+At any moment, the sky gradient is interpolated from the current sun altitude.
+
+### Zodiacal Light
+- Faint triangular glow along the ecliptic after sunset / before sunrise
+- Pale gold, 5-8% opacity, widening toward the horizon
+- Only visible during twilight, fades in deep night
+- Subtle but real — advanced stargazers will notice and appreciate it
+
+### Horizon Glow
+- Light pollution simulation based on location (Bortle scale)
+- Urban: warm amber dome on horizon (15% opacity)
+- Suburban: faint amber (8% opacity)
+- Rural/Ducktown: barely visible (3% opacity)
+- Direction-aware: glow stronger toward nearby cities
+
+### Nebula Haze (Deep Sky layer)
+When Milky Way layer is active:
+- Faint colored nebula regions at correct sky positions
+- Orion Nebula region: subtle rosy glow
+- North America Nebula: faint red patch
+- Lagoon/Trifid region: hint of pink near galactic center
+- All at 3-5% opacity — atmospheric, not distracting
+
+---
+
+## Parallax Depth System (the phone is a window, not a screen)
+
+### Concept
+When the user moves their phone, different layers move at different speeds.
+This creates a sense of looking THROUGH a window into deep space,
+not at a flat screen.
+
+### Layer Depths (parallax multipliers)
+```
+Layer               Parallax   Visual Effect
+─────────────────   ────────   ─────────────────────
+Milky Way panorama  0.92×      Moves slowest (deepest)
+Faint stars (mag 4-6) 0.95×    Barely shifts
+Bright stars (mag 0-3) 0.97×   Slight shift
+Constellation art   0.98×      Moves with stars but slightly behind
+Constellation lines 1.00×      Reference layer (matches sensor exactly)
+Planet markers      1.00×      Locked to real positions
+Satellite tracks    1.00×      Locked to real positions
+Moon               1.00×       Locked to real position
+Grid / compass      1.02×      Moves slightly faster (feels closer)
+UI elements         1.05×      Floats in front, slight drift
+Info cards          1.08×      Nearest layer, most responsive
+```
+
+### Implementation
+```typescript
+function applyParallax(
+  basePosition: ScreenPoint,
+  layerMultiplier: number,
+  panDelta: { dx: number; dy: number }
+): ScreenPoint {
+  return {
+    x: basePosition.x + panDelta.dx * (1 - layerMultiplier),
+    y: basePosition.y + panDelta.dy * (1 - layerMultiplier),
+    visible: basePosition.visible,
+    scale: basePosition.scale,
+  };
+}
+```
+
+### The Effect
+When panning the phone left:
+- Milky Way barely moves (it's infinitely far away)
+- Stars shift slightly
+- Grid lines shift a bit more
+- UI glass panels shift the most
+
+This 3-5% difference between layers creates a profound sense of depth.
+It's the difference between looking at a picture of the sky and
+looking INTO the sky.
+
+---
+
+## Constellation Art Style: Luxury Watch Engraving
+
+### NOT This (SkyView style)
+- Cartoon illustrations
+- Thick colored outlines
+- Literal animal/figure drawings
+- Looks like a children's book
+
+### THIS (AuraLunis style)
+- Fine gold line engraving (think Patek Philippe dial engravings)
+- Geometric precision with organic curves
+- Single stroke weight (0.5-1px)
+- Gold (#D9A84E) at 20-30% opacity
+- NO fill — outlines only, like etched crystal
+- Stars are the anchor points, lines flow between them
+- Subtle inner glow along the lines (as if engraved in light)
+
+The effect: looking at a Breguet watch dial projected onto the sky.
+Not a cartoon. Not a textbook illustration. A precision instrument.
+
+### Greek Style
+- Classical proportions, contraposto poses
+- Clean anatomical line art (not detailed — suggestive)
+- Flowing drapery as curved lines
+- Inspired by: Greek vase painting line art
+
+### Chinese Style
+- Ink brush stroke aesthetic (varying line width)
+- Dragon/Tiger/Tortoise/Phoenix as flowing brush art
+- Inspired by: Song dynasty astronomical charts
+
+### Norse Style
+- Angular knotwork intersections at star positions
+- Runic geometric patterns
+- Sharp angles, interlocking lines
+- Inspired by: Viking runestone carvings
+
+### Aboriginal Style
+- Dot clusters around star positions
+- Concentric circles at key stars
+- Path lines connecting dots (songlines)
+- Inspired by: traditional dot painting
+
+### Polynesian Style
+- Wave pattern curves connecting navigation stars
+- Canoe prow shapes
+- Ocean current line patterns
+- Inspired by: traditional navigation stick charts
+
+---
+
+## Radar Visual Upgrades
+
+### Sweep Beam
+- Rotating gold beam from center to edge (1 revolution per 4 seconds)
+- Beam: 15° wide wedge, gold gradient from bright to transparent
+- Objects "light up" as the sweep beam passes over them
+- Fading afterglow where the beam has passed (dims over 2 seconds)
+
+### Orbital Trails
+- Each tracked satellite leaves a fading orbital arc
+- Trail shows the last 30 minutes of path
+- Trail color matches the satellite's color assignment
+- Gradient: bright at current position → transparent at 30-min-ago position
+
+### Atmospheric Distortion
+- Objects near the horizon shimmer slightly (atmospheric refraction)
+- Subtle position jitter (±0.5px) for objects below 15° altitude
+- Simulates the twinkling you see with real low-altitude observations
+
+### Pass History
+- Completed passes leave a ghost trail for 10 minutes
+- Ghost trail: dotted line, 10% opacity, slowly fading
+- Labeled "last pass" with timestamp
