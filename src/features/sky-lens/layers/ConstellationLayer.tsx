@@ -28,17 +28,18 @@ export function ConstellationLayer({ constellations, project, box, palette, onSe
               c.points[i].aboveHorizon &&
               c.points[j].aboveHorizon
           )
-          .map(([i, j], idx) => (
-            <Line
-              key={`${c.id}-l${idx}`}
-              x1={projected[i].x}
-              y1={projected[i].y}
-              x2={projected[j].x}
-              y2={projected[j].y}
-              stroke={palette.line}
-              strokeWidth={1}
-            />
-          ));
+          .map(([i, j], idx) => {
+            const a = projected[i];
+            const b = projected[j];
+            return (
+              <G key={`${c.id}-l${idx}`}>
+                {/* glow */}
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={palette.line} strokeWidth={4} strokeOpacity={0.18} strokeLinecap="round" />
+                {/* crisp */}
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={palette.line} strokeWidth={1.4} strokeOpacity={0.92} strokeLinecap="round" />
+              </G>
+            );
+          });
 
         if (segments.length === 0) return null;
 

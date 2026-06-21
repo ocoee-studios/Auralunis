@@ -27,7 +27,7 @@ export function StarLayer({ stars, project, palette, nightMode, onSelect }: Prop
         // Night Mode stays monochrome red for dark adaptation; otherwise stars
         // take their spectral color, and the brightest get a soft colored glow.
         const color = nightMode ? palette.star : starColor(star.id, star.magnitude);
-        const bright = !nightMode && star.magnitude < 1.6;
+        const bright = !nightMode && star.magnitude < 2.0;
         const labeled = star.name !== undefined && star.magnitude <= LABEL_MAG_LIMIT;
 
         return (
@@ -52,7 +52,8 @@ export function StarLayer({ stars, project, palette, nightMode, onSelect }: Prop
                 })
               }
             />
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.22} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.16} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.32} />}
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
             {labeled && (
               <SvgText

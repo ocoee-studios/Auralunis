@@ -23,9 +23,9 @@ export interface SkyPalette {
 // Midnight-Gold palette (default) and the dark-adapted red palette for Night Mode.
 export const DAY_PALETTE: SkyPalette = {
   star: "#FFFFFF",
-  starLabel: "#FFF6D6",
-  line: "rgba(217,168,78,0.5)",
-  conLabel: "rgba(217,168,78,0.85)",
+  starLabel: "#FFF1C4",
+  line: "#FFD27A",
+  conLabel: "#FFE3A6",
   grid: "rgba(192,198,212,0.15)",
   gridLabel: "rgba(192,198,212,0.6)",
   horizon: "rgba(217,168,78,0.7)",
@@ -67,29 +67,29 @@ export function magnitudeToRadius(magnitude: number): number {
 // so the sky reads colorful rather than uniform white. Default is a soft
 // blue-white that cools slightly with magnitude.
 const STAR_COLORS: Record<string, string> = {
-  // blue / blue-white (O/B/A)
-  rigel: "#AEC6FF", bellatrix: "#BFD3FF", alnilam: "#AEC6FF", alnitak: "#AEC6FF",
-  mintaka: "#AEC6FF", saiph: "#BFD3FF", spica: "#A9C2FF", achernar: "#B6CCFF",
-  hadar: "#AEC6FF", acrux: "#AEC6FF", mimosa: "#AEC6FF", regulus: "#C4D6FF",
-  algol: "#C4D6FF", vega: "#CFE0FF", sirius: "#CFE6FF", deneb: "#DCE8FF",
-  castor: "#CFE0FF", adhara: "#AEC6FF", alkaid: "#BFD3FF", elnath: "#D6E2FF",
-  peacock: "#BFD3FF", mirzam: "#BFD3FF",
+  // blue / blue-white (O/B/A) — vivid icy blue
+  rigel: "#7FB0FF", bellatrix: "#93BCFF", alnilam: "#7FB0FF", alnitak: "#7FB0FF",
+  mintaka: "#7FB0FF", saiph: "#93BCFF", spica: "#79A8FF", achernar: "#8AB6FF",
+  hadar: "#7FB0FF", acrux: "#7FB0FF", mimosa: "#7FB0FF", regulus: "#A6C8FF",
+  algol: "#A6C8FF", vega: "#AFCFFF", sirius: "#BFE0FF", deneb: "#C7E2FF",
+  castor: "#AFCFFF", adhara: "#7FB0FF", alkaid: "#93BCFF", elnath: "#B6D2FF",
+  peacock: "#93BCFF", mirzam: "#93BCFF",
   // white (A/F)
-  altair: "#F4F7FF", canopus: "#FBFBF0", procyon: "#F8F8FF", fomalhaut: "#EAF0FF",
-  caph: "#FFF6E0", polaris: "#FAF7EC",
-  // yellow (G)
-  capella: "#FFE9A8", "rigil-kent": "#FFF1D6",
-  // orange (K)
-  arcturus: "#FFC074", aldebaran: "#FFB061", pollux: "#FFC890", dubhe: "#FFD9A8",
-  alphard: "#FFC890", hamal: "#FFD0A0", kochab: "#FFCE9E", suhail: "#FFC074",
-  menkent: "#FFCE9E", enif: "#FFC890",
-  // red (M)
-  betelgeuse: "#FF8C5A", antares: "#FF7E52", gacrux: "#FF9E6B", scheat: "#FFB089",
-  mirach: "#FFB089",
+  altair: "#EAF2FF", canopus: "#FBFAE8", procyon: "#F0F4FF", fomalhaut: "#DCE8FF",
+  caph: "#FFF0CC", polaris: "#F6F1DC",
+  // yellow (G) — warm gold
+  capella: "#FFDD7A", "rigil-kent": "#FFE9B0",
+  // orange (K) — rich amber
+  arcturus: "#FFB24A", aldebaran: "#FF9E3D", pollux: "#FFB866", dubhe: "#FFC97E",
+  alphard: "#FFB866", hamal: "#FFBE74", kochab: "#FFBC70", suhail: "#FFB24A",
+  menkent: "#FFBC70", enif: "#FFB866",
+  // red (M) — fiery coral-red
+  betelgeuse: "#FF6A3D", antares: "#FF5A33", gacrux: "#FF7E4A", scheat: "#FF9166",
+  mirach: "#FF9166",
 };
 
 export function starColor(id: string, magnitude: number): string {
-  return STAR_COLORS[id] ?? (magnitude < 2 ? "#F2F6FF" : magnitude < 3.2 ? "#E6EEFF" : "#D7E2FF");
+  return STAR_COLORS[id] ?? (magnitude < 2 ? "#EAF2FF" : magnitude < 3.2 ? "#D2E0FF" : "#BFD2FF");
 }
 
 export type SelectedKind = "star" | "planet" | "moon" | "constellation";

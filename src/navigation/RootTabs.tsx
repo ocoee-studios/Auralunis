@@ -33,6 +33,17 @@ export type RootTabParamList = {
 
 const Tab = createBottomTabNavigator<RootTabParamList>();
 
+// Exported so screens that go full-screen immersive (e.g. Sky Lens) can hide the
+// tab bar and then restore this exact style on exit.
+export const TAB_BAR_STYLE = {
+  backgroundColor: "transparent",
+  borderTopColor: "rgba(217,168,78,0.18)",
+  height: 82,
+  paddingBottom: 18,
+  paddingTop: 8,
+  position: "absolute" as const
+};
+
 const icons: Record<keyof RootTabParamList, keyof typeof Ionicons.glyphMap> = {
   Home: "home-outline",
   Sky: "moon-outline",
@@ -46,14 +57,7 @@ export function RootTabs() {
     <Tab.Navigator
       screenOptions={({ route }: { route: { name: keyof RootTabParamList } }) => ({
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: "transparent",
-          borderTopColor: "rgba(217,168,78,0.18)",
-          height: 82,
-          paddingBottom: 18,
-          paddingTop: 8,
-          position: "absolute"
-        },
+        tabBarStyle: TAB_BAR_STYLE,
         tabBarBackground: () => <TabBarBackground />,
         tabBarActiveTintColor: AuraLunisColors.gold2,
         tabBarInactiveTintColor: AuraLunisColors.muted,
