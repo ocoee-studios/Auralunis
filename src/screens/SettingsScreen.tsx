@@ -231,7 +231,7 @@ export function SettingsScreen() {
       {/* Brand footer with app icon */}
       <View style={styles.brandFooter}>
         <Image
-          source={require("@/../assets/icon.png")}
+          source={require("../../assets/icon.png")}
           style={styles.brandIcon}
           resizeMode="contain"
         />
