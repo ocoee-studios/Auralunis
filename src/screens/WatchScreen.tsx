@@ -1,12 +1,16 @@
-import React from "react";
+import React, { useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
 import { tapSelection } from "@/services/HapticService";
+import { WatchApp } from "@/features/watch/app/WatchApp";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
 import { LogoMark } from "@/components/LogoMark";
 import { AuraLunisColors } from "@/theme/tokens";
-import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
+// Live path on main today (chronaura→AuraLunis rename in progress; the renamed
+// "@/state/AuraLunisSettingsContext" does not exist yet). Using the real file so
+// the Watch screen mounts and the Watch app is reachable.
+import { useAuraLunisSettings } from "@/state/ChronauraSettingsContext";
 import { DeskObeliskPreview } from "@/features/future/DeskObeliskPreview";
 import { SovereignSigilPreview } from "@/features/future/SovereignSigilPreview";
 import {
@@ -135,6 +139,12 @@ function FaceBody({
 
 export function WatchScreen() {
   const { settings, updateSetting } = useAuraLunisSettings();
+  const [watchAppOpen, setWatchAppOpen] = useState(false);
+
+  // The interactive Watch app takes over the screen (6 working tabs).
+  if (watchAppOpen) {
+    return <WatchApp onClose={() => setWatchAppOpen(false)} />;
+  }
   const selectedFace = watchFaceOptions.find((face) => face.id === settings.selectedWatchFaceId) ?? watchFaceOptions[0];
   const selectedTheme = watchThemeOptions.find((theme) => theme.id === settings.selectedWatchThemeId) ?? watchThemeOptions[0];
   const previewTheme = themePreview(selectedTheme.id);
@@ -178,6 +188,16 @@ export function WatchScreen() {
 
   return (
     <ScreenShell title="Watch Face Gallery" subtitle="Watch">
+      <FeatureCard
+        title="Open AuraLunis Watch App"
+        description="Launch the full interactive watch experience — Celestial Dial, Tonight's Sky, Satellite Passes, Star Compass, Photo Timer, and Observation Log. Six tabs, live data, Night Mode."
+        actionLabel="Open Watch App"
+        onPress={() => {
+          tapSelection();
+          setWatchAppOpen(true);
+        }}
+      />
+
       <View style={styles.watchStage}>
         <View style={styles.watchCase}>
           <View
