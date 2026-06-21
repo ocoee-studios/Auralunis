@@ -10,24 +10,14 @@ Use this when filling out App Store Connect → App Privacy.
 - **Used for tracking:** No
 - **Notes:** On-device only. Computes sky positions. Never transmitted.
 
-### 2. Health & Fitness — Health
-- **Purpose:** App Functionality
-- **Linked to identity:** No
-- **Used for tracking:** No
-- **Data types:**
-  - Mindful Sessions (write) — stargazing as mindfulness
-  - Sleep Analysis (read) — lunar sleep correlation
-  - Heart Rate (read) — awe moments during sessions
-- **Notes:** All on-device. Optional. Never transmitted.
-
-### 3. Purchases
+### 2. Purchases
 - **Purpose:** App Functionality
 - **Linked to identity:** Yes (via Apple ID through RevenueCat)
 - **Used for tracking:** No
 - **Notes:** Subscription status managed by RevenueCat/Apple.
   No payment info handled by AuraLunis directly.
 
-### 4. Diagnostics — Crash Data
+### 3. Diagnostics — Crash Data
 - **Purpose:** App Functionality
 - **Linked to identity:** No
 - **Used for tracking:** No
@@ -43,6 +33,7 @@ Use this when filling out App Store Connect → App Privacy.
 - ❌ Photos or Videos — camera used live only, not stored unless user saves
 - ❌ Audio Data — not collected
 - ❌ Financial Info — not handled (Apple/RevenueCat only)
+- ❌ Health & Fitness — not collected (no HealthKit integration)
 - ❌ Sensitive Info — not collected
 - ❌ User Content (emails, texts, photos) — Vault is local/encrypted only
 

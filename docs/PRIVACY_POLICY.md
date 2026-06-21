@@ -47,11 +47,6 @@ If you enable notifications, AuraLunis schedules local alerts for sky events
 (sunset, moonrise) computed on-device. No notification data is sent to or
 received from a remote server.
 
-### Health data (future)
-A planned future feature may optionally read Apple Watch heart-rate data to
-pulse ambient visuals. This data would be processed on-device only and never
-transmitted.
-
 ## Data retention
 
 All user data is stored locally on your device. Deleting the app removes all

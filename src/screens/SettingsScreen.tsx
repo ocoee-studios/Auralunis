@@ -165,7 +165,7 @@ export function SettingsScreen() {
         <SettingRow title="Cloud Sync" description="Optional future device sync. Off by default." value={settings.cloudSyncEnabled} onValueChange={(value) => updateSetting("cloudSyncEnabled", value)} />
         <SettingRow title="AI Oracle Opt-In" description="Enable personalized Oracle briefings only when you choose." value={settings.aiOracleOptIn} onValueChange={(value) => updateSetting("aiOracleOptIn", value)} />
         <Text style={styles.localCount}>{items.length} local prototype Vault items</Text>
-        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Permissions", "Camera: Sky Lens only\nLocation: local sky calculations\nMotion: alignment\nPhotos: only when saving\nHealthKit: optional future wind-down feature")}>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Permissions", "Camera: Sky Lens only\nLocation: local sky calculations\nMotion: alignment\nPhotos: only when saving")}>
           <Text style={styles.secondaryButtonText}>Review Permissions</Text>
         </Pressable>
         <Pressable style={styles.dangerButton} onPress={() => clearPrototypeVault().then(() => Alert.alert("Prototype Vault", "Local prototype Vault items cleared."))}>

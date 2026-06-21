@@ -63,14 +63,3 @@ We may update this policy to reflect new features. The "Last updated" date at th
 
 manager@ocoeestudios.com  
 Ocoee Studios · ocoeestudios.com
-
-### HealthKit Data (Cosmic Wellness)
-If you enable Cosmic Wellness features, AuraLunis reads and/or writes the following HealthKit data:
-
-- **Mindful Sessions (write):** Stargazing sessions are written as mindfulness minutes to Apple Health. This data stays on your device within Apple Health.
-- **Sleep Analysis (read):** With your permission, AuraLunis reads sleep data to generate your personal Lunar Sleep Report (sleep duration correlated with moon phases). Sleep data is processed on-device and never transmitted.
-- **Heart Rate (read):** During active stargazing sessions, AuraLunis reads heart rate data to capture "awe moments" and compute a Calm Score. Heart rate data is processed on-device and never transmitted.
-
-HealthKit access is entirely optional. Each data type requires separate authorization. AuraLunis functions fully without HealthKit access. You can revoke access at any time in Settings → Privacy & Security → Health → AuraLunis.
-
-We do not sell, share, or transmit HealthKit data to any third party, including Ocoee Studios servers, advertising networks, or analytics providers. HealthKit data is never used for advertising or marketing purposes.
