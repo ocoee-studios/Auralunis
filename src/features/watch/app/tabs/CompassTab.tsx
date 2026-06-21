@@ -47,7 +47,7 @@ export function CompassTab({ ctx }: { ctx: WatchCtx }) {
         altitudeDegrees: b.altitudeDegrees,
         magnitude: b.magnitude ?? 0
       }));
-    const stars: SkyDot[] = computeStarPositions(BRIGHT_STARS, location)
+    const stars: SkyDot[] = computeStarPositions(BRIGHT_STARS, location, new Date(sky.whenISO))
       .filter((s: HorizontalStar) => s.aboveHorizon && s.name && s.magnitude <= magLimit)
       .map((s: HorizontalStar) => ({
         id: s.id,
@@ -58,7 +58,7 @@ export function CompassTab({ ctx }: { ctx: WatchCtx }) {
         magnitude: s.magnitude
       }));
     return [...bodies, ...stars];
-  }, [sky.visibleBodies, location, magLimit]);
+  }, [sky.visibleBodies, sky.whenISO, location, magLimit]);
 
   // Which objects are within the compass window right now, with screen positions.
   const placed = useMemo(() => {

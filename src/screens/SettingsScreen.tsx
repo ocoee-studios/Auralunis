@@ -10,7 +10,7 @@ import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { DeviceDiagnosticsPanel } from "@/features/device-qa/DeviceDiagnosticsPanel";
 import { FutureLuxuryModulesPanel } from "@/features/future/FutureLuxuryModulesPanel";
-import { openAuraLunisSubscriptionManagement } from "@/services/RevenueCatService";
+import { openAuraLunisSubscriptionManagement, restoreAuraLunisPurchases } from "@/services/RevenueCatService";
 
 type SettingRowProps = {
   title: string;
@@ -50,6 +50,20 @@ export function SettingsScreen() {
   const { items, clearPrototypeVault } = useAuraLunisVault();
   const [deviceDiagnosticsOpen, setDeviceDiagnosticsOpen] = useState(false);
 
+
+  async function handleRestorePurchases() {
+    try {
+      const result = await restoreAuraLunisPurchases();
+      Alert.alert(
+        "Restore Purchases",
+        result.status === "not_configured"
+          ? "The restore handler is wired. Add the public RevenueCat SDK key before sandbox restore testing."
+          : "AuraLunis refreshed the membership status for this App Store account."
+      );
+    } catch {
+      Alert.alert("Restore Purchases", "Restore could not be completed. Confirm the StoreKit sandbox account and try again.");
+    }
+  }
 
   async function handleManageSubscription() {
     try {
@@ -103,6 +117,12 @@ export function SettingsScreen() {
             onPress={handleManageSubscription}
           >
             <Text style={styles.actionButtonText}>Manage Subscription</Text>
+          </Pressable>
+          <Pressable
+            style={styles.secondaryButton}
+            onPress={handleRestorePurchases}
+          >
+            <Text style={styles.secondaryButtonText}>Restore Purchases</Text>
           </Pressable>
         </GlassPanel>
       </SettingsSection>

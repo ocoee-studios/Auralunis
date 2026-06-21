@@ -308,9 +308,14 @@ export function OrbitalAlignmentScreen() {
     }
   }, [activeScore, isLocked, mode, trainBlips, activeShowers]);
 
-  // Cosmic Drift lock recording
+  // Cosmic Drift lock recording + chain advance. Merged into ONE effect so the
+  // shared `wasLockedRef` lock-transition is consumed once: previously the
+  // recording effect flipped wasLockedRef before the separate chain effect ran,
+  // so chain-advance never fired. Deps include the values read on lock, so the
+  // recorded target is current rather than a stale closure.
   useEffect(() => {
-    if (isLocked && !wasLockedRef.current && ["fleet","deep-space","train","debris","reentry"].includes(mode)) {
+    const justLocked = isLocked && !wasLockedRef.current;
+    if (justLocked && ["fleet","deep-space","train","debris","reentry"].includes(mode)) {
       const type = mode === "fleet" ? "satellite" : mode === "deep-space" ? "planet" : "satellite";
       recordLock({ targetId: activeName, targetName: activeName, targetType: type, targetColor: activeColor, observerLat: location.latitudeDegrees, observerLon: location.longitudeDegrees, azimuth: activeAzimuth, elevation: activeElevation, altitudeKm: activeAltKm, isPremium })
         .then(() => setDriftRefresh(n => n + 1)).catch(() => {});
@@ -330,16 +335,12 @@ export function OrbitalAlignmentScreen() {
         timestamp: new Date().toISOString(),
       });
     }
-    wasLockedRef.current = isLocked;
-  }, [isLocked, mode]);
-
-  // Chain lock advance
-  useEffect(() => {
-    if (mode === "chain" && isLocked && !wasLockedRef.current) {
+    if (justLocked && mode === "chain") {
       advanceChain();
       setChainProgress(p => ({ ...p, currentIndex: Math.min(p.currentIndex + 1, p.chain.targets.length) }));
     }
-  }, [isLocked, mode]);
+    wasLockedRef.current = isLocked;
+  }, [isLocked, mode, activeName, activeColor, activeAzimuth, activeElevation, activeAltKm, activeScore, location, isPremium, simMode]);
 
   // Pulse
   useEffect(() => {
