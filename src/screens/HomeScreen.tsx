@@ -24,6 +24,7 @@ import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/ser
 import { tapLight } from "@/services/HapticService";
 import { computeSkyAtOffset } from "@/services/TimeScrubService";
 import { scheduleSkyEventNotifications } from "@/services/NotificationService";
+import { useNavigation } from "@react-navigation/native";
 
 function formatClock(iso: string | null): string {
   if (!iso) return "—";
@@ -31,6 +32,7 @@ function formatClock(iso: string | null): string {
 }
 
 export function HomeScreen() {
+  const navigation = useNavigation<any>();
   const [noteDraft, setNoteDraft] = useState("");
   const [scrubOffset, setScrubOffset] = useState(0);
   const { items, addNote } = useAuraLunisVault();
@@ -180,9 +182,9 @@ export function HomeScreen() {
 
       {/* ── Mode Shortcuts ── */}
       <View style={styles.modeRow}>
-        <ModeShortcut icon="◎" label="Constellations" sub="Overlay" />
-        <ModeShortcut icon="⊹" label="AR Sky" sub="Point & find" />
-        <ModeShortcut icon="◈" label="Fleet" sub="Satellites" />
+        <ModeShortcut icon="◎" label="Constellations" sub="Overlay" onPress={() => navigation.navigate("Sky")} />
+        <ModeShortcut icon="⊹" label="AR Sky" sub="Point & find" onPress={() => navigation.navigate("Sky")} />
+        <ModeShortcut icon="◈" label="Fleet" sub="Satellites" onPress={() => navigation.navigate("Sky")} />
       </View>
 
       {/* ── Cosmic Notes (compact) ── */}
@@ -218,9 +220,13 @@ function bodyColor(id: string): string {
   return map[id] ?? AuraLunisColors.silver;
 }
 
-function ModeShortcut({ icon, label, sub }: { icon: string; label: string; sub: string }) {
+function ModeShortcut({ icon, label, sub, onPress }: { icon: string; label: string; sub: string; onPress?: () => void }) {
   return (
-    <TouchableOpacity style={styles.modeCard}>
+    <TouchableOpacity
+      style={styles.modeCard}
+      activeOpacity={0.8}
+      onPress={() => { tapLight(); onPress?.(); }}
+    >
       <Text style={styles.modeIcon}>{icon}</Text>
       <Text style={styles.modeName}>{label}</Text>
       <Text style={styles.modeSub}>{sub}</Text>

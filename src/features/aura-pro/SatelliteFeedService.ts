@@ -149,11 +149,13 @@ function lookAngles(record: SatelliteElementSet, observer: ObserverLocation, whe
       height: (observer.altitudeMeters ?? 0) / 1000
     };
     const look = satellite.ecfToLookAngles(observerGd, ecf);
-    const elevationDegrees = satellite.radiansToDegrees(look.elevation);
+    // satellite.js 5.x has no radiansToDegrees helper; convert inline.
+    const toDeg = (rad: number) => (rad * 180) / Math.PI;
+    const elevationDegrees = toDeg(look.elevation);
     if (!Number.isFinite(elevationDegrees) || elevationDegrees <= 0) return null;
 
     return {
-      azimuthDegrees: satellite.radiansToDegrees(look.azimuth),
+      azimuthDegrees: toDeg(look.azimuth),
       elevationDegrees,
       rangeKilometers: look.rangeSat
     };

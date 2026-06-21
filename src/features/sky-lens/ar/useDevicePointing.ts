@@ -43,7 +43,13 @@ export function useDevicePointing(updateMs = 120, magneticDeclinationDegrees = 0
     if (!magnetometer) {
       return { azimuthDegrees: 0, altitudeDegrees: 0, rollDegrees: 0 };
     }
-    return pointingFromSensors(accelerometer, magnetometer, magneticDeclinationDegrees);
+    const p = pointingFromSensors(accelerometer, magnetometer, magneticDeclinationDegrees);
+    // iOS reports accelerometer with the opposite sign convention to what the
+    // orientation math assumes, so the camera's altitude (pitch) comes out
+    // inverted on-device — sky objects only appeared when pointing at the ground.
+    // Flip the altitude here, at the real-sensor boundary (keeps the pure math +
+    // its self-test untouched).
+    return { ...p, altitudeDegrees: -p.altitudeDegrees };
   }, [accelerometer, magnetometer, magneticDeclinationDegrees]);
 
   return { pointing, available: magnetometer !== null };

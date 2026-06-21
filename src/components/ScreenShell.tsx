@@ -18,7 +18,7 @@ export function ScreenShell({ title, subtitle, children }: Props) {
   const insets = useSafeAreaInsets();
 
   return (
-    <LinearGradient colors={palette.gradient} style={styles.root}>
+    <LinearGradient colors={palette.gradient as unknown as readonly [string, string, ...string[]]} style={styles.root}>
       <StarDust count={12} color={AuraLunisColors.gold} opacity={0.18} />
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}>
         {/* Brand header matching mockup: [Logo] AURALUNIS */}

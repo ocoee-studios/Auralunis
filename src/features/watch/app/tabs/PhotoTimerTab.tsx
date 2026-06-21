@@ -25,33 +25,32 @@ export function PhotoTimerTab({ ctx }: { ctx: WatchCtx }) {
   const firedHalf = useRef(false);
   const firedTen = useRef(false);
 
-  // Countdown driver.
+  // Pure 1-second tick — the updater stays side-effect-free (no haptics/setState
+  // nesting), which is what React 18/19 requires and avoids double-fired haptics.
   useEffect(() => {
     if (!running) return;
-    const id = setInterval(() => {
-      setRemaining((r) => {
-        const next = r - 1;
-        if (next <= duration / 2 && !firedHalf.current) { firedHalf.current = true; tapLight(); }
-        if (next <= 10 && next > 0 && !firedTen.current) { firedTen.current = true; tapMedium(); }
-        if (next <= 0) {
-          tapSuccess();
-          setCurrentFrame((cf) => {
-            if (cf < frames) {
-              firedHalf.current = false;
-              firedTen.current = false;
-              setRemaining(duration);
-              return cf + 1;
-            }
-            setRunning(false);
-            return cf;
-          });
-          return next <= 0 ? 0 : next;
-        }
-        return next;
-      });
-    }, 1000);
+    const id = setInterval(() => setRemaining((r) => r - 1), 1000);
     return () => clearInterval(id);
-  }, [running, duration, frames]);
+  }, [running]);
+
+  // Side effects driven by the remaining count: cue haptics, advance stacking
+  // frames, and stop at the end. Each haptic is latched by a ref so it fires once.
+  useEffect(() => {
+    if (!running) return;
+    if (remaining <= duration / 2 && !firedHalf.current) { firedHalf.current = true; tapLight(); }
+    if (remaining <= 10 && remaining > 0 && !firedTen.current) { firedTen.current = true; tapMedium(); }
+    if (remaining <= 0) {
+      tapSuccess();
+      if (currentFrame < frames) {
+        firedHalf.current = false;
+        firedTen.current = false;
+        setCurrentFrame((cf) => cf + 1);
+        setRemaining(duration);
+      } else {
+        setRunning(false);
+      }
+    }
+  }, [remaining, running, duration, frames, currentFrame]);
 
   const start = () => {
     tapMedium();

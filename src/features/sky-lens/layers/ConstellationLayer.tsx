@@ -17,10 +17,17 @@ export function ConstellationLayer({ constellations, project, box, palette, onSe
       {constellations.map((c) => {
         const projected = c.points.map((pt) => project(pt.azimuthDegrees, pt.altitudeDegrees));
 
-        // Only draw a segment when both endpoints are in front of the camera,
-        // otherwise the line would streak across the view.
+        // Only draw a segment when both endpoints are in front of the camera AND
+        // above the horizon — otherwise lines streak across the view or dive into
+        // the ground for stars that have already set.
         const segments = c.lines
-          .filter(([i, j]) => !projected[i].behind && !projected[j].behind)
+          .filter(
+            ([i, j]) =>
+              !projected[i].behind &&
+              !projected[j].behind &&
+              c.points[i].aboveHorizon &&
+              c.points[j].aboveHorizon
+          )
           .map(([i, j], idx) => (
             <Line
               key={`${c.id}-l${idx}`}
