@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CameraView } from "expo-camera";
+import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuraLunisColors } from "@/theme/tokens";
 import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
@@ -102,6 +103,15 @@ export function SkyLensScreen({ onClose }: Props) {
   return (
     <View style={styles.root} onLayout={onLayout}>
       <CameraView style={StyleSheet.absoluteFillObject} facing="back" />
+      {/* Atmospheric twilight glow rising from the horizon (skipped in Night Mode) */}
+      {!nightMode && (
+        <LinearGradient
+          colors={["rgba(0,0,0,0)", "rgba(46,58,120,0.10)", "rgba(40,110,130,0.30)"] as const}
+          locations={[0.5, 0.8, 1]}
+          style={styles.atmosphere}
+          pointerEvents="none"
+        />
+      )}
       {nightMode && <View style={styles.nightFilter} pointerEvents="none" />}
 
       <SkyLensCanvas
@@ -167,6 +177,7 @@ export function SkyLensScreen({ onClose }: Props) {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#000" },
   nightFilter: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
+  atmosphere: { position: "absolute", left: 0, right: 0, bottom: 0, height: "42%" },
   finder: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   finderText: {
     backgroundColor: "rgba(7,18,37,0.78)",
