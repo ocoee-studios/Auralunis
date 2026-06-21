@@ -1,5 +1,5 @@
 import React from "react";
-import { Circle, G, Text as SvgText } from "react-native-svg";
+import { Circle, Ellipse, G, Text as SvgText } from "react-native-svg";
 import type { SkyBody } from "../ephemeris/SkyEphemerisService";
 import { PLANET_COLORS, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
 
@@ -25,8 +25,25 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
 
         return (
           <G key={body.id}>
-            {/* Glow ring */}
-            <Circle cx={p.x} cy={p.y} r={9} fill={color} opacity={0.18} />
+            {/* Two-ring glow */}
+            <Circle cx={p.x} cy={p.y} r={12} fill={color} opacity={0.14} />
+            <Circle cx={p.x} cy={p.y} r={8} fill={color} opacity={0.28} />
+            {/* Saturn's ring */}
+            {body.id === "saturn" && (
+              <Ellipse
+                cx={p.x}
+                cy={p.y}
+                rx={10.5}
+                ry={3.4}
+                fill="none"
+                stroke={color}
+                strokeWidth={1.4}
+                strokeOpacity={0.9}
+                rotation={-18}
+                originX={p.x}
+                originY={p.y}
+              />
+            )}
             <Circle
               cx={p.x}
               cy={p.y}
@@ -48,6 +65,8 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
                 })
               }
             />
+            {/* specular highlight for a 3-D feel */}
+            {!nightMode && <Circle cx={p.x - 1.4} cy={p.y - 1.4} r={1.6} fill="#FFFFFF" opacity={0.5} />}
             <SvgText x={p.x + 9} y={p.y + 4} fill={palette.starLabel} fontSize={11} fontWeight="700">
               {body.name}
             </SvgText>

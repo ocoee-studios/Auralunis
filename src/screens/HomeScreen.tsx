@@ -22,8 +22,8 @@ import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherSer
 import { computeTonightScore } from "@/services/TonightScoreService";
 import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
 import { tapLight } from "@/services/HapticService";
-import { computeSkyAtOffset } from "@/services/TimeScrubService";
 import { scheduleSkyEventNotifications } from "@/services/NotificationService";
+import { useNavigation } from "@react-navigation/native";
 
 function formatClock(iso: string | null): string {
   if (!iso) return "—";
@@ -31,6 +31,7 @@ function formatClock(iso: string | null): string {
 }
 
 export function HomeScreen() {
+  const navigation = useNavigation<any>();
   const [noteDraft, setNoteDraft] = useState("");
   const [scrubOffset, setScrubOffset] = useState(0);
   const { items, addNote } = useAuraLunisVault();
@@ -58,16 +59,13 @@ export function HomeScreen() {
     [sky, weather, settings.skyQuality]
   );
 
-  // ── Scrubbed sky (when user drags the dial) ──────────────────────────
-  const scrubbedSky = useMemo(() => {
-    if (scrubOffset === 0) return null;
-    return computeSkyAtOffset(location, scrubOffset);
-  }, [location, scrubOffset]);
-
-  // Use scrubbed sky when active, live sky otherwise
-  const displaySky = scrubbedSky
-    ? { ...sky, visibleBodies: sky.visibleBodies } // TODO: map scrubbedSky planets back to TonightSky format
-    : sky;
+  // ── Displayed sky: live, or recomputed at the scrubbed time when the user
+  // drags the dial. computeTonightSky returns a full TonightSky, so planet
+  // positions and visibility actually move with the scrub (not just the clock).
+  const displaySky = useMemo(() => {
+    if (scrubOffset === 0) return sky;
+    return computeTonightSky(location, new Date(Date.now() + scrubOffset * 60000));
+  }, [sky, location, scrubOffset]);
 
   // ── Golden hour ──────────────────────────────────────────────────────────
   const sunPos = useMemo(() => computeSunPosition(location), [location]);
@@ -75,10 +73,10 @@ export function HomeScreen() {
   const nextGolden = goldenEvents[0] ?? null;
 
   // ── Visible planets ──────────────────────────────────────────────────────
-  const visibleBodies = sky.visibleBodies.filter(
+  const visibleBodies = displaySky.visibleBodies.filter(
     (b) => b.id !== "sun" && b.altitudeDegrees > 0
   );
-  const belowBodies = sky.visibleBodies.filter(
+  const belowBodies = displaySky.visibleBodies.filter(
     (b) => b.id !== "sun" && b.altitudeDegrees <= 0
   );
 
@@ -104,7 +102,7 @@ export function HomeScreen() {
 
       {/* ── The Celestial Dial ── */}
       <CelestialDial
-        sky={sky}
+        sky={displaySky}
         tonightScore={tonightScore.score}
         tonightLabel={tonightScore.label}
         onTimeScrub={setScrubOffset}
@@ -180,9 +178,9 @@ export function HomeScreen() {
 
       {/* ── Mode Shortcuts ── */}
       <View style={styles.modeRow}>
-        <ModeShortcut icon="◎" label="Constellations" sub="Overlay" />
-        <ModeShortcut icon="⊹" label="AR Sky" sub="Point & find" />
-        <ModeShortcut icon="◈" label="Fleet" sub="Satellites" />
+        <ModeShortcut icon="◎" label="Constellations" sub="Overlay" onPress={() => navigation.navigate("Sky")} />
+        <ModeShortcut icon="⊹" label="AR Sky" sub="Point & find" onPress={() => navigation.navigate("Sky")} />
+        <ModeShortcut icon="◈" label="Fleet" sub="Satellites" onPress={() => navigation.navigate("Sky")} />
       </View>
 
       {/* ── Cosmic Notes (compact) ── */}
@@ -218,9 +216,13 @@ function bodyColor(id: string): string {
   return map[id] ?? AuraLunisColors.silver;
 }
 
-function ModeShortcut({ icon, label, sub }: { icon: string; label: string; sub: string }) {
+function ModeShortcut({ icon, label, sub, onPress }: { icon: string; label: string; sub: string; onPress?: () => void }) {
   return (
-    <TouchableOpacity style={styles.modeCard}>
+    <TouchableOpacity
+      style={styles.modeCard}
+      activeOpacity={0.8}
+      onPress={() => { tapLight(); onPress?.(); }}
+    >
       <Text style={styles.modeIcon}>{icon}</Text>
       <Text style={styles.modeName}>{label}</Text>
       <Text style={styles.modeSub}>{sub}</Text>

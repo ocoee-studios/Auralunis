@@ -40,14 +40,14 @@ const required = [
   "src/features/permissions/SkyLensPermissionGate.tsx",
   "src/features/sky-lens/ManualSkyMap.tsx",
   "src/features/archive/DeepSkyCatalog.ts",
-  "src/state/ChronauraSettingsContext.tsx",
-  "src/state/ChronauraVaultContext.tsx",
+  "src/state/AuraLunisSettingsContext.tsx",
+  "src/state/AuraLunisVaultContext.tsx",
   "src/data/brand.ts",
   "src/data/sourceOfTruth.ts",
   "assets/logo/chronaura-stardust-emblem.png",
   "assets/logo/chronaura-stardust-lockup.png",
-  "assets/logo/chronaura-app-icon.png",
-  "assets/logo/chronaura-splash.png",
+  "assets/logo/auralunis-app-icon.png",
+  "assets/logo/auralunis-splash.png",
   "app.json",
   "package.json"
 ];
@@ -123,7 +123,7 @@ for (const term of [
   "tonights_sky",
   "deep_sky_portal",
   "daily_alignment",
-  "minimal_chronaura",
+  "minimal_auralunis",
   "sovereign_sigil",
   "moon_phase",
   "tonight_score",
@@ -133,7 +133,7 @@ for (const term of [
 }
 pass("watch face gallery, theme selector, and complication picker");
 
-const settingsContext = fs.readFileSync(path.join(root, "src/state/ChronauraSettingsContext.tsx"), "utf8");
+const settingsContext = fs.readFileSync(path.join(root, "src/state/AuraLunisSettingsContext.tsx"), "utf8");
 if (!settingsContext.includes("AsyncStorage")) fail("settings persistence", "AsyncStorage missing");
 else pass("settings persistence");
 
@@ -141,13 +141,13 @@ else pass("settings persistence");
 const settingsScreen = fs.readFileSync(path.join(root, "src/screens/SettingsScreen.tsx"), "utf8");
 for (const term of [
   "About Us",
-  "Chronaura was created to turn the night sky into a living, personal experience. Blending astronomy, thoughtful design, and quiet daily rituals, we help you slow down, look up, and feel more connected to the universe around you."
+  "AuraLunis was created to turn the night sky into a living, personal experience. Blending astronomy, thoughtful design, and quiet daily rituals, we help you slow down, look up, and feel more connected to the universe around you."
 ]) {
   if (!settingsScreen.includes(term)) fail("SettingsScreen", `missing ${term}`);
 }
 pass("settings about us section");
 
-const vaultContext = fs.readFileSync(path.join(root, "src/state/ChronauraVaultContext.tsx"), "utf8");
+const vaultContext = fs.readFileSync(path.join(root, "src/state/AuraLunisVaultContext.tsx"), "utf8");
 if (!vaultContext.includes("AsyncStorage")) fail("vault persistence", "AsyncStorage missing");
 else pass("prototype vault persistence");
 
@@ -191,10 +191,10 @@ for (const full of allSourceFiles) {
 if (!failed) pass("supported font weights");
 
 const app = JSON.parse(fs.readFileSync(path.join(root, "app.json"), "utf8"));
-if (app.expo.icon !== "./assets/logo/chronaura-app-icon.png") fail("app icon config");
+if (app.expo.icon !== "./assets/logo/auralunis-app-icon.png") fail("app icon config");
 else pass("app icon config");
-if (!app.expo.splash || app.expo.splash.image !== "./assets/logo/chronaura-splash.png") fail("splash config");
+if (!app.expo.splash || app.expo.splash.image !== "./assets/logo/auralunis-splash.png") fail("splash config");
 else pass("splash config");
 
 if (failed) process.exit(1);
-console.log("Chronaura approved five-tab static QA passed.");
+console.log("AuraLunis approved five-tab static QA passed.");

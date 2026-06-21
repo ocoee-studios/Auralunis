@@ -91,7 +91,7 @@ check("Sky Lens projection module present", fs.existsSync(path.join(root, "src/f
 check("Sky Lens orientation module present", fs.existsSync(path.join(root, "src/features/sky-lens/ar/SkyLensOrientation.ts")));
 check("Sky Lens AR self-test script present", fs.existsSync(path.join(root, "scripts/skylens-selftest.js")));
 
-const vault = read("src/state/ChronauraVaultContext.tsx");
+const vault = read("src/state/AuraLunisVaultContext.tsx");
 check("vault uses encrypted storage", vault.includes("encryptVault") && vault.includes("decryptVault"));
 check("vault migration from unencrypted", vault.includes("isEncrypted"));
 check("vault encryption module present", fs.existsSync(path.join(root, "src/services/VaultEncryption.ts")));

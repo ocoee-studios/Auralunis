@@ -232,8 +232,8 @@ const styles = StyleSheet.create({
   norad: {
     color: AuraLunisColors.faint,
     fontSize: 11,
-    marginLeft: "auto" as unknown as number,
-    fontVariant: ["tabular-nums"],
+    marginLeft: "auto",
+    fontVariant: ["tabular-nums"] as const,
   },
   pillRow: {
     flexDirection: "row",
@@ -256,7 +256,7 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "800",
     marginTop: 3,
-    fontVariant: ["tabular-nums"],
+    fontVariant: ["tabular-nums"] as const,
   },
   divider: {
     height: 1,

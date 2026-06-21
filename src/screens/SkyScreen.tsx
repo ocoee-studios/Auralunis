@@ -1,5 +1,7 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
+import { TAB_BAR_STYLE } from "@/navigation/RootTabs";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
@@ -25,6 +27,14 @@ export function SkyScreen() {
 
   const { location, status } = useObserverLocation();
   const sky = useMemo(() => computeTonightSky(location), [location]);
+
+  // Hide the (absolute-positioned) bottom tab bar during full-screen immersive
+  // modes so it doesn't sit on top of the Sky Lens layer pills / Alignment controls.
+  const navigation = useNavigation<any>();
+  useEffect(() => {
+    const immersive = skyLensOpen || alignmentOpen;
+    navigation.setOptions({ tabBarStyle: immersive ? { display: "none" } : TAB_BAR_STYLE });
+  }, [navigation, skyLensOpen, alignmentOpen]);
 
   if (showPermission && !skyLensOpen && !manualMapOpen) {
     return (

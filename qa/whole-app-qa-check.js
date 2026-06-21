@@ -38,12 +38,12 @@ const required = [
   "src/features/archive/DeepSkyCatalog.ts",
   "src/features/learn/LearnCatalog.ts",
   "src/features/watch/WatchFaceCatalog.ts",
-  "src/state/ChronauraSettingsContext.tsx",
-  "src/state/ChronauraVaultContext.tsx",
+  "src/state/AuraLunisSettingsContext.tsx",
+  "src/state/AuraLunisVaultContext.tsx",
   "src/components/LogoMark.tsx",
   "assets/logo/chronaura-stardust-emblem.png",
-  "assets/logo/chronaura-app-icon.png",
-  "assets/logo/chronaura-splash.png",
+  "assets/logo/auralunis-app-icon.png",
+  "assets/logo/auralunis-splash.png",
   "docs/ABOUT_US_SETTINGS_SPEC.md"
 ];
 
@@ -66,7 +66,7 @@ for (const term of ["Living Astrolabe", "Cosmic Notes", "Save Note to Vault", "L
 }
 
 const sky = read("src/screens/SkyScreen.tsx");
-for (const term of ["Chronaura Sky Lens", "Manual Sky Map", "Find Mode", "X-Ray Lens + Birth Sky Overlay", "Milky Way / Galaxy Mode", "featuredDeepSkyObjects", "Celestial Archive"]) {
+for (const term of ["AuraLunis Sky Lens", "Manual Sky Map", "Find Mode", "X-Ray Lens + Birth Sky Overlay", "Milky Way / Galaxy Mode", "featuredDeepSkyObjects", "Celestial Archive"]) {
   check(`Sky: ${term}`, sky.includes(term));
 }
 
@@ -79,10 +79,10 @@ for (const term of ["WATCH APP FACE GALLERY", "THEME SELECTOR", "COMPLICATION PI
   check(`Watch: ${term}`, watch.includes(term));
 }
 const catalog = read("src/features/watch/WatchFaceCatalog.ts");
-for (const term of ["living_astrolabe", "moon_keeper", "tonights_sky", "deep_sky_portal", "daily_alignment", "minimal_chronaura", "sovereign_sigil"]) {
+for (const term of ["living_astrolabe", "moon_keeper", "tonights_sky", "deep_sky_portal", "daily_alignment", "minimal_auralunis", "sovereign_sigil"]) {
   check(`Watch face: ${term}`, catalog.includes(term));
 }
-for (const term of ["moon_phase", "tonight_score", "moonrise_countdown", "next_event", "visible_planet", "daily_alignment", "tonights_ritual", "sky_lens_shortcut", "sound_bath_shortcut", "chronaura_logo"]) {
+for (const term of ["moon_phase", "tonight_score", "moonrise_countdown", "next_event", "visible_planet", "daily_alignment", "tonights_ritual", "sky_lens_shortcut", "sound_bath_shortcut", "auralunis_logo"]) {
   check(`Watch complication: ${term}`, catalog.includes(term));
 }
 
@@ -95,15 +95,15 @@ const settings = read("src/screens/SettingsScreen.tsx");
 for (const term of ["Subscription", "Appearance", "Notifications + Alarms", "Sky Lens", "Privacy + Data", "Watch + Widgets", "Audio + Learning", "Help + About", "About Us"]) {
   check(`Settings: ${term}`, settings.includes(term));
 }
-check("Settings About Us paragraph", settings.includes("Chronaura was created to turn the night sky into a living, personal experience."));
+check("Settings About Us paragraph", settings.includes("AuraLunis was created to turn the night sky into a living, personal experience."));
 check("Settings About card clean style reference", settings.includes("<View style={styles.aboutCard}>"));
 
-const settingsContext = read("src/state/ChronauraSettingsContext.tsx");
+const settingsContext = read("src/state/AuraLunisSettingsContext.tsx");
 check("Settings persisted with AsyncStorage", settingsContext.includes("AsyncStorage"));
 check("Settings local data sanitization", settingsContext.includes("sanitizeSettings") && settingsContext.includes("sanitizeWatchComplications"));
 check("Watch settings max four sanitized", settingsContext.includes("MAX_WATCH_COMPLICATIONS = 4"));
 
-const vaultContext = read("src/state/ChronauraVaultContext.tsx");
+const vaultContext = read("src/state/AuraLunisVaultContext.tsx");
 check("Vault persisted with AsyncStorage", vaultContext.includes("AsyncStorage"));
 check("Vault local data sanitization", vaultContext.includes("sanitizeVaultItems"));
 
@@ -114,8 +114,8 @@ const shell = read("src/components/ScreenShell.tsx");
 check("Theme gradient tuple preserved", shell.includes("colors={palette.gradient}"));
 
 const appConfig = JSON.parse(read("app.json"));
-check("App icon configured", appConfig.expo.icon === "./assets/logo/chronaura-app-icon.png");
-check("Splash configured", appConfig.expo.splash && appConfig.expo.splash.image === "./assets/logo/chronaura-splash.png");
+check("App icon configured", appConfig.expo.icon === "./assets/logo/auralunis-app-icon.png");
+check("Splash configured", appConfig.expo.splash && appConfig.expo.splash.image === "./assets/logo/auralunis-splash.png");
 
 const allTsFiles = [];
 function collect(dir) {
@@ -138,4 +138,4 @@ if (failures.length) {
   process.exit(1);
 }
 
-console.log(`Chronaura whole-app QA passed with ${passes.length} checks.`);
+console.log(`AuraLunis whole-app QA passed with ${passes.length} checks.`);

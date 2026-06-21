@@ -29,6 +29,8 @@ export interface PlanOption {
   subtitle: string;
   revenueCatPackageId: string;
   badge?: string;
+  /** Effective monthly price for an annual plan — e.g. "$3.33/mo" */
+  effectiveMonthly?: string;
   /** Trial only on annual */
   trial: boolean;
   /** Anchor price shown as strikethrough on lifetime card */
@@ -45,6 +47,7 @@ export const plans: PlanOption[] = [
     subtitle: "$3.33/month, billed annually",
     revenueCatPackageId: RevenueCatIds.packages.premiumAnnual,
     badge: "BEST VALUE · SAVE 52%",
+    effectiveMonthly: "$3.33/mo",
     trial: true,   // 7-day free trial on annual only
   },
   {

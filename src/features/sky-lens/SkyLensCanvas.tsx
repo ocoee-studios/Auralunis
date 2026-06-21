@@ -1,12 +1,15 @@
 import React, { useCallback } from "react";
 import Svg from "react-native-svg";
 import { StyleSheet } from "react-native";
-import { DEFAULT_FOV, projectTarget, type CameraPointing } from "./ar/SkyLensProjection";
+import { projectTarget, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
 import { GridLayer } from "./layers/GridLayer";
 import { ConstellationLayer } from "./layers/ConstellationLayer";
 import { StarLayer } from "./layers/StarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer } from "./layers/MoonLayer";
+import { MilkyWayLayer } from "./layers/MilkyWayLayer";
+import { TwinkleLayer } from "./layers/TwinkleLayer";
+import { MeteorLayer } from "./layers/MeteorLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
 import type { LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
@@ -15,8 +18,10 @@ type Props = {
   box: { width: number; height: number };
   pointing: CameraPointing;
   sky: SkyData;
+  fov: CameraFov;
   activeLayers: Set<LayerKey>;
   nightMode: boolean;
+  milkyWayBoost: number;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -24,18 +29,22 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, activeLayers, nightMode, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
 
   const project: ProjectFn = useCallback(
-    (az: number, alt: number) => projectTarget(pointing, az, alt, DEFAULT_FOV, box),
-    [pointing, box]
+    (az: number, alt: number) => projectTarget(pointing, az, alt, fov, box),
+    [pointing, box, fov]
   );
 
   const moon = sky.bodies.find((b) => b.id === "moon");
 
   return (
     <Svg style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+      {/* Milky Way sits behind everything */}
+      {activeLayers.has("milkyway") && (
+        <MilkyWayLayer band={sky.milkyWay} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
+      )}
       {activeLayers.has("grid") && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
       )}
@@ -45,11 +54,15 @@ export function SkyLensCanvas({ box, pointing, sky, activeLayers, nightMode, onS
           project={project}
           box={box}
           palette={palette}
+          nightMode={nightMode}
           onSelect={onSelect}
         />
       )}
       {activeLayers.has("stars") && (
-        <StarLayer stars={sky.stars} project={project} palette={palette} onSelect={onSelect} />
+        <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} onSelect={onSelect} />
+      )}
+      {activeLayers.has("stars") && (
+        <TwinkleLayer stars={sky.stars} project={project} nightMode={nightMode} />
       )}
       {activeLayers.has("planets") && (
         <PlanetLayer
@@ -68,6 +81,8 @@ export function SkyLensCanvas({ box, pointing, sky, activeLayers, nightMode, onS
         palette={palette}
         onSelect={onSelect}
       />
+      {/* Meteor streaks on top, for ambiance */}
+      <MeteorLayer box={box} nightMode={nightMode} />
     </Svg>
   );
 }

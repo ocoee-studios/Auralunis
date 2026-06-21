@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { getLiveISSPosition, type PropagatedPosition } from "@/services/LiveTLEService";
 import { tapLight } from "@/services/HapticService";
@@ -25,11 +25,14 @@ export function SatellitesTab({ ctx }: { ctx: WatchCtx }) {
   const { palette, location } = ctx;
   const [status, setStatus] = useState<Status>("loading");
   const [iss, setIss] = useState<PropagatedPosition | null>(null);
+  const mounted = useRef(true);
+  useEffect(() => () => { mounted.current = false; }, []);
 
   const load = useCallback(async () => {
     setStatus("loading");
     try {
       const pos = await getLiveISSPosition();
+      if (!mounted.current) return; // user left the tab mid-request
       if (pos) {
         setIss(pos);
         setStatus("ok");
@@ -37,7 +40,7 @@ export function SatellitesTab({ ctx }: { ctx: WatchCtx }) {
         setStatus("error");
       }
     } catch {
-      setStatus("error");
+      if (mounted.current) setStatus("error");
     }
   }, []);
 

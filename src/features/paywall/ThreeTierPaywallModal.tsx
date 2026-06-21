@@ -6,7 +6,7 @@
 
 import React, { useState } from "react";
 import {
-  Modal, Pressable, ScrollView, StyleSheet,
+  Linking, Modal, Pressable, ScrollView, StyleSheet,
   Text, TouchableOpacity, View,
 } from "react-native";
 import { AuraLunisColors } from "@/theme/tokens";
@@ -22,9 +22,13 @@ type Props = {
   visible: boolean;
   onClose: () => void;
   onPurchase: (planId: string) => void;
+  onRestore: () => void;
 };
 
-export function ThreeTierPaywallModal({ visible, onClose, onPurchase }: Props) {
+const TERMS_URL = "https://ocoeestudios.com/auralunis/terms";
+const PRIVACY_URL = "https://ocoeestudios.com/auralunis/privacy";
+
+export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore }: Props) {
   const [selected, setSelected] = useState<string>("premium_annual");
 
   const annual   = plans.find(p => p.id === "premium_annual")!;
@@ -99,11 +103,11 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase }: Props) {
 
             {/* Footer */}
             <View style={styles.footer}>
-              <Text style={styles.footerLink} onPress={onClose}>Restore Purchases</Text>
+              <Text style={styles.footerLink} onPress={() => { tapLight(); onRestore(); }}>Restore Purchases</Text>
               <Text style={styles.footerDot}>·</Text>
-              <Text style={styles.footerLink}>Terms</Text>
+              <Text style={styles.footerLink} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text>
               <Text style={styles.footerDot}>·</Text>
-              <Text style={styles.footerLink}>Privacy</Text>
+              <Text style={styles.footerLink} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy</Text>
             </View>
 
             <TouchableOpacity onPress={onClose} style={styles.skipBtn}>

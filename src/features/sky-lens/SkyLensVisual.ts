@@ -23,9 +23,9 @@ export interface SkyPalette {
 // Midnight-Gold palette (default) and the dark-adapted red palette for Night Mode.
 export const DAY_PALETTE: SkyPalette = {
   star: "#FFFFFF",
-  starLabel: "#FFF6D6",
-  line: "rgba(217,168,78,0.5)",
-  conLabel: "rgba(217,168,78,0.85)",
+  starLabel: "#FFF1C4",
+  line: "#FFD27A",
+  conLabel: "#FFE3A6",
   grid: "rgba(192,198,212,0.15)",
   gridLabel: "rgba(192,198,212,0.6)",
   horizon: "rgba(217,168,78,0.7)",
@@ -61,6 +61,46 @@ export const PLANET_COLORS: Record<string, string> = {
 export function magnitudeToRadius(magnitude: number): number {
   const r = 3.6 - magnitude * 0.85;
   return Math.max(0.9, Math.min(4.6, r));
+}
+
+// Approximate spectral colors for the brightest named stars (by spectral class),
+// so the sky reads colorful rather than uniform white. Default is a soft
+// blue-white that cools slightly with magnitude.
+const STAR_COLORS: Record<string, string> = {
+  // blue / blue-white (O/B/A) — vivid icy blue
+  rigel: "#7FB0FF", bellatrix: "#93BCFF", alnilam: "#7FB0FF", alnitak: "#7FB0FF",
+  mintaka: "#7FB0FF", saiph: "#93BCFF", spica: "#79A8FF", achernar: "#8AB6FF",
+  hadar: "#7FB0FF", acrux: "#7FB0FF", mimosa: "#7FB0FF", regulus: "#A6C8FF",
+  algol: "#A6C8FF", vega: "#AFCFFF", sirius: "#BFE0FF", deneb: "#C7E2FF",
+  castor: "#AFCFFF", adhara: "#7FB0FF", alkaid: "#93BCFF", elnath: "#B6D2FF",
+  peacock: "#93BCFF", mirzam: "#93BCFF",
+  // white (A/F)
+  altair: "#EAF2FF", canopus: "#FBFAE8", procyon: "#F0F4FF", fomalhaut: "#DCE8FF",
+  caph: "#FFF0CC", polaris: "#F6F1DC",
+  // yellow (G) — warm gold
+  capella: "#FFDD7A", "rigil-kent": "#FFE9B0",
+  // orange (K) — rich amber
+  arcturus: "#FFB24A", aldebaran: "#FF9E3D", pollux: "#FFB866", dubhe: "#FFC97E",
+  alphard: "#FFB866", hamal: "#FFBE74", kochab: "#FFBC70", suhail: "#FFB24A",
+  menkent: "#FFBC70", enif: "#FFB866",
+  // red (M) — fiery coral-red
+  betelgeuse: "#FF6A3D", antares: "#FF5A33", gacrux: "#FF7E4A", scheat: "#FF9166",
+  mirach: "#FF9166",
+};
+
+export function starColor(id: string, magnitude: number): string {
+  return STAR_COLORS[id] ?? (magnitude < 2 ? "#EAF2FF" : magnitude < 3.2 ? "#D2E0FF" : "#BFD2FF");
+}
+
+// Subtle per-constellation tints so each figure reads as distinct without turning
+// the sky into a rainbow — a curated cool/warm set, chosen deterministically by id.
+const CONSTELLATION_TINTS = [
+  "#FFD27A", "#8FD0FF", "#9CE6C8", "#C7A6FF", "#FF9EB5", "#FFC07A", "#7FE3FF", "#E0C36B"
+];
+export function constellationColor(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return CONSTELLATION_TINTS[h % CONSTELLATION_TINTS.length];
 }
 
 export type SelectedKind = "star" | "planet" | "moon" | "constellation";
