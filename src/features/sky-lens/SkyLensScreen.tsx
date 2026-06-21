@@ -46,6 +46,7 @@ export function SkyLensScreen({ onClose }: Props) {
   const [box, setBox] = useState({ width: 360, height: 720 });
   const [active, setActive] = useState<Set<LayerKey>>(() => new Set(DEFAULT_ACTIVE_LAYERS));
   const [nightMode, setNightMode] = useState(false);
+  const [planetarium, setPlanetarium] = useState(false); // camera off → portable planetarium
   const [selected, setSelected] = useState<SelectedObject | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set());
 
@@ -70,6 +71,15 @@ export function SkyLensScreen({ onClose }: Props) {
     [zoom]
   );
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
+  // Planetarium Mode renders the gold Milky Way at full brightness on pure black.
+  const milkyWayBoost = planetarium ? 4.5 : 1.6;
+  const togglePlanetarium = useCallback(() => {
+    setPlanetarium((on) => {
+      const next = !on;
+      if (next) setActive((prev) => new Set(prev).add("milkyway")); // the Milky Way is the whole point
+      return next;
+    });
+  }, []);
 
   const onLayout = useCallback((e: LayoutEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -134,9 +144,10 @@ export function SkyLensScreen({ onClose }: Props) {
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={pinch}>
         <View style={StyleSheet.absoluteFill} collapsable={false}>
-          <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />
-          {/* Atmospheric twilight glow rising from the horizon (skipped in Night Mode) */}
-          {!nightMode && (
+          {/* Planetarium Mode = camera off → pure black behind the sky */}
+          {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
+          {/* Atmospheric twilight glow (camera mode only) */}
+          {!nightMode && !planetarium && (
             <LinearGradient
               colors={["rgba(0,0,0,0)", "rgba(46,58,120,0.10)", "rgba(40,110,130,0.30)"] as const}
               locations={[0.5, 0.8, 1]}
@@ -153,6 +164,7 @@ export function SkyLensScreen({ onClose }: Props) {
             fov={fov}
             activeLayers={active}
             nightMode={nightMode}
+            milkyWayBoost={milkyWayBoost}
             onSelect={setSelected}
           />
         </View>
@@ -177,16 +189,29 @@ export function SkyLensScreen({ onClose }: Props) {
 
         <View style={styles.hudPill} pointerEvents="none">
           <Text style={[styles.hudText, { color: accent }]}>{hud}</Text>
-          {status === "fallback" ? <Text style={styles.hudSub}>Default location</Text> : null}
+          {planetarium ? (
+            <Text style={styles.hudSub}>🔭 Planetarium — pan to explore</Text>
+          ) : status === "fallback" ? (
+            <Text style={styles.hudSub}>Default location</Text>
+          ) : null}
         </View>
 
-        <TouchableOpacity
-          style={[styles.iconBtn, nightMode && { backgroundColor: "rgba(139,32,32,0.5)" }]}
-          onPress={() => setNightMode((n) => !n)}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.iconBtnText}>{nightMode ? "🌙" : "◐"}</Text>
-        </TouchableOpacity>
+        <View style={styles.toggleRow} pointerEvents="box-none">
+          <TouchableOpacity
+            style={[styles.iconBtn, planetarium && { backgroundColor: "rgba(217,168,78,0.32)" }]}
+            onPress={togglePlanetarium}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.iconBtnText}>🔭</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.iconBtn, nightMode && { backgroundColor: "rgba(139,32,32,0.5)" }]}
+            onPress={() => setNightMode((n) => !n)}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.iconBtnText}>{nightMode ? "🌙" : "◐"}</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Moon finder banner (hidden while an info card is open) */}
@@ -233,6 +258,7 @@ const styles = StyleSheet.create({
     paddingVertical: 6
   },
   zoomText: { fontSize: 12, fontWeight: "800", fontVariant: ["tabular-nums"] },
+  toggleRow: { flexDirection: "row", gap: 8 },
   finder: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   finderText: {
     backgroundColor: "rgba(7,18,37,0.78)",

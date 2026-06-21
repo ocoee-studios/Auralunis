@@ -21,6 +21,7 @@ type Props = {
   fov: CameraFov;
   activeLayers: Set<LayerKey>;
   nightMode: boolean;
+  milkyWayBoost: number;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -28,7 +29,7 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
 
   const project: ProjectFn = useCallback(
@@ -42,7 +43,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
     <Svg style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
       {/* Milky Way sits behind everything */}
       {activeLayers.has("milkyway") && (
-        <MilkyWayLayer band={sky.milkyWay} project={project} box={box} nightMode={nightMode} />
+        <MilkyWayLayer band={sky.milkyWay} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
       )}
       {activeLayers.has("grid") && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />

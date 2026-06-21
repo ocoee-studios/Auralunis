@@ -345,3 +345,226 @@ Layers grouped into categories for the layer picker:
 
 Each category is a collapsible section in a slide-up drawer.
 Individual layers toggle independently within each category.
+
+---
+
+## Constellation Art Overlays (SkyView-level quality)
+
+### Reference: SkyView Lite
+SkyView renders illustrated mythological figures (scorpion for Scorpius,
+bear for Ursa Major, etc.) as semi-transparent overlays aligned to the
+star positions. This is their key differentiator.
+
+### AuraLunis Approach: Multi-Cultural Art System
+
+Instead of one art set (Greek), AuraLunis ships with 5 cultural art sets.
+Users toggle between cultures in the layer drawer. Same stars, different
+stories, different art.
+
+#### Art Style Per Culture
+| Culture | Art Style | Color Palette | Examples |
+|---------|-----------|---------------|----------|
+| Greek | Classical line art, marble statue aesthetic | White/silver on transparent | Orion as hunter, Scorpius as scorpion, Ursa Major as bear |
+| Aboriginal | Dot painting style, dreamtime aesthetic | Ochre/earth tones on transparent | Emu in the Sky (dark constellation), canoe, eagle |
+| Chinese | Ink brush painting style | Gold/vermillion on transparent | Azure Dragon, Black Tortoise, White Tiger, Vermillion Bird |
+| Norse | Runic knotwork line art | Ice blue/silver on transparent | Odin's Wain, Thor's constellation, Fenrir |
+| Polynesian | Navigation line art, wave patterns | Teal/ocean tones on transparent | Navigator stars, Maui's fishhook, great canoe |
+
+#### Art Asset Format
+- SVG paths, NOT rasterized images
+- Each constellation = one SVG group with paths aligned to star positions
+- Paths are relative to the constellation's bounding star coordinates
+- At render time: transform SVG to match projected star screen positions
+- Semi-transparent (opacity 0.3-0.5) so stars show through
+
+#### Art Rendering Pipeline
+```
+1. Compute star screen positions (existing projection math)
+2. For active culture layer, load SVG path data for visible constellations
+3. Transform SVG paths to match star positions on screen
+4. Render at 30-50% opacity behind the constellation lines
+5. Constellation lines render ON TOP of the art (gold, 1px)
+6. Star dots render ON TOP of everything
+```
+
+Layer order (back to front):
+```
+Camera feed
+  ↓ Milky Way band (lowest overlay)
+  ↓ Grid lines
+  ↓ Constellation ART (semi-transparent)
+  ↓ Constellation LINES (gold, connected stars)
+  ↓ Star dots (white/gold, magnitude-sized)
+  ↓ Planet markers (colored with glow)
+  ↓ Satellite tracks
+  ↓ Labels (names, magnitudes)
+  ↓ UI (layer bar, info card, reticle)
+```
+
+#### Night Vision Mode (matching SkyView)
+When night mode is active:
+- ALL overlays switch to deep red palette
+- Camera feed gets dark red filter overlay (rgba(10,0,0,0.3))
+- Constellation art: red-tinted
+- Constellation lines: #8B2020 instead of #D9A84E
+- Star dots: dark red instead of white
+- Labels: dark red
+- Preserves dark adaptation for real stargazing
+
+#### Magnitude Slider (matching SkyView)
+Bottom of screen, horizontal slider:
+- Left: fewer stars (bright only, mag < 2)
+- Right: more stars (dim included, mag < 6)
+- Smoothly fades stars in/out as slider moves
+- Crown control on Apple Watch equivalent
+
+#### Center Reticle
+- Thin circle (24px diameter) at screen center
+- Crosshair lines extending 12px in each direction
+- Gold at 30% opacity
+- When aimed at an object: reticle pulses, object name appears
+- On Apple Watch: haptic tap when reticle crosses an object
+
+#### AuraLunis Differentiators vs SkyView
+1. GOLD lines (not blue) — instantly recognizable brand
+2. FIVE cultures (not one) — 5× the constellation art
+3. Layer system — toggle individual overlays on/off
+4. Satellite tracking IN the AR view — SkyView doesn't do this
+5. Birth Sky mode — see YOUR personal sky overlaid
+6. Photography assist — framing grid, exposure data on screen
+7. Share cards — branded screenshots from the AR view
+8. Tonight Score — sky quality indicator on the AR screen
+9. Find Mode with haptic lock-on — SkyView has search but no haptic
+10. Astro Weather inline — cloud forecast visible in the AR view
+
+### Art Production Options
+
+#### Option A: AI-Generated SVG (fastest)
+Use AI image generation to create constellation art in each cultural style,
+then trace to SVG paths. ~2-3 days for all 5 cultures × 20 main constellations.
+Pros: Fast, consistent style. Cons: May lack cultural authenticity.
+
+#### Option B: Commission Artists (highest quality)
+Commission 5 illustrators (one per culture, ideally from that culture).
+Each creates 20 constellation overlays in their tradition's art style.
+Pros: Authentic, unique, defensible IP. Cons: Expensive, 4-8 weeks.
+
+#### Option C: Hybrid (recommended)
+AI-generate the Greek set (well-documented, less cultural sensitivity).
+Commission Aboriginal, Chinese, Norse, Polynesian from cultural artists.
+Ship Greek in v1, add others as premium content drops.
+
+### Priority
+- v1.0: Greek art only (ship with Sky Lens Phase 1)
+- v1.1: Chinese + Norse (two most visually distinct)
+- v1.2: Aboriginal + Polynesian (require cultural consultation)
+
+---
+
+## Milky Way — Full Color Render (not just a band)
+
+### What SkyView Does
+SkyView renders the Milky Way as a photorealistic panoramic texture —
+the galactic core glows warm gold/amber, dust lanes are visible as dark
+ribbons, star clouds create depth. It looks like a real long-exposure
+photo projected onto the sky.
+
+### What AuraLunis Must Do (minimum SkyView parity)
+The Milky Way CANNOT be a simple semi-transparent band. It must be a
+full-color astronomical render that makes people gasp.
+
+### Implementation: Panoramic Texture Projection
+
+#### Asset: Milky Way Panorama
+- Source: ESA/Gaia DR3 all-sky map or NASA/ESO public domain panorama
+- Format: Equirectangular projection PNG (4096×2048 or 8192×4096)
+- Covers the full celestial sphere in galactic coordinates
+- Shows: galactic core, dust lanes, Magellanic clouds, star fields
+
+Several public domain options:
+- ESO/S. Brunier Milky Way panorama (Creative Commons)
+- NASA/COBE all-sky survey
+- Axel Mellinger's all-sky mosaic (free for non-commercial, license for commercial)
+
+#### AuraLunis Color Twist
+Instead of the standard white/blue astronomical color:
+- Tint the panorama toward our Midnight Gold palette
+- Galactic core: warm amber/gold (#D9A84E tinted)
+- Dust lanes: deep cosmic black (#030816)
+- Star clouds: starlight (#FFF6D6 tinted)
+- Edge regions: subtle silver (#C0C6D4)
+
+This makes the Milky Way instantly "AuraLunis" — warm gold instead
+of cold blue. Nobody else has a gold Milky Way.
+
+#### Rendering Pipeline
+```typescript
+// 1. Load panorama texture (once, at Sky Lens init)
+const milkyWayTexture = require('@/assets/sky/milkyway-panorama.png');
+
+// 2. For each frame, compute which portion of the panorama is visible
+//    based on device pointing direction (az/alt → galactic l/b → texture UV)
+
+// 3. Project visible portion onto screen coordinates using existing
+//    SkyLensProjection.ts math
+
+// 4. Render as Image behind all other overlays but above camera feed
+
+interface MilkyWayRenderer {
+  // Convert equatorial (RA/Dec) to galactic (l/b) coordinates
+  equatorialToGalactic(ra: number, dec: number): { l: number; b: number };
+  
+  // Map galactic coordinates to panorama texture UV
+  galacticToUV(l: number, b: number): { u: number; v: number };
+  
+  // Get visible texture region for current FOV
+  getVisibleRegion(pointing: SkyPointing, fov: FOV): TextureRegion;
+  
+  // Render the visible region to screen
+  render(region: TextureRegion, screen: ScreenDimensions): void;
+}
+```
+
+#### Performance
+- Panorama loaded once into GPU texture memory
+- Only the visible FOV region is rendered each frame (~10% of full panorama)
+- Use React Native's Image component with transform for positioning
+- OR use expo-gl (WebGL) for hardware-accelerated texture mapping
+- Target: zero frame drops when panning across the galactic core
+
+#### Opacity Control
+- Slider in layer drawer: 0% (invisible) to 100% (full brightness)
+- Default: 40% opacity (visible but doesn't overwhelm constellation lines)
+- In Night Vision mode: Milky Way tinted deep red
+- In camera mode: blended with live camera feed
+- In planetarium mode (no camera): full opacity, stunning
+
+#### Galactic Core Highlight
+When pointing at the galactic center (Sagittarius region):
+- Subtle gold glow pulse around the core
+- Info card: "Galactic Center · 26,000 light years away"
+- Sagittarius A* marker (supermassive black hole location)
+- Best viewing: show tonight's galactic center rise/set times
+
+#### Planetarium Mode (bonus)
+Toggle camera off → pure black background + Milky Way panorama
+at full opacity. Turns the phone into a portable planetarium.
+Pan around the full sky without needing to be outside.
+Indoor stargazing for cloudy nights or classrooms.
+
+### File Structure
+```
+assets/sky/
+├── milkyway-panorama.png         # Full equirectangular panorama (4096×2048)
+├── milkyway-panorama-gold.png    # AuraLunis gold-tinted version
+└── milkyway-panorama-red.png     # Night vision red version
+
+src/features/sky-lens/layers/
+└── MilkyWayLayer.tsx             # Panorama texture projection + rendering
+```
+
+### Priority
+- v1.0: Ship with the gold-tinted panorama. This is a must-have, not a nice-to-have.
+  The Milky Way IS the night sky. Without it, Sky Lens looks empty.
+- Use ESO/Brunier panorama (CC license) or NASA public domain source.
+- Gold tint applied as a post-process or pre-baked into the asset.
