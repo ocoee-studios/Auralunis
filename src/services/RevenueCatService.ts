@@ -1,10 +1,24 @@
 import { Linking, Platform } from "react-native";
 import Constants from "expo-constants";
-import Purchases, {
-  type CustomerInfo,
-  type PurchasesPackage
-} from "react-native-purchases";
 import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
+
+// Dynamic require — react-native-purchases is not available in Expo Go
+type CustomerInfo = { entitlements: { active: Record<string, unknown> } };
+type PurchasesPackage = { product: { priceString: string; price: number }; identifier: string };
+
+let Purchases: {
+  configure: (opts: { apiKey: string }) => void;
+  getCustomerInfo: () => Promise<CustomerInfo>;
+  getOfferings: () => Promise<{ current: { availablePackages: PurchasesPackage[] } | null }>;
+  purchasePackage: (pkg: PurchasesPackage) => Promise<{ customerInfo: CustomerInfo }>;
+  restorePurchases: () => Promise<CustomerInfo>;
+} | null = null;
+
+try {
+  Purchases = require("react-native-purchases").default;
+} catch {
+  // react-native-purchases not available in Expo Go — all purchase functions will gracefully degrade
+}
 
 type BillingPeriod = "monthly" | "annual";
 type AuraLunisPaidTierId = string;
@@ -47,6 +61,7 @@ export async function configureRevenueCat(): Promise<ConfigureResult> {
   }
 
   const publicApiKey = apiKey as string;
+  if (!Purchases) return { status: "unsupported_platform" };
   Purchases.configure({ apiKey: publicApiKey });
   configured = true;
 
