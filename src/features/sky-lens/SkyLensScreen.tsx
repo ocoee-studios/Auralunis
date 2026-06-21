@@ -1,5 +1,6 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { CameraView } from "expo-camera";
 import { LinearGradient } from "expo-linear-gradient";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -40,6 +41,31 @@ export function SkyLensScreen({ onClose }: Props) {
   const [nightMode, setNightMode] = useState(false);
   const [selected, setSelected] = useState<SelectedObject | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set());
+
+  // Pinch-to-zoom: zoom magnifies the sky by narrowing the field of view (and
+  // nudges the camera's optical zoom to match). 1× = full 60°×45° FOV.
+  const [zoom, setZoom] = useState(1);
+  const zoomRef = useRef(1);
+  zoomRef.current = zoom;
+  const zoomStart = useRef(1);
+  const pinch = useMemo(
+    () =>
+      Gesture.Pinch()
+        .runOnJS(true)
+        .onStart(() => {
+          zoomStart.current = zoomRef.current;
+        })
+        .onUpdate((e) => setZoom(Math.max(1, Math.min(6, zoomStart.current * e.scale)))),
+    []
+  );
+  const fov = useMemo(
+    () => ({
+      horizontalDegrees: DEFAULT_FOV.horizontalDegrees / zoom,
+      verticalDegrees: DEFAULT_FOV.verticalDegrees / zoom
+    }),
+    [zoom]
+  );
+  const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
 
   const onLayout = useCallback((e: LayoutEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -93,35 +119,51 @@ export function SkyLensScreen({ onClose }: Props) {
     const moon = sky.bodies.find((b) => b.id === "moon");
     if (!moon) return null;
     if (!moon.aboveHorizon) return "☾  The Moon is below the horizon right now";
-    const p = projectTarget(pointing, moon.azimuthDegrees, moon.altitudeDegrees, DEFAULT_FOV, box);
+    const p = projectTarget(pointing, moon.azimuthDegrees, moon.altitudeDegrees, fov, box);
     if (p.onScreen) return null; // it's in view — no need to point you to it
     return p.behind ? "☾  Turn around for the Moon ↻" : `☾  Pan ${arrowFor(p.bearingDegrees)} to the Moon`;
-  }, [sky.bodies, pointing, box]);
+  }, [sky.bodies, pointing, box, fov]);
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
   return (
     <View style={styles.root} onLayout={onLayout}>
-      <CameraView style={StyleSheet.absoluteFillObject} facing="back" />
-      {/* Atmospheric twilight glow rising from the horizon (skipped in Night Mode) */}
-      {!nightMode && (
-        <LinearGradient
-          colors={["rgba(0,0,0,0)", "rgba(46,58,120,0.10)", "rgba(40,110,130,0.30)"] as const}
-          locations={[0.5, 0.8, 1]}
-          style={styles.atmosphere}
-          pointerEvents="none"
-        />
-      )}
-      {nightMode && <View style={styles.nightFilter} pointerEvents="none" />}
+      <GestureDetector gesture={pinch}>
+        <View style={StyleSheet.absoluteFill} collapsable={false}>
+          <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />
+          {/* Atmospheric twilight glow rising from the horizon (skipped in Night Mode) */}
+          {!nightMode && (
+            <LinearGradient
+              colors={["rgba(0,0,0,0)", "rgba(46,58,120,0.10)", "rgba(40,110,130,0.30)"] as const}
+              locations={[0.5, 0.8, 1]}
+              style={styles.atmosphere}
+              pointerEvents="none"
+            />
+          )}
+          {nightMode && <View style={styles.nightFilter} pointerEvents="none" />}
 
-      <SkyLensCanvas
-        box={box}
-        pointing={pointing}
-        sky={sky}
-        activeLayers={active}
-        nightMode={nightMode}
-        onSelect={setSelected}
-      />
+          <SkyLensCanvas
+            box={box}
+            pointing={pointing}
+            sky={sky}
+            fov={fov}
+            activeLayers={active}
+            nightMode={nightMode}
+            onSelect={setSelected}
+          />
+        </View>
+      </GestureDetector>
+
+      {/* Zoom indicator — pinch to zoom, tap to reset */}
+      {zoom > 1.05 && (
+        <TouchableOpacity
+          style={[styles.zoomChip, { top: insets.top + 58 }]}
+          onPress={() => setZoom(1)}
+          activeOpacity={0.85}
+        >
+          <Text style={[styles.zoomText, { color: accent }]}>{zoom.toFixed(1)}×  ·  tap to reset</Text>
+        </TouchableOpacity>
+      )}
 
       {/* Top HUD */}
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
@@ -178,6 +220,15 @@ const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#000" },
   nightFilter: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.3)" },
   atmosphere: { position: "absolute", left: 0, right: 0, bottom: 0, height: "42%" },
+  zoomChip: {
+    position: "absolute",
+    alignSelf: "center",
+    backgroundColor: "rgba(7,18,37,0.78)",
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingVertical: 6
+  },
+  zoomText: { fontSize: 12, fontWeight: "800", fontVariant: ["tabular-nums"] },
   finder: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   finderText: {
     backgroundColor: "rgba(7,18,37,0.78)",

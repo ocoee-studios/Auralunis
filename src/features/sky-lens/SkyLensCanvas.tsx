@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import Svg from "react-native-svg";
 import { StyleSheet } from "react-native";
-import { DEFAULT_FOV, projectTarget, type CameraPointing } from "./ar/SkyLensProjection";
+import { projectTarget, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
 import { GridLayer } from "./layers/GridLayer";
 import { ConstellationLayer } from "./layers/ConstellationLayer";
 import { StarLayer } from "./layers/StarLayer";
@@ -18,6 +18,7 @@ type Props = {
   box: { width: number; height: number };
   pointing: CameraPointing;
   sky: SkyData;
+  fov: CameraFov;
   activeLayers: Set<LayerKey>;
   nightMode: boolean;
   onSelect: (object: SelectedObject) => void;
@@ -27,12 +28,12 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, activeLayers, nightMode, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
 
   const project: ProjectFn = useCallback(
-    (az: number, alt: number) => projectTarget(pointing, az, alt, DEFAULT_FOV, box),
-    [pointing, box]
+    (az: number, alt: number) => projectTarget(pointing, az, alt, fov, box),
+    [pointing, box, fov]
   );
 
   const moon = sky.bodies.find((b) => b.id === "moon");
