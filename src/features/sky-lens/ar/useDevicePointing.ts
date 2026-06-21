@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Accelerometer, Magnetometer } from "expo-sensors";
 import { pointingFromSensors, type Vec3 } from "./SkyLensOrientation";
 import type { CameraPointing } from "./SkyLensProjection";
@@ -23,20 +23,33 @@ export interface DevicePointingState {
 // Streams accelerometer + magnetometer and derives the back camera's pointing
 // direction. The math is exact; real-world accuracy still depends on sensor
 // calibration, device FOV, and magnetic declination — tune those outdoors.
-export function useDevicePointing(updateMs = 120, magneticDeclinationDegrees = 0): DevicePointingState {
+// `smoothingAlpha` is the EMA tracking rate (0–1): lower = steadier/more damped,
+// higher = snappier. Callers ramp it down as they zoom in to fight amplified jitter.
+export function useDevicePointing(
+  updateMs = 120,
+  magneticDeclinationDegrees = 0,
+  smoothingAlpha = 0.3
+): DevicePointingState {
   const [accelerometer, setAccelerometer] = useState<Vec3>({ x: 0, y: 0, z: 1 });
   const [magnetometer, setMagnetometer] = useState<Vec3 | null>(null);
+  // Held in a ref so the live alpha is read inside the listener without
+  // re-subscribing the sensors on every change.
+  const alphaRef = useRef(smoothingAlpha);
+  alphaRef.current = smoothingAlpha;
 
   useEffect(() => {
     Sensors.Accelerometer.setUpdateInterval(updateMs);
     Sensors.Magnetometer.setUpdateInterval(updateMs);
     // Exponential smoothing damps the raw sensor jitter so the overlay glides
     // instead of twitching — that high-frequency jitter is what reads as "laggy".
-    const ema = (prev: Vec3, next: SensorReading, a = 0.3): Vec3 => ({
-      x: prev.x + (next.x - prev.x) * a,
-      y: prev.y + (next.y - prev.y) * a,
-      z: prev.z + (next.z - prev.z) * a,
-    });
+    const ema = (prev: Vec3, next: SensorReading): Vec3 => {
+      const a = alphaRef.current;
+      return {
+        x: prev.x + (next.x - prev.x) * a,
+        y: prev.y + (next.y - prev.y) * a,
+        z: prev.z + (next.z - prev.z) * a,
+      };
+    };
     const accelSub = Sensors.Accelerometer.addListener((r) => setAccelerometer((prev) => ema(prev, r)));
     const magSub = Sensors.Magnetometer.addListener((r) => setMagnetometer((prev) => (prev ? ema(prev, r) : r)));
 

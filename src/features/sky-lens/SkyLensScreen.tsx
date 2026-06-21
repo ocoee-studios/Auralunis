@@ -31,7 +31,14 @@ const arrowFor = (bearingDegrees: number) => ARROWS[Math.round(bearingDegrees / 
 export function SkyLensScreen({ onClose }: Props) {
   const insets = useSafeAreaInsets();
   const { location, status } = useObserverLocation();
-  const { pointing, available } = useDevicePointing();
+  // Zoom state lives up here so the device-pointing smoothing can ramp with it.
+  const [zoom, setZoom] = useState(1);
+  const zoomRef = useRef(1);
+  zoomRef.current = zoom;
+  // Ramp EMA smoothing DOWN (steadier, more damped) as zoom climbs, because a
+  // narrow FOV amplifies hand-shake: ~0.32 at 1× → 0.10 at 12×.
+  const smoothAlpha = Math.max(0.1, 0.32 - (zoom - 1) * 0.02);
+  const { pointing, available } = useDevicePointing(120, 0, smoothAlpha);
   const sky = useSkyData(location);
   const { isPremium } = useEntitlement();
   const { addItem } = useAuraLunisVault();
@@ -44,9 +51,6 @@ export function SkyLensScreen({ onClose }: Props) {
 
   // Pinch-to-zoom: zoom magnifies the sky by narrowing the field of view (and
   // nudges the camera's optical zoom to match). 1× = full 60°×45° FOV.
-  const [zoom, setZoom] = useState(1);
-  const zoomRef = useRef(1);
-  zoomRef.current = zoom;
   const zoomStart = useRef(1);
   const pinch = useMemo(
     () =>
