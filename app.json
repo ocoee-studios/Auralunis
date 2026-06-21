@@ -16,9 +16,7 @@
         "NSCameraUsageDescription": "AuraLunis uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view.",
         "NSLocationWhenInUseUsageDescription": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you.",
         "NSPhotoLibraryAddUsageDescription": "AuraLunis saves sky captures and cosmic time-lapse exports only when you choose to save them.",
-        "NSMotionUsageDescription": "AuraLunis uses motion sensors to align the sky lens with the direction your phone is pointing.",
-        "NSHealthShareUsageDescription": "AuraLunis reads sleep and heart rate data to show how the cosmos affects your body.",
-        "NSHealthUpdateUsageDescription": "AuraLunis logs stargazing sessions as mindfulness minutes in Apple Health."
+        "NSMotionUsageDescription": "AuraLunis uses motion sensors to align the sky lens with the direction your phone is pointing."
       },
       "privacyManifests": {
         "NSPrivacyAccessedAPITypes": [
@@ -39,14 +37,6 @@
             ]
           },
           {
-            "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypeHealth",
-            "NSPrivacyCollectedDataTypeLinked": false,
-            "NSPrivacyCollectedDataTypeTracking": false,
-            "NSPrivacyCollectedDataTypePurposes": [
-              "NSPrivacyCollectedDataTypePurposeAppFunctionality"
-            ]
-          },
-          {
             "NSPrivacyCollectedDataType": "NSPrivacyCollectedDataTypePurchaseHistory",
             "NSPrivacyCollectedDataTypeLinked": true,
             "NSPrivacyCollectedDataTypeTracking": false,
@@ -56,12 +46,6 @@
           }
         ],
         "NSPrivacyTracking": false
-      },
-      "entitlements": {
-        "com.apple.developer.healthkit": true,
-        "com.apple.developer.healthkit.access": [
-          "health-records"
-        ]
       }
     },
     "android": {
