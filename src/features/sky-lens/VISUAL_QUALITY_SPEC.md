@@ -296,3 +296,74 @@ their phone at the sky, the reaction should be:
 "Holy shit."
 
 That's the bar. If it doesn't hit that, it's not done.
+
+---
+
+## Enhanced Planet Detail — Rings & Moons
+
+### Saturn (the star of the show)
+Saturn's rings should be THE visual flex of Sky Lens. When someone
+points at Saturn and the rings render, that's the screenshot moment.
+
+- Ring system: 3 concentric ellipses (A ring, B ring, C ring)
+- A ring (outer): gold (#D9A84E) at 35% opacity, 1px
+- B ring (middle, brightest): gold at 50% opacity, 1.5px
+- C ring (inner, faintest): gold at 15% opacity, 0.5px
+- Cassini Division: 1px gap between A and B rings (visible as dark line)
+- Ring tilt: computed from real obliquity + Earth viewing angle
+- Ring shadow: faint dark band across planet disk from ring shadow
+- Total visual width: ~20px across (planet is 6px, rings extend to 10px each side)
+- When identified: ring labels fade in ("A Ring · B Ring · Cassini Division")
+
+### Jupiter (bands + moons = mini solar system)
+- Horizontal cloud bands: 3 alternating stripes across the disk
+  - Light zones: amber (#EF9F27) at full opacity
+  - Dark belts: darker amber (#BA7517) at 80% opacity
+- Great Red Spot: tiny dot at correct latitude (23°S), deep coral (#D85A30)
+  - Only visible when zoom level > 2× (Easter egg for explorers)
+- 4 Galilean moons rendered as real dots at REAL computed positions:
+  - Io: 2px, warm orange
+  - Europa: 1.5px, white
+  - Ganymede: 2.5px (largest moon in solar system!), silver
+  - Callisto: 2px, dim gray
+  - Positions computed from orbital period (Io: 1.77d, Europa: 3.55d, 
+    Ganymede: 7.15d, Callisto: 16.69d)
+  - They actually MOVE over the course of an evening — show it!
+  - Label on tap: "Io · Europa · Ganymede · Callisto"
+- Jupiter's faint ring: 0.3px line at 8% opacity (Easter egg — barely visible,
+  but it's REAL and we show it because we're accurate)
+
+### Mars Detail
+- Polar ice caps: tiny white dot at north pole (0.5px, 40% opacity)
+- Dark feature hint: Syrtis Major as a slightly darker patch
+- Phobos & Deimos: NOT shown (too small/dim for naked eye, would be dishonest)
+
+### Venus Detail
+- Phase shadow: accurately computed crescent/gibbous from elongation
+- Cloud shimmer: very subtle brightness oscillation (Venus has thick clouds
+  that actually cause slight brightness variations)
+- At maximum brightness (mag -4.6): intense bloom, dominates the view
+
+### Planet Info Cards (tap to reveal)
+When tapping any planet, the info card shows:
+```
+┌──────────────────────────────────┐
+│  ● Jupiter                       │
+│  King of the planets             │
+│──────────────────────────────────│
+│  Magnitude   -2.1                │
+│  Distance    4.2 AU              │
+│  Azimuth     251°                │
+│  Altitude    -0.7° (below hz)    │
+│  Rise time   4:12 AM             │
+│──────────────────────────────────│
+│  Moons visible: 4                │
+│  ○ Io  ○ Europa  ○ Ganymede      │
+│  ○ Callisto                      │
+│                                  │
+│  Bands + Great Red Spot visible  │
+│  at 2× zoom                      │
+│                                  │
+│  [Save to Vault] [Share Card]    │
+└──────────────────────────────────┘
+```
