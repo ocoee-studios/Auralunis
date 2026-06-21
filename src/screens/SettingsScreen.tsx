@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Alert, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { Alert, Image, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import { GlassPanel } from "@/components/GlassPanel";
 import { ScreenShell } from "@/components/ScreenShell";
 import { LogoMark } from "@/components/LogoMark";
@@ -227,6 +227,19 @@ export function SettingsScreen() {
           <Text style={styles.secondaryButtonText}>Reset Settings</Text>
         </Pressable>
       </SettingsSection>
+
+      {/* Brand footer with app icon */}
+      <View style={styles.brandFooter}>
+        <Image
+          source={require("@/../assets/icon.png")}
+          style={styles.brandIcon}
+          resizeMode="contain"
+        />
+        <Text style={styles.brandName}>AuraLunis</Text>
+        <Text style={styles.brandTagline}>Your Time, Written in the Stars</Text>
+        <Text style={styles.brandVersion}>v1.0.0 · Ocoee Studios</Text>
+        <Text style={styles.brandEmail}>admin@ocoeestudios.com</Text>
+      </View>
     </ScreenShell>
   );
 }
@@ -274,5 +287,43 @@ const styles = StyleSheet.create({
     borderColor: "rgba(217,168,78,0.18)"
   },
   aboutTitle: { color: "#FFF", fontSize: 18, fontWeight: "900" },
-  aboutCopy: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5 }
+  aboutCopy: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 19, marginTop: 5 },
+  brandFooter: {
+    alignItems: "center",
+    paddingVertical: 32,
+    paddingBottom: 48,
+    marginTop: 8,
+  },
+  brandIcon: {
+    width: 80,
+    height: 80,
+    borderRadius: 18,
+    marginBottom: 12,
+  },
+  brandName: {
+    color: AuraLunisColors.gold,
+    fontSize: 16,
+    fontWeight: "700",
+    letterSpacing: 4,
+    textTransform: "uppercase",
+  },
+  brandTagline: {
+    color: AuraLunisColors.gold,
+    fontSize: 10,
+    letterSpacing: 1.5,
+    opacity: 0.5,
+    marginTop: 4,
+    fontStyle: "italic",
+  },
+  brandVersion: {
+    color: AuraLunisColors.faint,
+    fontSize: 10,
+    marginTop: 10,
+  },
+  brandEmail: {
+    color: AuraLunisColors.gold,
+    fontSize: 10,
+    marginTop: 2,
+    opacity: 0.6,
+  },
 });
