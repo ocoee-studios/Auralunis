@@ -92,6 +92,17 @@ export function starColor(id: string, magnitude: number): string {
   return STAR_COLORS[id] ?? (magnitude < 2 ? "#EAF2FF" : magnitude < 3.2 ? "#D2E0FF" : "#BFD2FF");
 }
 
+// Subtle per-constellation tints so each figure reads as distinct without turning
+// the sky into a rainbow — a curated cool/warm set, chosen deterministically by id.
+const CONSTELLATION_TINTS = [
+  "#FFD27A", "#8FD0FF", "#9CE6C8", "#C7A6FF", "#FF9EB5", "#FFC07A", "#7FE3FF", "#E0C36B"
+];
+export function constellationColor(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return CONSTELLATION_TINTS[h % CONSTELLATION_TINTS.length];
+}
+
 export type SelectedKind = "star" | "planet" | "moon" | "constellation";
 
 export interface SelectedFact {
