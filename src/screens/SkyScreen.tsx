@@ -4,7 +4,7 @@ import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
 import { SkyLensPermissionGate } from "@/features/permissions/SkyLensPermissionGate";
-import { SkyLensPlaceholder } from "@/features/sky-lens/SkyLensPlaceholder";
+import { SkyLensScreen } from "@/features/sky-lens/SkyLensScreen";
 import { ManualSkyMap } from "@/features/sky-lens/ManualSkyMap";
 import { featuredDeepSkyObjects } from "@/features/archive/DeepSkyCatalog";
 import { AuraLunisColors } from "@/theme/tokens";
@@ -42,9 +42,14 @@ export function SkyScreen() {
     );
   }
 
+  // The Sky Lens takes over the full screen (camera + AR overlay), so render it
+  // as a standalone screen rather than an embedded card.
+  if (skyLensOpen) {
+    return <SkyLensScreen onClose={() => setSkyLensOpen(false)} />;
+  }
+
   return (
     <ScreenShell title="Sky Lens + Archive" subtitle="Sky">
-      {skyLensOpen ? <SkyLensPlaceholder onClose={() => setSkyLensOpen(false)} /> : null}
       {manualMapOpen ? <ManualSkyMap onClose={() => setManualMapOpen(false)} /> : null}
       {alignmentOpen ? (
         <View style={StyleSheet.absoluteFillObject}>
