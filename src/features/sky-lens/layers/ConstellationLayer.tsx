@@ -26,10 +26,12 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
         const segments = c.lines
           .filter(
             ([i, j]) =>
+              projected[i] &&
+              projected[j] &&
               !projected[i].behind &&
               !projected[j].behind &&
-              c.points[i].aboveHorizon &&
-              c.points[j].aboveHorizon
+              c.points[i]?.aboveHorizon &&
+              c.points[j]?.aboveHorizon
           )
           .map(([i, j], idx) => {
             const a = projected[i];

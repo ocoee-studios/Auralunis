@@ -8,8 +8,6 @@ import { StarLayer } from "./layers/StarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer } from "./layers/MoonLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
-import { TwinkleLayer } from "./layers/TwinkleLayer";
-import { MeteorLayer } from "./layers/MeteorLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
 import type { LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
@@ -61,9 +59,6 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {activeLayers.has("stars") && (
         <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} onSelect={onSelect} />
       )}
-      {activeLayers.has("stars") && (
-        <TwinkleLayer stars={sky.stars} project={project} nightMode={nightMode} />
-      )}
       {activeLayers.has("planets") && (
         <PlanetLayer
           bodies={sky.bodies}
@@ -81,8 +76,6 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         palette={palette}
         onSelect={onSelect}
       />
-      {/* Meteor streaks on top, for ambiance */}
-      <MeteorLayer box={box} nightMode={nightMode} />
     </Svg>
   );
 }
