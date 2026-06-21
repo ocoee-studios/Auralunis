@@ -13,6 +13,7 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.ocoee.auralunis",
       "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "AuraLunis uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view.",
         "NSLocationWhenInUseUsageDescription": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you.",
         "NSPhotoLibraryAddUsageDescription": "AuraLunis saves sky captures and cosmic time-lapse exports only when you choose to save them.",
@@ -71,7 +72,7 @@
       [
         "expo-location",
         {
-          "locationAlwaysAndWhenInUsePermission": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you."
+          "locationWhenInUsePermission": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you."
         }
       ],
       [
