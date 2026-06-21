@@ -16,7 +16,7 @@ import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
-import type { SelectedObject } from "./SkyLensVisual";
+import { skyGradient, type SelectedObject } from "./SkyLensVisual";
 
 type Props = { onClose: () => void };
 
@@ -139,14 +139,28 @@ export function SkyLensScreen({ onClose }: Props) {
     return p.behind ? "☾  Turn around for the Moon ↻" : `☾  Pan ${arrowFor(p.bearingDegrees)} to the Moon`;
   }, [sky.bodies, pointing, box, fov]);
 
+  // Dynamic sky gradient by the Sun's altitude (drives Planetarium Mode's backdrop).
+  const sunAltitude = sky.bodies.find((b) => b.id === "sun")?.altitudeDegrees ?? -90;
+  const skyColors = skyGradient(sunAltitude);
+
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
   return (
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={pinch}>
         <View style={StyleSheet.absoluteFill} collapsable={false}>
-          {/* Planetarium Mode = camera off → pure black behind the sky */}
+          {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
+          {planetarium && !nightMode && (
+            <LinearGradient
+              colors={skyColors}
+              locations={[0, 0.42, 0.72, 1]}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
+              pointerEvents="none"
+            />
+          )}
           {/* Atmospheric twilight glow (camera mode only) */}
           {!nightMode && !planetarium && (
             <LinearGradient
