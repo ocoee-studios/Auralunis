@@ -3,8 +3,8 @@ import Constants from "expo-constants";
 import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
 
 // Dynamic require — react-native-purchases is not available in Expo Go
-type CustomerInfo = { entitlements: { active: Record<string, unknown> } };
-type PurchasesPackage = { product: { priceString: string; price: number }; identifier: string };
+type CustomerInfo = { entitlements: { active: Record<string, unknown> }; managementURL?: string | null };
+type PurchasesPackage = { product: { priceString: string; price: number; identifier: string }; identifier: string };
 
 let Purchases: {
   configure: (opts: { apiKey: string }) => void;
@@ -72,6 +72,7 @@ export async function getCurrentPackages(): Promise<PurchasesPackage[]> {
   const configuration = await configureRevenueCat();
 
   if (configuration.status !== "configured") return [];
+  if (!Purchases) return [];
 
   const offerings = await Purchases.getOfferings();
   return offerings.current?.availablePackages ?? [];
@@ -94,6 +95,9 @@ export async function purchaseAuraLunisTier(
   const configuration = await configureRevenueCat();
 
   if (configuration.status !== "configured") {
+    return { status: "not_configured", productId: product.productId };
+  }
+  if (!Purchases) {
     return { status: "not_configured", productId: product.productId };
   }
 
@@ -135,6 +139,7 @@ export async function restoreAuraLunisPurchases(): Promise<{
   if (configuration.status !== "configured") {
     return { status: "not_configured" };
   }
+  if (!Purchases) return { status: "not_configured" };
 
   const customerInfo = await Purchases.restorePurchases();
   return { status: "restored", customerInfo };
@@ -148,6 +153,7 @@ export async function openAuraLunisSubscriptionManagement(): Promise<{
   if (configuration.status !== "configured") {
     return { status: "not_configured" };
   }
+  if (!Purchases) return { status: "not_configured" };
 
   const customerInfo = await Purchases.getCustomerInfo();
   const managementURL = customerInfo.managementURL;
