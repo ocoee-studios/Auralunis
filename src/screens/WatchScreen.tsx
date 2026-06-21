@@ -7,10 +7,7 @@ import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
 import { LogoMark } from "@/components/LogoMark";
 import { AuraLunisColors } from "@/theme/tokens";
-// Live path on main today (chronaura→AuraLunis rename in progress; the renamed
-// "@/state/AuraLunisSettingsContext" does not exist yet). Using the real file so
-// the Watch screen mounts and the Watch app is reachable.
-import { useAuraLunisSettings } from "@/state/ChronauraSettingsContext";
+import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { DeskObeliskPreview } from "@/features/future/DeskObeliskPreview";
 import { SovereignSigilPreview } from "@/features/future/SovereignSigilPreview";
 import {

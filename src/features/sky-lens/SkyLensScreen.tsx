@@ -3,11 +3,7 @@ import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { CameraView } from "expo-camera";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuraLunisColors } from "@/theme/tokens";
-// NOTE: imported from the file that exists on main today. Several screens
-// reference the post-rename "@/state/AuraLunisVaultContext" path, which is not
-// yet present (chronaura→AuraLunis rename in progress). Using the live path keeps
-// Sky Lens runnable now; a later rename sweep will update all importers together.
-import { useAuraLunisVault } from "@/state/ChronauraVaultContext";
+import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { useObserverLocation } from "./ephemeris/useObserverLocation";
 import { useDevicePointing } from "./ar/useDevicePointing";

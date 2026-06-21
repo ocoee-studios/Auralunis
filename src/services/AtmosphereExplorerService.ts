@@ -18,7 +18,6 @@ import {
 import { calculateAlignment, type AlignmentResult } from "@/utils/alignmentEngine";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import type { CameraPointing } from "@/features/sky-lens/ar/SkyLensProjection";
-import { isSatelliteJsAvailable, getLiveISSPosition, getLiveStarlinkPositions } from "@/services/LiveTLEService";
 
 export interface SatelliteState {
   satellite: AtmosphericSatellite;

@@ -1,7 +1,6 @@
 import React, { useMemo, useState } from "react";
 import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-// NOTE: live path on main today; see WatchApp/SkyLens note on the chronaura→AuraLunis rename.
-import { useAuraLunisVault } from "@/state/ChronauraVaultContext";
+import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { tapSuccess } from "@/services/HapticService";
 import type { WatchCtx } from "../WatchAppTheme";
 import { bodyGlyph, formatClock } from "../WatchFormat";
