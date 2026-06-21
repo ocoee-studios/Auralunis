@@ -55,7 +55,7 @@ export function SkyLensScreen({ onClose }: Props) {
         .onStart(() => {
           zoomStart.current = zoomRef.current;
         })
-        .onUpdate((e) => setZoom(Math.max(1, Math.min(6, zoomStart.current * e.scale)))),
+        .onUpdate((e) => setZoom(Math.max(1, Math.min(12, zoomStart.current * e.scale)))),
     []
   );
   const fov = useMemo(
