@@ -3,7 +3,7 @@ import { Image, StyleSheet, Text, View } from "react-native";
 import { AuraLunisBrand } from "@/data/brand";
 import { AuraLunisColors } from "@/theme/tokens";
 
-const stardustEmblem = require("../../assets/logo/auralunis-stardust-emblem.png");
+const appIcon = require("../../assets/icon.png");
 
 type Props = {
   size?: number;
@@ -21,10 +21,10 @@ export function LogoMark({
   return (
     <View style={[styles.row, centered && styles.centeredContainer]}>
       <Image
-        source={stardustEmblem}
-        style={{ width: size, height: size }}
+        source={appIcon}
+        style={{ width: size, height: size, borderRadius: size * 0.22 }}
         resizeMode="contain"
-        accessibilityLabel="AuraLunis star-dust celestial emblem"
+        accessibilityLabel="AuraLunis app icon"
       />
       {showWordmark ? (
         <View style={centered && styles.centeredWordmarkContainer}>
