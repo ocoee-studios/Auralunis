@@ -50,9 +50,9 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
 
   return (
     <Svg style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-      {/* Milky Way behind everything: a thin procedural band wraps the full galactic
-          plane (Sagittarius→Cygnus→Cassiopeia→Orion), then the REAL photographic core
-          glows on top at Sagittarius. */}
+      {/* Milky Way: a soft radial-gradient band wraps the whole galactic plane
+          (visible in every direction), then the REAL photographic core texture
+          glows on top at Sagittarius. No polyline stripe artifacts. */}
       {activeLayers.has("milkyway") && (
         <MilkyWayLayer band={sky.milkyWay} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
       )}

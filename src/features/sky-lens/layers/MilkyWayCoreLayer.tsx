@@ -65,10 +65,9 @@ export function MilkyWayCoreLayer({ band, project, fov, box, nightMode, boost }:
   // the mask is fully transparent before any image edge; the circle is rotation-
   // invariant, so it melts cleanly regardless of the galactic-plane tilt.
   const radius = h * 0.5;
-  // The hero. A warm golden river that GLOWS — dust lanes and star clouds clearly
-  // visible, brightest at the galactic core (the radial mask centers there). ~35%
-  // over the camera, brighter in Planetarium (pure-black backdrop).
-  const op = Math.min(0.5, 0.35 * boost);
+  // The hero Sagittarius core. The wrap-around band (MilkyWayLayer) handles the
+  // rest of the sky, so the core stays at ~38% over the camera.
+  const op = Math.min(0.5, 0.38 * boost);
 
   return (
     <G>
