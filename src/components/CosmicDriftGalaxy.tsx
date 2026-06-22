@@ -13,18 +13,16 @@ import {
   ScrollView,
   Modal,
 } from "react-native";
-import Svg, { Circle, Line, G } from "react-native-svg";
+import Svg, { Circle, G } from "react-native-svg";
 import Animated, {
   useSharedValue,
-  useAnimatedProps,
+  useAnimatedStyle,
   withRepeat,
   withTiming,
   Easing,
 } from "react-native-reanimated";
 import { getLockEntries, type LockEntry } from "@/services/CosmicDriftService";
 import { AuraLunisColors } from "@/theme/tokens";
-
-const AnimatedG = Animated.createAnimatedComponent(G);
 
 const SIZE = 280;
 const CENTER = SIZE / 2;
@@ -52,9 +50,11 @@ export function CosmicDriftGalaxy({ refreshTrigger = 0 }: CosmicDriftGalaxyProps
     getLockEntries().then(setEntries).catch(() => {});
   }, [refreshTrigger]);
 
-  const animatedProps = useAnimatedProps(() => ({
-    rotation: rotationDeg.value,
-    origin: `${CENTER}, ${CENTER}`,
+  // Crash-safe: rotate an Animated.View's transform (useAnimatedStyle) rather than
+  // animating react-native-svg props via useAnimatedProps, which crashes on
+  // RN 0.81 + Reanimated 4 + react-native-svg 15.
+  const rotateStyle = useAnimatedStyle(() => ({
+    transform: [{ rotate: `${rotationDeg.value}deg` }],
   }));
 
   function formatDate(iso: string): string {
@@ -81,60 +81,44 @@ export function CosmicDriftGalaxy({ refreshTrigger = 0 }: CosmicDriftGalaxyProps
   return (
     <View style={styles.container}>
       {/* Particle cloud */}
-      <Svg width={SIZE} height={SIZE} style={styles.svg}>
-        {/* Background star field */}
-        {Array.from({ length: 60 }).map((_, i) => {
-          const x = ((Math.sin(i * 137.5) + 1) / 2) * SIZE;
-          const y = ((Math.cos(i * 97.3) + 1) / 2) * SIZE;
-          const r = (Math.sin(i * 43) + 1) * 0.4 + 0.3;
-          return (
-            <Circle
-              key={`bg-${i}`}
-              cx={x}
-              cy={y}
-              r={r}
-              fill="white"
-              opacity={0.18 + (i % 5) * 0.04}
-            />
-          );
-        })}
-
-        {/* Rotating lock particles */}
-        <AnimatedG animatedProps={animatedProps}>
-          {entries.map((entry, i) => {
-            // Project 3D particle onto 2D using simple isometric-ish projection
-            const px = CENTER + entry.particleX * SCALE - entry.particleZ * SCALE * 0.3;
-            const py = CENTER + entry.particleY * SCALE - entry.particleZ * SCALE * 0.2;
-            const depth = (entry.particleZ + 1) / 2; // 0..1
-            const radius = 3 + depth * 4;
-            const opacity = 0.5 + depth * 0.5;
-
+      <View style={styles.galaxy}>
+        {/* Static background star field */}
+        <Svg width={SIZE} height={SIZE} style={StyleSheet.absoluteFill}>
+          {Array.from({ length: 60 }).map((_, i) => {
+            const x = ((Math.sin(i * 137.5) + 1) / 2) * SIZE;
+            const y = ((Math.cos(i * 97.3) + 1) / 2) * SIZE;
+            const r = (Math.sin(i * 43) + 1) * 0.4 + 0.3;
             return (
-              <G key={entry.id}>
-                {/* Glow ring */}
-                <Circle
-                  cx={px}
-                  cy={py}
-                  r={radius + 4}
-                  fill="none"
-                  stroke={entry.targetColor}
-                  strokeWidth={0.5}
-                  opacity={opacity * 0.35}
-                />
-                {/* Core star */}
-                <Circle
-                  cx={px}
-                  cy={py}
-                  r={radius}
-                  fill={entry.targetColor}
-                  opacity={opacity}
-                  onPress={() => setSelected(entry)}
-                />
-              </G>
+              <Circle key={`bg-${i}`} cx={x} cy={y} r={r} fill="white" opacity={0.18 + (i % 5) * 0.04} />
             );
           })}
-        </AnimatedG>
-      </Svg>
+        </Svg>
+
+        {/* Rotating lock particles — the Animated.View spins (crash-safe), the SVG inside is static */}
+        <Animated.View style={[StyleSheet.absoluteFill, rotateStyle]}>
+          <Svg width={SIZE} height={SIZE}>
+            <G>
+              {entries.map((entry) => {
+                // Project 3D particle onto 2D using simple isometric-ish projection
+                const px = CENTER + entry.particleX * SCALE - entry.particleZ * SCALE * 0.3;
+                const py = CENTER + entry.particleY * SCALE - entry.particleZ * SCALE * 0.2;
+                const depth = (entry.particleZ + 1) / 2; // 0..1
+                const radius = 3 + depth * 4;
+                const opacity = 0.5 + depth * 0.5;
+
+                return (
+                  <G key={entry.id}>
+                    {/* Glow ring */}
+                    <Circle cx={px} cy={py} r={radius + 4} fill="none" stroke={entry.targetColor} strokeWidth={0.5} opacity={opacity * 0.35} />
+                    {/* Core star */}
+                    <Circle cx={px} cy={py} r={radius} fill={entry.targetColor} opacity={opacity} onPress={() => setSelected(entry)} />
+                  </G>
+                );
+              })}
+            </G>
+          </Svg>
+        </Animated.View>
+      </View>
 
       <Text style={styles.count}>
         {entries.length} {entries.length === 1 ? "star" : "stars"} in your universe
@@ -211,7 +195,7 @@ function ModalPill({ label, value, color }: { label: string; value: string; colo
 
 const styles = StyleSheet.create({
   container: { alignItems: "center", width: "100%" },
-  svg: { alignSelf: "center" },
+  galaxy: { width: SIZE, height: SIZE, alignSelf: "center" },
   count: { color: AuraLunisColors.gold, fontSize: 13, fontWeight: "800", marginTop: 4 },
   hint: { color: AuraLunisColors.faint, fontSize: 10, marginTop: 2, marginBottom: 14 },
   empty: { alignItems: "center", padding: 32, gap: 10 },
