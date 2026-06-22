@@ -14,6 +14,8 @@ export interface LearnTopic {
   title: string;
   level: "beginner" | "intermediate" | "advanced";
   summary: string;
+  /** Full lesson body — a few real paragraphs (textbook content, not a placeholder). */
+  body?: string;
   keyFacts: string[];
   skyLensAction?: string;
   archiveAction?: string;
