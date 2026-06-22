@@ -32,13 +32,38 @@ function altitudeArc(project: ProjectFn, altitude: number, centerAz: number): st
   return pts.join(" ");
 }
 
+// A vertical great-circle of constant azimuth from horizon to zenith. Split into
+// in-front runs so it never streaks when part of the meridian is behind the camera.
+function meridianRuns(project: ProjectFn, azimuth: number): string[] {
+  const runs: string[] = [];
+  let run: string[] = [];
+  for (let alt = 0; alt <= 88; alt += 6) {
+    const p = project(azimuth, alt);
+    if (p.behind) {
+      if (run.length > 1) runs.push(run.join(" "));
+      run = [];
+      continue;
+    }
+    run.push(`${p.x.toFixed(1)},${p.y.toFixed(1)}`);
+  }
+  if (run.length > 1) runs.push(run.join(" "));
+  return runs;
+}
+
 export function GridLayer({ project, centerAzimuth, box, palette }: Props) {
   const horizon = altitudeArc(project, 0, centerAzimuth);
   const arc30 = altitudeArc(project, 30, centerAzimuth);
   const arc60 = altitudeArc(project, 60, centerAzimuth);
 
+  // Azimuth meridians every 30° around the full sphere.
+  const meridians = Array.from({ length: 12 }, (_, i) => meridianRuns(project, i * 30));
+  const zenith = project(centerAzimuth, 90);
+
   return (
     <G>
+      {meridians.flat().map((pts, i) => (
+        <Polyline key={`mer-${i}`} points={pts} fill="none" stroke={palette.grid} strokeWidth={0.8} strokeDasharray="3 7" />
+      ))}
       {arc30.length > 0 && (
         <Polyline points={arc30} fill="none" stroke={palette.grid} strokeWidth={1} strokeDasharray="4 6" />
       )}
@@ -59,6 +84,17 @@ export function GridLayer({ project, centerAzimuth, box, palette }: Props) {
           </SvgText>
         );
       })}
+
+      {/* Zenith marker — shown when pointing near straight up */}
+      {!zenith.behind && zenith.x > 0 && zenith.x < box.width && zenith.y > 0 && zenith.y < box.height && (
+        <G>
+          <Line x1={zenith.x - 7} y1={zenith.y} x2={zenith.x + 7} y2={zenith.y} stroke={palette.horizon} strokeWidth={1} />
+          <Line x1={zenith.x} y1={zenith.y - 7} x2={zenith.x} y2={zenith.y + 7} stroke={palette.horizon} strokeWidth={1} />
+          <SvgText x={zenith.x + 10} y={zenith.y + 3} fill={palette.gridLabel} fontSize={9}>
+            90° zenith
+          </SvgText>
+        </G>
+      )}
 
       {/* Cardinal + intercardinal markers on the horizon */}
       {CARDINALS.map(({ az, label }) => {

@@ -35,8 +35,8 @@ export function MilkyWayLayer({ band, project, box, nightMode, boost }: Props) {
 
   // ~30° of sky for the soft halo; a tighter core so the band feathers inward
   // instead of stopping at a hard edge.
-  const halo = Math.max(120, box.height * 0.6);
-  const core = Math.max(50, box.height * 0.26);
+  const halo = Math.max(70, box.height * 0.32);
+  const core = Math.max(28, box.height * 0.13);
   const o = (v: number) => Math.min(1, v * boost);
 
   return (
@@ -45,10 +45,10 @@ export function MilkyWayLayer({ band, project, box, nightMode, boost }: Props) {
         const str = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
         return (
           <G key={`mw-${i}`}>
-            {/* wide soft gold halo — feathers out to nothing */}
-            <Polyline points={str} fill="none" stroke="#D9A84E" strokeWidth={halo} strokeOpacity={o(0.045)} strokeLinecap="round" strokeLinejoin="round" />
-            {/* warm golden core — a faint river of light through Cygnus */}
-            <Polyline points={str} fill="none" stroke="#EBCB86" strokeWidth={core} strokeOpacity={o(0.09)} strokeLinecap="round" strokeLinejoin="round" />
+            {/* soft gold halo — thin, butt-capped so run-ends don't bloom into blobs */}
+            <Polyline points={str} fill="none" stroke="#D9A84E" strokeWidth={halo} strokeOpacity={o(0.04)} strokeLinecap="butt" strokeLinejoin="round" />
+            {/* warm golden core — the faint river wrapping Sagittarius→Cygnus→Cassiopeia */}
+            <Polyline points={str} fill="none" stroke="#EBCB86" strokeWidth={core} strokeOpacity={o(0.07)} strokeLinecap="butt" strokeLinejoin="round" />
           </G>
         );
       })}
