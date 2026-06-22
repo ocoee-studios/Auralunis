@@ -19,6 +19,8 @@ import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLo
 import { OrbitalAlignmentScreen } from "@/screens/OrbitalAlignmentScreen";
 import { BirthSkyScreen } from "@/screens/BirthSkyScreen";
 import { AstroWeatherScreen } from "@/screens/AstroWeatherScreen";
+import { PhotoPlannerScreen } from "@/screens/PhotoPlannerScreen";
+import { SkyShareScreen } from "@/screens/SkyShareScreen";
 
 export function SkyScreen() {
   const [showPermission, setShowPermission] = useState(false);
@@ -28,6 +30,8 @@ export function SkyScreen() {
   const [alignmentOpen, setAlignmentOpen] = useState(false);
   const [birthSkyOpen, setBirthSkyOpen] = useState(false);
   const [astroWeatherOpen, setAstroWeatherOpen] = useState(false);
+  const [photoPlannerOpen, setPhotoPlannerOpen] = useState(false);
+  const [skyShareOpen, setSkyShareOpen] = useState(false);
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(null);
   const { addItem } = useAuraLunisVault();
 
@@ -39,9 +43,9 @@ export function SkyScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   useEffect(() => {
-    const immersive = skyLensOpen || alignmentOpen || birthSkyOpen || astroWeatherOpen;
+    const immersive = skyLensOpen || alignmentOpen || birthSkyOpen || astroWeatherOpen || photoPlannerOpen || skyShareOpen;
     navigation.setOptions({ tabBarStyle: immersive ? { display: "none" } : TAB_BAR_STYLE });
-  }, [navigation, skyLensOpen, alignmentOpen, birthSkyOpen, astroWeatherOpen]);
+  }, [navigation, skyLensOpen, alignmentOpen, birthSkyOpen, astroWeatherOpen, photoPlannerOpen, skyShareOpen]);
 
   // A Learn lesson can deep-link here with a target ("See in Sky Lens"): open the
   // lens straight to Find Mode on that object, then clear the param so it doesn't
@@ -102,6 +106,14 @@ export function SkyScreen() {
 
   if (astroWeatherOpen) {
     return <AstroWeatherScreen onClose={() => setAstroWeatherOpen(false)} />;
+  }
+
+  if (photoPlannerOpen) {
+    return <PhotoPlannerScreen onClose={() => setPhotoPlannerOpen(false)} />;
+  }
+
+  if (skyShareOpen) {
+    return <SkyShareScreen onClose={() => setSkyShareOpen(false)} />;
   }
 
   return (
@@ -174,6 +186,20 @@ export function SkyScreen() {
         description="Tonight's observing verdict — GO / MAYBE / STAY IN — with the best clear window and an hour-by-hour breakdown of cloud, seeing, and transparency."
         actionLabel="Check Tonight's Sky"
         onPress={() => setAstroWeatherOpen(true)}
+      />
+
+      <FeatureCard
+        title="Photo Planner"
+        description="Astrophotography planner: tonight's verdict, exposure settings for your gear (500 & NPF rules, ISO, stacking), the Milky Way core window, golden/blue hours, and ranked targets."
+        actionLabel="Plan a Shoot"
+        onPress={() => setPhotoPlannerOpen(true)}
+      />
+
+      <FeatureCard
+        title="Share Your Sky"
+        description="Turn tonight's sky into a shareable card — pick a style (cosmic, minimal, data, story), add a note, and share."
+        actionLabel="Create Share Card"
+        onPress={() => setSkyShareOpen(true)}
       />
 
       <FeatureCard

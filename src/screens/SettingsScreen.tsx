@@ -11,7 +11,6 @@ import type { AuraLunisThemeMode } from "@/features/settings/SettingsTypes";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { DeviceDiagnosticsPanel } from "@/features/device-qa/DeviceDiagnosticsPanel";
-import { FutureLuxuryModulesPanel } from "@/features/future/FutureLuxuryModulesPanel";
 import { openAuraLunisSubscriptionManagement, restoreAuraLunisPurchases } from "@/services/RevenueCatService";
 
 type SettingRowProps = {
@@ -208,10 +207,6 @@ export function SettingsScreen() {
         </Pressable>
       </SettingsSection>
 
-
-      <SettingsSection title="Future Luxury Modules">
-        <FutureLuxuryModulesPanel />
-      </SettingsSection>
 
       <SettingsSection title="Native Device QA">
         <Text style={styles.infoCopy}>
