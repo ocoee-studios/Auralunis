@@ -56,11 +56,12 @@ export const PLANET_COLORS: Record<string, string> = {
   saturn: "#D9A84E"
 };
 
-// Naked-eye magnitude → marker radius (px). Brighter (smaller mag) → bigger dot.
-// Clamped so the dimmest catalog stars stay tappable and Sirius doesn't bloom.
+// Naked-eye magnitude → marker radius (px). Steep curve so brightness reads as a
+// clear hierarchy, not a field of identical dots: mag-0 showpieces (Vega, Deneb,
+// Sirius) ~5px, visible named stars ~2.5px, dim catalog stars clamp to ~0.8px.
 export function magnitudeToRadius(magnitude: number): number {
-  const r = 3.6 - magnitude * 0.85;
-  return Math.max(0.9, Math.min(4.6, r));
+  const r = 5.0 - magnitude * 1.4;
+  return Math.max(0.8, Math.min(5.0, r));
 }
 
 // Approximate spectral colors for the brightest named stars (by spectral class),

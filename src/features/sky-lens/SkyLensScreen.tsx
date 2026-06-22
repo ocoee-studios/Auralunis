@@ -146,11 +146,13 @@ export function SkyLensScreen({ onClose }: Props) {
   const sunAltitude = sky.bodies.find((b) => b.id === "sun")?.altitudeDegrees ?? -90;
   const skyColors = skyGradient(sunAltitude);
 
-  // Bright on-screen stars projected for the twinkle overlay (View-based, crash-safe).
+  // The 20 brightest on-screen stars projected for the twinkle overlay (View-based,
+  // crash-safe). Sorted by magnitude so it's genuinely the brightest, not the first
+  // 20 found in catalog order.
   const twinkleStars = useMemo<TwinkleTarget[]>(() => {
     const out: TwinkleTarget[] = [];
     for (const s of sky.stars) {
-      if (!s.aboveHorizon || s.magnitude > 2.2) continue;
+      if (!s.aboveHorizon || s.magnitude > 3.0) continue;
       const p = projectTarget(pointing, s.azimuthDegrees, s.altitudeDegrees, fov, box);
       if (!p.onScreen) continue;
       out.push({
@@ -159,11 +161,11 @@ export function SkyLensScreen({ onClose }: Props) {
         y: p.y,
         size: Math.max(2.5, 6 - s.magnitude),
         color: starColor(s.id, s.magnitude),
-        offset: (s.id.charCodeAt(0) % 10) / 10
+        offset: (s.id.charCodeAt(0) % 10) / 10,
+        magnitude: s.magnitude
       });
-      if (out.length >= 14) break;
     }
-    return out;
+    return out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 20);
   }, [sky.stars, pointing, fov, box]);
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
@@ -184,12 +186,15 @@ export function SkyLensScreen({ onClose }: Props) {
               pointerEvents="none"
             />
           )}
-          {/* Atmospheric twilight glow (camera mode only) */}
+          {/* Atmospheric depth over the camera feed: transparent at the top,
+              deepening to ground-glow at the bottom for a sense of depth. */}
           {!nightMode && !planetarium && (
             <LinearGradient
-              colors={["rgba(0,0,0,0)", "rgba(46,58,120,0.10)", "rgba(40,110,130,0.30)"] as const}
-              locations={[0.5, 0.8, 1]}
-              style={styles.atmosphere}
+              colors={["rgba(3,8,22,0)", "rgba(3,8,22,0.3)"] as const}
+              locations={[0, 1]}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              style={StyleSheet.absoluteFillObject}
               pointerEvents="none"
             />
           )}

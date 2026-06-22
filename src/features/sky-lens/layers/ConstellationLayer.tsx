@@ -1,7 +1,10 @@
 import React from "react";
 import { G, Line, Text as SvgText } from "react-native-svg";
 import type { HorizontalConstellation } from "../ephemeris/StarPositions";
-import { constellationColor, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+import { type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+
+// AuraLunis brand gold — every other star app uses blue/white lines; we use gold.
+const GOLD = "#D9A84E"; // rgb(217, 168, 78)
 
 type Props = {
   constellations: HorizontalConstellation[];
@@ -17,8 +20,9 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
     <G>
       {constellations.map((c) => {
         const projected = c.points.map((pt) => project(pt.azimuthDegrees, pt.altitudeDegrees));
-        // Each constellation gets its own subtle tint (Night Mode stays red).
-        const lineColor = nightMode ? palette.line : constellationColor(c.id);
+        // Brand gold for every figure (Night Mode stays dark-adapted red) — no
+        // rainbow tints, no box shapes, just gold lines connecting the stars.
+        const lineColor = nightMode ? palette.line : GOLD;
 
         // Only draw a segment when both endpoints are in front of the camera AND
         // above the horizon — otherwise lines streak across the view or dive into
@@ -38,10 +42,10 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
             const b = projected[j];
             return (
               <G key={`${c.id}-l${idx}`}>
-                {/* glow */}
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={4} strokeOpacity={0.18} strokeLinecap="round" />
-                {/* crisp */}
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={1.4} strokeOpacity={0.92} strokeLinecap="round" />
+                {/* 2px soft gold glow */}
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={5} strokeOpacity={0.16} strokeLinecap="round" />
+                {/* crisp gold line — rgba(217,168,78,0.5) */}
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={1.6} strokeOpacity={0.5} strokeLinecap="round" />
               </G>
             );
           });
@@ -63,9 +67,10 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
               <SvgText
                 x={centroid.x}
                 y={centroid.y}
-                fill={nightMode ? palette.conLabel : lineColor}
-                fontSize={11}
-                fontWeight="700"
+                fill={nightMode ? palette.conLabel : GOLD}
+                fontSize={10}
+                fontWeight="600"
+                letterSpacing={2}
                 textAnchor="middle"
                 onPress={() =>
                   onSelect({
