@@ -22,7 +22,13 @@ async function save(state: StreakState): Promise<void> {
 }
 
 function todayKey(): string {
-  return new Date().toISOString().slice(0, 10);
+  // Local calendar day, not UTC — a late-evening session in a negative-UTC zone
+  // must not roll the streak into "tomorrow".
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 export async function completeNight(): Promise<StreakState> {

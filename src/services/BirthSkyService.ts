@@ -5,6 +5,7 @@
 
 import { computePlanetaryTargets } from "@/utils/planetaryEphemeris";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
+import { moonPhaseName } from "@/services/MoonPhase";
 
 export interface BirthSkyProfile {
   birthDate: string;       // ISO 8601
@@ -84,8 +85,8 @@ function getMoonPhase(jd: number): { name: string; illumination: number } {
   const daysSince = jd - knownNewMoon;
   const phase = ((daysSince % synodicMonth) + synodicMonth) % synodicMonth;
   const illumination = Math.round((1 - Math.cos((phase / synodicMonth) * 2 * Math.PI)) / 2 * 100);
-  const phaseIndex = Math.floor((phase / synodicMonth) * 8) % 8;
-  return { name: MOON_PHASES[phaseIndex], illumination };
+  const isWaxing = phase < synodicMonth / 2; // first half of the cycle = waxing
+  return { name: moonPhaseName(illumination, isWaxing), illumination };
 }
 
 /** Rising constellation (on the eastern horizon at birth moment) */
