@@ -110,6 +110,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         illuminationPercent={sky.moonIlluminationPercent}
         project={project}
         palette={palette}
+        nightMode={nightMode}
         onSelect={onSelect}
       />
     </Svg>
