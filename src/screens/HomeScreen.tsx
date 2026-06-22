@@ -11,6 +11,7 @@ import {
   Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
+import { Starfield } from "@/components/Starfield";
 import { GlassPanel } from "@/components/GlassPanel";
 import { CelestialDial } from "@/components/CelestialDial";
 import { AuraLunisColors } from "@/theme/tokens";
@@ -91,7 +92,7 @@ export function HomeScreen() {
   }
 
   return (
-    <ScreenShell title="AuraLunis" subtitle="Home">
+    <ScreenShell title="AuraLunis" subtitle="Home" background={<Starfield />}>
 
       {/* Date */}
       <Text style={styles.dateText}>

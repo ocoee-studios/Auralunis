@@ -11,15 +11,18 @@ type Props = {
   title: string;
   subtitle: string;
   children: React.ReactNode;
+  /** Optional custom background layer (rendered absolutely behind the scroll
+   *  content). Defaults to the gold StarDust. Home passes a living Starfield. */
+  background?: React.ReactNode;
 };
 
-export function ScreenShell({ title, subtitle, children }: Props) {
+export function ScreenShell({ title, subtitle, children, background }: Props) {
   const { palette } = useAuraLunisSettings();
   const insets = useSafeAreaInsets();
 
   return (
     <LinearGradient colors={palette.gradient as unknown as readonly [string, string, ...string[]]} style={styles.root}>
-      <StarDust count={12} color={AuraLunisColors.gold} opacity={0.18} />
+      {background ?? <StarDust count={12} color={AuraLunisColors.gold} opacity={0.18} />}
       <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}>
         {/* Brand header matching mockup: [Logo] AURALUNIS */}
         <View style={styles.brandBar}>
