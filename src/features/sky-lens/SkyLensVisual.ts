@@ -60,8 +60,9 @@ export const PLANET_COLORS: Record<string, string> = {
 // clear hierarchy, not a field of identical dots: mag-0 showpieces (Vega, Deneb,
 // Sirius) ~5px, visible named stars ~2.5px, dim catalog stars clamp to ~0.8px.
 export function magnitudeToRadius(magnitude: number): number {
-  const r = 5.0 - magnitude * 1.4;
-  return Math.max(0.8, Math.min(5.0, r));
+  // Sized for visibility on a phone screen: mag 0 ≈ 6px down to mag 6 ≈ 1px.
+  const r = 6 - magnitude;
+  return Math.max(1, Math.min(6.5, r));
 }
 
 // Approximate spectral colors for the brightest named stars (by spectral class),
@@ -131,7 +132,7 @@ export function domeColor(id: string): string {
 
 export function skyGradient(sunAltitudeDegrees: number): readonly [string, string, string, string] {
   const a = sunAltitudeDegrees;
-  if (a < -18) return ["#030816", "#061028", "#0A1535", "#121D3A"]; // deep night
+  if (a < -18) return ["#05091C", "#0B1432", "#11204A", "#1A2C58"]; // deep night (navy horizon, not black)
   if (a < -12) return ["#050D1E", "#0D1A38", "#1A254A", "#2A2855"]; // astronomical twilight
   if (a < -6) return ["#0A1428", "#1A2548", "#2D2E5A", "#8B5A30"]; // nautical twilight (violet→amber)
   if (a < 6) return ["#142040", "#2A3060", "#5A4060", "#EF7B27"]; // golden hour / civil
