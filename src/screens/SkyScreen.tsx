@@ -17,6 +17,8 @@ import { AstrophotographyPredictorPanel } from "@/features/aura-pro/Astrophotogr
 import { computeTonightSky, findBody } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 import { OrbitalAlignmentScreen } from "@/screens/OrbitalAlignmentScreen";
+import { BirthSkyScreen } from "@/screens/BirthSkyScreen";
+import { AstroWeatherScreen } from "@/screens/AstroWeatherScreen";
 
 export function SkyScreen() {
   const [showPermission, setShowPermission] = useState(false);
@@ -24,6 +26,8 @@ export function SkyScreen() {
   const [manualMapOpen, setManualMapOpen] = useState(false);
   const [galaxyModeOn, setGalaxyModeOn] = useState(false);
   const [alignmentOpen, setAlignmentOpen] = useState(false);
+  const [birthSkyOpen, setBirthSkyOpen] = useState(false);
+  const [astroWeatherOpen, setAstroWeatherOpen] = useState(false);
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(null);
   const { addItem } = useAuraLunisVault();
 
@@ -35,9 +39,9 @@ export function SkyScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   useEffect(() => {
-    const immersive = skyLensOpen || alignmentOpen;
+    const immersive = skyLensOpen || alignmentOpen || birthSkyOpen || astroWeatherOpen;
     navigation.setOptions({ tabBarStyle: immersive ? { display: "none" } : TAB_BAR_STYLE });
-  }, [navigation, skyLensOpen, alignmentOpen]);
+  }, [navigation, skyLensOpen, alignmentOpen, birthSkyOpen, astroWeatherOpen]);
 
   // A Learn lesson can deep-link here with a target ("See in Sky Lens"): open the
   // lens straight to Find Mode on that object, then clear the param so it doesn't
@@ -90,6 +94,14 @@ export function SkyScreen() {
         </TouchableOpacity>
       </View>
     );
+  }
+
+  if (birthSkyOpen) {
+    return <BirthSkyScreen onClose={() => setBirthSkyOpen(false)} />;
+  }
+
+  if (astroWeatherOpen) {
+    return <AstroWeatherScreen onClose={() => setAstroWeatherOpen(false)} />;
   }
 
   return (
@@ -151,10 +163,17 @@ export function SkyScreen() {
       />
 
       <FeatureCard
-        title="X-Ray Lens + Birth Sky Overlay"
-        description="Reveal orbital geometry, ecliptic paths, moon path, transit vectors, and birth-sky comparison."
-        actionLabel="Reveal Geometry"
-        onPress={() => Alert.alert("X-Ray Lens", "Orbital geometry layer prepared.")}
+        title="Your Birth Sky"
+        description="What did the sky look like the night you were born? Moon phase, sun sign, rising constellation, visible planets, and a poetic cosmic signature you can share."
+        actionLabel="Reveal My Birth Sky"
+        onPress={() => setBirthSkyOpen(true)}
+      />
+
+      <FeatureCard
+        title="Astro Weather"
+        description="Tonight's observing verdict — GO / MAYBE / STAY IN — with the best clear window and an hour-by-hour breakdown of cloud, seeing, and transparency."
+        actionLabel="Check Tonight's Sky"
+        onPress={() => setAstroWeatherOpen(true)}
       />
 
       <FeatureCard
