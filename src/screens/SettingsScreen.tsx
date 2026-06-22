@@ -206,8 +206,7 @@ export function SettingsScreen() {
         <SettingRow title="Portal Stack Widgets" description="Moon, Tonight Score, Note, Event, Alarm, and mini astrolabe widgets." value={settings.widgetsEnabled} onValueChange={(value) => updateSetting("widgetsEnabled", value)} />
       </SettingsSection>
 
-      <SettingsSection title="Audio + Learning">
-        <SettingRow title="Sound Bath Autoplay" description="Resume the last Astral Sound Bath during Lunar Wind-Down." value={settings.soundBathAutoplayEnabled} onValueChange={(value) => updateSetting("soundBathAutoplayEnabled", value)} />
+      <SettingsSection title="Learning">
         <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Learning Preferences", "Teacher Mode, difficulty, pronunciation help, quizzes, and saved progress direction prepared.")}>
           <Text style={styles.secondaryButtonText}>Learning Preferences</Text>
         </Pressable>

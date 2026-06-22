@@ -115,9 +115,6 @@ function sanitizeSettings(value: unknown): AuraLunisSettingsState {
     widgetsEnabled: isBoolean(saved.widgetsEnabled)
       ? saved.widgetsEnabled
       : defaultAuraLunisSettings.widgetsEnabled,
-    soundBathAutoplayEnabled: isBoolean(saved.soundBathAutoplayEnabled)
-      ? saved.soundBathAutoplayEnabled
-      : defaultAuraLunisSettings.soundBathAutoplayEnabled,
     selectedWatchFaceId:
       typeof saved.selectedWatchFaceId === "string" &&
       validWatchFaceIds.has(saved.selectedWatchFaceId as WatchFaceId)

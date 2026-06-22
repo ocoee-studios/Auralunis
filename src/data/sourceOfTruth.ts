@@ -19,7 +19,6 @@ export const SourceOfTruth = {
       "Cosmic Notes",
       "Cosmic Vault",
       "LifeSky Timeline",
-      "Astral Sound Bath",
       "Cosmic Steering Wheel",
       "Time-Scrub Matrix"
     ],

@@ -20,7 +20,6 @@ export interface AuraLunisSettingsState {
   motionPermissionExplained: boolean;
   watchSyncEnabled: boolean;
   widgetsEnabled: boolean;
-  soundBathAutoplayEnabled: boolean;
   selectedWatchFaceId: WatchFaceId;
   selectedWatchThemeId: WatchThemeId;
   selectedWatchComplicationIds: WatchComplicationId[];
@@ -43,7 +42,6 @@ export const defaultAuraLunisSettings: AuraLunisSettingsState = {
   motionPermissionExplained: true,
   watchSyncEnabled: false,
   widgetsEnabled: false,
-  soundBathAutoplayEnabled: false,
   selectedWatchFaceId: "living_astrolabe",
   selectedWatchThemeId: "midnight_gold",
   selectedWatchComplicationIds: ["moon_phase", "tonight_score", "next_event", "sky_lens_shortcut"]
