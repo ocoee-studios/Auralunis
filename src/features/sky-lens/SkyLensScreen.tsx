@@ -11,6 +11,7 @@ import { useEntitlement } from "@/hooks/useEntitlement";
 import { useObserverLocation } from "./ephemeris/useObserverLocation";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useDevicePointing } from "./ar/useDevicePointing";
+import { useParallaxOffset } from "./ar/useParallaxOffset";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
 import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
@@ -61,6 +62,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // narrow FOV amplifies hand-shake: ~0.32 at 1× → 0.10 at 12×.
   const smoothAlpha = Math.max(0.1, 0.32 - (zoom - 1) * 0.02);
   const { pointing, available } = useDevicePointing(120, 0, smoothAlpha);
+  const parallax = useParallaxOffset();
   const sky = useSkyData(location);
   const { isPremium } = useEntitlement();
   const { addItem } = useAuraLunisVault();
@@ -399,6 +401,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               milkyWayBoost={milkyWayBoost}
               isPremium={isPremium}
               focus={focusZone}
+              parallax={parallax}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>

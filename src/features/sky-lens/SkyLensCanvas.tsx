@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import Svg from "react-native-svg";
+import Svg, { G } from "react-native-svg";
 import { StyleSheet } from "react-native";
 import { projectTarget, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
 import { GridLayer } from "./layers/GridLayer";
@@ -16,6 +16,7 @@ import { ZodiacLayer } from "./layers/ZodiacLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { type LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
+import type { ParallaxOffset } from "./ar/useParallaxOffset";
 
 type Props = {
   box: { width: number; height: number };
@@ -27,6 +28,7 @@ type Props = {
   milkyWayBoost: number;
   isPremium: boolean;
   focus: FocusZone;
+  parallax: ParallaxOffset;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -34,8 +36,12 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, parallax, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
+
+  // Celestial-dome depth: cloud layers float by a fraction of the gyro parallax
+  // offset while the deep dome stays anchored. translate(0 0) at rest = exact AR.
+  const depth = (d: number) => `translate(${(parallax.x * d).toFixed(2)} ${(parallax.y * d).toFixed(2)})`;
 
   // Constellation FIGURES (gold stick lines) are shown for everyone — gating them
   // made 25 constellations render as bare stars with no lines (looked broken).
@@ -55,13 +61,15 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           plane (Sagittarius→Cygnus→Cassiopeia→Orion), then the REAL photographic core
           glows on top at Sagittarius. */}
       {activeLayers.has("milkyway") && (
-        <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
+        <G transform={depth(0.6)}>
+          <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
+          <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
+        </G>
       )}
-      {activeLayers.has("milkyway") && (
-        <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
-      )}
-      {/* Deep-sky nebulae glows sit just behind the stars */}
-      <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} onSelect={onSelect} />
+      {/* Deep-sky nebulae glows sit just behind the stars — float at full parallax */}
+      <G transform={depth(1)}>
+        <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} onSelect={onSelect} />
+      </G>
       {activeLayers.has("grid") && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
       )}
@@ -94,7 +102,9 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         <DomeStarLayer stars={sky.domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} />
       )}
       {activeLayers.has("stars") && (
-        <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} onSelect={onSelect} />
+        <G transform={depth(0.25)}>
+          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} onSelect={onSelect} />
+        </G>
       )}
       {activeLayers.has("planets") && (
         <PlanetLayer
