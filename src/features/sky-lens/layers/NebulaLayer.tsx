@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Circle, Defs, G, RadialGradient, Stop, Text as SvgText } from "react-native-svg";
 import type { HorizontalNebula } from "../ephemeris/Nebulae";
 import type { ProjectFn, SkyPalette } from "../SkyLensVisual";
@@ -8,7 +8,11 @@ type Props = {
   project: ProjectFn;
   palette: SkyPalette;
   nightMode: boolean;
-  time: number; // for breathing animation
+  // Drives the breathing pulse (ms). Optional: if a parent doesn't supply it,
+  // NebulaLayer runs its own internal clock so the re-renders stay ISOLATED to
+  // this component — feeding `time` from the canvas would re-render the whole SVG
+  // tree (1200+ dome stars, the Milky Way image) on every frame.
+  time?: number;
 };
 
 /**
@@ -23,8 +27,19 @@ type Props = {
  * The effect should look like a real astrophotography capture —
  * soft colored clouds, not flat circles or dots.
  */
-export function NebulaLayer({ nebulae, project, palette, nightMode, time }: Props) {
+export function NebulaLayer({ nebulae, project, palette, nightMode, time: timeProp }: Props) {
+  // Internal breathing clock (~8 fps) — only used when no `time` prop is supplied.
+  // Hooks must run before any early return (rules of hooks).
+  const [internalTime, setInternalTime] = useState(() => Date.now());
+  useEffect(() => {
+    if (timeProp !== undefined || nightMode) return;
+    const id = setInterval(() => setInternalTime(Date.now()), 120);
+    return () => clearInterval(id);
+  }, [timeProp, nightMode]);
+
   if (nightMode) return null;
+
+  const time = timeProp ?? internalTime;
 
   return (
     <G>
