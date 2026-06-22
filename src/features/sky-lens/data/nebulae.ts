@@ -85,5 +85,61 @@ export const NEBULAE: ReadonlyArray<Nebula> = [
   { id: "m1", catalog: "M1", name: "Crab Nebula", raHours: 5.575, decDegrees: 22.01, type: "supernova", con: "Tau", constellation: "Taurus", coreColor: "#F0A050", hazeColor: "#D06030", radius: 10, distanceLy: "6,500 ly", visibility: "Telescope",
     description: "The shattered remains of a star that exploded in 1054 AD — recorded by astronomers worldwide.", bestMonths: "December–February" },
   { id: "ngc6960", catalog: "NGC 6960", name: "Veil Nebula", raHours: 20.76, decDegrees: 30.71, type: "supernova", con: "Cyg", constellation: "Cygnus", coreColor: "#70E0C8", hazeColor: "#40A0B0", radius: 20, distanceLy: "2,400 ly", visibility: "Telescope",
-    description: "Delicate teal filaments — the blast wave of a star that died ten thousand years ago, still expanding.", bestMonths: "July–October" }
+    description: "Delicate teal filaments — the blast wave of a star that died ten thousand years ago, still expanding.", bestMonths: "July–October" },
+
+  // ── Sky gap fillers — every direction should have color ────────────────────
+
+  // Autumn (RA 0-3h)
+  { id: "ngc253", catalog: "NGC 253", name: "Sculptor Galaxy", raHours: 0.792, decDegrees: -25.29, type: "galaxy", con: "Scl", constellation: "Sculptor", coreColor: "#D0D8E8", hazeColor: "#A0A8C0", radius: 18, elongated: true, angle: 52, distanceLy: "11.4 million ly", visibility: "Binoculars",
+    description: "A silver sliver of light — a starburst galaxy seen nearly edge-on, churning with newborn stars.", bestMonths: "October–December" },
+  { id: "m77", catalog: "M77", name: "Cetus A", raHours: 2.711, decDegrees: -0.01, type: "galaxy", con: "Cet", constellation: "Cetus", coreColor: "#C0C8E0", hazeColor: "#9098B0", radius: 12, distanceLy: "47 million ly", visibility: "Telescope",
+    description: "A Seyfert galaxy with an intensely active nucleus — a supermassive black hole feeding voraciously.", bestMonths: "October–January" },
+
+  // Winter extras (RA 3-6h)
+  { id: "ngc2024", catalog: "NGC 2024", name: "Flame Nebula", raHours: 5.679, decDegrees: -1.85, type: "emission", con: "Ori", constellation: "Orion", coreColor: "#F0A050", hazeColor: "#D08030", radius: 14, distanceLy: "1,350 ly", visibility: "Telescope",
+    description: "A curtain of fire next to Alnitak — dark dust lanes carve the glow into flickering tongues of flame.", bestMonths: "December–February" },
+  { id: "ic434", catalog: "IC 434", name: "Horsehead Nebula", raHours: 5.681, decDegrees: -2.46, type: "emission", con: "Ori", constellation: "Orion", coreColor: "#D06878", hazeColor: "#A04858", radius: 12, distanceLy: "1,500 ly", visibility: "Telescope",
+    description: "The most famous silhouette in the sky — a dark horse's head rearing against a curtain of glowing hydrogen.", bestMonths: "December–February" },
+
+  // Late winter gap (RA 6-9h)
+  { id: "m44", catalog: "M44", name: "Beehive Cluster", raHours: 8.672, decDegrees: 19.67, type: "cluster", con: "Cnc", constellation: "Cancer", coreColor: "#E8D890", hazeColor: "#C0B060", radius: 22, distanceLy: "577 ly", visibility: "Naked eye",
+    description: "A swarm of golden stars visible to the naked eye — ancient observers called it the Manger.", bestMonths: "February–May" },
+  { id: "m46", catalog: "M46", name: "Puppis Cluster", raHours: 7.697, decDegrees: -14.82, type: "cluster", con: "Pup", constellation: "Puppis", coreColor: "#D4C890", hazeColor: "#B0A868", radius: 16, distanceLy: "5,400 ly", visibility: "Binoculars",
+    description: "A rich scattering of faint stars with a planetary nebula hiding inside.", bestMonths: "January–March" },
+
+  // Spring gap (RA 9-12h)
+  { id: "m65", catalog: "M65", name: "Leo Triplet", raHours: 11.315, decDegrees: 13.09, type: "galaxy", con: "Leo", constellation: "Leo", coreColor: "#C0C8D8", hazeColor: "#9098B0", radius: 16, elongated: true, angle: 170, distanceLy: "35 million ly", visibility: "Telescope",
+    description: "Three galaxies in a cosmic conversation — Leo's famous group, visible in one eyepiece.", bestMonths: "March–May" },
+  { id: "m104", catalog: "M104", name: "Sombrero Galaxy", raHours: 12.667, decDegrees: -11.62, type: "galaxy", con: "Vir", constellation: "Virgo", coreColor: "#D0D0E0", hazeColor: "#A0A0B8", radius: 16, elongated: true, angle: 90, distanceLy: "31 million ly", visibility: "Telescope",
+    description: "A bright bulge bisected by a dark dust lane — it really does look like a hat floating in space.", bestMonths: "March–June" },
+
+  // Spring/Summer gap (RA 12-15h)
+  { id: "m87", catalog: "M87", name: "Virgo A", raHours: 12.514, decDegrees: 12.39, type: "galaxy", con: "Vir", constellation: "Virgo", coreColor: "#D0D8E8", hazeColor: "#A0A8C0", radius: 16, distanceLy: "53 million ly", visibility: "Telescope",
+    description: "Home to the first black hole ever photographed — at the heart of the Virgo Cluster.", bestMonths: "March–June" },
+  { id: "ngc5128", catalog: "NGC 5128", name: "Centaurus A", raHours: 13.424, decDegrees: -43.02, type: "galaxy", con: "Cen", constellation: "Centaurus", coreColor: "#C8C0D8", hazeColor: "#9890A8", radius: 20, elongated: true, angle: 35, distanceLy: "12 million ly", visibility: "Binoculars",
+    description: "A peculiar galaxy bisected by a dramatic dust lane — the nearest radio galaxy.", bestMonths: "April–July" },
+  { id: "ngc5139", catalog: "NGC 5139", name: "Omega Centauri", raHours: 13.447, decDegrees: -47.48, type: "cluster", con: "Cen", constellation: "Centaurus", coreColor: "#E8D898", hazeColor: "#C0B068", radius: 24, distanceLy: "17,090 ly", visibility: "Naked eye",
+    description: "Ten million stars — the largest globular cluster in our galaxy, possibly a captured dwarf galaxy core.", bestMonths: "April–July" },
+  { id: "m3", catalog: "M3", name: "Canes Venatici Cluster", raHours: 13.703, decDegrees: 28.38, type: "cluster", con: "CVn", constellation: "Canes Venatici", coreColor: "#D8C880", hazeColor: "#B0A060", radius: 16, distanceLy: "33,900 ly", visibility: "Binoculars",
+    description: "A perfect sphere of half a million ancient stars — one of the finest globulars in the northern sky.", bestMonths: "April–July" },
+
+  // Summer extras (RA 15-18h)
+  { id: "m4", catalog: "M4", name: "Scorpius Cluster", raHours: 16.393, decDegrees: -26.53, type: "cluster", con: "Sco", constellation: "Scorpius", coreColor: "#D8C070", hazeColor: "#B09848", radius: 16, distanceLy: "7,200 ly", visibility: "Binoculars",
+    description: "The closest globular cluster to Earth — a golden ball right next to blazing Antares.", bestMonths: "June–August" },
+  { id: "ngc6231", catalog: "NGC 6231", name: "Scorpius Jewel Box", raHours: 16.904, decDegrees: -41.83, type: "cluster", con: "Sco", constellation: "Scorpius", coreColor: "#90B8FF", hazeColor: "#6890D0", radius: 18, distanceLy: "5,900 ly", visibility: "Binoculars",
+    description: "Blue-white diamond stars in the Scorpion's tail — young, hot, and dazzlingly bright.", bestMonths: "June–August" },
+
+  // Deep summer extra
+  { id: "m11", catalog: "M11", name: "Wild Duck Cluster", raHours: 18.851, decDegrees: -6.27, type: "cluster", con: "Sct", constellation: "Scutum", coreColor: "#D8C870", hazeColor: "#B0A050", radius: 14, distanceLy: "6,120 ly", visibility: "Binoculars",
+    description: "Thousands of stars in a V-formation — it really does look like a flock of ducks in flight.", bestMonths: "July–September" },
+
+  // Autumn rising (RA 21-24h)
+  { id: "m15", catalog: "M15", name: "Pegasus Cluster", raHours: 21.499, decDegrees: 12.17, type: "cluster", con: "Peg", constellation: "Pegasus", coreColor: "#D8C068", hazeColor: "#B09848", radius: 16, distanceLy: "33,600 ly", visibility: "Binoculars",
+    description: "One of the densest globulars known — its core may harbor a rare intermediate-mass black hole.", bestMonths: "August–November" },
+  { id: "ngc7293", catalog: "NGC 7293", name: "Helix Nebula", raHours: 22.494, decDegrees: -20.84, type: "planetary", con: "Aqr", constellation: "Aquarius", coreColor: "#50C8B8", hazeColor: "#308880", radius: 22, distanceLy: "655 ly", visibility: "Binoculars",
+    description: "The Eye of God — a vast ring of glowing gas. The closest large planetary nebula. It stares back.", bestMonths: "August–November" },
+  { id: "ngc104", catalog: "NGC 104", name: "47 Tucanae", raHours: 0.401, decDegrees: -72.08, type: "cluster", con: "Tuc", constellation: "Tucana", coreColor: "#E0C878", hazeColor: "#B8A050", radius: 20, distanceLy: "13,000 ly", visibility: "Naked eye",
+    description: "A blazing ball near the Small Magellanic Cloud — the second-finest globular in the entire sky.", bestMonths: "October–December" },
+  { id: "m2", catalog: "M2", name: "Aquarius Cluster", raHours: 21.558, decDegrees: -0.82, type: "cluster", con: "Aqr", constellation: "Aquarius", coreColor: "#D0B870", hazeColor: "#A89050", radius: 14, distanceLy: "37,500 ly", visibility: "Binoculars",
+    description: "A tight golden sphere of 150,000 ancient stars orbiting our galaxy.", bestMonths: "August–November" }
 ];
