@@ -25,6 +25,7 @@ import { configureNotificationHandler } from "@/services/NotificationService";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
 import { useAuraLunisFonts } from "@/theme/useFonts";
 import { PaywallNavigationProvider, usePaywallNavigation } from "@/context/PaywallNavigationContext";
+import { EntitlementProvider, refreshEntitlement } from "@/context/EntitlementContext";
 import { recordSession } from "@/services/ReviewPromptService";
 
 const ONBOARDING_SEEN_KEY = "auralunis.onboarding.seen";
@@ -105,6 +106,7 @@ export default function App() {
 
       if (result.status === "purchased") {
         trackPaywallEvent("purchase_complete", { planId });
+        await refreshEntitlement(); // flip the whole app to premium immediately
         setPaywallVisible(false);
         Alert.alert("Welcome to AuraLunis Premium", "Your membership is active.");
         return;
@@ -134,12 +136,13 @@ export default function App() {
 
       if (result.status === "not_configured") {
         Alert.alert(
-          "RevenueCat setup required",
-          "The restore handler is wired. Add the public RevenueCat SDK key before sandbox restore testing."
+          "Subscriptions available after launch",
+          "Purchases can be restored once AuraLunis is live on the App Store."
         );
         return;
       }
 
+      await refreshEntitlement(); // reflect any restored entitlement app-wide
       Alert.alert(
         "Purchases restored",
         "AuraLunis refreshed the membership status for this App Store account."
@@ -161,6 +164,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <EntitlementProvider>
       <PaywallNavigationProvider>
         <AuraLunisSettingsProvider>
           <AuraLunisVaultProvider>
@@ -184,6 +188,7 @@ export default function App() {
           </AuraLunisVaultProvider>
         </AuraLunisSettingsProvider>
       </PaywallNavigationProvider>
+      </EntitlementProvider>
     </GestureHandlerRootView>
   );
 }

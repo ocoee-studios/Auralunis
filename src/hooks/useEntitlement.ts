@@ -1,67 +1,19 @@
 // useEntitlement.ts
-// Single source of truth for premium status across the app.
-// Checks RevenueCat on mount and when the app foregrounds.
-// Returns isPremium, isLoading, and a refresh function.
+// Reads the SHARED premium status from EntitlementContext (single source of truth,
+// mounted once at the app root). Same API as before — { isPremium, isLoading,
+// refresh } — so existing call sites are unchanged, but every consumer now sees the
+// same value and a purchase/restore updates them all at once.
 //
 // Usage:
 //   const { isPremium } = useEntitlement();
-//   if (!isPremium) return <PaywallGate />;
+//   if (!isPremium) openPaywall();
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { AppState, type AppStateStatus } from "react-native";
-import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
+import { useContext } from "react";
+import { EntitlementContext, type EntitlementValue } from "@/context/EntitlementContext";
 
-// Typed locally — react-native-purchases types may not resolve under all
-// module resolution modes; the runtime API matches these signatures.
-let Purchases: {
-  configure: (opts: { apiKey: string }) => void;
-  getCustomerInfo: () => Promise<{
-    entitlements: { active: Record<string, unknown> };
-  }>;
-} | null = null;
+const SAFE_DEFAULT: EntitlementValue = { isPremium: false, isLoading: false, refresh: async () => {} };
 
-try {
-  Purchases = require("react-native-purchases").default;
-} catch {
-  // react-native-purchases not available in Expo Go
-}
-
-async function fetchIsPremium(): Promise<boolean> {
-  if (!Purchases) return false;
-  try {
-    const info = await Purchases.getCustomerInfo();
-    return Boolean(info.entitlements.active[RevenueCatIds.entitlement]);
-  } catch {
-    return false;
-  }
-}
-
-export function useEntitlement() {
-  const [isPremium, setIsPremium] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const appStateRef = useRef<AppStateStatus>(AppState.currentState);
-
-  const refresh = useCallback(async () => {
-    setIsLoading(true);
-    const premium = await fetchIsPremium();
-    setIsPremium(premium);
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    refresh();
-  }, []);
-
-  // Re-check when app comes back to foreground (user may have purchased)
-  useEffect(() => {
-    const sub = AppState.addEventListener("change", (next) => {
-      if (appStateRef.current.match(/inactive|background/) && next === "active") {
-        refresh();
-      }
-      appStateRef.current = next;
-    });
-    return () => sub.remove();
-  }, [refresh]);
-
-  return { isPremium, isLoading, refresh };
+export function useEntitlement(): EntitlementValue {
+  // Fails closed to a non-premium default if ever rendered outside the provider.
+  return useContext(EntitlementContext) ?? SAFE_DEFAULT;
 }
