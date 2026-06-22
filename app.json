@@ -7,7 +7,7 @@
     "scheme": "auralunis",
     "userInterfaceStyle": "dark",
     "assetBundlePatterns": [
-      "**/*"
+      "assets/**/*"
     ],
     "ios": {
       "supportsTablet": true,
