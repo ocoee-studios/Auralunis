@@ -25,6 +25,7 @@ import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
 import { MeteorOverlay } from "./MeteorOverlay";
 import { TargetPulse } from "./TargetPulse";
+import { HeroSpotlight } from "./HeroSpotlight";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject } from "./SkyLensVisual";
@@ -235,6 +236,41 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
+  // Hero Object Spotlight: reverse-map the selected object's id to its LIVE az/alt
+  // (one place, no per-layer wiring), then project it so the spotlight dims the
+  // field around whatever you've focused and tracks it as you pan.
+  const focusAzAlt = useMemo(() => {
+    if (!selected) return null;
+    const { kind, id } = selected;
+    if (kind === "moon" || kind === "planet") {
+      const b = sky.bodies.find((x) => x.id === id);
+      return b && b.aboveHorizon ? { az: b.azimuthDegrees, alt: b.altitudeDegrees } : null;
+    }
+    if (kind === "star") {
+      const s = sky.stars.find((x) => x.id === id) ?? sky.domeStars.find((x) => x.id === id);
+      return s && s.aboveHorizon ? { az: s.azimuthDegrees, alt: s.altitudeDegrees } : null;
+    }
+    if (kind === "constellation") {
+      const c = sky.constellations.find((x) => x.id === id);
+      return c ? { az: c.centroid.azimuthDegrees, alt: c.centroid.altitudeDegrees } : null;
+    }
+    if (kind === "nebula") {
+      const n = sky.nebulae.find((x) => x.id === id);
+      return n && n.aboveHorizon ? { az: n.azimuthDegrees, alt: n.altitudeDegrees } : null;
+    }
+    if (kind === "zodiac") {
+      const z = sky.zodiac.signs.find((s) => `zodiac-${s.id}` === id);
+      return z && z.center.aboveHorizon ? { az: z.center.azimuthDegrees, alt: z.center.altitudeDegrees } : null;
+    }
+    return null;
+  }, [selected, sky]);
+
+  const focusProj = useMemo(() => {
+    if (!focusAzAlt) return null;
+    const p = projectTarget(pointing, focusAzAlt.az, focusAzAlt.alt, fov, box);
+    return p.behind ? null : p;
+  }, [focusAzAlt, pointing, fov, box]);
+
   // Below-horizon bleed guard: the screen-fixed decorative overlays (FX layers,
   // atmosphere glow, meteors) aren't sky-projected, so they'd render over the real
   // floor in camera mode. Fade them out as the camera tilts below the horizon —
@@ -363,6 +399,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {horizonFade > 0.2 && <MeteorOverlay box={box} nightMode={nightMode} />}
           {/* Find-Mode arrival pulse on the lesson target */}
           {targetProj?.onScreen && <TargetPulse x={targetProj.x} y={targetProj.y} />}
+          {/* Hero Object Spotlight — dims the field around the selected object so it
+              becomes the star of the scene. Above the field, below the forge + HUD. */}
+          {focusProj && <HeroSpotlight x={focusProj.x} y={focusProj.y} box={box} nightMode={nightMode} />}
           {/* Constellation Forge — gold ink-draw on identify (above canvas, below HUD) */}
           <ConstellationForgeLayer
             width={box.width}
