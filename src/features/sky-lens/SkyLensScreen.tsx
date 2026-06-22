@@ -9,6 +9,7 @@ import { AuraLunisColors } from "@/theme/tokens";
 import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { useObserverLocation } from "./ephemeris/useObserverLocation";
+import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useDevicePointing } from "./ar/useDevicePointing";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
@@ -59,7 +60,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const [box, setBox] = useState({ width: 360, height: 720 });
   const [active, setActive] = useState<Set<LayerKey>>(() => new Set(DEFAULT_ACTIVE_LAYERS));
-  const [nightMode, setNightMode] = useState(false);
+  // Night Vision is shared with Settings: seed from the saved flag on open, write
+  // back on toggle so the two stay in sync.
+  const { settings, updateSetting } = useAuraLunisSettings();
+  const [nightMode, setNightMode] = useState(settings.nightVision);
   const [planetarium, setPlanetarium] = useState(false); // camera off → portable planetarium
   const [selected, setSelected] = useState<SelectedObject | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set());
@@ -313,7 +317,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconBtn, nightMode && { backgroundColor: "rgba(139,32,32,0.5)" }]}
-            onPress={() => setNightMode((n) => !n)}
+            onPress={() => setNightMode((n) => { const next = !n; updateSetting("nightVision", next); return next; })}
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>{nightMode ? "🌙" : "◐"}</Text>

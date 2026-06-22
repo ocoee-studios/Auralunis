@@ -145,6 +145,12 @@ export function SettingsScreen() {
             );
           })}
         </View>
+        <SettingRow
+          title="Night Vision Mode"
+          description="Deep red for dark adaptation. Syncs with the Sky Lens night toggle."
+          value={settings.nightVision}
+          onValueChange={(value) => updateSetting("nightVision", value)}
+        />
       </SettingsSection>
 
       <SettingsSection title="Notifications + Alarms">
@@ -158,10 +164,10 @@ export function SettingsScreen() {
 
         <Text style={styles.qualityLabel}>Sky Quality</Text>
         <Text style={styles.qualityDescription}>
-          Affects the Tonight Score. Choose the best match for where you usually observe.
+          Bortle scale of your usual site — Urban (7–9), Suburban (5–6), Rural (3–4), Dark (1–2). Affects the Tonight Score.
         </Text>
         <View style={styles.segmentRow}>
-          {(["urban", "suburban", "rural"] as const).map((quality) => (
+          {(["urban", "suburban", "rural", "dark"] as const).map((quality) => (
             <Pressable
               key={quality}
               style={[styles.segment, settings.skyQuality === quality && styles.segmentActive]}
