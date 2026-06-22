@@ -2,6 +2,11 @@
 
 ## THE VISION
 
+> Do not make Sky Lens look like an astronomy app.
+>
+> Make it look like a $10,000 celestial instrument from a civilization
+> thousands of years more advanced than ours.
+>
 > Make Sky Lens feel like standing beneath a living celestial cathedral
 > built from stars, gold light, and ancient astronomical instruments.
 
