@@ -235,6 +235,12 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
+  // Below-horizon bleed guard: the screen-fixed decorative overlays (FX layers,
+  // atmosphere glow, meteors) aren't sky-projected, so they'd render over the real
+  // floor in camera mode. Fade them out as the camera tilts below the horizon —
+  // 1 at alt ≥ 0°, linearly to 0 by −18°. Planetarium (virtual dome) keeps full.
+  const horizonFade = planetarium ? 1 : Math.max(0, Math.min(1, (pointing.altitudeDegrees + 18) / 18));
+
   // Moon screen position for the Lunar God Ray layer.
   const moonProj = useMemo(() => {
     const m = sky.bodies.find((b) => b.id === "moon");
@@ -277,7 +283,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               locations={[0, 0.42, 0.72, 1]}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
+              style={[StyleSheet.absoluteFillObject, { opacity: horizonFade }]}
               pointerEvents="none"
             />
           )}
@@ -304,19 +310,19 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             nightVision={nightMode}
             moonVisible={sky.bodies.find((b) => b.id === "moon")?.aboveHorizon ?? false}
             milkyWayVisible={active.has("milkyway")}
-            intensity={planetarium ? 0.9 : 0.55}
+            intensity={(planetarium ? 0.9 : 0.55) * horizonFade}
           />
           <AstralBreathingLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
-            intensity={planetarium ? 0.8 : 0.45}
+            intensity={(planetarium ? 0.8 : 0.45) * horizonFade}
           />
           <LuxuryStarfieldFXLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
-            intensity={planetarium ? 0.8 : 0.45}
+            intensity={(planetarium ? 0.8 : 0.45) * horizonFade}
           />
           {moonProj && (
             <LunarGodRayLayer
@@ -327,7 +333,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               moonRadius={16}
               visible={moonProj.onScreen}
               nightVision={nightMode}
-              intensity={planetarium ? 0.9 : 0.5}
+              intensity={(planetarium ? 0.9 : 0.5) * horizonFade}
             />
           )}
           <OrbitalGhostTrailsLayer
@@ -335,7 +341,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             height={box.height}
             trails={[]}
             nightVision={nightMode}
-            intensity={planetarium ? 0.9 : 0.6}
+            intensity={(planetarium ? 0.9 : 0.6) * horizonFade}
           />
 
           <SkyLensErrorBoundary>
@@ -354,7 +360,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Crash-safe twinkle: View-opacity animation over the bright stars */}
           <TwinkleOverlay targets={twinkleStars} nightMode={nightMode} />
           {/* Crash-safe shooting stars: View transform + opacity */}
-          <MeteorOverlay box={box} nightMode={nightMode} />
+          {horizonFade > 0.2 && <MeteorOverlay box={box} nightMode={nightMode} />}
           {/* Find-Mode arrival pulse on the lesson target */}
           {targetProj?.onScreen && <TargetPulse x={targetProj.x} y={targetProj.y} />}
           {/* Constellation Forge — gold ink-draw on identify (above canvas, below HUD) */}

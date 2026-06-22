@@ -20,7 +20,8 @@ export function EclipticLayer({ points, project, palette, nightMode }: Props) {
   let run: string[] = [];
   for (const pt of points) {
     const p = project(pt.azimuthDegrees, pt.altitudeDegrees);
-    if (p.behind) {
+    if (p.behind || pt.altitudeDegrees < -2) {
+      // break the run at the horizon so the ecliptic never draws over the ground
       if (run.length > 1) runs.push(run);
       run = [];
       continue;
