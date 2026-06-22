@@ -37,8 +37,8 @@ export function EclipticLayer({ points, project, palette, nightMode }: Props) {
           points={pts.join(" ")}
           fill="none"
           stroke={color}
-          strokeWidth={1.4}
-          strokeOpacity={0.15}
+          strokeWidth={0.6}
+          strokeOpacity={0.2}
           strokeDasharray="5 6"
           strokeLinecap="round"
         />

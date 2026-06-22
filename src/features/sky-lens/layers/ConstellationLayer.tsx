@@ -42,10 +42,10 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
             const b = projected[j];
             return (
               <G key={`${c.id}-l${idx}`}>
-                {/* 2px soft gold glow */}
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={5} strokeOpacity={0.16} strokeLinecap="round" />
-                {/* crisp gold line — rgba(217,168,78,0.5) */}
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={1.6} strokeOpacity={0.5} strokeLinecap="round" />
+                {/* soft 4px gold glow behind the line */}
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={4} strokeOpacity={0.08} strokeLinecap="round" />
+                {/* crisp gold thread — rgba(217,168,78,0.6) */}
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={1.2} strokeOpacity={0.6} strokeLinecap="round" />
               </G>
             );
           });

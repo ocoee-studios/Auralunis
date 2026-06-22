@@ -165,7 +165,7 @@ export function SkyLensScreen({ onClose }: Props) {
         magnitude: s.magnitude
       });
     }
-    return out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 20);
+    return out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 10);
   }, [sky.stars, pointing, fov, box]);
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;

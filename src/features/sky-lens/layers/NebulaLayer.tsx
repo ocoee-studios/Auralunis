@@ -24,10 +24,10 @@ export function NebulaLayer({ nebulae, project, palette, nightMode }: Props) {
         if (!p.onScreen) return null;
         return (
           <G key={n.id}>
-            {/* subtle 8px rosy glow */}
-            <Circle cx={p.x} cy={p.y} r={8} fill={n.color} opacity={0.08} />
-            {/* tiny 3px core dot */}
-            <Circle cx={p.x} cy={p.y} r={3} fill={n.color} opacity={0.55} />
+            {/* soft 10px warm-gold glow so they melt INTO the Milky Way */}
+            <Circle cx={p.x} cy={p.y} r={10} fill="rgba(217,168,78,0.12)" />
+            {/* tiny 3px gold-rose core dot */}
+            <Circle cx={p.x} cy={p.y} r={3} fill="#E6B690" opacity={0.7} />
             {/* small label underneath */}
             <SvgText x={p.x} y={p.y + 15} fill={palette.starLabel} fontSize={8} fontWeight="600" textAnchor="middle" opacity={0.6}>
               {n.name}

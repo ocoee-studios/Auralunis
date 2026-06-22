@@ -1,7 +1,7 @@
 import React from "react";
 import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
-import { magnitudeToRadius, starColor, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+import { magnitudeToRadius, starColor, STAR_FEATURES, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
 
 type Props = {
   stars: HorizontalStar[];
@@ -23,7 +23,8 @@ export function StarLayer({ stars, project, palette, nightMode, onSelect }: Prop
         const p = project(star.azimuthDegrees, star.altitudeDegrees);
         if (!p.onScreen) return null;
 
-        const r = magnitudeToRadius(star.magnitude);
+        const feature = nightMode ? undefined : STAR_FEATURES[star.id];
+        const r = feature ? feature.radius : magnitudeToRadius(star.magnitude);
         // Night Mode stays monochrome red for dark adaptation; otherwise stars
         // take their spectral color, and the brightest get a soft colored glow.
         const color = nightMode ? palette.star : starColor(star.id, star.magnitude);
@@ -55,6 +56,8 @@ export function StarLayer({ stars, project, palette, nightMode, onSelect }: Prop
                 })
               }
             />
+            {/* hand-tuned ember glow for showpiece stars (Antares, Shaula) */}
+            {feature && <Circle cx={p.x} cy={p.y} r={feature.glowRadius} fill={feature.glowColor} />}
             {/* wide 8px glow ring so the magnitude-0 stars genuinely POP */}
             {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.1} />}
             {bright && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.16} />}

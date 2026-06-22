@@ -27,9 +27,9 @@ export type TwinkleTarget = {
 // with its own phase offset so they shimmer out of sync.
 function TwinkleDot({ clock, t }: { clock: SharedValue<number>; t: TwinkleTarget }) {
   const offset = t.offset;
-  // ±15% opacity around a near-full base — a living shimmer, not a hard blink.
+  // ±12% opacity around a near-full base — a very subtle living shimmer.
   const style = useAnimatedStyle(() => ({
-    opacity: 0.85 + 0.15 * Math.sin((clock.value + offset) * Math.PI * 2)
+    opacity: 0.88 + 0.12 * Math.sin((clock.value + offset) * Math.PI * 2)
   }));
   return (
     <Animated.View
