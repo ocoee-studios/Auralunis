@@ -85,3 +85,82 @@ After both fixes, take screenshots at these 6 angles:
 Every screenshot above horizon = full celestial content.
 Every screenshot below horizon = clean camera feed only.
 No diagonal stripes anywhere.
+
+## FIX 3: Wire the Gemini FX Layers (STARDUST + BREATHING + BLOOM)
+
+Three visual FX layers exist in the repo but are NOT mounted
+in SkyLensScreen.tsx. They need to be wired in.
+
+Files already exist at src/features/sky-lens/layers/:
+- LuxuryStarfieldFXLayer.tsx  (cosmic gold dust particles)
+- AstralBreathingLayer.tsx    (whole-sky breathing pulse)
+- PremiumSkyBloomLayer.tsx    (bloom + horizon glow + moon halo)
+
+### Wiring Instructions:
+
+In SkyLensScreen.tsx, import all three:
+```tsx
+import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
+import { AstralBreathingLayer } from "./layers/AstralBreathingLayer";
+import { LuxuryStarfieldFXLayer } from "./layers/LuxuryStarfieldFXLayer";
+```
+
+Mount them ABOVE the camera view but BELOW the SVG star/constellation
+layers. Order matters:
+
+```tsx
+{/* Camera feed */}
+<CameraView ... />
+
+{/* Visual atmosphere layers (Gemini FX) */}
+<PremiumSkyBloomLayer
+  width={layout.width}
+  height={layout.height}
+  nightVision={nightVision}
+  moonVisible={sky.moonAltitude > 0}
+  milkyWayVisible={layers.milkyWay}
+  intensity={nightVision ? 0.35 : 0.8}
+/>
+<AstralBreathingLayer
+  width={layout.width}
+  height={layout.height}
+  nightVision={nightVision}
+  intensity={nightVision ? 0.3 : 0.6}
+/>
+<LuxuryStarfieldFXLayer
+  width={layout.width}
+  height={layout.height}
+  nightVision={nightVision}
+  intensity={nightVision ? 0.25 : 0.9}
+  count={110}
+/>
+
+{/* Existing SVG layers (stars, constellations, etc.) */}
+```
+
+### What each adds:
+
+**PremiumSkyBloomLayer** — Deep space violet/gold bloom wash,
+  horizon glow (gold-to-violet at bottom), moon atmospheric halo,
+  Milky Way silk band. 14-second breathing cycle. Prevents the
+  sky from ever looking flat black.
+
+**AstralBreathingLayer** — Subtle 22-second opacity pulse across
+  the entire sky. The whole view inhales and exhales together.
+  Users won't consciously notice it but they'll feel the sky
+  is alive.
+
+**LuxuryStarfieldFXLayer** — 110 tiny gold/starlight dust
+  particles floating across the screen. 9-second shimmer cycle
+  with 2px vertical drift. Plus 2 luxury optic glints with
+  tiny diffraction crosses. This is the STARDUST.
+
+### ⚠️ PERFORMANCE WARNING
+Wire them ONE AT A TIME. Test on device after each.
+If ANY causes frame drops below 30fps, reduce its intensity
+or count prop. If it crashes, skip it.
+
+Priority order if performance is tight:
+1. LuxuryStarfieldFXLayer (stardust — most visible impact)
+2. PremiumSkyBloomLayer (atmosphere — most premium feel)
+3. AstralBreathingLayer (breathing — most subtle, skip if needed)
