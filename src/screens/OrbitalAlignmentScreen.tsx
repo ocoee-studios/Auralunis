@@ -63,7 +63,7 @@ const MODE_LABELS: Record<TrackingMode, string> = {
   debris: "Debris", meteor: "Meteor", chain: "Chain", static: "Static", reentry: "Re-Entry",
 };
 
-const SIM_LOCATION: ObserverLocation = { latitudeDegrees: 40.7128, longitudeDegrees: -74.006, altitudeMeters: 10 };
+const SIM_LOCATION: ObserverLocation = { latitudeDegrees: 35.04, longitudeDegrees: -84.38, altitudeMeters: 460 }; // Ducktown, TN
 function buildSimPointing(tick: number): CameraPointing {
   return { azimuthDegrees: (tick * 1.5) % 360, altitudeDegrees: 30 + Math.sin((tick * Math.PI) / 120) * 20, rollDegrees: 0 };
 }

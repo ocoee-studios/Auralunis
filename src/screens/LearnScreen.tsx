@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
@@ -98,14 +98,6 @@ export function LearnScreen() {
           status={topic.level}
         />
       ))}
-
-      <FeatureCard
-        title="Teacher Mode"
-        description="Future option: simplified explanations, pronunciation help, object quizzes, and guided sky challenges for families, children, and true beginners."
-        actionLabel="Preview Teacher Mode"
-        onPress={() => Alert.alert("Teacher Mode", "Future educational mode preview.")}
-        status="future"
-      />
     </ScreenShell>
   );
 }
