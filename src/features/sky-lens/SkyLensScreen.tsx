@@ -366,7 +366,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               height={box.height}
               moonX={moonProj.x}
               moonY={moonProj.y}
-              moonRadius={16}
+              moonRadius={22}
               visible={moonProj.onScreen}
               nightVision={nightMode}
               intensity={(planetarium ? 0.9 : 0.5) * horizonFade}
