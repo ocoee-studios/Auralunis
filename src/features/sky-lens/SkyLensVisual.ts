@@ -102,6 +102,11 @@ export interface StarFeature {
   glowColor: string;
 }
 export const STAR_FEATURES: Record<string, StarFeature> = {
+  sirius: { radius: 6.5, glowRadius: 20, glowColor: "rgba(190,224,255,0.30)" }, // brightest star — blue-white bloom + spikes
+  vega: { radius: 5.5, glowRadius: 15, glowColor: "rgba(170,207,255,0.26)" }, // icy blue-white glow
+  rigel: { radius: 6, glowRadius: 16, glowColor: "rgba(150,190,255,0.28)" }, // electric blue shimmer
+  betelgeuse: { radius: 6, glowRadius: 17, glowColor: "rgba(255,110,60,0.28)" }, // ember-red aura
+  arcturus: { radius: 5, glowRadius: 13, glowColor: "rgba(255,178,74,0.22)" }, // warm amber
   antares: { radius: 6, glowRadius: 14, glowColor: "rgba(240,100,100,0.25)" }, // red ember, heart of Scorpius
   shaula: { radius: 4, glowRadius: 10, glowColor: "rgba(255,246,214,0.15)" } // warm-white, the stinger
 };

@@ -31,20 +31,31 @@ export function MilkyWayLayer({ band, project, box, nightMode, boost }: Props) {
   if (pts.length === 0) return null;
 
   const blobR = Math.max(70, box.height * 0.3); // band thickness (feathers to 0 at edge)
-  const o = (v: number) => Math.min(0.13, v * boost);
+  const o = (v: number) => Math.min(0.18, v * boost);
 
   return (
     <G>
       <Defs>
+        {/* warm gold haze of the band */}
         <RadialGradient id="mwBandGlow" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#EBCB86" stopOpacity={o(0.05)} />
-          <Stop offset="50%" stopColor="#D9A84E" stopOpacity={o(0.028)} />
+          <Stop offset="0%" stopColor="#EBCB86" stopOpacity={o(0.075)} />
+          <Stop offset="50%" stopColor="#D9A84E" stopOpacity={o(0.04)} />
+          <Stop offset="100%" stopColor="#D9A84E" stopOpacity={0} />
+        </RadialGradient>
+        {/* brighter, whiter star-cloud knots — the texture that reads as 'our galaxy' */}
+        <RadialGradient id="mwStarCloud" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor="#FFF3CC" stopOpacity={o(0.12)} />
+          <Stop offset="45%" stopColor="#EBCB86" stopOpacity={o(0.055)} />
           <Stop offset="100%" stopColor="#D9A84E" stopOpacity={0} />
         </RadialGradient>
       </Defs>
-      {pts.map((p, i) => (
-        <Circle key={`mw-${i}`} cx={p.x} cy={p.y} r={blobR} fill="url(#mwBandGlow)" />
-      ))}
+      {pts.map((p, i) =>
+        i % 5 === 0 ? (
+          <Circle key={`mw-${i}`} cx={p.x} cy={p.y} r={blobR * 0.7} fill="url(#mwStarCloud)" />
+        ) : (
+          <Circle key={`mw-${i}`} cx={p.x} cy={p.y} r={blobR} fill="url(#mwBandGlow)" />
+        )
+      )}
     </G>
   );
 }
