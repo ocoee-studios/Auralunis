@@ -12,14 +12,14 @@ function mulberry32(seed: number) {
   };
 }
 
-// ~1200 faint background stars spread uniformly over the celestial sphere. These
-// fill the sky *between* the named bright stars so Sky Lens reads as a real, rich
-// starfield instead of a sparse scatter of dots. Same RA/Dec→horizontal pipeline
-// as the bright catalog, so they sit correctly and move with the sky.
+// ~1500 faint background stars spread uniformly over the celestial sphere (full
+// 0–24h RA, −90°…+90° Dec). These fill the sky *between* the named bright stars so
+// every direction reads as a real, rich starfield instead of a sparse scatter of
+// dots. Same RA/Dec→horizontal pipeline as the bright catalog.
 export const DOME_STARS: ReadonlyArray<BrightStar> = (() => {
   const rng = mulberry32(20260621);
   const out: BrightStar[] = [];
-  for (let i = 0; i < 1200; i++) {
+  for (let i = 0; i < 1500; i++) {
     const raHours = rng() * 24;
     // Uniform-on-sphere declination: dec = asin(2u - 1).
     const decDegrees = (Math.asin(2 * rng() - 1) * 180) / Math.PI;
