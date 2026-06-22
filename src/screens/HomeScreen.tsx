@@ -22,6 +22,7 @@ import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLo
 import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherService";
 import { computeTonightScore } from "@/services/TonightScoreService";
 import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
+import { generateCelestialMood } from "@/services/CelestialMoodService";
 import { tapLight } from "@/services/HapticService";
 import { scheduleSkyEventNotifications } from "@/services/NotificationService";
 import { useNavigation } from "@react-navigation/native";
@@ -72,6 +73,27 @@ export function HomeScreen() {
   const sunPos = useMemo(() => computeSunPosition(location), [location]);
   const goldenEvents = useMemo(() => findNextGoldenEvents(location), [location]);
   const nextGolden = goldenEvents[0] ?? null;
+
+  // Poetic mood headline/description/suggestion from the prebuilt mood engine.
+  const mood = useMemo(() => {
+    const sunAlt = sky.bodies.find((b) => b.id === "sun")?.altitudeDegrees ?? -90;
+    const moonAlt = sky.bodies.find((b) => b.id === "moon")?.altitudeDegrees ?? -90;
+    return generateCelestialMood({
+      moonIllumination: sky.moonIlluminationPercent,
+      moonAltitude: moonAlt,
+      visiblePlanets: sky.visibleBodies
+        .filter((b) => b.id !== "sun" && b.id !== "moon" && b.altitudeDegrees > 0)
+        .map((b) => b.name),
+      cloudCover: weather.cloudPercent,
+      seeingScore: Math.max(1, Math.min(5, Math.round(5 - weather.cloudPercent / 25))),
+      tonightScore: tonightScore.score,
+      isGoldenHour: sunPos.isGoldenHour,
+      isTwilight: sunAlt < -6 && sunAlt >= -18,
+      isDarkNight: sunAlt < -18,
+      activeMeteorShower: null,
+      auroraKp: 0,
+    });
+  }, [sky, weather, tonightScore.score, sunPos.isGoldenHour]);
 
   // ── Visible planets ──────────────────────────────────────────────────────
   const visibleBodies = displaySky.visibleBodies.filter(
@@ -147,14 +169,12 @@ export function HomeScreen() {
         </View>
       )}
 
-      {/* ── Sky Summary ── */}
-      <Text style={styles.skySummary}>
-        {visibleBodies.length > 0
-          ? `${visibleBodies.map(b => b.name).join(", ")} visible`
-          : "No naked-eye planets above the horizon"}
-        {" · Moon "}
-        {sky.moonIlluminationPercent}%
-      </Text>
+      {/* ── Celestial Mood ── */}
+      <View style={styles.moodCard}>
+        <Text style={styles.moodHeadline}>{mood.emoji}  {mood.headline}</Text>
+        <Text style={styles.moodDescription}>{mood.description}</Text>
+        <Text style={styles.moodSuggestion}>{mood.suggestion}</Text>
+      </View>
 
       {/* ── Visible Bodies ── */}
       <GlassPanel accent style={styles.bodiesCard}>
@@ -301,12 +321,31 @@ const styles = StyleSheet.create({
     color: AuraLunisColors.faint,
     marginTop: 1,
   },
-  skySummary: {
-    fontSize: 10,
+  moodCard: {
+    borderRadius: 18,
+    padding: 14,
+    marginBottom: 12,
+    backgroundColor: "rgba(217,168,78,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(217,168,78,0.16)",
+  },
+  moodHeadline: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: AuraLunisColors.gold2,
+    letterSpacing: -0.3,
+  },
+  moodDescription: {
+    fontSize: 13,
+    color: AuraLunisColors.silver,
+    lineHeight: 20,
+    marginTop: 6,
+  },
+  moodSuggestion: {
+    fontSize: 11,
     color: AuraLunisColors.muted,
-    textAlign: "center",
-    marginBottom: 10,
-    lineHeight: 16,
+    marginTop: 8,
+    fontWeight: "600",
   },
   bodiesCard: {
     marginBottom: 10,

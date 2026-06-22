@@ -264,6 +264,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               activeLayers={active}
               nightMode={nightMode}
               milkyWayBoost={milkyWayBoost}
+              isPremium={isPremium}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>

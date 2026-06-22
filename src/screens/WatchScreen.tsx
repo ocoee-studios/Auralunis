@@ -8,8 +8,6 @@ import { GlassPanel } from "@/components/GlassPanel";
 import { LogoMark } from "@/components/LogoMark";
 import { AuraLunisColors } from "@/theme/tokens";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
-import { DeskObeliskPreview } from "@/features/future/DeskObeliskPreview";
-import { SovereignSigilPreview } from "@/features/future/SovereignSigilPreview";
 import {
   defaultWatchComplications,
   watchComplicationOptions,
@@ -112,14 +110,6 @@ function FaceBody({
           <Text style={styles.faceTitle}>AURALUNIS</Text>
           <Text style={styles.faceTime}>4:42</Text>
           <Text style={styles.faceSmall}>☾ 78% · Venus visible</Text>
-        </>
-      );
-    case "sovereign_sigil":
-      return (
-        <>
-          <Text style={[styles.faceSigil, { color: accent }]}>✧ ◇ ✦ ◇ ✧</Text>
-          <Text style={styles.faceTitle}>SOVEREIGN SIGIL</Text>
-          <Text style={styles.faceInsight}>Future personalized crest preview</Text>
         </>
       );
     default:
@@ -332,32 +322,30 @@ export function WatchScreen() {
         onPress={() => updateSetting("widgetsEnabled", !settings.widgetsEnabled)}
       />
 
-      <FeatureCard
-        title="Haptic Breathing"
-        description="Apple Watch breathing pattern direction for Astral Breath and Lunar Wind-Down."
-        actionLabel="Preview Haptic Pattern"
-        onPress={() => Alert.alert("Haptic Breathing", "Native watchOS haptic sequence boundary prepared.")}
-      />
-
-      <DeskObeliskPreview />
-
-      <SovereignSigilPreview />
-
-      <FeatureCard
-        title="Taptic Astrolabe Crown"
-        description="Future Digital Crown kinetic scrubbing with alignment detents and mechanical haptic weight."
-        actionLabel="Preview Future Module"
-        onPress={() => Alert.alert("Future Module", "Taptic Astrolabe remains a future watchOS-native enhancement.")}
-        status="future"
-      />
-
-      <FeatureCard
-        title="Desk Obelisk / StandBy"
-        description="Future StandBy display that turns the charging phone into a luxury kinetic cosmic desk clock."
-        actionLabel="Preview Future Module"
-        onPress={() => Alert.alert("Future Module", "Desk Obelisk remains a future iOS WidgetKit / StandBy enhancement.")}
-        status="future"
-      />
+      <GlassPanel style={{ marginBottom: 14 }}>
+        <Text style={styles.sectionLabel}>COMING TO THE WATCH APP</Text>
+        <View style={styles.comingRow}>
+          <Text style={styles.comingIcon}>🧭</Text>
+          <View style={styles.comingText}>
+            <Text style={styles.comingTitle}>Star Compass</Text>
+            <Text style={styles.comingCopy}>Raise your wrist and a gold arrow points toward the brightest planet, the Moon, or tonight's best target — guided by the watch compass and your live sky.</Text>
+          </View>
+        </View>
+        <View style={styles.comingRow}>
+          <Text style={styles.comingIcon}>◇</Text>
+          <View style={styles.comingText}>
+            <Text style={styles.comingTitle}>Live Complications</Text>
+            <Text style={styles.comingCopy}>Moon phase, Tonight Score, and the next sky event on your watch face — the four-module set you choose above maps into watchOS complication slots.</Text>
+          </View>
+        </View>
+        <View style={styles.comingRow}>
+          <Text style={styles.comingIcon}>✶</Text>
+          <View style={styles.comingText}>
+            <Text style={styles.comingTitle}>Haptic Constellations</Text>
+            <Text style={styles.comingCopy}>Trace a constellation on the watch and feel it — a distinct taptic pulse for each star as the figure draws itself across your wrist.</Text>
+          </View>
+        </View>
+      </GlassPanel>
     </ScreenShell>
   );
 }
@@ -397,6 +385,11 @@ const styles = StyleSheet.create({
   previewMeta: { color: AuraLunisColors.gold2, fontSize: 11, marginTop: 8 },
   section: { borderRadius: 24, padding: 14, backgroundColor: "rgba(255,255,255,0.045)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)", marginBottom: 14 },
   sectionLabel: { color: AuraLunisColors.gold2, fontSize: 10, letterSpacing: 2.3, fontWeight: "900" },
+  comingRow: { flexDirection: "row", gap: 12, marginTop: 12, alignItems: "flex-start" },
+  comingIcon: { fontSize: 20, width: 26, textAlign: "center" },
+  comingText: { flex: 1 },
+  comingTitle: { color: "#FFF", fontSize: 14, fontWeight: "800", marginBottom: 3 },
+  comingCopy: { color: AuraLunisColors.muted, fontSize: 12, lineHeight: 17 },
   sectionTitle: { color: "#FFF", fontSize: 20, fontWeight: "900", marginTop: 7 },
   sectionCopy: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 19, marginTop: 6, marginBottom: 4 },
   grid: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
