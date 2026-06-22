@@ -4,8 +4,7 @@ export type WatchFaceId =
   | "tonights_sky"
   | "deep_sky_portal"
   | "daily_alignment"
-  | "minimal_auralunis"
-  | "sovereign_sigil";
+  | "minimal_auralunis";
 
 export type WatchThemeId =
   | "midnight_gold"
@@ -88,14 +87,6 @@ export const watchFaceOptions: WatchFaceOption[] = [
     name: "Minimal AuraLunis",
     description: "Clean time, star-dust logo, Moon icon, and one selected complication.",
     bestFor: "Elegant everyday use"
-  },
-  {
-    id: "sovereign_sigil",
-    name: "Sovereign Sigil",
-    description: "Personalized geometric crest direction with subtle star dust and local-safe seed generation.",
-    bestFor: "Future prestige customization",
-    premium: true,
-    future: true
   }
 ];
 

@@ -32,7 +32,14 @@ export const SKY_LENS_LAYERS: ReadonlyArray<LayerDef> = [
   { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true },
   { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: false, defaultOn: false },
   { key: "deepsky", label: "Deep Sky", icon: "✦", premium: true, available: false, defaultOn: false },
-  { key: "ecliptic", label: "Ecliptic", icon: "~", premium: false, available: true, defaultOn: true }
+  { key: "ecliptic", label: "Ecliptic", icon: "~", premium: true, available: true, defaultOn: false }
+];
+
+// Free tier sees ~10 recognizable constellations spread across the sky; Premium
+// unlocks the full catalog. Chosen for all-direction coverage, not just the first N.
+export const FREE_CONSTELLATION_IDS: ReadonlyArray<string> = [
+  "orion", "ursa_major", "cassiopeia", "leo", "scorpius",
+  "sagittarius", "cygnus", "pegasus", "taurus", "gemini"
 ];
 
 export const DEFAULT_ACTIVE_LAYERS: LayerKey[] = SKY_LENS_LAYERS.filter((l) => l.defaultOn).map(

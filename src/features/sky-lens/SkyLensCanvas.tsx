@@ -14,7 +14,7 @@ import { NebulaLayer } from "./layers/NebulaLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { ZodiacLayer } from "./layers/ZodiacLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
-import type { LayerKey } from "./SkyLensLayerCatalog";
+import { FREE_CONSTELLATION_IDS, type LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
 
 type Props = {
@@ -25,6 +25,7 @@ type Props = {
   activeLayers: Set<LayerKey>;
   nightMode: boolean;
   milkyWayBoost: number;
+  isPremium: boolean;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -32,8 +33,13 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
+
+  // Free tier sees the ~10 recognizable constellations; Premium unlocks all.
+  const constellations = isPremium
+    ? sky.constellations
+    : sky.constellations.filter((c) => FREE_CONSTELLATION_IDS.includes(c.id));
 
   const project: ProjectFn = useCallback(
     (az: number, alt: number) => projectTarget(pointing, az, alt, fov, box),
@@ -63,7 +69,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {activeLayers.has("constellations") && (
         <ConstellationLayer
-          constellations={sky.constellations}
+          constellations={constellations}
           project={project}
           box={box}
           palette={palette}
