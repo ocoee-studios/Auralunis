@@ -138,7 +138,7 @@ export function skyGradient(sunAltitudeDegrees: number): readonly [string, strin
   return ["#1E4FA0", "#2E6FC0", "#5A9FD4", "#BFD8EA"]; // daytime blue
 }
 
-export type SelectedKind = "star" | "planet" | "moon" | "constellation" | "nebula";
+export type SelectedKind = "star" | "planet" | "moon" | "constellation" | "nebula" | "zodiac";
 
 export interface SelectedFact {
   label: string;

@@ -12,6 +12,7 @@ import { MilkyWayLayer } from "./layers/MilkyWayLayer";
 import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
+import { ZodiacLayer } from "./layers/ZodiacLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
 import type { LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
@@ -67,6 +68,17 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           box={box}
           palette={palette}
           nightMode={nightMode}
+          onSelect={onSelect}
+        />
+      )}
+      {/* Zodiac: the 12 signs along the ecliptic (free "find your sign" layer) */}
+      {activeLayers.has("zodiac") && (
+        <ZodiacLayer
+          zodiac={sky.zodiac}
+          project={project}
+          palette={palette}
+          nightMode={nightMode}
+          sun={sky.bodies.find((b) => b.id === "sun") ?? null}
           onSelect={onSelect}
         />
       )}
