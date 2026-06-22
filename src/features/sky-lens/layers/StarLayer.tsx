@@ -27,6 +27,7 @@ export function StarLayer({ stars, project, palette, nightMode, onSelect }: Prop
         // Night Mode stays monochrome red for dark adaptation; otherwise stars
         // take their spectral color, and the brightest get a soft colored glow.
         const color = nightMode ? palette.star : starColor(star.id, star.magnitude);
+        const brightest = !nightMode && star.magnitude < 1.5; // Vega, Deneb, Sirius… — the showpieces
         const bright = !nightMode && star.magnitude < 2.0;
         const glint = !nightMode && star.magnitude < 1.2; // diffraction spike on the showpiece stars
         const spike = r + 9;
@@ -54,6 +55,8 @@ export function StarLayer({ stars, project, palette, nightMode, onSelect }: Prop
                 })
               }
             />
+            {/* wide 8px glow ring so the magnitude-0 stars genuinely POP */}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.1} />}
             {bright && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.16} />}
             {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.32} />}
             {glint && (

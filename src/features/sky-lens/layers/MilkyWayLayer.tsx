@@ -11,12 +11,11 @@ type Props = {
   boost: number; // opacity multiplier — ~1 in camera mode, slightly higher in Planetarium
 };
 
-// The AuraLunis Milky Way: a single, barely-visible warm glow feathered along the
-// galactic plane — something you FEEL more than SEE. No circles, no ellipses, no
-// dust-lane, no bulge. Just two soft nested strokes (wide faint halo → slightly
-// tighter core) in warm starlight (rgba 255,246,214), feathering to transparent at
-// the edges. If you can clearly see it, it's too bright. `boost` nudges it a touch
-// brighter in Planetarium Mode where the background is pure black.
+// The AuraLunis Milky Way: a warm GOLDEN haze feathered along the galactic plane —
+// a faint river of light (~8–10% opacity), not the cold blue every other app uses
+// and not invisible. No circles, no ellipses, no dust-lane, no bulge. Just two soft
+// nested strokes (wide gold halo → warm golden core) feathering to transparent at
+// the edges. `boost` nudges it brighter in Planetarium Mode (pure-black backdrop).
 export function MilkyWayLayer({ band, project, box, nightMode, boost }: Props) {
   if (nightMode) return null;
 
@@ -46,10 +45,10 @@ export function MilkyWayLayer({ band, project, box, nightMode, boost }: Props) {
         const str = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
         return (
           <G key={`mw-${i}`}>
-            {/* wide soft halo — feathers out to nothing */}
-            <Polyline points={str} fill="none" stroke="#FFF6D6" strokeWidth={halo} strokeOpacity={o(0.022)} strokeLinecap="round" strokeLinejoin="round" />
-            {/* faint warm core — the band you almost see */}
-            <Polyline points={str} fill="none" stroke="#FFF6D6" strokeWidth={core} strokeOpacity={o(0.04)} strokeLinecap="round" strokeLinejoin="round" />
+            {/* wide soft gold halo — feathers out to nothing */}
+            <Polyline points={str} fill="none" stroke="#D9A84E" strokeWidth={halo} strokeOpacity={o(0.045)} strokeLinecap="round" strokeLinejoin="round" />
+            {/* warm golden core — a faint river of light through Cygnus */}
+            <Polyline points={str} fill="none" stroke="#EBCB86" strokeWidth={core} strokeOpacity={o(0.09)} strokeLinecap="round" strokeLinejoin="round" />
           </G>
         );
       })}
