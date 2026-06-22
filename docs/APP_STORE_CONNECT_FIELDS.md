@@ -99,7 +99,6 @@ $6.99/month · $39.99/year (7-day free trial) · $99.99 Founders Lifetime
 
 Privacy-first. Your observations stay on your device in an encrypted vault. No ads. No tracking. No social feeds.
 
-Made with love under the dark skies of Ducktown, Tennessee.
 Ocoee Studios · ocoeestudios.com
 ```
 
