@@ -19,4 +19,12 @@ export interface LearnTopic {
   keyFacts: string[];
   skyLensAction?: string;
   archiveAction?: string;
+  /** When set, "Try in Sky Lens" deep-links to Find Mode on this RA/Dec target. */
+  skyTarget?: {
+    raHours: number;
+    decDegrees: number;
+    name: string;
+    subtitle?: string;
+    description?: string;
+  };
 }

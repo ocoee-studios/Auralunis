@@ -58,8 +58,9 @@ export const learnTopics: LearnTopic[] = [
       "Stars in a constellation are usually not physically close together.",
       "Constellations change visibility with season and location."
     ],
-    skyLensAction: "Trace Orion",
-    archiveAction: "Open Constellations"
+    skyLensAction: "See Orion in Sky Lens",
+    archiveAction: "Open Constellations",
+    skyTarget: { raHours: 5.6, decDegrees: 0, name: "Orion", subtitle: "Constellation", description: "The Hunter — find the three belt stars in a row, with Betelgeuse (orange) and Rigel (blue-white) at the shoulders and knees." }
   },
   {
     id: "star-brightness",
@@ -73,8 +74,9 @@ export const learnTopics: LearnTopic[] = [
       "Sirius is the brightest star in the night sky.",
       "Star color gives clues about temperature."
     ],
-    skyLensAction: "Find Sirius",
-    archiveAction: "Open Stars"
+    skyLensAction: "Find Sirius in Sky Lens",
+    archiveAction: "Open Stars",
+    skyTarget: { raHours: 6.752, decDegrees: -16.716, name: "Sirius", subtitle: "Brightest star", description: "The Dog Star — the brightest star in the night sky, a hot blue-white sun just 8.6 light-years away." }
   },
   {
     id: "nebulae",
@@ -88,8 +90,9 @@ export const learnTopics: LearnTopic[] = [
       "Dark nebulae block background light.",
       "Planetary nebulae are shells from dying stars."
     ],
-    skyLensAction: "Show Deep Sky layer",
-    archiveAction: "Open Nebulae"
+    skyLensAction: "See the Orion Nebula in Sky Lens",
+    archiveAction: "Open Nebulae",
+    skyTarget: { raHours: 5.588, decDegrees: -5.39, name: "Orion Nebula", subtitle: "Emission Nebula · M42", description: "A glowing stellar nursery in Orion's sword — a rosy cloud of hydrogen birthing new suns, faintly visible to the naked eye." }
   },
   {
     id: "milky-way-band",
@@ -103,8 +106,9 @@ export const learnTopics: LearnTopic[] = [
       "The Great Rift is a dark dust lane crossing the band.",
       "Best views require dark skies and low moon brightness."
     ],
-    skyLensAction: "Open Galaxy Mode",
-    archiveAction: "Open Milky Way"
+    skyLensAction: "See the Galactic Core in Sky Lens",
+    archiveAction: "Open Milky Way",
+    skyTarget: { raHours: 17.76, decDegrees: -28.94, name: "Galactic Core", subtitle: "Center of the Milky Way", description: "Toward Sagittarius lies the heart of our galaxy — the brightest, richest stretch of the Milky Way band." }
   },
   {
     id: "learn-sky-night-one",
