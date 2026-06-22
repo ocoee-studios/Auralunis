@@ -14,7 +14,7 @@ import { NebulaLayer } from "./layers/NebulaLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { ZodiacLayer } from "./layers/ZodiacLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
-import { FREE_CONSTELLATION_IDS, type LayerKey } from "./SkyLensLayerCatalog";
+import { type LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
 
 type Props = {
@@ -36,10 +36,10 @@ type Props = {
 export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
 
-  // Free tier sees the ~10 recognizable constellations; Premium unlocks all.
-  const constellations = isPremium
-    ? sky.constellations
-    : sky.constellations.filter((c) => FREE_CONSTELLATION_IDS.includes(c.id));
+  // Constellation FIGURES (gold stick lines) are shown for everyone — gating them
+  // made 25 constellations render as bare stars with no lines (looked broken).
+  // Premium value lives in the other layers (Deep Sky, Satellites, Ecliptic, etc.).
+  const constellations = sky.constellations;
 
   const project: ProjectFn = useCallback(
     (az: number, alt: number) => projectTarget(pointing, az, alt, fov, box),
