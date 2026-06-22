@@ -94,15 +94,21 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={op} />;
       })}
 
-      {/* LAYERS 1 & 5 — dark dust + Great Rift ON TOP (carves the rivers, makes contrast) */}
+      {/* LAYERS 1 & 5 — dark dust ON TOP (carves the rivers, makes contrast). Four
+          classes: rift (mwr), fracture tributaries (mwf), deep dark knots (mwk),
+          scattered clouds (mwc) — each its own size/darkness so the band frays. */}
       {dust.map((d) => {
         if (!d.aboveHorizon) return null;
         const p = project(d.azimuthDegrees, d.altitudeDegrees);
         if (!p.onScreen) return null;
-        const rift = d.id.startsWith("mwr");
         const v = (hash(d.id) % 100) / 100;
-        const r = (rift ? dustBase * 1.15 : dustBase * 0.7) * (0.7 + v * 0.8);
-        return <Circle key={d.id} cx={p.x} cy={p.y} r={r} fill="url(#mwDust)" opacity={rift ? 1 : 0.72} />;
+        let base = dustBase * 0.7;
+        let op = 0.72;
+        if (d.id.startsWith("mwk")) { base = dustBase * 1.5; op = 1; } // Coalsack-like deep knot
+        else if (d.id.startsWith("mwr")) { base = dustBase * 1.1; op = 1; } // rift
+        else if (d.id.startsWith("mwf")) { base = dustBase * 0.58; op = 0.82; } // thin fracture
+        const r = base * (0.7 + v * 0.8);
+        return <Circle key={d.id} cx={p.x} cy={p.y} r={r} fill="url(#mwDust)" opacity={op} />;
       })}
     </G>
   );
