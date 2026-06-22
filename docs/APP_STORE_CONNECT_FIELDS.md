@@ -62,42 +62,46 @@ AuraLunis — The Interactive Astral Clock
 
 Your time, written in the stars.
 
-AuraLunis transforms your iPhone into a living celestial instrument. Point your phone at the sky and see constellation lines, planet labels, and satellite tracks overlaid on your live camera. Track the ISS, plan astrophotography sessions, and discover the stories written in the stars by five different cultures.
+Point your phone at the sky. Watch gold constellation lines trace ancient patterns across your camera. See planets glow with color. Discover nebulae hiding in the Milky Way. Track the International Space Station as it streaks overhead. AuraLunis turns your iPhone into a living celestial instrument.
 
 SKY LENS — AR CAMERA OVERLAY
-Point and discover. 40+ toggleable layers show stars, constellations, planets, satellites, and the Milky Way on your live camera feed. Gold constellation lines and luxury engraving-style art make every screenshot beautiful.
+40+ toggleable layers on your live camera. Stars with real spectral colors and magnitude sizing. Gold constellation lines that feel like luxury watch engravings. Glowing nebulae in pink, teal, and gold. The Milky Way rendered as a warm golden river. Night Vision mode for real stargazing. Every object tappable — discover names, distances, mythology, and science.
+
+ZODIAC IN THE REAL SKY
+Find your zodiac sign in the actual sky. Twelve zodiac constellations with symbols, mythology cards, and current sun position. See which sign the Sun is transiting right now.
 
 CELESTIAL DIAL
-A living astral clock with planets on orbital rings, real-time moon phase, tonight's observing score, and time-scrub to see the sky hours ahead or behind.
-
-SATELLITE TRACKING
-Track ISS, Hubble, Starlink trains, and more. Live radar with 9 tracking modes, orbital trails, and flyover predictions with haptic alerts.
-
-ASTRO WEATHER
-Hour-by-hour observing forecast. Cloud cover, atmospheric seeing, transparency — and a simple verdict: GO, MAYBE, or STAY IN.
+A living astral clock. Planets orbit on golden rings. Real-time moon phase. Tonight Score tells you if the sky is worth going outside for. Poetic sky descriptions: not just data — atmosphere.
 
 BIRTH SKY
-Enter your birthday and see the exact sky the night you were born. Your moon phase, visible planets, rising constellation, and a personal cosmic signature.
+Enter your birthday. See the exact sky the moment you were born. Your moon phase, sun sign, rising constellation, visible planets, and a personal cosmic signature.
+
+ASTRO WEATHER
+Hour-by-hour observing forecast. Cloud cover, atmospheric seeing, transparency. One simple verdict: GO, MAYBE, or STAY IN.
 
 ASTROPHOTOGRAPHY PLANNER
-Exposure calculator (500 Rule + NPF Rule), Milky Way core timing, tonight's best targets, and stacking recommendations for your equipment.
+Exposure calculator with 500 Rule and NPF Rule. Milky Way core timing. Tonight's best targets ranked by difficulty. Stacking recommendations.
 
-CULTURAL SKY STORIES
-See the same stars through five different eyes: Greek, Aboriginal, Chinese, Norse, and Polynesian constellation art and mythology.
+SATELLITE TRACKING
+Nine tracking modes. ISS, Hubble, Starlink trains, space debris, and re-entry alerts. Live orbital radar with haptic proximity feedback.
 
 LEARN
-Sky in 30 Nights guided course. Solar system, moon phases, star life cycles, satellite orbits, and cultural astronomy.
+Free astronomy lessons with live visuals. Solar system, moon phases, star life cycles, constellations, deep sky objects. Each lesson links directly to Sky Lens — read about Orion, then see it in your sky.
+
+38 DEEP SKY OBJECTS
+Orion Nebula, Andromeda Galaxy, Pleiades, Lagoon Nebula, Ring Nebula, and more. Each rendered as a glowing cloud of color — not a dot on a map.
 
 APPLE WATCH COMPANION
-Star Compass on your wrist — point and feel the stars through haptic feedback. 7 complications. Tonight Score widget. Observation log.
+Star Compass — point your wrist and feel the stars through haptic feedback. Seven complications. Tonight Score widget. Observation log that syncs to your vault.
 
-PREMIUM FEATURES
-Free: Celestial Dial, basic sky view, 10 constellations, ISS tracking, Learn.
-Premium: Full Sky Lens AR, 88 constellations, all satellites, Birth Sky, Astro Weather, Photo Planner, Cultural Stories, Watch app, Night Vision, Dark Sky Finder.
+PRIVACY FIRST
+No account required. No ads. No tracking. Your observations stay on your device in an encrypted vault. We don't sell data. We don't even collect it.
 
-$6.99/month · $39.99/year (7-day free trial) · $99.99 Founders Lifetime
+PREMIUM
+Free: Celestial Dial, basic sky view, ISS tracking, Learn, Zodiac.
+Premium: Full Sky Lens AR, 88 constellations, all satellites, Birth Sky, Astro Weather, Photo Planner, Night Vision, encrypted vault, Watch app, and everything we build next.
 
-Privacy-first. Your observations stay on your device in an encrypted vault. No ads. No tracking. No social feeds.
+$6.99/month · $39.99/year with 7-day free trial · $99.99 Founders Lifetime
 
 Ocoee Studios · ocoeestudios.com
 ```
