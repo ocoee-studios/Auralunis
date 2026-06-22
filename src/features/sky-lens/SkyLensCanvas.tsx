@@ -63,7 +63,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           glows on top at Sagittarius. */}
       {activeLayers.has("milkyway") && (
         <G transform={depth(0.6)}>
-          <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
+          <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} dust={sky.milkyWayDust} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
           <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
         </G>
       )}

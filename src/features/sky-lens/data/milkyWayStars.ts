@@ -1,68 +1,56 @@
 import type { BrightStar } from "./brightStars";
+import { galacticToEquatorial, mulberry32, gaussian, coreProx, GALACTIC_KNOTS } from "./galacticGeom";
 
-// A procedural STAR CLOUD for the Milky Way — ~1800 faint stars packed along the
-// galactic plane so the band reads as a real river of suns, not a gray gradient.
-// Distribution (in galactic coords): longitude with density rising toward the core
-// (l≈0, Sagittarius), latitude a Gaussian about the plane (most stars within ±10°),
-// magnitude fainter than the naked-eye catalog and brighter toward the core. Each
-// is converted galactic→equatorial at build time so it sits at a FIXED sky position
-// and tracks correctly as the phone pans (same RA/Dec pipeline as every other star).
-
-const D2R = Math.PI / 180;
-const R2D = 180 / Math.PI;
-// Galactic → equatorial (J2000) rotation constants (match ephemeris/MilkyWay.ts).
-const RA_NGP = 192.85948;
-const DEC_NGP = 27.12825;
-const L_NCP = 122.93192;
-
-function galacticToEquatorial(lDeg: number, bDeg: number): { raHours: number; decDeg: number } {
-  const l = lDeg * D2R;
-  const b = bDeg * D2R;
-  const decN = DEC_NGP * D2R;
-  const lcp = L_NCP * D2R;
-  const dec = Math.asin(Math.sin(decN) * Math.sin(b) + Math.cos(decN) * Math.cos(b) * Math.cos(lcp - l));
-  const y = Math.cos(b) * Math.sin(lcp - l);
-  const x = Math.cos(decN) * Math.sin(b) - Math.sin(decN) * Math.cos(b) * Math.cos(lcp - l);
-  let ra = (RA_NGP * D2R + Math.atan2(y, x)) * R2D;
-  ra = ((ra % 360) + 360) % 360;
-  return { raHours: ra / 15, decDeg: dec * R2D };
-}
-
-function mulberry32(seed: number) {
-  let s = seed >>> 0;
-  return function () {
-    s = (s + 0x6d2b79f5) | 0;
-    let t = Math.imul(s ^ (s >>> 15), 1 | s);
-    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-// coreProx: 1 at the galactic centre (l=0/360), 0 at the anticentre (l=180).
-function coreProx(lDeg: number): number {
-  return (1 + Math.cos(lDeg * D2R)) / 2;
-}
-
+// LAYER 2 — the star-cloud TEXTURE. ~2200 stars packed along the galactic plane, but
+// CLUMPY rather than smooth: most are scattered around a set of cluster seeds (the
+// named star clouds — Sagittarius, Scutum, Cygnus, Carina — plus procedural knots),
+// so the band reads as mottled clusters with brightness variation, not a gradient.
+// A diffuse minority fills the gaps. Brighter toward the core and the plane, with
+// occasional sparkle stars. Galactic→equatorial at build time → fixed sky positions.
 export const MILKY_WAY_STARS: ReadonlyArray<BrightStar> = (() => {
   const rng = mulberry32(31337);
-  const out: BrightStar[] = [];
-  let i = 0;
-  while (out.length < 1800 && i < 60000) {
-    i++;
+
+  // Cluster seeds: the named knots dominate, plus procedural clumps along the plane.
+  const seeds: { l: number; b: number; w: number; spread: number }[] = [];
+  for (const k of GALACTIC_KNOTS) seeds.push({ l: k.l, b: k.b, w: k.weight * 1.6, spread: 5 + (1 - k.weight) * 6 });
+  for (let i = 0; i < 64; i++) {
     const l = rng() * 360;
     const cp = coreProx(l);
-    // Rejection-sample longitude so the core region is much denser.
-    if (rng() > 0.35 + 0.65 * Math.pow(cp, 1.4)) continue;
-    // Gaussian galactic latitude (Box–Muller); tighter near the core (thinner disk).
-    const u1 = Math.max(1e-6, rng());
-    const u2 = rng();
-    const g = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
-    const sigma = 7 + (1 - cp) * 5; // 7°–12° spread
-    const b = g * sigma;
-    if (Math.abs(b) > 32) continue;
+    seeds.push({ l, b: gaussian(rng) * 5, w: 0.2 + cp * 0.6, spread: 7 + (1 - cp) * 6 });
+  }
+  const totalW = seeds.reduce((a, s) => a + s.w, 0);
+  const pickSeed = () => {
+    let r = rng() * totalW;
+    for (const s of seeds) {
+      r -= s.w;
+      if (r <= 0) return s;
+    }
+    return seeds[seeds.length - 1];
+  };
+
+  const out: BrightStar[] = [];
+  let guard = 0;
+  while (out.length < 2200 && guard < 120000) {
+    guard++;
+    let l: number, b: number;
+    if (rng() < 0.72) {
+      // clustered — scatter around a seed
+      const s = pickSeed();
+      l = s.l + gaussian(rng) * s.spread;
+      b = s.b + gaussian(rng) * s.spread * 0.55;
+    } else {
+      // diffuse — thin background spread along the whole plane, denser inward
+      l = rng() * 360;
+      const cp0 = coreProx(l);
+      if (rng() > 0.4 + 0.6 * Math.pow(cp0, 1.3)) continue;
+      b = gaussian(rng) * 9;
+    }
+    if (Math.abs(b) > 34) continue;
+    const cp = coreProx(((l % 360) + 360) % 360);
     const { raHours, decDeg } = galacticToEquatorial(l, b);
-    // Fainter than the bright catalog; brighter toward the core.
-    const magnitude = 5.2 + rng() * 2.0 - cp * 1.0 - Math.max(0, (1 - Math.abs(b) / 10)) * 0.4;
+    // brightness: brighter toward the core and the mid-plane; occasional sparkle knots
+    let magnitude = 5.0 + rng() * 2.2 - cp * 0.9 - Math.max(0, 1 - Math.abs(b) / 10) * 0.5;
+    if (rng() < 0.05) magnitude -= 1.2;
     out.push({ id: `mw${out.length}`, raHours, decDegrees: decDeg, magnitude, con: "" });
   }
   return out;
