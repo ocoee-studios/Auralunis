@@ -19,12 +19,17 @@ try {
 }
 
 async function fetchIsPremium(): Promise<boolean> {
-  if (!Purchases) return false;
+  if (!Purchases) {
+    // RevenueCat unavailable (e.g. Expo Go) — grant premium in dev so the app is
+    // testable. __DEV__ is false in release builds, so this never ships unlocked.
+    return __DEV__;
+  }
   try {
     const info = await Purchases.getCustomerInfo();
     return Boolean(info.entitlements.active[RevenueCatIds.entitlement]);
   } catch {
-    return false;
+    // RC configured but errored (placeholder key, network) — premium in dev only.
+    return __DEV__;
   }
 }
 
