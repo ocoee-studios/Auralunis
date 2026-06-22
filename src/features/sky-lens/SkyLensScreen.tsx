@@ -102,12 +102,14 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Planetarium Mode (pure black background) keeps it from vanishing entirely.
   const milkyWayBoost = planetarium ? 1.6 : 1;
   const togglePlanetarium = useCallback(() => {
-    setPlanetarium((on) => {
-      const next = !on;
-      if (next) setActive((prev) => new Set(prev).add("milkyway")); // the Milky Way is the whole point
-      return next;
-    });
-  }, []);
+    // Two independent state updates at the top level of the handler. NEVER nest one
+    // setState inside another's updater — React runs the updater during its render
+    // phase, so a nested setState throws "Cannot update a component while rendering a
+    // different component". Reading `planetarium` (with it in deps) is the clean way
+    // to know we're turning ON.
+    if (!planetarium) setActive((prev) => (prev.has("milkyway") ? prev : new Set(prev).add("milkyway")));
+    setPlanetarium((on) => !on);
+  }, [planetarium]);
 
   const onLayout = useCallback((e: LayoutEvent) => {
     const { width, height } = e.nativeEvent.layout;
