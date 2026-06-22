@@ -51,8 +51,8 @@ import Svg, { Defs, RadialGradient, Stop, Rect, Circle } from "react-native-svg"
 // has its own feel without overwhelming the scene (3–6% opacity). null = navy default.
 function modeTint(mode: TrackingMode): { color: string; opacity: number } | null {
   switch (mode) {
-    case "debris": return { color: "#FF3B30", opacity: 0.05 }; // danger red
-    case "reentry": return { color: "#FF9500", opacity: 0.05 }; // amber warning
+    case "debris": return { color: "#FF3B30", opacity: 0.08 }; // danger red — stronger so it reads as a hazard
+    case "reentry": return { color: "#FF9500", opacity: 0.08 }; // amber warning — stronger
     case "train": return { color: "#3A6FFF", opacity: 0.045 }; // cool blue
     case "deep-space": return { color: "#000000", opacity: 0.06 }; // darker, deeper space
     default: return null; // fleet / golden / meteor / chain / static → navy default
