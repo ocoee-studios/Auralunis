@@ -7,6 +7,7 @@ export type LayerKey =
   | "grid"
   | "stars"
   | "constellations"
+  | "zodiac"
   | "planets"
   | "satellites"
   | "milkyway"
@@ -25,6 +26,7 @@ export interface LayerDef {
 export const SKY_LENS_LAYERS: ReadonlyArray<LayerDef> = [
   { key: "stars", label: "Stars", icon: "☆", premium: false, available: true, defaultOn: true },
   { key: "constellations", label: "Constellations", icon: "◎", premium: false, available: true, defaultOn: true },
+  { key: "zodiac", label: "Zodiac", icon: "♈", premium: false, available: true, defaultOn: false },
   { key: "planets", label: "Planets", icon: "●", premium: false, available: true, defaultOn: true },
   { key: "grid", label: "Grid", icon: "#", premium: false, available: true, defaultOn: true },
   { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true },

@@ -13,6 +13,7 @@ import {
 import { computeMilkyWay, type MilkyWayBand, type MilkyWayPoint } from "../ephemeris/MilkyWay";
 import { computeEcliptic } from "../ephemeris/Ecliptic";
 import { computeNebulae, type HorizontalNebula } from "../ephemeris/Nebulae";
+import { computeZodiac, type ZodiacData } from "../ephemeris/Zodiac";
 import { BRIGHT_STARS } from "../data/brightStars";
 import { DOME_STARS } from "../data/skyDome";
 import { CONSTELLATION_LINES } from "../data/constellationLines";
@@ -26,6 +27,7 @@ export interface SkyData {
   milkyWay: MilkyWayBand;
   ecliptic: MilkyWayPoint[];
   nebulae: HorizontalNebula[];
+  zodiac: ZodiacData;
   moonIlluminationPercent: number;
 }
 
@@ -53,6 +55,7 @@ export function useSkyData(location: ObserverLocation, refreshMs = 20000): SkyDa
       milkyWay: computeMilkyWay(location, now),
       ecliptic: computeEcliptic(location, now),
       nebulae: computeNebulae(location, now),
+      zodiac: computeZodiac(location, now),
       moonIlluminationPercent: sky.moonIlluminationPercent
     };
   }, [location, now]);
