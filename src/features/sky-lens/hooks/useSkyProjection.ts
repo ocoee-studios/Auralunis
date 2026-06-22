@@ -16,12 +16,14 @@ import { computeNebulae, type HorizontalNebula } from "../ephemeris/Nebulae";
 import { computeZodiac, type ZodiacData } from "../ephemeris/Zodiac";
 import { BRIGHT_STARS } from "../data/brightStars";
 import { DOME_STARS } from "../data/skyDome";
+import { MILKY_WAY_STARS } from "../data/milkyWayStars";
 import { CONSTELLATION_LINES } from "../data/constellationLines";
 
 export interface SkyData {
   when: Date;
   stars: HorizontalStar[];
   domeStars: HorizontalStar[];
+  milkyWayStars: HorizontalStar[];
   constellations: HorizontalConstellation[];
   bodies: SkyBody[];
   milkyWay: MilkyWayBand;
@@ -50,6 +52,7 @@ export function useSkyData(location: ObserverLocation, refreshMs = 20000): SkyDa
       when: now,
       stars: computeStarPositions(BRIGHT_STARS, location, now),
       domeStars: computeStarPositions(DOME_STARS, location, now),
+      milkyWayStars: computeStarPositions(MILKY_WAY_STARS, location, now),
       constellations: computeConstellationPositions(CONSTELLATION_LINES, location, now),
       bodies: sky.bodies,
       milkyWay: computeMilkyWay(location, now),

@@ -25,6 +25,7 @@ import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
 import { MeteorOverlay } from "./MeteorOverlay";
 import { TargetPulse } from "./TargetPulse";
+import { HeroSpotlight } from "./HeroSpotlight";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject } from "./SkyLensVisual";
@@ -235,6 +236,47 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
+  // Hero Object Spotlight: reverse-map the selected object's id to its LIVE az/alt
+  // (one place, no per-layer wiring), then project it so the spotlight dims the
+  // field around whatever you've focused and tracks it as you pan.
+  const focusAzAlt = useMemo(() => {
+    if (!selected) return null;
+    const { kind, id } = selected;
+    if (kind === "moon" || kind === "planet") {
+      const b = sky.bodies.find((x) => x.id === id);
+      return b && b.aboveHorizon ? { az: b.azimuthDegrees, alt: b.altitudeDegrees } : null;
+    }
+    if (kind === "star") {
+      const s = sky.stars.find((x) => x.id === id) ?? sky.domeStars.find((x) => x.id === id);
+      return s && s.aboveHorizon ? { az: s.azimuthDegrees, alt: s.altitudeDegrees } : null;
+    }
+    if (kind === "constellation") {
+      const c = sky.constellations.find((x) => x.id === id);
+      return c ? { az: c.centroid.azimuthDegrees, alt: c.centroid.altitudeDegrees } : null;
+    }
+    if (kind === "nebula") {
+      const n = sky.nebulae.find((x) => x.id === id);
+      return n && n.aboveHorizon ? { az: n.azimuthDegrees, alt: n.altitudeDegrees } : null;
+    }
+    if (kind === "zodiac") {
+      const z = sky.zodiac.signs.find((s) => `zodiac-${s.id}` === id);
+      return z && z.center.aboveHorizon ? { az: z.center.azimuthDegrees, alt: z.center.altitudeDegrees } : null;
+    }
+    return null;
+  }, [selected, sky]);
+
+  const focusProj = useMemo(() => {
+    if (!focusAzAlt) return null;
+    const p = projectTarget(pointing, focusAzAlt.az, focusAzAlt.alt, fov, box);
+    return p.behind ? null : p;
+  }, [focusAzAlt, pointing, fov, box]);
+
+  // Below-horizon bleed guard: the screen-fixed decorative overlays (FX layers,
+  // atmosphere glow, meteors) aren't sky-projected, so they'd render over the real
+  // floor in camera mode. Fade them out as the camera tilts below the horizon —
+  // 1 at alt ≥ 0°, linearly to 0 by −18°. Planetarium (virtual dome) keeps full.
+  const horizonFade = planetarium ? 1 : Math.max(0, Math.min(1, (pointing.altitudeDegrees + 18) / 18));
+
   // Moon screen position for the Lunar God Ray layer.
   const moonProj = useMemo(() => {
     const m = sky.bodies.find((b) => b.id === "moon");
@@ -277,7 +319,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               locations={[0, 0.42, 0.72, 1]}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
-              style={StyleSheet.absoluteFillObject}
+              style={[StyleSheet.absoluteFillObject, { opacity: horizonFade }]}
               pointerEvents="none"
             />
           )}
@@ -304,19 +346,19 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             nightVision={nightMode}
             moonVisible={sky.bodies.find((b) => b.id === "moon")?.aboveHorizon ?? false}
             milkyWayVisible={active.has("milkyway")}
-            intensity={planetarium ? 0.9 : 0.55}
+            intensity={(planetarium ? 0.9 : 0.55) * horizonFade}
           />
           <AstralBreathingLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
-            intensity={planetarium ? 0.8 : 0.45}
+            intensity={(planetarium ? 0.8 : 0.45) * horizonFade}
           />
           <LuxuryStarfieldFXLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
-            intensity={planetarium ? 0.8 : 0.45}
+            intensity={(planetarium ? 0.8 : 0.45) * horizonFade}
           />
           {moonProj && (
             <LunarGodRayLayer
@@ -327,7 +369,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               moonRadius={16}
               visible={moonProj.onScreen}
               nightVision={nightMode}
-              intensity={planetarium ? 0.9 : 0.5}
+              intensity={(planetarium ? 0.9 : 0.5) * horizonFade}
             />
           )}
           <OrbitalGhostTrailsLayer
@@ -335,7 +377,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             height={box.height}
             trails={[]}
             nightVision={nightMode}
-            intensity={planetarium ? 0.9 : 0.6}
+            intensity={(planetarium ? 0.9 : 0.6) * horizonFade}
           />
 
           <SkyLensErrorBoundary>
@@ -354,9 +396,12 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Crash-safe twinkle: View-opacity animation over the bright stars */}
           <TwinkleOverlay targets={twinkleStars} nightMode={nightMode} />
           {/* Crash-safe shooting stars: View transform + opacity */}
-          <MeteorOverlay box={box} nightMode={nightMode} />
+          {horizonFade > 0.2 && <MeteorOverlay box={box} nightMode={nightMode} />}
           {/* Find-Mode arrival pulse on the lesson target */}
           {targetProj?.onScreen && <TargetPulse x={targetProj.x} y={targetProj.y} />}
+          {/* Hero Object Spotlight — dims the field around the selected object so it
+              becomes the star of the scene. Above the field, below the forge + HUD. */}
+          {focusProj && <HeroSpotlight x={focusProj.x} y={focusProj.y} box={box} nightMode={nightMode} />}
           {/* Constellation Forge — gold ink-draw on identify (above canvas, below HUD) */}
           <ConstellationForgeLayer
             width={box.width}

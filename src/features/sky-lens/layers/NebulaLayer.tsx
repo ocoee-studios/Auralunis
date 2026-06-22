@@ -10,8 +10,6 @@ type Props = {
   palette: SkyPalette;
   nightMode: boolean;
   onSelect: (object: SelectedObject) => void;
-  // Optional external clock (ms). When absent, an internal ~8fps clock drives the
-  // breathing so re-renders stay ISOLATED to this layer (never the whole canvas).
   time?: number;
 };
 
@@ -24,11 +22,15 @@ const TYPE_LABEL: Record<NebulaType, string> = {
   supernova: "Supernova Remnant",
 };
 
-// Deep-sky objects as real CLOUDS OF COLOR — multi-stop radial gradients (smooth
-// falloff, not flat concentric circles): a broad colored haze (~3× radius), a
-// concentrated bright core, and a hot star-forming heart. Galaxies render as tilted
-// ellipses with warm-gold cores. Each gently breathes (±10%, phase-offset), and a
-// tap opens the info card. Hidden in Night Mode.
+// Showcase objects render IMPOSSIBLY large — huge soft volumetric clouds, not
+// markers. Andromeda spans ~6 Moons in the real sky; here it dominates. Big = lower
+// per-layer opacity so they read as clouds of cosmic fire, not solid stickers.
+const SHOWCASE = new Set(["m31", "m42", "m8", "m20", "m16", "ngc3372", "ngc2237", "m45", "m17"]);
+const scaleFor = (id: string) => (id === "m31" ? 3.2 : SHOWCASE.has(id) ? 2.4 : 1);
+
+// Deep-sky objects as real CLOUDS OF COLOR — multi-stop radial gradients with a
+// broad volumetric haze, a concentrated bright core, and a hot heart. Galaxies are
+// tilted ellipses. Each gently breathes. Tap opens the info card. Hidden at night.
 export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, time: timeProp }: Props) {
   const [internalTime, setInternalTime] = useState(() => Date.now());
   useEffect(() => {
@@ -45,14 +47,12 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
       <Defs>
         {nebulae.map((n) => (
           <React.Fragment key={`def-${n.id}`}>
-            {/* broad haze — the colored cloud */}
             <RadialGradient id={`neb-haze-${n.id}`} cx="50%" cy="50%" r="50%">
               <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.5" />
               <Stop offset="30%" stopColor={n.hazeColor} stopOpacity="0.3" />
               <Stop offset="65%" stopColor={n.hazeColor} stopOpacity="0.12" />
               <Stop offset="100%" stopColor={n.hazeColor} stopOpacity="0" />
             </RadialGradient>
-            {/* concentrated bright core */}
             <RadialGradient id={`neb-core-${n.id}`} cx="50%" cy="50%" r="50%">
               <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.85" />
               <Stop offset="40%" stopColor={n.coreColor} stopOpacity="0.45" />
@@ -67,11 +67,13 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
         const p = project(n.azimuthDegrees, n.altitudeDegrees);
         if (!p.onScreen) return null;
 
-        // ±10% breathing over ~4s, phase-offset per object so they churn out of sync.
         const breathe = 0.9 + Math.sin(time * 0.00157 + i * 0.7) * 0.1;
-        const r = Math.max(16, n.radius); // floor so every object is visibly a cloud
+        const showcase = SHOWCASE.has(n.id);
+        const r = Math.max(showcase ? 40 : 16, n.radius * scaleFor(n.id));
+        const opMul = showcase ? 0.58 : 1; // huge clouds stay subtle (lower opacity)
         const hazeR = r * 3;
         const coreR = r * 1.1;
+        const volR = r * 4.4; // volumetric outer edge
 
         return (
           <G key={n.id}>
@@ -81,7 +83,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
               cy={p.y}
               r={Math.max(r * 1.5, 26)}
               fill="transparent"
-              onPress={() =>
+              onPress={() => {
                 onSelect({
                   kind: "nebula",
                   id: n.id,
@@ -95,18 +97,20 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
                     { label: "Best viewed", value: n.bestMonths },
                   ],
                   description: n.description,
-                })
-              }
+                });
+              }}
             />
 
-            <G opacity={breathe}>
+            <G opacity={breathe * opMul}>
               {n.elongated ? (
                 <G transform={`rotate(${n.angle ?? 0} ${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
+                  {showcase && <Ellipse cx={p.x} cy={p.y} rx={volR} ry={volR * 0.42} fill={`url(#neb-haze-${n.id})`} opacity={0.45} />}
                   <Ellipse cx={p.x} cy={p.y} rx={hazeR} ry={hazeR * 0.42} fill={`url(#neb-haze-${n.id})`} />
                   <Ellipse cx={p.x} cy={p.y} rx={coreR * 1.4} ry={coreR * 0.6} fill={`url(#neb-core-${n.id})`} />
                 </G>
               ) : (
                 <>
+                  {showcase && <Circle cx={p.x} cy={p.y} r={volR} fill={`url(#neb-haze-${n.id})`} opacity={0.45} />}
                   <Circle cx={p.x} cy={p.y} r={hazeR} fill={`url(#neb-haze-${n.id})`} />
                   <Circle cx={p.x} cy={p.y} r={coreR} fill={`url(#neb-core-${n.id})`} />
                 </>
@@ -118,7 +122,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
             {/* label */}
             <SvgText
               x={p.x}
-              y={p.y + Math.min(hazeR * 0.5, 46) + 4}
+              y={p.y + Math.min(hazeR * 0.5, showcase ? 90 : 46) + 4}
               fill={palette.starLabel}
               fontSize={9}
               fontWeight="600"
