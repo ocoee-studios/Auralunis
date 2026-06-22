@@ -13,7 +13,7 @@ import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { ZodiacLayer } from "./layers/ZodiacLayer";
-import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
+import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { type LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
 
@@ -26,6 +26,7 @@ type Props = {
   nightMode: boolean;
   milkyWayBoost: number;
   isPremium: boolean;
+  focus: FocusZone;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -33,7 +34,7 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
 
   // Constellation FIGURES (gold stick lines) are shown for everyone — gating them
@@ -60,7 +61,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
       )}
       {/* Deep-sky nebulae glows sit just behind the stars */}
-      <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} onSelect={onSelect} />
+      <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} onSelect={onSelect} />
       {activeLayers.has("grid") && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
       )}
@@ -90,10 +91,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Dense background field behind the named bright stars */}
       {activeLayers.has("stars") && (
-        <DomeStarLayer stars={sky.domeStars} project={project} palette={palette} nightMode={nightMode} />
+        <DomeStarLayer stars={sky.domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} />
       )}
       {activeLayers.has("stars") && (
-        <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} onSelect={onSelect} />
+        <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} onSelect={onSelect} />
       )}
       {activeLayers.has("planets") && (
         <PlanetLayer

@@ -1,13 +1,14 @@
 import React from "react";
 import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
-import { magnitudeToRadius, starColor, STAR_FEATURES, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+import { magnitudeToRadius, starColor, STAR_FEATURES, focusFactor, type ProjectFn, type SkyPalette, type SelectedObject, type FocusZone } from "../SkyLensVisual";
 
 type Props = {
   stars: HorizontalStar[];
   project: ProjectFn;
   palette: SkyPalette;
   nightMode: boolean;
+  focus?: FocusZone;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -15,7 +16,7 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
-export function StarLayer({ stars, project, palette, nightMode, onSelect }: Props) {
+export function StarLayer({ stars, project, palette, nightMode, focus = null, onSelect }: Props) {
   return (
     <G>
       {stars.map((star) => {
@@ -24,7 +25,8 @@ export function StarLayer({ stars, project, palette, nightMode, onSelect }: Prop
         if (!p.onScreen) return null;
 
         const feature = nightMode ? undefined : STAR_FEATURES[star.id];
-        const r = feature ? feature.radius : magnitudeToRadius(star.magnitude);
+        const ff = focusFactor(p.x, p.y, focus); // focus mode: stars in the focused region swell + glow
+        const r = (feature ? feature.radius : magnitudeToRadius(star.magnitude)) * (1 + ff * 0.4);
         // Night Mode stays monochrome red for dark adaptation; otherwise stars
         // take their spectral color, and the brightest get a soft colored glow.
         const color = nightMode ? palette.star : starColor(star.id, star.magnitude);
@@ -56,6 +58,8 @@ export function StarLayer({ stars, project, palette, nightMode, onSelect }: Prop
                 })
               }
             />
+            {/* focus-mode aura: any star in the spotlighted region gets a soft halo */}
+            {ff > 0 && <Circle cx={p.x} cy={p.y} r={(r + 9) * (1 + ff)} fill={color} opacity={0.16 * ff} />}
             {/* hand-tuned ember glow for showpiece stars (Antares, Shaula) */}
             {feature && <Circle cx={p.x} cy={p.y} r={feature.glowRadius} fill={feature.glowColor} />}
             {/* wide 8px glow ring so the magnitude-0 stars genuinely POP */}

@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Circle, Defs, Ellipse, G, RadialGradient, Stop, Text as SvgText } from "react-native-svg";
 import type { HorizontalNebula } from "../ephemeris/Nebulae";
 import type { NebulaType } from "../data/nebulae";
-import type { ProjectFn, SkyPalette, SelectedObject } from "../SkyLensVisual";
+import { focusFactor, type ProjectFn, type SkyPalette, type SelectedObject, type FocusZone } from "../SkyLensVisual";
 
 type Props = {
   nebulae: HorizontalNebula[];
   project: ProjectFn;
   palette: SkyPalette;
   nightMode: boolean;
+  focus?: FocusZone;
   onSelect: (object: SelectedObject) => void;
   time?: number;
 };
@@ -31,7 +32,7 @@ const scaleFor = (id: string) => (id === "m31" ? 3.2 : SHOWCASE.has(id) ? 2.4 : 
 // Deep-sky objects as real CLOUDS OF COLOR — multi-stop radial gradients with a
 // broad volumetric haze, a concentrated bright core, and a hot heart. Galaxies are
 // tilted ellipses. Each gently breathes. Tap opens the info card. Hidden at night.
-export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, time: timeProp }: Props) {
+export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null, onSelect, time: timeProp }: Props) {
   const [internalTime, setInternalTime] = useState(() => Date.now());
   useEffect(() => {
     if (timeProp !== undefined || nightMode) return;
@@ -69,8 +70,10 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
 
         const breathe = 0.9 + Math.sin(time * 0.00157 + i * 0.7) * 0.1;
         const showcase = SHOWCASE.has(n.id);
-        const r = Math.max(showcase ? 40 : 16, n.radius * scaleFor(n.id));
-        const opMul = showcase ? 0.58 : 1; // huge clouds stay subtle (lower opacity)
+        // Focus mode: a nebula inside the spotlighted region swells and intensifies.
+        const ff = focusFactor(p.x, p.y, focus);
+        const r = Math.max(showcase ? 40 : 16, n.radius * scaleFor(n.id)) * (1 + ff * 0.8);
+        const opMul = (showcase ? 0.58 : 1) * (1 + ff * 0.7); // huge clouds stay subtle (lower opacity)
         const hazeR = r * 3;
         const coreR = r * 1.1;
         const volR = r * 4.4; // volumetric outer edge
@@ -101,7 +104,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
               }}
             />
 
-            <G opacity={breathe * opMul}>
+            <G opacity={Math.min(1, breathe * opMul)}>
               {n.elongated ? (
                 <G transform={`rotate(${n.angle ?? 0} ${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
                   {showcase && <Ellipse cx={p.x} cy={p.y} rx={volR} ry={volR * 0.42} fill={`url(#neb-haze-${n.id})`} opacity={0.45} />}
