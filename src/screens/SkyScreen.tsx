@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { TAB_BAR_STYLE } from "@/navigation/RootTabs";
+import type { FocusTarget } from "@/features/sky-lens/SkyLensScreen";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
@@ -23,6 +24,7 @@ export function SkyScreen() {
   const [manualMapOpen, setManualMapOpen] = useState(false);
   const [galaxyModeOn, setGalaxyModeOn] = useState(false);
   const [alignmentOpen, setAlignmentOpen] = useState(false);
+  const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(null);
   const { addItem } = useAuraLunisVault();
 
   const { location, status } = useObserverLocation();
@@ -31,10 +33,23 @@ export function SkyScreen() {
   // Hide the (absolute-positioned) bottom tab bar during full-screen immersive
   // modes so it doesn't sit on top of the Sky Lens layer pills / Alignment controls.
   const navigation = useNavigation<any>();
+  const route = useRoute<any>();
   useEffect(() => {
     const immersive = skyLensOpen || alignmentOpen;
     navigation.setOptions({ tabBarStyle: immersive ? { display: "none" } : TAB_BAR_STYLE });
   }, [navigation, skyLensOpen, alignmentOpen]);
+
+  // A Learn lesson can deep-link here with a target ("See in Sky Lens"): open the
+  // lens straight to Find Mode on that object, then clear the param so it doesn't
+  // re-fire on the next focus.
+  useEffect(() => {
+    const t = route.params?.focusTarget as FocusTarget | undefined;
+    if (t) {
+      setFocusTarget(t);
+      setSkyLensOpen(true);
+      navigation.setParams({ focusTarget: undefined });
+    }
+  }, [route.params?.focusTarget, navigation]);
 
   if (showPermission && !skyLensOpen && !manualMapOpen) {
     return (
@@ -55,7 +70,12 @@ export function SkyScreen() {
   // The Sky Lens takes over the full screen (camera + AR overlay), so render it
   // as a standalone screen rather than an embedded card.
   if (skyLensOpen) {
-    return <SkyLensScreen onClose={() => setSkyLensOpen(false)} />;
+    return (
+      <SkyLensScreen
+        onClose={() => { setSkyLensOpen(false); setFocusTarget(null); }}
+        focusTarget={focusTarget}
+      />
+    );
   }
 
   // Orbital Alignment also takes over the full screen. It used to render as an

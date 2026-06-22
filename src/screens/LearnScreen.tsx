@@ -45,7 +45,7 @@ export function LearnScreen() {
           onNext={() => setOpenTopicId(next.id)}
           onOpenSkyLens={() => {
             setOpenTopicId(null);
-            navigation.navigate("Sky");
+            navigation.navigate("Sky", topic.skyTarget ? { focusTarget: topic.skyTarget } : undefined);
           }}
         />
       );

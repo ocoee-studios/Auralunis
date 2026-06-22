@@ -1,5 +1,6 @@
-import React, { useCallback, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { CameraView } from "expo-camera";
 import { LinearGradient } from "expo-linear-gradient";
@@ -16,11 +17,21 @@ import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
 import { MeteorOverlay } from "./MeteorOverlay";
+import { TargetPulse } from "./TargetPulse";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject } from "./SkyLensVisual";
 
-type Props = { onClose: () => void };
+// A Find-Mode target handed in from Learn ("See in Sky Lens") — RA/Dec + lesson copy.
+export type FocusTarget = {
+  raHours: number;
+  decDegrees: number;
+  name: string;
+  subtitle?: string;
+  description?: string;
+};
+
+type Props = { onClose: () => void; focusTarget?: FocusTarget | null };
 
 type LayoutEvent = { nativeEvent: { layout: { width: number; height: number } } };
 
@@ -31,7 +42,7 @@ const arrowFor = (bearingDegrees: number) => ARROWS[Math.round(bearingDegrees / 
 // Full-screen AR Sky Lens (Phase 1): live camera feed with the Stars,
 // Constellations, Planets, Moon, and Grid layers projected over it, a toggle
 // bar, tap-to-reveal Info Card, and Night Mode. Phase-2 layers appear locked.
-export function SkyLensScreen({ onClose }: Props) {
+export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const insets = useSafeAreaInsets();
   const { location, status } = useObserverLocation();
   // Zoom state lives up here so the device-pointing smoothing can ramp with it.
@@ -142,6 +153,50 @@ export function SkyLensScreen({ onClose }: Props) {
     return p.behind ? "☾  Turn around for the Moon ↻" : `☾  Pan ${arrowFor(p.bearingDegrees)} to the Moon`;
   }, [sky.bodies, pointing, box, fov]);
 
+  // ── Find Mode: guide the user to a target handed in from a Learn lesson ──────
+  const targetHoriz = useMemo(() => {
+    if (!focusTarget) return null;
+    const obs = new Observer(location.latitudeDegrees, location.longitudeDegrees, location.altitudeMeters ?? 0);
+    const h = Horizon(sky.when, obs, focusTarget.raHours, focusTarget.decDegrees, "normal");
+    return { az: h.azimuth, alt: h.altitude, above: h.altitude > 0 };
+  }, [focusTarget, location, sky.when]);
+
+  const targetProj = useMemo(() => {
+    if (!targetHoriz || !targetHoriz.above) return null;
+    return projectTarget(pointing, targetHoriz.az, targetHoriz.alt, fov, box);
+  }, [targetHoriz, pointing, fov, box]);
+
+  const targetFinder = useMemo(() => {
+    if (!focusTarget || !targetHoriz) return null;
+    if (!targetHoriz.above) return `✦  ${focusTarget.name} is below the horizon right now`;
+    if (!targetProj || targetProj.onScreen) return null;
+    return targetProj.behind
+      ? `✦  Turn around for ${focusTarget.name} ↻`
+      : `✦  Pan ${arrowFor(targetProj.bearingDegrees)} to ${focusTarget.name}`;
+  }, [focusTarget, targetHoriz, targetProj]);
+
+  // On arrival (target first comes on screen), slide up the lesson info card once.
+  const arrivedRef = useRef(false);
+  useEffect(() => {
+    arrivedRef.current = false;
+  }, [focusTarget]);
+  useEffect(() => {
+    if (focusTarget && targetHoriz?.above && targetProj?.onScreen && !arrivedRef.current) {
+      arrivedRef.current = true;
+      setSelected({
+        kind: "constellation",
+        id: `focus-${focusTarget.name}`,
+        name: focusTarget.name,
+        subtitle: focusTarget.subtitle,
+        facts: [
+          { label: "Azimuth", value: `${Math.round(targetHoriz.az)}°` },
+          { label: "Altitude", value: `${Math.round(targetHoriz.alt)}°` },
+        ],
+        description: focusTarget.description,
+      });
+    }
+  }, [focusTarget, targetHoriz, targetProj]);
+
   // Dynamic sky gradient by the Sun's altitude (drives Planetarium Mode's backdrop).
   const sunAltitude = sky.bodies.find((b) => b.id === "sun")?.altitudeDegrees ?? -90;
   const skyColors = skyGradient(sunAltitude);
@@ -216,6 +271,8 @@ export function SkyLensScreen({ onClose }: Props) {
           <TwinkleOverlay targets={twinkleStars} nightMode={nightMode} />
           {/* Crash-safe shooting stars: View transform + opacity */}
           <MeteorOverlay box={box} nightMode={nightMode} />
+          {/* Find-Mode arrival pulse on the lesson target */}
+          {targetProj?.onScreen && <TargetPulse x={targetProj.x} y={targetProj.y} />}
         </View>
       </GestureDetector>
 
@@ -263,8 +320,14 @@ export function SkyLensScreen({ onClose }: Props) {
         </View>
       </View>
 
-      {/* Moon finder banner (hidden while an info card is open) */}
-      {!selected && moonFinder && (
+      {/* Find-Mode target banner (from a Learn lesson) takes priority */}
+      {!selected && targetFinder && (
+        <View style={[styles.finder, { bottom: insets.bottom + 82 }]} pointerEvents="none">
+          <Text style={[styles.finderText, { color: accent }]}>{targetFinder}</Text>
+        </View>
+      )}
+      {/* Moon finder banner (hidden while an info card is open or a target is set) */}
+      {!selected && !targetFinder && moonFinder && (
         <View style={[styles.finder, { bottom: insets.bottom + 82 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{moonFinder}</Text>
         </View>
