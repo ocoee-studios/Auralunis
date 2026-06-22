@@ -30,7 +30,7 @@ export const SKY_LENS_LAYERS: ReadonlyArray<LayerDef> = [
   { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true },
   { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: false, defaultOn: false },
   { key: "deepsky", label: "Deep Sky", icon: "✦", premium: true, available: false, defaultOn: false },
-  { key: "ecliptic", label: "Ecliptic", icon: "~", premium: true, available: false, defaultOn: false }
+  { key: "ecliptic", label: "Ecliptic", icon: "~", premium: false, available: true, defaultOn: true }
 ];
 
 export const DEFAULT_ACTIVE_LAYERS: LayerKey[] = SKY_LENS_LAYERS.filter((l) => l.defaultOn).map(
