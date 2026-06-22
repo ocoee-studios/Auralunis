@@ -74,8 +74,9 @@ export function SkyLensScreen({ onClose }: Props) {
     [zoom]
   );
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
-  // Planetarium Mode renders the gold Milky Way at full brightness on pure black.
-  const milkyWayBoost = planetarium ? 4.5 : 1.6;
+  // Milky Way is a faint warm glow — feel more than see. A small boost in
+  // Planetarium Mode (pure black background) keeps it from vanishing entirely.
+  const milkyWayBoost = planetarium ? 1.6 : 1;
   const togglePlanetarium = useCallback(() => {
     setPlanetarium((on) => {
       const next = !on;
