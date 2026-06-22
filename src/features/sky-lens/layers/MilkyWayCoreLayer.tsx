@@ -59,9 +59,12 @@ export function MilkyWayCoreLayer({ band, project, fov, box, nightMode, boost }:
     }
   }
 
-  // Radial feather centered on the core — opaque at the core, fading to nothing
-  // outward, so the rectangle's edges never show (works over the live camera feed).
-  const radius = Math.max(box.width, box.height) * 0.55;
+  // Radial feather centered on the core — opaque at the core, fading to ZERO by the
+  // time it reaches the band photo's nearest (top/bottom) edge, so the rectangle's
+  // hard edges NEVER show (the old "awful line"). Tied to the image half-height so
+  // the mask is fully transparent before any image edge; the circle is rotation-
+  // invariant, so it melts cleanly regardless of the galactic-plane tilt.
+  const radius = h * 0.5;
   // The hero. A warm golden river that GLOWS — dust lanes and star clouds clearly
   // visible, brightest at the galactic core (the radial mask centers there). ~35%
   // over the camera, brighter in Planetarium (pure-black backdrop).

@@ -402,5 +402,123 @@ export const CONSTELLATION_LINES: ReadonlyArray<ConstellationLine> = [
       { raHours: 20.5560, decDegrees: 11.303 }  // 4 Epsilon
     ],
     lines: [[0, 2], [2, 3], [3, 1], [1, 0], [1, 4]]
+  },
+  {
+    id: "ursa_major",
+    name: "Ursa Major",
+    season: "Spring",
+    myth: "The Great Bear. Its seven brightest stars form the Big Dipper — the most famous pattern in the northern sky.",
+    stars: [
+      { raHours: 11.062, decDegrees: 61.751 }, // 0 Dubhe
+      { raHours: 11.031, decDegrees: 56.382 }, // 1 Merak
+      { raHours: 11.897, decDegrees: 53.695 }, // 2 Phecda
+      { raHours: 12.257, decDegrees: 57.033 }, // 3 Megrez
+      { raHours: 12.900, decDegrees: 55.960 }, // 4 Alioth
+      { raHours: 13.399, decDegrees: 54.925 }, // 5 Mizar
+      { raHours: 13.792, decDegrees: 49.313 }  // 6 Alkaid
+    ],
+    lines: [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4], [4, 5], [5, 6]]
+  },
+  {
+    id: "ursa_minor",
+    name: "Ursa Minor",
+    season: "All year (north)",
+    myth: "The Little Bear, anchored by Polaris — the North Star, which barely moves as the sky wheels around it.",
+    stars: [
+      { raHours: 2.530, decDegrees: 89.264 },  // 0 Polaris
+      { raHours: 17.537, decDegrees: 86.586 }, // 1 Yildun
+      { raHours: 16.766, decDegrees: 82.037 }, // 2 Epsilon
+      { raHours: 15.734, decDegrees: 77.794 }, // 3 Zeta
+      { raHours: 14.845, decDegrees: 74.156 }, // 4 Kochab
+      { raHours: 15.345, decDegrees: 71.834 }  // 5 Pherkad
+    ],
+    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 2]]
+  },
+  {
+    id: "draco",
+    name: "Draco",
+    season: "All year (north)",
+    myth: "The Dragon, winding between the two Bears — the sleepless serpent guarding the golden apples.",
+    stars: [
+      { raHours: 17.943, decDegrees: 51.489 }, // 0 Eltanin
+      { raHours: 17.507, decDegrees: 52.301 }, // 1 Rastaban
+      { raHours: 17.892, decDegrees: 56.873 }, // 2 Grumium
+      { raHours: 17.684, decDegrees: 55.173 }, // 3 Nu
+      { raHours: 19.209, decDegrees: 67.661 }, // 4 Delta
+      { raHours: 17.146, decDegrees: 65.715 }, // 5 Zeta
+      { raHours: 15.415, decDegrees: 58.966 }, // 6 Edasich
+      { raHours: 14.073, decDegrees: 64.376 }  // 7 Thuban
+    ],
+    lines: [[0, 1], [1, 3], [3, 2], [2, 0], [2, 4], [4, 5], [5, 6], [6, 7]]
+  },
+  {
+    id: "virgo",
+    name: "Virgo",
+    season: "Spring",
+    myth: "The Maiden holding a sheaf of wheat, marked by brilliant blue-white Spica.",
+    stars: [
+      { raHours: 13.420, decDegrees: -11.161 }, // 0 Spica
+      { raHours: 12.694, decDegrees: -1.449 },  // 1 Porrima
+      { raHours: 13.036, decDegrees: 10.959 },  // 2 Vindemiatrix
+      { raHours: 11.845, decDegrees: 1.765 },   // 3 Zavijava
+      { raHours: 13.578, decDegrees: -0.596 }   // 4 Heze
+    ],
+    lines: [[3, 1], [1, 2], [1, 4], [4, 0]]
+  },
+  {
+    id: "aquarius",
+    name: "Aquarius",
+    season: "Autumn",
+    myth: "The Water Bearer pouring an endless stream — Ganymede, cupbearer to the gods.",
+    stars: [
+      { raHours: 21.526, decDegrees: -5.571 },  // 0 Sadalsuud
+      { raHours: 22.096, decDegrees: -0.320 },  // 1 Sadalmelik
+      { raHours: 22.911, decDegrees: -15.821 }, // 2 Skat
+      { raHours: 20.794, decDegrees: -9.496 },  // 3 Albali
+      { raHours: 22.361, decDegrees: -1.387 }   // 4 Sadachbia
+    ],
+    lines: [[3, 0], [0, 1], [1, 4], [4, 2]]
+  },
+  {
+    id: "capricornus",
+    name: "Capricornus",
+    season: "Autumn",
+    myth: "The Sea-Goat — the god Pan, half goat and half fish, transformed as he fled into a river.",
+    stars: [
+      { raHours: 20.300, decDegrees: -12.508 }, // 0 Algedi
+      { raHours: 20.350, decDegrees: -14.781 }, // 1 Dabih
+      { raHours: 21.784, decDegrees: -16.127 }, // 2 Deneb Algedi
+      { raHours: 21.668, decDegrees: -16.662 }  // 3 Nashira
+    ],
+    lines: [[0, 1], [1, 3], [3, 2], [2, 0]]
+  },
+  {
+    id: "canis_major",
+    name: "Canis Major",
+    season: "Winter",
+    myth: "The Great Dog at Orion's heel, blazing with Sirius — the brightest star in the entire night sky.",
+    stars: [
+      { raHours: 6.752, decDegrees: -16.716 },  // 0 Sirius
+      { raHours: 6.378, decDegrees: -17.956 },  // 1 Mirzam
+      { raHours: 7.140, decDegrees: -26.393 },  // 2 Wezen
+      { raHours: 6.977, decDegrees: -28.972 },  // 3 Adhara
+      { raHours: 7.402, decDegrees: -29.303 },  // 4 Aludra
+      { raHours: 7.063, decDegrees: -15.633 }   // 5 Muliphein
+    ],
+    lines: [[1, 0], [0, 5], [0, 2], [2, 3], [3, 4], [2, 4]]
+  },
+  {
+    id: "hercules",
+    name: "Hercules",
+    season: "Summer",
+    myth: "The kneeling hero of the Twelve Labors. Four stars form the Keystone at his core.",
+    stars: [
+      { raHours: 16.503, decDegrees: 21.490 }, // 0 Kornephoros
+      { raHours: 16.688, decDegrees: 31.603 }, // 1 Zeta (Keystone)
+      { raHours: 17.251, decDegrees: 36.809 }, // 2 Pi (Keystone)
+      { raHours: 16.715, decDegrees: 38.922 }, // 3 Eta (Keystone)
+      { raHours: 17.005, decDegrees: 30.926 }  // 4 Epsilon (Keystone)
+    ],
+    lines: [[1, 3], [3, 2], [2, 4], [4, 1], [1, 0]]
   }
 ];
