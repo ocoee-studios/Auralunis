@@ -10,6 +10,7 @@ import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer } from "./layers/MoonLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
+import { EclipticLayer } from "./layers/EclipticLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
 import type { LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
@@ -49,6 +50,9 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} />
       {activeLayers.has("grid") && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
+      )}
+      {activeLayers.has("ecliptic") && (
+        <EclipticLayer points={sky.ecliptic} project={project} palette={palette} nightMode={nightMode} />
       )}
       {activeLayers.has("constellations") && (
         <ConstellationLayer

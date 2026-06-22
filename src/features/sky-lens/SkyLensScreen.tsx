@@ -15,6 +15,7 @@ import { SkyLensLayerBar } from "./SkyLensLayerBar";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
+import { MeteorOverlay } from "./MeteorOverlay";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject } from "./SkyLensVisual";
@@ -207,6 +208,8 @@ export function SkyLensScreen({ onClose }: Props) {
           </SkyLensErrorBoundary>
           {/* Crash-safe twinkle: View-opacity animation over the bright stars */}
           <TwinkleOverlay targets={twinkleStars} nightMode={nightMode} />
+          {/* Crash-safe shooting stars: View transform + opacity */}
+          <MeteorOverlay box={box} nightMode={nightMode} />
         </View>
       </GestureDetector>
 

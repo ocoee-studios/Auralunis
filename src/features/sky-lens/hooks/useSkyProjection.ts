@@ -10,7 +10,8 @@ import {
   type HorizontalStar,
   type HorizontalConstellation
 } from "../ephemeris/StarPositions";
-import { computeMilkyWay, type MilkyWayBand } from "../ephemeris/MilkyWay";
+import { computeMilkyWay, type MilkyWayBand, type MilkyWayPoint } from "../ephemeris/MilkyWay";
+import { computeEcliptic } from "../ephemeris/Ecliptic";
 import { computeNebulae, type HorizontalNebula } from "../ephemeris/Nebulae";
 import { BRIGHT_STARS } from "../data/brightStars";
 import { DOME_STARS } from "../data/skyDome";
@@ -23,6 +24,7 @@ export interface SkyData {
   constellations: HorizontalConstellation[];
   bodies: SkyBody[];
   milkyWay: MilkyWayBand;
+  ecliptic: MilkyWayPoint[];
   nebulae: HorizontalNebula[];
   moonIlluminationPercent: number;
 }
@@ -49,6 +51,7 @@ export function useSkyData(location: ObserverLocation, refreshMs = 20000): SkyDa
       constellations: computeConstellationPositions(CONSTELLATION_LINES, location, now),
       bodies: sky.bodies,
       milkyWay: computeMilkyWay(location, now),
+      ecliptic: computeEcliptic(location, now),
       nebulae: computeNebulae(location, now),
       moonIlluminationPercent: sky.moonIlluminationPercent
     };
