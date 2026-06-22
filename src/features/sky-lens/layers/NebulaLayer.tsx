@@ -23,15 +23,69 @@ const TYPE_LABEL: Record<NebulaType, string> = {
   supernova: "Supernova Remnant",
 };
 
+// SIGNATURE objects: the few nebulae that earn a hand-built ORGANIC SHAPE instead of
+// a round blob, so they read like astrophotography — soft lobes that bleed and swirl,
+// thin filaments, hollow rose rings. Offsets/sizes are in units of the base radius r.
+type Lobe = { dx: number; dy: number; s: number; op?: number };
+type Filament = { dx: number; dy: number; rx: number; ry: number; ang: number; op: number };
+type Signature = { scale: number; lobes?: Lobe[]; ring?: boolean; filaments?: Filament[] };
+const SIGNATURES: Record<string, Signature> = {
+  // Orion — a huge red-magenta cloud with sweeping wings
+  m42: {
+    scale: 3.6,
+    lobes: [
+      { dx: 0, dy: 0, s: 1 },
+      { dx: -0.55, dy: -0.75, s: 0.7, op: 0.7 },
+      { dx: 0.6, dy: 0.55, s: 0.85, op: 0.75 },
+      { dx: 0.15, dy: 1.15, s: 0.55, op: 0.6 },
+      { dx: -0.9, dy: 0.3, s: 0.5, op: 0.5 },
+    ],
+  },
+  // Lagoon — a bright core trailing gold haze
+  m8: {
+    scale: 3.0,
+    lobes: [
+      { dx: 0, dy: 0, s: 1 },
+      { dx: 0.55, dy: 0.15, s: 0.65, op: 0.7 },
+      { dx: -0.5, dy: 0.25, s: 0.5, op: 0.55 },
+    ],
+  },
+  // Rosette — a massive hollow rose bloom
+  ngc2237: { scale: 3.4, ring: true },
+  // North America — a recognizable continent built from offset lobes
+  ngc7000: {
+    scale: 3.2,
+    lobes: [
+      { dx: 0, dy: -0.65, s: 0.75 }, // Canada
+      { dx: 0.35, dy: 0.15, s: 1.0 }, // central states
+      { dx: -0.55, dy: 0.55, s: 0.6 }, // west coast
+      { dx: 0.8, dy: 1.0, s: 0.5, op: 0.7 }, // Florida / Gulf tail
+      { dx: 0.5, dy: -0.5, s: 0.55, op: 0.6 },
+    ],
+  },
+  // Veil — thin curved supernova filaments, not a cloud
+  ngc6960: {
+    scale: 3.6,
+    filaments: [
+      { dx: -0.2, dy: 0, rx: 2.6, ry: 0.26, ang: 18, op: 0.5 },
+      { dx: 0.4, dy: 0.5, rx: 2.0, ry: 0.2, ang: -12, op: 0.42 },
+      { dx: 0.1, dy: -0.6, rx: 1.6, ry: 0.16, ang: 42, op: 0.38 },
+    ],
+  },
+};
+
 // Showcase objects render IMPOSSIBLY large — huge soft volumetric clouds, not
 // markers. Andromeda spans ~6 Moons in the real sky; here it dominates. Big = lower
 // per-layer opacity so they read as clouds of cosmic fire, not solid stickers.
-const SHOWCASE = new Set(["m31", "m42", "m8", "m20", "m16", "ngc3372", "ngc2237", "m45", "m17"]);
+const SHOWCASE = new Set([
+  "m31", "m42", "m8", "m20", "m16", "ngc3372", "ngc2237", "m45", "m17", "ngc7000", "ngc6960",
+]);
 const scaleFor = (id: string) => (id === "m31" ? 3.2 : SHOWCASE.has(id) ? 2.4 : 1);
 
 // Deep-sky objects as real CLOUDS OF COLOR — multi-stop radial gradients with a
-// broad volumetric haze, a concentrated bright core, and a hot heart. Galaxies are
-// tilted ellipses. Each gently breathes. Tap opens the info card. Hidden at night.
+// broad volumetric haze, a concentrated bright core, and a hot heart. Signature
+// objects get organic shapes; galaxies are tilted ellipses. Each gently breathes.
+// Tap opens the info card. Hidden at night.
 export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null, onSelect, time: timeProp }: Props) {
   const [internalTime, setInternalTime] = useState(() => Date.now());
   useEffect(() => {
@@ -59,6 +113,15 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               <Stop offset="40%" stopColor={n.coreColor} stopOpacity="0.45" />
               <Stop offset="100%" stopColor={n.coreColor} stopOpacity="0" />
             </RadialGradient>
+            {SIGNATURES[n.id]?.ring && (
+              <RadialGradient id={`neb-ring-${n.id}`} cx="50%" cy="50%" r="50%">
+                <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0" />
+                <Stop offset="38%" stopColor={n.coreColor} stopOpacity="0" />
+                <Stop offset="58%" stopColor={n.coreColor} stopOpacity="0.5" />
+                <Stop offset="80%" stopColor={n.hazeColor} stopOpacity="0.2" />
+                <Stop offset="100%" stopColor={n.hazeColor} stopOpacity="0" />
+              </RadialGradient>
+            )}
           </React.Fragment>
         ))}
       </Defs>
@@ -70,13 +133,17 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
 
         const breathe = 0.9 + Math.sin(time * 0.00157 + i * 0.7) * 0.1;
         const showcase = SHOWCASE.has(n.id);
+        const sig = SIGNATURES[n.id];
         // Focus mode: a nebula inside the spotlighted region swells and intensifies.
         const ff = focusFactor(p.x, p.y, focus);
-        const r = Math.max(showcase ? 40 : 16, n.radius * scaleFor(n.id)) * (1 + ff * 0.8);
+        const eff = sig ? sig.scale : scaleFor(n.id);
+        const r = Math.max(showcase ? 40 : 16, n.radius * eff) * (1 + ff * 0.8);
         const opMul = (showcase ? 0.58 : 1) * (1 + ff * 0.7); // huge clouds stay subtle (lower opacity)
         const hazeR = r * 3;
         const coreR = r * 1.1;
         const volR = r * 4.4; // volumetric outer edge
+        const hazeId = `url(#neb-haze-${n.id})`;
+        const coreId = `url(#neb-core-${n.id})`;
 
         return (
           <G key={n.id}>
@@ -105,21 +172,53 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
             />
 
             <G opacity={Math.min(1, breathe * opMul)}>
-              {n.elongated ? (
+              {sig?.ring ? (
+                /* Rosette — hollow rose bloom + a faint outer halo */
+                <>
+                  <Circle cx={p.x} cy={p.y} r={volR * 0.7} fill={hazeId} opacity={0.4} />
+                  <Circle cx={p.x} cy={p.y} r={r * 2.4} fill={`url(#neb-ring-${n.id})`} />
+                </>
+              ) : sig?.lobes ? (
+                /* organic multi-lobe cloud (Orion, Lagoon, North America) */
+                <>
+                  <Circle cx={p.x} cy={p.y} r={volR} fill={hazeId} opacity={0.4} />
+                  {sig.lobes.map((lb, k) => (
+                    <Circle
+                      key={`lobe-${k}`}
+                      cx={p.x + lb.dx * r}
+                      cy={p.y + lb.dy * r}
+                      r={hazeR * lb.s}
+                      fill={hazeId}
+                      opacity={lb.op ?? 1}
+                    />
+                  ))}
+                  <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
+                </>
+              ) : sig?.filaments ? (
+                /* Veil — thin curved filaments over a faint base haze */
+                <>
+                  <Circle cx={p.x} cy={p.y} r={hazeR * 0.7} fill={hazeId} opacity={0.28} />
+                  {sig.filaments.map((fl, k) => (
+                    <G key={`fil-${k}`} transform={`rotate(${fl.ang} ${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
+                      <Ellipse cx={p.x + fl.dx * r} cy={p.y + fl.dy * r} rx={r * fl.rx} ry={r * fl.ry} fill={hazeId} opacity={fl.op} />
+                    </G>
+                  ))}
+                </>
+              ) : n.elongated ? (
                 <G transform={`rotate(${n.angle ?? 0} ${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
-                  {showcase && <Ellipse cx={p.x} cy={p.y} rx={volR} ry={volR * 0.42} fill={`url(#neb-haze-${n.id})`} opacity={0.45} />}
-                  <Ellipse cx={p.x} cy={p.y} rx={hazeR} ry={hazeR * 0.42} fill={`url(#neb-haze-${n.id})`} />
-                  <Ellipse cx={p.x} cy={p.y} rx={coreR * 1.4} ry={coreR * 0.6} fill={`url(#neb-core-${n.id})`} />
+                  {showcase && <Ellipse cx={p.x} cy={p.y} rx={volR} ry={volR * 0.42} fill={hazeId} opacity={0.45} />}
+                  <Ellipse cx={p.x} cy={p.y} rx={hazeR} ry={hazeR * 0.42} fill={hazeId} />
+                  <Ellipse cx={p.x} cy={p.y} rx={coreR * 1.4} ry={coreR * 0.6} fill={coreId} />
                 </G>
               ) : (
                 <>
-                  {showcase && <Circle cx={p.x} cy={p.y} r={volR} fill={`url(#neb-haze-${n.id})`} opacity={0.45} />}
-                  <Circle cx={p.x} cy={p.y} r={hazeR} fill={`url(#neb-haze-${n.id})`} />
-                  <Circle cx={p.x} cy={p.y} r={coreR} fill={`url(#neb-core-${n.id})`} />
+                  {showcase && <Circle cx={p.x} cy={p.y} r={volR} fill={hazeId} opacity={0.45} />}
+                  <Circle cx={p.x} cy={p.y} r={hazeR} fill={hazeId} />
+                  <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
                 </>
               )}
-              {/* hot heart — the central star / cluster */}
-              <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />
+              {/* hot heart — the central star / cluster (rings stay hollow) */}
+              {!sig?.ring && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
             </G>
 
             {/* label */}
