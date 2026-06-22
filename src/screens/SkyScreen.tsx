@@ -21,6 +21,7 @@ import { BirthSkyScreen } from "@/screens/BirthSkyScreen";
 import { AstroWeatherScreen } from "@/screens/AstroWeatherScreen";
 import { PhotoPlannerScreen } from "@/screens/PhotoPlannerScreen";
 import { SkyShareScreen } from "@/screens/SkyShareScreen";
+import { CelestialArchiveScreen } from "@/screens/CelestialArchiveScreen";
 
 export function SkyScreen() {
   const [showPermission, setShowPermission] = useState(false);
@@ -32,6 +33,7 @@ export function SkyScreen() {
   const [astroWeatherOpen, setAstroWeatherOpen] = useState(false);
   const [photoPlannerOpen, setPhotoPlannerOpen] = useState(false);
   const [skyShareOpen, setSkyShareOpen] = useState(false);
+  const [archiveOpen, setArchiveOpen] = useState(false);
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(null);
   const { addItem } = useAuraLunisVault();
 
@@ -43,9 +45,9 @@ export function SkyScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   useEffect(() => {
-    const immersive = skyLensOpen || alignmentOpen || birthSkyOpen || astroWeatherOpen || photoPlannerOpen || skyShareOpen;
+    const immersive = skyLensOpen || alignmentOpen || birthSkyOpen || astroWeatherOpen || photoPlannerOpen || skyShareOpen || archiveOpen;
     navigation.setOptions({ tabBarStyle: immersive ? { display: "none" } : TAB_BAR_STYLE });
-  }, [navigation, skyLensOpen, alignmentOpen, birthSkyOpen, astroWeatherOpen, photoPlannerOpen, skyShareOpen]);
+  }, [navigation, skyLensOpen, alignmentOpen, birthSkyOpen, astroWeatherOpen, photoPlannerOpen, skyShareOpen, archiveOpen]);
 
   // A Learn lesson can deep-link here with a target ("See in Sky Lens"): open the
   // lens straight to Find Mode on that object, then clear the param so it doesn't
@@ -114,6 +116,10 @@ export function SkyScreen() {
 
   if (skyShareOpen) {
     return <SkyShareScreen onClose={() => setSkyShareOpen(false)} />;
+  }
+
+  if (archiveOpen) {
+    return <CelestialArchiveScreen onClose={() => setArchiveOpen(false)} />;
   }
 
   return (
@@ -237,9 +243,9 @@ export function SkyScreen() {
 
       <FeatureCard
         title="Celestial Archive"
-        description="Solar System, planets, moons, all 88 official constellations, named stars, events, Deep Sky, and Milky Way education."
-        actionLabel="Open Archive Summary"
-        onPress={() => Alert.alert("Celestial Archive", "Archive sections prepared: Solar System · Moon · Planets · Moons · Constellations · Stars · Events · Deep Sky · Milky Way.")}
+        description="The reference library — Solar System, Moon, Planets, Constellations, Stars, Deep Sky, Milky Way, and Events, each with live counts and a jump to learn it."
+        actionLabel="Open Archive"
+        onPress={() => setArchiveOpen(true)}
       />
     </ScreenShell>
   );
