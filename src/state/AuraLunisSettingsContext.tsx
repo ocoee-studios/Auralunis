@@ -70,9 +70,12 @@ function sanitizeSettings(value: unknown): AuraLunisSettingsState {
         : defaultAuraLunisSettings.themeMode,
     skyQuality:
       typeof saved.skyQuality === "string" &&
-      (["urban", "suburban", "rural"] as readonly string[]).includes(saved.skyQuality)
+      (["urban", "suburban", "rural", "dark"] as readonly string[]).includes(saved.skyQuality)
         ? (saved.skyQuality as SkyQuality)
         : defaultAuraLunisSettings.skyQuality,
+    nightVision: isBoolean(saved.nightVision)
+      ? saved.nightVision
+      : defaultAuraLunisSettings.nightVision,
     notificationsEnabled: isBoolean(saved.notificationsEnabled)
       ? saved.notificationsEnabled
       : defaultAuraLunisSettings.notificationsEnabled,

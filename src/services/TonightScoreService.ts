@@ -20,6 +20,7 @@ export interface TonightScoreResult {
 }
 
 const LIGHT_FACTORS: Record<SkyQuality, number> = {
+  dark: 1.15,
   rural: 1.0,
   suburban: 0.78,
   urban: 0.52
