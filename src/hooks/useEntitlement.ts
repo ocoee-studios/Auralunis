@@ -27,11 +27,18 @@ try {
 }
 
 async function fetchIsPremium(): Promise<boolean> {
-  if (!Purchases) return false;
+  if (!Purchases) {
+    // RevenueCat unavailable (Expo Go) — grant premium in dev for testing
+    if (__DEV__) return true;
+    return false;
+  }
   try {
     const info = await Purchases.getCustomerInfo();
     return Boolean(info.entitlements.active[RevenueCatIds.entitlement]);
   } catch {
+    // RC configured but errored (placeholder key, network, etc.)
+    // Grant premium in dev so the app is testable
+    if (__DEV__) return true;
     return false;
   }
 }
