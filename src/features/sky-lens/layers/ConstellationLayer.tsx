@@ -1,5 +1,5 @@
 import React from "react";
-import { G, Line, Text as SvgText } from "react-native-svg";
+import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { HorizontalConstellation } from "../ephemeris/StarPositions";
 import { type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
 
@@ -64,27 +64,36 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
           <G key={c.id}>
             {segments}
             {labelVisible && (
-              <SvgText
-                x={centroid.x}
-                y={centroid.y}
-                fill={nightMode ? palette.conLabel : GOLD}
-                fontSize={10}
-                fontWeight="600"
-                letterSpacing={2}
-                textAnchor="middle"
-                onPress={() =>
-                  onSelect({
-                    kind: "constellation",
-                    id: c.id,
-                    name: c.name,
-                    subtitle: "Constellation",
-                    facts: [{ label: "Best season", value: c.season }],
-                    description: c.myth
-                  })
-                }
-              >
-                {c.name.toUpperCase()}
-              </SvgText>
+              <>
+                <SvgText
+                  x={centroid.x}
+                  y={centroid.y}
+                  fill={nightMode ? palette.conLabel : GOLD}
+                  fontSize={10}
+                  fontWeight="600"
+                  letterSpacing={2}
+                  textAnchor="middle"
+                >
+                  {c.name.toUpperCase()}
+                </SvgText>
+                {/* generous transparent tap target over the label (≈20px hit area) */}
+                <Circle
+                  cx={centroid.x}
+                  cy={centroid.y - 3}
+                  r={24}
+                  fill="transparent"
+                  onPress={() =>
+                    onSelect({
+                      kind: "constellation",
+                      id: c.id,
+                      name: c.name,
+                      subtitle: "Constellation",
+                      facts: [{ label: "Best season", value: c.season }],
+                      description: c.myth
+                    })
+                  }
+                />
+              </>
             )}
           </G>
         );

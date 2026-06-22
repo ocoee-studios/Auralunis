@@ -1,14 +1,14 @@
-// Catches JS crashes and shows a recovery screen.
-// Uses require("react").Component to work around type resolution.
+// Catches JS crashes anywhere in its subtree and shows a recovery screen instead of
+// a white-screen crash — the production safety net around the Sky renderer, the
+// sensor manager, and Settings. Properly typed so it can be used as a JSX component.
+import { Component, type ReactNode } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { AuraLunisColors } from "@/theme/tokens";
 
-const React = require("react") as { Component: any; createElement: any };
-
-type Props = { children: unknown };
+type Props = { children: ReactNode };
 type State = { hasError: boolean; error: string };
 
-export class ErrorBoundary extends (React.Component as any) {
+export class ErrorBoundary extends Component<Props, State> {
   state: State = { hasError: false, error: "" };
 
   static getDerivedStateFromError(error: Error): State {
@@ -16,19 +16,20 @@ export class ErrorBoundary extends (React.Component as any) {
   }
 
   render() {
-    const self = this as unknown as { state: State; props: Props; setState: (s: Partial<State>) => void };
-    if (self.state.hasError) {
-      return React.createElement(View, { style: s.container },
-        React.createElement(Text, { style: s.icon }, "✦"),
-        React.createElement(Text, { style: s.title }, "Something went wrong"),
-        React.createElement(Text, { style: s.body }, "AuraLunis encountered an unexpected error. Your Vault data is safe."),
-        React.createElement(Text, { style: s.detail }, self.state.error),
-        React.createElement(Pressable, { style: s.button, onPress: () => self.setState({ hasError: false, error: "" }) },
-          React.createElement(Text, { style: s.buttonText }, "Try Again")
-        )
+    if (this.state.hasError) {
+      return (
+        <View style={s.container}>
+          <Text style={s.icon}>✦</Text>
+          <Text style={s.title}>Something went wrong</Text>
+          <Text style={s.body}>AuraLunis encountered an unexpected error. Your Vault data is safe.</Text>
+          <Text style={s.detail}>{this.state.error}</Text>
+          <Pressable style={s.button} onPress={() => this.setState({ hasError: false, error: "" })}>
+            <Text style={s.buttonText}>Try Again</Text>
+          </Pressable>
+        </View>
       );
     }
-    return self.props.children;
+    return this.props.children;
   }
 }
 
