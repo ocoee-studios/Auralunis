@@ -93,6 +93,18 @@ export function starColor(id: string, magnitude: number): string {
   return STAR_COLORS[id] ?? (magnitude < 2 ? "#EAF2FF" : magnitude < 3.2 ? "#D2E0FF" : "#BFD2FF");
 }
 
+// Showpiece stars that earn a hand-tuned size + glow ring beyond the usual
+// magnitude curve — the ones people point at and screenshot.
+export interface StarFeature {
+  radius: number;
+  glowRadius: number;
+  glowColor: string;
+}
+export const STAR_FEATURES: Record<string, StarFeature> = {
+  antares: { radius: 6, glowRadius: 14, glowColor: "rgba(240,100,100,0.25)" }, // red ember, heart of Scorpius
+  shaula: { radius: 4, glowRadius: 10, glowColor: "rgba(255,246,214,0.15)" } // warm-white, the stinger
+};
+
 // Subtle per-constellation tints so each figure reads as distinct without turning
 // the sky into a rainbow — a curated cool/warm set, chosen deterministically by id.
 const CONSTELLATION_TINTS = [
