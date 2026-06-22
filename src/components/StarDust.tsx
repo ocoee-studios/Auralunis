@@ -2,7 +2,7 @@
 // smooth 60fps animation. Render as a child of any container.
 import React, { useEffect } from "react";
 import { StyleSheet, View } from "react-native";
-import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing } from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedStyle, withRepeat, withTiming, Easing, cancelAnimation } from "react-native-reanimated";
 
 type Props = { count?: number; color?: string; opacity?: number };
 
@@ -13,11 +13,20 @@ function Particle({ delay, color, baseOpacity }: { delay: number; color: string;
 
   useEffect(() => {
     const dur = 4000 + Math.random() * 6000;
-    setTimeout(() => {
+    const t = setTimeout(() => {
       y.value = withRepeat(withTiming(-60 - Math.random() * 40, { duration: dur, easing: Easing.linear }), -1, false);
       x.value = withRepeat(withTiming((Math.random() - 0.5) * 30, { duration: dur * 0.7, easing: Easing.inOut(Easing.sin) }), -1, true);
       o.value = withRepeat(withTiming(baseOpacity, { duration: dur * 0.4 }), -1, true);
     }, delay);
+    // Cancel the pending start AND the infinite loops on unmount (no leaked timer
+    // or animation running against an unmounted particle).
+    return () => {
+      clearTimeout(t);
+      cancelAnimation(y);
+      cancelAnimation(x);
+      cancelAnimation(o);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const style = useAnimatedStyle(() => ({
