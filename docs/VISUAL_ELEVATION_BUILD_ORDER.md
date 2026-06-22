@@ -1,5 +1,12 @@
 # Sky Lens Visual Elevation — Build Order for Claude Code
 
+## THE VISION
+
+> Make Sky Lens feel like standing beneath a living celestial cathedral
+> built from stars, gold light, and ancient astronomical instruments.
+
+The wow factor comes from emotion and atmosphere, not object count.
+
 ## Source: Gemini's 7-phase plan + our existing specs
 ## Rule: EXTEND existing systems. Do NOT rewrite.
 
