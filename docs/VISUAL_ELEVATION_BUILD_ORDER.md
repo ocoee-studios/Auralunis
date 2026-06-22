@@ -214,3 +214,30 @@ Every change must answer YES to:
 
 If yes: build it.
 If no: skip it.
+
+---
+
+## Phase 0 — Astral Breathing (do this FIRST — 10 minutes, transforms everything)
+
+Every 20 seconds, the ENTIRE sky performs a microscopic brightness pulse.
+Not enough to consciously notice. Enough to subconsciously feel.
+
+Implementation: In `SkyLensCanvas.tsx`, add a single shared sine wave:
+
+```typescript
+const breathe = 1.0 + Math.sin(Date.now() * 0.0003) * 0.015; // ±1.5% opacity
+```
+
+Apply as an opacity multiplier to the root `<G>` wrapping ALL visual layers:
+
+```tsx
+<G opacity={breathe}>
+  {/* all layers render here */}
+</G>
+```
+
+That's it. One line of math. One wrapper.
+
+Stars, nebulae, Milky Way, constellation lines — everything inhales
+and exhales together. The whole sky is alive and users won't know
+why AuraLunis feels different. They'll just stay longer.
