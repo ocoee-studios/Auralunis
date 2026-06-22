@@ -62,7 +62,9 @@ export function MilkyWayCoreLayer({ band, project, fov, box, nightMode, boost }:
   // Radial feather centered on the core — opaque at the core, fading to nothing
   // outward, so the rectangle's edges never show (works over the live camera feed).
   const radius = Math.max(box.width, box.height) * 0.55;
-  const op = Math.min(0.42, 0.26 * boost);
+  // Ghostly — warm golden fog, not a decal. ~20% over the camera, a touch more in
+  // Planetarium (pure-black backdrop).
+  const op = Math.min(0.3, 0.2 * boost);
 
   return (
     <G>

@@ -8,7 +8,6 @@ import { StarLayer } from "./layers/StarLayer";
 import { DomeStarLayer } from "./layers/DomeStarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer } from "./layers/MoonLayer";
-import { MilkyWayLayer } from "./layers/MilkyWayLayer";
 import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
@@ -43,11 +42,9 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
 
   return (
     <Svg style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-      {/* Milky Way sits behind everything: faint procedural band as connective
-          tissue, then the REAL photographic core mapped to Sagittarius on top. */}
-      {activeLayers.has("milkyway") && (
-        <MilkyWayLayer band={sky.milkyWay} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
-      )}
+      {/* Milky Way sits behind everything — ONLY the real photographic core,
+          mapped to Sagittarius. The procedural band is gone (its huge round-capped
+          strokes read as brown blobs that fought the texture). Let it breathe. */}
       {activeLayers.has("milkyway") && (
         <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
       )}
