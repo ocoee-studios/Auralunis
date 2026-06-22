@@ -43,13 +43,6 @@ function themePreview(themeId: WatchThemeId) {
         accent: "#D7DFFF",
         soft: "rgba(210,220,255,0.13)"
       };
-    case "liquid_obsidian":
-      return {
-        face: "#020309",
-        border: "rgba(217,168,78,0.66)",
-        accent: "#FFF0B8",
-        soft: "rgba(217,168,78,0.18)"
-      };
     default:
       return {
         face: "#070912",

@@ -10,8 +10,7 @@ export type WatchThemeId =
   | "midnight_gold"
   | "moon_silver"
   | "deep_space"
-  | "soft_moon"
-  | "liquid_obsidian";
+  | "soft_moon";
 
 export type WatchComplicationId =
   | "moon_phase"
@@ -22,7 +21,6 @@ export type WatchComplicationId =
   | "daily_alignment"
   | "tonights_ritual"
   | "sky_lens_shortcut"
-  | "sound_bath_shortcut"
   | "auralunis_logo";
 
 export interface WatchFaceOption {
@@ -110,13 +108,6 @@ export const watchThemeOptions: WatchThemeOption[] = [
     id: "soft_moon",
     name: "Soft Moon",
     description: "Calmer, softer lunar tones for a gentle wind-down look."
-  },
-  {
-    id: "liquid_obsidian",
-    name: "Liquid Obsidian",
-    description: "Future prestige material with glass-black depth and metallic shimmer.",
-    premium: true,
-    future: true
   }
 ];
 
@@ -175,13 +166,6 @@ export const watchComplicationOptions: WatchComplicationOption[] = [
     name: "Sky Lens Shortcut",
     shortLabel: "Lens",
     description: "Launches the phone app into Sky Lens or Manual Sky Map.",
-    nativeNote: "Use as an app-intent shortcut complication."
-  },
-  {
-    id: "sound_bath_shortcut",
-    name: "Sound Bath Shortcut",
-    shortLabel: "Sound",
-    description: "Starts the user’s last Astral Sound Bath.",
     nativeNote: "Use as an app-intent shortcut complication."
   },
   {
