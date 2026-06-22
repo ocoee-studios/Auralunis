@@ -44,6 +44,20 @@ import { fetchSpaceWeather, AURA_VISUALS, type SpaceWeatherSnapshot } from "@/se
 import { computeStaticParams, elevationAudioLabel, STATIC_COLORS } from "@/services/IonosphericStaticService";
 import { getIonosphericEngine, destroyIonosphericEngine } from "@/services/IonosphericAudioEngine";
 import { AuraLunisColors } from "@/theme/tokens";
+import { Starfield } from "@/components/Starfield";
+import Svg, { Defs, RadialGradient, Stop, Rect, Circle } from "react-native-svg";
+
+// A faint mode-coloured wash over the living-sky background so each tracking mode
+// has its own feel without overwhelming the scene (3–6% opacity). null = navy default.
+function modeTint(mode: TrackingMode): { color: string; opacity: number } | null {
+  switch (mode) {
+    case "debris": return { color: "#FF3B30", opacity: 0.08 }; // danger red — stronger so it reads as a hazard
+    case "reentry": return { color: "#FF9500", opacity: 0.08 }; // amber warning — stronger
+    case "train": return { color: "#3A6FFF", opacity: 0.045 }; // cool blue
+    case "deep-space": return { color: "#000000", opacity: 0.06 }; // darker, deeper space
+    default: return null; // fleet / golden / meteor / chain / static → navy default
+  }
+}
 import { RadarTutorial } from "@/features/onboarding/RadarTutorial";
 import { LockShareCard, type LockShareData } from "@/components/LockShareCard";
 import { isModeGated, FREE_DRIFT_EVENT_LIMIT, type TrackingMode } from "@/features/paywall/MonetizationCatalog";
@@ -369,10 +383,31 @@ export function OrbitalAlignmentScreen() {
   const isReady = simMode || (gpsStatus !== "loading" && sensorAvailable);
   const auraStyle = weather ? AURA_VISUALS[weather.auraIntensity] : AURA_VISUALS.calm;
 
+  // Living-sky background shared by both render states (loading + main): a centre-lifted
+  // radial gradient (#071225 → #030816), the Home-style twinkling Starfield, and a faint
+  // mode tint. Sits absolutely behind the ScrollView so every mode feels like space.
+  const tint = modeTint(mode);
+  const skyBackground = (
+    <View style={StyleSheet.absoluteFill} pointerEvents="none">
+      <Svg style={StyleSheet.absoluteFill} width="100%" height="100%">
+        <Defs>
+          <RadialGradient id="orbitalSky" cx="50%" cy="40%" r="80%">
+            <Stop offset="0%" stopColor="#071225" />
+            <Stop offset="100%" stopColor="#030816" />
+          </RadialGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill="url(#orbitalSky)" />
+      </Svg>
+      <Starfield />
+      {tint && <View style={[StyleSheet.absoluteFill, { backgroundColor: tint.color, opacity: tint.opacity }]} />}
+    </View>
+  );
+
   // ── Loading ──────────────────────────────────────────────────────────────────
   if (!isReady) {
     return (
       <View style={[styles.screen, styles.center]}>
+        {skyBackground}
         <Text style={styles.title}>AURALUNIS TELEMETRY</Text>
         <View style={styles.loadingCard}>
           <Text style={styles.loadingTitle}>Acquiring telemetry…</Text>
@@ -392,6 +427,7 @@ export function OrbitalAlignmentScreen() {
   // ── Main ─────────────────────────────────────────────────────────────────────
   return (
     <View style={styles.screen}>
+      {skyBackground}
       <RadarTutorial onComplete={() => setTutorialDone(true)} />
 
       <ScrollView style={styles.scroll} contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
@@ -538,14 +574,28 @@ export function OrbitalAlignmentScreen() {
               </View>
             </Animated.View>
 
-            <SpaceRadarGrid
-              blips={activeBlips}
-              alignmentScore={activeScore}
-              isLocked={isLocked}
-              onBlipPress={mode === "fleet" ? setSelectedSatId : undefined}
-              devicePitch={pointing.altitudeDegrees}
-              showHorizon={true}
-            />
+            <View style={styles.radarWrap}>
+              {/* subtle gold radial glow → the radar reads as a holographic projection
+                  floating in space rather than a flat disc on a screen */}
+              <Svg width={320} height={320} style={styles.radarGlow} pointerEvents="none">
+                <Defs>
+                  <RadialGradient id="radarGlow" cx="50%" cy="50%" r="50%">
+                    <Stop offset="0%" stopColor="#D9A84E" stopOpacity={0.08} />
+                    <Stop offset="55%" stopColor="#D9A84E" stopOpacity={0.03} />
+                    <Stop offset="100%" stopColor="#D9A84E" stopOpacity={0} />
+                  </RadialGradient>
+                </Defs>
+                <Circle cx={160} cy={160} r={160} fill="url(#radarGlow)" />
+              </Svg>
+              <SpaceRadarGrid
+                blips={activeBlips}
+                alignmentScore={activeScore}
+                isLocked={isLocked}
+                onBlipPress={mode === "fleet" ? setSelectedSatId : undefined}
+                devicePitch={pointing.altitudeDegrees}
+                showHorizon={true}
+              />
+            </View>
 
             <Text style={styles.tapHint}>
               {mode === "fleet" ? "Tap a blip to identify the satellite" :
@@ -710,7 +760,9 @@ const styles = StyleSheet.create({
   scoreVal: { fontSize: 17, fontWeight: "900", width: 46, textAlign: "right" },
   scoreTrack: { flex: 1, height: 4, backgroundColor: AuraLunisColors.elevated, borderRadius: 2, overflow: "hidden" },
   scoreFill: { height: "100%", borderRadius: 2 },
-  card: { width: "100%", backgroundColor: AuraLunisColors.surface, borderRadius: 14, borderWidth: 1, borderColor: AuraLunisColors.borderGold, padding: 13, marginBottom: 9 },
+  radarWrap: { alignItems: "center", justifyContent: "center", marginBottom: 4 },
+  radarGlow: { position: "absolute" },
+  card: { width: "100%", backgroundColor: "rgba(7,18,37,0.7)", borderRadius: 14, borderWidth: 1, borderColor: AuraLunisColors.borderGold, padding: 13, marginBottom: 9 },
   cardLabel: { color: AuraLunisColors.faint, fontSize: 8, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 7 },
   cardVal: { fontSize: 13, fontWeight: "800", color: AuraLunisColors.gold2, marginBottom: 7 },
   activeHeader: { flexDirection: "row", alignItems: "center", gap: 7, marginBottom: 7 },
@@ -733,7 +785,7 @@ const styles = StyleSheet.create({
   loadingCard: { alignItems: "center", gap: 8, marginBottom: 24 },
   loadingTitle: { color: AuraLunisColors.silver, fontSize: 15, fontWeight: "700" },
   loadingDetail: { color: AuraLunisColors.faint, fontSize: 12 },
-  simCard: { width: "100%", backgroundColor: AuraLunisColors.surface, borderRadius: 14, borderWidth: 1, borderColor: AuraLunisColors.borderSubtle, padding: 16, alignItems: "center", gap: 10 },
+  simCard: { width: "100%", backgroundColor: "rgba(7,18,37,0.7)", borderRadius: 14, borderWidth: 1, borderColor: AuraLunisColors.borderGold, padding: 16, alignItems: "center", gap: 10 },
   simCardTitle: { color: AuraLunisColors.silver, fontSize: 13, fontWeight: "700" },
   simBtn: { backgroundColor: AuraLunisColors.deepIndigo, borderRadius: 11, paddingHorizontal: 18, paddingVertical: 9, borderWidth: 1, borderColor: AuraLunisColors.borderGold },
   simBtnText: { color: AuraLunisColors.gold2, fontSize: 12, fontWeight: "700" },
