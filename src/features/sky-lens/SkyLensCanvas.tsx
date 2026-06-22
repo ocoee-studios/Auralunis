@@ -54,7 +54,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           plane (Sagittarius→Cygnus→Cassiopeia→Orion), then the REAL photographic core
           glows on top at Sagittarius. */}
       {activeLayers.has("milkyway") && (
-        <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
+        <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} dust={sky.milkyWayDust} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
       )}
       {activeLayers.has("milkyway") && (
         <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
