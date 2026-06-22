@@ -14,7 +14,11 @@ import { useDevicePointing } from "./ar/useDevicePointing";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
 import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
+import { AstralBreathingLayer } from "./layers/AstralBreathingLayer";
 import { LuxuryStarfieldFXLayer } from "./layers/LuxuryStarfieldFXLayer";
+import { LunarGodRayLayer } from "./layers/LunarGodRayLayer";
+import { OrbitalGhostTrailsLayer } from "./layers/OrbitalGhostTrailsLayer";
+import { ConstellationForgeLayer, type ForgePoint, type ForgeSegment } from "./layers/ConstellationForgeLayer";
 import { SkyLensLayerBar } from "./SkyLensLayerBar";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
@@ -231,6 +235,36 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
+  // Moon screen position for the Lunar God Ray layer.
+  const moonProj = useMemo(() => {
+    const m = sky.bodies.find((b) => b.id === "moon");
+    if (!m || !m.aboveHorizon) return null;
+    const mp = projectTarget(pointing, m.azimuthDegrees, m.altitudeDegrees, fov, box);
+    return mp.behind ? null : mp;
+  }, [sky.bodies, pointing, fov, box]);
+
+  // Constellation Forge: when a constellation is identified (selected), snapshot its
+  // projected segments/points and play the gold ink-draw for ~1.8s.
+  const [forge, setForge] = useState<{ active: boolean; points: ForgePoint[]; segments: ForgeSegment[] }>(
+    { active: false, points: [], segments: [] }
+  );
+  const forgeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    if (selected?.kind !== "constellation") return;
+    const c = sky.constellations.find((x) => x.id === selected.id);
+    if (!c) return;
+    const proj = c.points.map((pt) => projectTarget(pointing, pt.azimuthDegrees, pt.altitudeDegrees, fov, box));
+    const points: ForgePoint[] = proj.filter((q) => !q.behind).map((q) => ({ x: q.x, y: q.y }));
+    const segments: ForgeSegment[] = c.lines
+      .filter(([i, j]) => proj[i] && proj[j] && !proj[i].behind && !proj[j].behind)
+      .map(([i, j]) => ({ from: { x: proj[i].x, y: proj[i].y }, to: { x: proj[j].x, y: proj[j].y } }));
+    setForge({ active: true, points, segments });
+    if (forgeTimer.current) clearTimeout(forgeTimer.current);
+    forgeTimer.current = setTimeout(() => setForge((f) => ({ ...f, active: false })), 1900);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selected?.id, selected?.kind]);
+  useEffect(() => () => { if (forgeTimer.current) clearTimeout(forgeTimer.current); }, []);
+
   return (
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={pinch}>
@@ -272,11 +306,36 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             milkyWayVisible={active.has("milkyway")}
             intensity={planetarium ? 0.9 : 0.55}
           />
+          <AstralBreathingLayer
+            width={box.width}
+            height={box.height}
+            nightVision={nightMode}
+            intensity={planetarium ? 0.8 : 0.45}
+          />
           <LuxuryStarfieldFXLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
             intensity={planetarium ? 0.8 : 0.45}
+          />
+          {moonProj && (
+            <LunarGodRayLayer
+              width={box.width}
+              height={box.height}
+              moonX={moonProj.x}
+              moonY={moonProj.y}
+              moonRadius={16}
+              visible={moonProj.onScreen}
+              nightVision={nightMode}
+              intensity={planetarium ? 0.9 : 0.5}
+            />
+          )}
+          <OrbitalGhostTrailsLayer
+            width={box.width}
+            height={box.height}
+            trails={[]}
+            nightVision={nightMode}
+            intensity={planetarium ? 0.9 : 0.6}
           />
 
           <SkyLensErrorBoundary>
@@ -298,6 +357,15 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           <MeteorOverlay box={box} nightMode={nightMode} />
           {/* Find-Mode arrival pulse on the lesson target */}
           {targetProj?.onScreen && <TargetPulse x={targetProj.x} y={targetProj.y} />}
+          {/* Constellation Forge — gold ink-draw on identify (above canvas, below HUD) */}
+          <ConstellationForgeLayer
+            width={box.width}
+            height={box.height}
+            active={forge.active}
+            points={forge.points}
+            segments={forge.segments}
+            nightVision={nightMode}
+          />
         </View>
       </GestureDetector>
 
