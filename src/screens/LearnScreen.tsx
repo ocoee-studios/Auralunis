@@ -1,43 +1,25 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
-import { GlassPanel } from "@/components/GlassPanel";
+import { useNavigation } from "@react-navigation/native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { AuraLunisColors } from "@/theme/tokens";
+import { TAB_BAR_STYLE } from "@/navigation/RootTabs";
 import { learnCategories, learnTopics } from "@/features/learn/LearnCatalog";
 import type { LearnCategoryId } from "@/features/learn/LearnTypes";
-import { SolarSystemLiveVisual } from "@/features/learn/visuals/SolarSystemLiveVisual";
-import { MoonPhaseLiveVisual } from "@/features/learn/visuals/MoonPhaseLiveVisual";
-import { ConstellationIgnitionVisual } from "@/features/learn/visuals/ConstellationIgnitionVisual";
-import { StarBrightnessVisual } from "@/features/learn/visuals/StarBrightnessVisual";
-import { DeepSkyGlowVisual } from "@/features/learn/visuals/DeepSkyGlowVisual";
-import { MilkyWayBandVisual } from "@/features/learn/visuals/MilkyWayBandVisual";
-import { ThirtyNightsProgressVisual } from "@/features/learn/visuals/ThirtyNightsProgressVisual";
-
-function LearnVisualForCategory({ categoryId }: { categoryId: LearnCategoryId }) {
-  switch (categoryId) {
-    case "solar_system":
-    case "planets":
-      return <SolarSystemLiveVisual />;
-    case "moon":
-      return <MoonPhaseLiveVisual />;
-    case "constellations":
-      return <ConstellationIgnitionVisual />;
-    case "stars":
-      return <StarBrightnessVisual />;
-    case "deep_sky":
-      return <DeepSkyGlowVisual />;
-    case "milky_way":
-      return <MilkyWayBandVisual />;
-    case "beginner_path":
-      return <ThirtyNightsProgressVisual />;
-    default:
-      return null;
-  }
-}
+import { LearnVisualForCategory } from "@/features/learn/LearnCategoryVisual";
+import { LearnDetailScreen } from "@/screens/LearnDetailScreen";
 
 export function LearnScreen() {
+  const navigation = useNavigation<any>();
   const [selectedCategory, setSelectedCategory] = useState<LearnCategoryId>("solar_system");
+  const [openTopicId, setOpenTopicId] = useState<string | null>(null);
+
+  // Go full-screen for a lesson: hide the tab bar, restore it on exit (mirrors
+  // the Sky Lens immersive pattern).
+  useEffect(() => {
+    navigation.setOptions?.({ tabBarStyle: openTopicId ? { display: "none" } : TAB_BAR_STYLE });
+  }, [navigation, openTopicId]);
 
   const selectedTopics = useMemo(
     () => learnTopics.filter((topic) => topic.categoryId === selectedCategory),
@@ -45,6 +27,30 @@ export function LearnScreen() {
   );
 
   const selectedMeta = learnCategories.find((category) => category.id === selectedCategory);
+
+  // ── Full-screen lesson ──────────────────────────────────────────────────────
+  if (openTopicId) {
+    const idx = learnTopics.findIndex((t) => t.id === openTopicId);
+    const topic = learnTopics[idx];
+    if (topic) {
+      const next = learnTopics[(idx + 1) % learnTopics.length];
+      const categoryTitle =
+        learnCategories.find((c) => c.id === topic.categoryId)?.title ?? "Lesson";
+      return (
+        <LearnDetailScreen
+          topic={topic}
+          categoryTitle={categoryTitle}
+          nextTopicTitle={next && next.id !== topic.id ? next.title : null}
+          onBack={() => setOpenTopicId(null)}
+          onNext={() => setOpenTopicId(next.id)}
+          onOpenSkyLens={() => {
+            setOpenTopicId(null);
+            navigation.navigate("Sky");
+          }}
+        />
+      );
+    }
+  }
 
   return (
     <ScreenShell title="Learn the Cosmos" subtitle="Education">
@@ -54,6 +60,7 @@ export function LearnScreen() {
           Learn planets, constellations, stars, the Moon, nebulae, galaxies, and the Milky Way
           through real live visuals instead of static blocks alone.
         </Text>
+        <Text style={styles.heroFree}>Every lesson is free.</Text>
       </View>
 
       <Text style={styles.sectionLabel}>Choose a learning path</Text>
@@ -86,13 +93,8 @@ export function LearnScreen() {
           key={topic.id}
           title={topic.title}
           description={`${topic.summary}\n\nKey facts:\n• ${topic.keyFacts.join("\n• ")}`}
-          actionLabel={topic.skyLensAction ?? "Open Lesson"}
-          onPress={() =>
-            Alert.alert(
-              topic.title,
-              `${topic.archiveAction ?? "Open Archive"}\n\nThis lesson connects to the live visual module and can later connect to Sky Lens and Celestial Archive.`
-            )
-          }
+          actionLabel="Open Lesson"
+          onPress={() => setOpenTopicId(topic.id)}
           status={topic.level}
         />
       ))}
@@ -128,6 +130,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 21,
     marginTop: 8
+  },
+  heroFree: {
+    color: AuraLunisColors.gold2,
+    fontSize: 11,
+    fontWeight: "800",
+    letterSpacing: 1.5,
+    textTransform: "uppercase",
+    marginTop: 10
   },
   sectionLabel: {
     color: AuraLunisColors.gold2,
