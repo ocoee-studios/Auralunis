@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import { Alert, Image, Linking, Modal, Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { TermsScreen } from "@/screens/TermsScreen";
 import { PrivacyScreen } from "@/screens/PrivacyScreen";
 import { GlassPanel } from "@/components/GlassPanel";
@@ -49,6 +51,8 @@ function SettingsSection({ title, children }: { title: string; children: React.R
 
 export function SettingsScreen() {
   const { settings, hydrated, updateSetting, resetSettings } = useAuraLunisSettings();
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const { items, clearPrototypeVault } = useAuraLunisVault();
   const [deviceDiagnosticsOpen, setDeviceDiagnosticsOpen] = useState(false);
   const [legalModal, setLegalModal] = useState<"terms" | "privacy" | null>(null);
@@ -116,11 +120,16 @@ export function SettingsScreen() {
           <Text style={styles.infoCopy}>
             Start with a free trial, upgrade when you're ready. Cancel anytime.
           </Text>
+          {!isPremium && (
+            <Pressable style={styles.actionButton} onPress={openPaywall}>
+              <Text style={styles.actionButtonText}>Upgrade to Premium</Text>
+            </Pressable>
+          )}
           <Pressable
-            style={styles.actionButton}
+            style={isPremium ? styles.actionButton : styles.secondaryButton}
             onPress={handleManageSubscription}
           >
-            <Text style={styles.actionButtonText}>Manage Subscription</Text>
+            <Text style={isPremium ? styles.actionButtonText : styles.secondaryButtonText}>Manage Subscription</Text>
           </Pressable>
           <Pressable
             style={styles.secondaryButton}

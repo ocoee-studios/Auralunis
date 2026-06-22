@@ -17,11 +17,10 @@ import { AuraLunisVaultProvider } from "@/state/AuraLunisVaultContext";
 import { OnboardingFlow } from "@/features/onboarding/OnboardingFlow";
 import {
   configureRevenueCat,
-  purchaseAuraLunisTier,
+  purchaseAuraLunisPackage,
   restoreAuraLunisPurchases
 } from "@/services/RevenueCatService";
-import type {
-} from "@/features/paywall/MonetizationCatalog";
+import { plans } from "@/features/paywall/MonetizationCatalog";
 import { configureNotificationHandler } from "@/services/NotificationService";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
 import { useAuraLunisFonts } from "@/theme/useFonts";
@@ -100,10 +99,12 @@ export default function App() {
 
   async function handlePurchase(planId: string) {
     try {
-      const result = await purchaseAuraLunisTier(planId as never, planId.includes("annual") ? "annual" as never : "monthly" as never);
+      // Package-based purchase so EVERY plan (incl. lifetime) buys the right product.
+      const plan = plans.find((p) => p.id === planId);
+      const result = await purchaseAuraLunisPackage(plan?.revenueCatPackageId ?? planId, plan?.productId);
 
       if (result.status === "purchased") {
-        trackPaywallEvent("purchase_complete", { planId, productId: result.productId });
+        trackPaywallEvent("purchase_complete", { planId });
         setPaywallVisible(false);
         Alert.alert("Welcome to AuraLunis Premium", "Your membership is active.");
         return;
@@ -114,18 +115,11 @@ export default function App() {
         return;
       }
 
-      if (result.status === "not_configured") {
-        Alert.alert(
-          "RevenueCat setup required",
-          `The purchase handler is wired for ${result.productId}. Add the public RevenueCat SDK key and finish App Store Connect / RevenueCat sandbox setup before purchase testing.`
-        );
+      if (result.status === "not_configured" || result.status === "not_available") {
+        // No live RevenueCat key / offering yet (e.g. before launch) — never crash.
+        Alert.alert("Subscriptions available after launch", "Premium plans will be purchasable once AuraLunis is live on the App Store.");
         return;
       }
-
-      Alert.alert(
-        "Product not available yet",
-        `The App Store package for ${result.productId ?? planId} is not available in the current RevenueCat offering.`
-      );
     } catch {
       Alert.alert(
         "Purchase could not be completed",
