@@ -13,6 +13,7 @@ import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useDevicePointing } from "./ar/useDevicePointing";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
+import { CelestialAtmosphereLayer } from "./layers/CelestialAtmosphereLayer";
 import { SkyLensLayerBar } from "./SkyLensLayerBar";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
@@ -258,6 +259,17 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             />
           )}
           {nightMode && <View style={styles.nightFilter} pointerEvents="none" />}
+
+          {/* Ambient celestial atmosphere — breathing glow above the background,
+              below the star canvas + labels/cards. Crash-safe (Animated.View). */}
+          <CelestialAtmosphereLayer
+            width={box.width}
+            height={box.height}
+            nightVision={nightMode}
+            moonVisible={sky.bodies.find((b) => b.id === "moon")?.aboveHorizon ?? false}
+            milkyWayVisible={active.has("milkyway")}
+            intensity={planetarium ? 0.9 : 0.55}
+          />
 
           <SkyLensErrorBoundary>
             <SkyLensCanvas
