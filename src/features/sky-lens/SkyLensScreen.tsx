@@ -477,7 +477,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconBtn, nightMode && { backgroundColor: "rgba(139,32,32,0.5)" }]}
-            onPress={() => setNightMode((n) => { const next = !n; updateSetting("nightVision", next); return next; })}
+            onPress={() => { const next = !nightMode; setNightMode(next); updateSetting("nightVision", next); }}
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>{nightMode ? "🌙" : "◐"}</Text>
