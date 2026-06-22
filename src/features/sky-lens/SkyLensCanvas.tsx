@@ -9,6 +9,7 @@ import { DomeStarLayer } from "./layers/DomeStarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer } from "./layers/MoonLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
+import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
@@ -42,9 +43,13 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
 
   return (
     <Svg style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
-      {/* Milky Way sits behind everything */}
+      {/* Milky Way sits behind everything: faint procedural band as connective
+          tissue, then the REAL photographic core mapped to Sagittarius on top. */}
       {activeLayers.has("milkyway") && (
         <MilkyWayLayer band={sky.milkyWay} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
+      )}
+      {activeLayers.has("milkyway") && (
+        <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
       )}
       {/* Deep-sky nebulae glows sit just behind the stars */}
       <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} />
