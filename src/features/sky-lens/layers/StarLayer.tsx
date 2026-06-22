@@ -9,6 +9,7 @@ type Props = {
   palette: SkyPalette;
   nightMode: boolean;
   focus?: FocusZone;
+  showcase?: FocusZone; // auto-lit hero region (e.g. Orion in view) — stronger star glow
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -16,7 +17,7 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
-export function StarLayer({ stars, project, palette, nightMode, focus = null, onSelect }: Props) {
+export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, onSelect }: Props) {
   return (
     <G>
       {stars.map((star) => {
@@ -25,8 +26,11 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, on
         if (!p.onScreen) return null;
 
         const feature = nightMode ? undefined : STAR_FEATURES[star.id];
-        const ff = focusFactor(p.x, p.y, focus); // focus mode: stars in the focused region swell + glow
-        const r = (feature ? feature.radius : magnitudeToRadius(star.magnitude)) * (1 + ff * 0.4);
+        // focus mode (tap) + auto showcase region (e.g. Orion in view): stars swell + glow
+        const ff = focusFactor(p.x, p.y, focus);
+        const sf = focusFactor(p.x, p.y, showcase);
+        const lit = Math.max(ff, sf); // combined "in a lit region" strength
+        const r = (feature ? feature.radius : magnitudeToRadius(star.magnitude)) * (1 + ff * 0.4 + sf * 0.3);
         // Night Mode stays monochrome red for dark adaptation; otherwise stars
         // take their spectral color, and the brightest get a soft colored glow.
         const color = nightMode ? palette.star : starColor(star.id, star.magnitude);
@@ -58,10 +62,11 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, on
                 })
               }
             />
-            {/* focus-mode aura: any star in the spotlighted region gets a soft halo */}
-            {ff > 0 && <Circle cx={p.x} cy={p.y} r={(r + 9) * (1 + ff)} fill={color} opacity={0.16 * ff} />}
-            {/* hand-tuned ember glow for showpiece stars (Antares, Shaula) */}
-            {feature && <Circle cx={p.x} cy={p.y} r={feature.glowRadius} fill={feature.glowColor} />}
+            {/* focus/showcase aura: any star in a lit region gets a soft halo */}
+            {lit > 0 && <Circle cx={p.x} cy={p.y} r={(r + 9) * (1 + lit)} fill={color} opacity={0.16 * lit} />}
+            {/* hand-tuned ember glow for showpiece stars — grows in a showcase region
+                so Betelgeuse/Rigel blaze when Orion is on screen */}
+            {feature && <Circle cx={p.x} cy={p.y} r={feature.glowRadius * (1 + sf * 1.2)} fill={feature.glowColor} />}
             {/* wide 8px glow ring so the magnitude-0 stars genuinely POP */}
             {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.1} />}
             {bright && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.16} />}

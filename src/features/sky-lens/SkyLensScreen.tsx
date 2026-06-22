@@ -281,6 +281,18 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     return { x: focusProj.x, y: focusProj.y, r: Math.min(box.width, box.height) * 0.34 };
   }, [focusProj, box]);
 
+  // Auto showcase region: when Orion's heart (M42) is in view, light up the whole
+  // region — no tap needed. Layers boost nebula intensity (~3×), local star density,
+  // and showcase-star glow inside this zone, so Orion (M42 + Flame + Horsehead +
+  // Rosette + Betelgeuse + Rigel) becomes the most dramatic patch of sky on screen.
+  const showcaseZone = useMemo<FocusZone>(() => {
+    const m42 = sky.nebulae.find((n) => n.id === "m42");
+    if (!m42 || !m42.aboveHorizon) return null;
+    const sp = projectTarget(pointing, m42.azimuthDegrees, m42.altitudeDegrees, fov, box);
+    if (sp.behind || !sp.onScreen) return null;
+    return { x: sp.x, y: sp.y, r: Math.min(box.width, box.height) * 0.55 };
+  }, [sky.nebulae, pointing, fov, box]);
+
   // Below-horizon bleed guard: the screen-fixed decorative overlays (FX layers,
   // atmosphere glow, meteors) aren't sky-projected, so they'd render over the real
   // floor in camera mode. Fade them out as the camera tilts below the horizon —
@@ -401,6 +413,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               milkyWayBoost={milkyWayBoost}
               isPremium={isPremium}
               focus={focusZone}
+              showcase={showcaseZone}
               parallax={parallax}
               onSelect={setSelected}
             />
