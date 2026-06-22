@@ -46,7 +46,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             <Circle
               cx={p.x}
               cy={p.y}
-              r={Math.max(r + 6, 10)}
+              r={Math.max(r + 12, 16)}
               fill="transparent"
               onPress={() =>
                 onSelect({

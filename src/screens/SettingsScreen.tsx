@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Alert, Image, Linking, Modal, Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { TermsScreen } from "@/screens/TermsScreen";
 import { PrivacyScreen } from "@/screens/PrivacyScreen";
 import { GlassPanel } from "@/components/GlassPanel";
@@ -95,6 +96,7 @@ export function SettingsScreen() {
   ];
 
   return (
+    <ErrorBoundary>
     <ScreenShell title="Settings" subtitle="Control Center">
       <View style={styles.hero}>
         <LogoMark size={126} showWordmark showDescriptor centered />
@@ -286,6 +288,7 @@ export function SettingsScreen() {
         </View>
       </Modal>
     </ScreenShell>
+    </ErrorBoundary>
   );
 }
 

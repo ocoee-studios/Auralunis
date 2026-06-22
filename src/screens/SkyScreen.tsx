@@ -8,6 +8,7 @@ import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
 import { SkyLensPermissionGate } from "@/features/permissions/SkyLensPermissionGate";
 import { SkyLensScreen } from "@/features/sky-lens/SkyLensScreen";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ManualSkyMap } from "@/features/sky-lens/ManualSkyMap";
 import { featuredDeepSkyObjects } from "@/features/archive/DeepSkyCatalog";
 import { AuraLunisColors } from "@/theme/tokens";
@@ -81,10 +82,14 @@ export function SkyScreen() {
   // as a standalone screen rather than an embedded card.
   if (skyLensOpen) {
     return (
-      <SkyLensScreen
-        onClose={() => { setSkyLensOpen(false); setFocusTarget(null); }}
-        focusTarget={focusTarget}
-      />
+      // Outer boundary catches crashes in the sensor manager / hooks (which run in
+      // SkyLensScreen itself, above the inner SkyLensErrorBoundary around the canvas).
+      <ErrorBoundary>
+        <SkyLensScreen
+          onClose={() => { setSkyLensOpen(false); setFocusTarget(null); }}
+          focusTarget={focusTarget}
+        />
+      </ErrorBoundary>
     );
   }
 
