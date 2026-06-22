@@ -1,40 +1,70 @@
 import type { BrightStar } from "./brightStars";
 import { galacticToEquatorial, mulberry32, gaussian, coreProx } from "./galacticGeom";
 
-// LAYERS 1 & 5 — the DUST. The single most important layer: the dark rivers that turn
-// "fog" into "galaxy". Two populations, both at fixed sky positions (rendered as dark
-// feathered blobs that occlude the star cloud, creating real black-against-bright
-// contrast):
-//   • the GREAT RIFT — a dense dark lane running the bright summer band (galactic
-//     longitude ~340°→100°), sitting slightly north of the plane, that visually
-//     splits the Milky Way from Cygnus down toward Sagittarius.
-//   • scattered DARK CLOUDS along the inner plane for organic mottling.
-// The `id` prefix (mwr = rift, mwc = cloud) tells the renderer the base blob size.
+// LAYERS 1 & 5 — the DUST, rebuilt to feel ORGANIC rather than a tidy band. Four
+// populations, all at fixed sky positions (rendered as dark feathered blobs that
+// occlude the star cloud → real black-against-bright contrast + structure). The
+// `id` prefix tells the renderer the blob's size/darkness class:
+//   • mwr — the GREAT RIFT: a dark river whose centre MEANDERS with longitude and
+//     whose WIDTH swells near the core and thins toward Cygnus (asymmetry, not a tube)
+//   • mwf — FRACTURES: tributary lanes that branch off the rift at an angle and veer
+//     to higher latitude, so the rift frays instead of running clean
+//   • mwk — dark KNOTS: dense Coalsack-like dark nebulae (a few big, deep blobs)
+//   • mwc — scattered dark CLOUDS for general mottling
 // magnitude is unused (positions only).
+const D2R = Math.PI / 180;
+
 export const MILKY_WAY_DUST: ReadonlyArray<BrightStar> = (() => {
   const rng = mulberry32(99173);
   const out: BrightStar[] = [];
+  const push = (prefix: string, lDeg: number, bDeg: number) => {
+    if (Math.abs(bDeg) > 24) return;
+    const { raHours, decDeg } = galacticToEquatorial(((lDeg % 360) + 360) % 360, bDeg);
+    out.push({ id: `${prefix}${out.length}`, raHours, decDegrees: decDeg, magnitude: 0, con: "" });
+  };
 
-  // Great Rift — the dominant dark river.
-  for (let i = 0; i < 96; i++) {
-    const l = -20 + rng() * 120; // 340°…100°
-    const b = 1.2 + gaussian(rng) * 3.2; // hugs just north of the plane
-    if (Math.abs(b) > 12) continue;
-    const { raHours, decDeg } = galacticToEquatorial(((l % 360) + 360) % 360, b);
-    out.push({ id: `mwr${out.length}`, raHours, decDegrees: decDeg, magnitude: 0, con: "" });
+  // The rift's meandering centre-line + width as functions of galactic longitude.
+  const riftCenter = (l: number) => 1.0 + 2.6 * Math.sin((l + 25) * D2R) + (l > 60 && l < 100 ? 2.2 : 0);
+  const riftWidth = (l: number) => 1.8 + 2.4 * Math.max(0, Math.cos(l * D2R)); // fat at the core, thin toward Cygnus
+
+  // 1. GREAT RIFT — meandering, width-modulated dark river.
+  for (let i = 0; i < 120; i++) {
+    const l = -22 + rng() * 134; // ~338°…112°
+    const b = riftCenter(l) + gaussian(rng) * riftWidth(l);
+    push("mwr", l, b);
   }
 
-  // Scattered dark clouds — denser toward the bright inner galaxy.
+  // 2. FRACTURES — tributary lanes peeling off the rift at an angle.
+  const branches = [
+    { l: 6, dir: 1 }, { l: 24, dir: -1 }, { l: 48, dir: 1 }, { l: 74, dir: -1 }, { l: -10, dir: 1 }, { l: 33, dir: 1 },
+  ];
+  for (const br of branches) {
+    const steps = 6 + Math.floor(rng() * 5);
+    const slope = (0.5 + rng() * 0.7) * br.dir; // °b per step
+    const lDrift = (rng() < 0.5 ? 1 : -1) * (0.8 + rng() * 1.2);
+    for (let s = 1; s <= steps; s++) {
+      const l = br.l + s * lDrift + gaussian(rng) * 0.8;
+      const b = riftCenter(br.l) + slope * s * 1.7 + gaussian(rng) * 1.0;
+      push("mwf", l, b);
+    }
+  }
+
+  // 3. DARK KNOTS — dense Coalsack-like clumps (a handful of deep, big blobs).
+  const knots = [
+    { l: 3, b: -0.5 }, { l: 27, b: 1 }, { l: 80, b: 2.5 }, { l: -14, b: 2 }, { l: 52, b: 0.5 },
+  ];
+  for (const k of knots) {
+    const n = 4 + Math.floor(rng() * 3);
+    for (let i = 0; i < n; i++) push("mwk", k.l + gaussian(rng) * 2.4, k.b + gaussian(rng) * 1.6);
+  }
+
+  // 4. scattered dark clouds — denser toward the bright inner galaxy.
   let guard = 0;
-  while (out.filter((d) => d.id.startsWith("mwc")).length < 80 && guard < 8000) {
+  while (out.filter((d) => d.id.startsWith("mwc")).length < 70 && guard < 8000) {
     guard++;
     const l = rng() * 360;
-    const cp = coreProx(l);
-    if (rng() > 0.28 + 0.72 * cp) continue; // most dust lives toward the core side
-    const b = gaussian(rng) * 5;
-    if (Math.abs(b) > 16) continue;
-    const { raHours, decDeg } = galacticToEquatorial(l, b);
-    out.push({ id: `mwc${out.length}`, raHours, decDegrees: decDeg, magnitude: 0, con: "" });
+    if (rng() > 0.26 + 0.74 * coreProx(l)) continue;
+    push("mwc", l, gaussian(rng) * 5);
   }
   return out;
 })();

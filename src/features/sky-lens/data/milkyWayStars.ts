@@ -33,8 +33,9 @@ export const MILKY_WAY_STARS: ReadonlyArray<BrightStar> = (() => {
   while (out.length < 2200 && guard < 120000) {
     guard++;
     let l: number, b: number;
-    if (rng() < 0.72) {
-      // clustered — scatter around a seed
+    if (rng() < 0.8) {
+      // clustered — scatter around a seed (higher fraction → more irregular density,
+      // granular clumps and voids instead of an even wash)
       const s = pickSeed();
       l = s.l + gaussian(rng) * s.spread;
       b = s.b + gaussian(rng) * s.spread * 0.55;
