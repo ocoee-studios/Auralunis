@@ -47,15 +47,15 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
           <React.Fragment key={`def-${n.id}`}>
             {/* broad haze — the colored cloud */}
             <RadialGradient id={`neb-haze-${n.id}`} cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.30" />
-              <Stop offset="35%" stopColor={n.hazeColor} stopOpacity="0.16" />
-              <Stop offset="70%" stopColor={n.hazeColor} stopOpacity="0.05" />
+              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.5" />
+              <Stop offset="30%" stopColor={n.hazeColor} stopOpacity="0.3" />
+              <Stop offset="65%" stopColor={n.hazeColor} stopOpacity="0.12" />
               <Stop offset="100%" stopColor={n.hazeColor} stopOpacity="0" />
             </RadialGradient>
             {/* concentrated bright core */}
             <RadialGradient id={`neb-core-${n.id}`} cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.6" />
-              <Stop offset="40%" stopColor={n.coreColor} stopOpacity="0.32" />
+              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.85" />
+              <Stop offset="40%" stopColor={n.coreColor} stopOpacity="0.45" />
               <Stop offset="100%" stopColor={n.coreColor} stopOpacity="0" />
             </RadialGradient>
           </React.Fragment>
@@ -69,7 +69,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, onSelect, ti
 
         // ±10% breathing over ~4s, phase-offset per object so they churn out of sync.
         const breathe = 0.9 + Math.sin(time * 0.00157 + i * 0.7) * 0.1;
-        const r = n.radius;
+        const r = Math.max(16, n.radius); // floor so every object is visibly a cloud
         const hazeR = r * 3;
         const coreR = r * 1.1;
 

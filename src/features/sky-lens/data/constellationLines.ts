@@ -520,5 +520,62 @@ export const CONSTELLATION_LINES: ReadonlyArray<ConstellationLine> = [
       { raHours: 17.005, decDegrees: 30.926 }  // 4 Epsilon (Keystone)
     ],
     lines: [[1, 3], [3, 2], [2, 4], [4, 1], [1, 0]]
+  },
+  {
+    id: "ophiuchus",
+    name: "Ophiuchus",
+    season: "Summer",
+    myth: "The Serpent Bearer, a giant figure straddling the ecliptic — the 'thirteenth sign' the Sun passes through.",
+    stars: [
+      { raHours: 17.582, decDegrees: 12.560 }, // 0 Rasalhague
+      { raHours: 17.173, decDegrees: -15.725 }, // 1 Sabik
+      { raHours: 17.724, decDegrees: 4.567 },   // 2 Cebalrai
+      { raHours: 16.239, decDegrees: -3.694 },  // 3 Yed Prior
+      { raHours: 16.304, decDegrees: -4.692 },  // 4 Yed Posterior
+      { raHours: 16.620, decDegrees: -10.567 }, // 5 Zeta
+      { raHours: 16.961, decDegrees: 9.375 }    // 6 Kappa
+    ],
+    lines: [[0, 6], [6, 3], [3, 4], [4, 5], [5, 1], [1, 2], [2, 0]]
+  },
+  {
+    id: "serpens",
+    name: "Serpens",
+    season: "Summer",
+    myth: "The Serpent, the only constellation split in two — held in the hands of Ophiuchus.",
+    stars: [
+      { raHours: 15.738, decDegrees: 6.426 },  // 0 Unukalhai
+      { raHours: 15.770, decDegrees: 15.422 }, // 1 Beta
+      { raHours: 15.827, decDegrees: -3.430 }, // 2 Mu
+      { raHours: 15.946, decDegrees: 15.661 }, // 3 Gamma
+      { raHours: 15.846, decDegrees: 4.477 }   // 4 Epsilon
+    ],
+    lines: [[2, 0], [0, 4], [4, 1], [1, 3]]
+  },
+  {
+    id: "corona_borealis",
+    name: "Corona Borealis",
+    season: "Summer",
+    myth: "The Northern Crown — a delicate arc of seven stars, the jeweled crown of Ariadne.",
+    stars: [
+      { raHours: 15.578, decDegrees: 26.715 }, // 0 Alphecca
+      { raHours: 15.464, decDegrees: 29.106 }, // 1 Beta
+      { raHours: 15.713, decDegrees: 26.296 }, // 2 Gamma
+      { raHours: 15.558, decDegrees: 31.359 }, // 3 Theta
+      { raHours: 15.960, decDegrees: 26.878 }  // 4 Epsilon
+    ],
+    lines: [[3, 1], [1, 0], [0, 2], [2, 4]]
+  },
+  {
+    id: "camelopardalis",
+    name: "Camelopardalis",
+    season: "All year (north)",
+    myth: "The Giraffe — a faint sprawl of stars filling the gap between the Bears and Perseus.",
+    stars: [
+      { raHours: 5.057, decDegrees: 60.442 }, // 0 Beta
+      { raHours: 4.900, decDegrees: 66.343 }, // 1 Alpha
+      { raHours: 3.839, decDegrees: 71.332 }, // 2 Gamma
+      { raHours: 5.054, decDegrees: 53.752 }  // 3 BE Cam
+    ],
+    lines: [[3, 0], [0, 1], [1, 2]]
   }
 ];
