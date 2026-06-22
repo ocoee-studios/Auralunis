@@ -130,6 +130,33 @@ export async function purchaseAuraLunisTier(
   }
 }
 
+// Generic package purchase — correctly handles ALL plans including lifetime. The
+// tier-based helper above only mapped annual/monthly, so a lifetime selection would
+// mis-purchase the monthly product. Match the RevenueCat package by its identifier
+// or the underlying product identifier.
+export async function purchaseAuraLunisPackage(
+  packageId: string,
+  productId?: string
+): Promise<{ status: "purchased" | "cancelled" | "not_configured" | "not_available"; customerInfo?: CustomerInfo }> {
+  const configuration = await configureRevenueCat();
+  if (configuration.status !== "configured" || !Purchases) return { status: "not_configured" };
+
+  const packages = await getCurrentPackages();
+  const pkg = packages.find(
+    (candidate) => candidate.identifier === packageId || (productId !== undefined && candidate.product.identifier === productId)
+  );
+  if (!pkg) return { status: "not_available" };
+
+  try {
+    const result = await Purchases.purchasePackage(pkg);
+    return { status: "purchased", customerInfo: result.customerInfo };
+  } catch (error) {
+    const candidate = error as { userCancelled?: boolean };
+    if (candidate.userCancelled) return { status: "cancelled" };
+    throw error;
+  }
+}
+
 export async function restoreAuraLunisPurchases(): Promise<{
   status: "restored" | "not_configured";
   customerInfo?: CustomerInfo;

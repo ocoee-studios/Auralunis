@@ -8,6 +8,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuraLunisColors } from "@/theme/tokens";
 import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { useObserverLocation } from "./ephemeris/useObserverLocation";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useDevicePointing } from "./ar/useDevicePointing";
@@ -65,6 +66,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const parallax = useParallaxOffset();
   const sky = useSkyData(location);
   const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const { addItem } = useAuraLunisVault();
 
   const [box, setBox] = useState({ width: 360, height: 720 });
@@ -127,14 +129,15 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const onLockedPress = useCallback(
     (def: LayerDef) => {
-      Alert.alert(
-        `${def.label} · Coming Soon`,
-        isPremium
-          ? `The ${def.label} layer arrives in the next Sky Lens update.`
-          : `${def.label} is part of AuraLunis Premium and is coming in the next update — Satellites, Deep Sky, the Milky Way band, and Find Mode.`
-      );
+      // Free user tapping a premium layer → open the paywall (the sales moment).
+      if (!isPremium) {
+        openPaywall();
+        return;
+      }
+      // Premium user, layer simply not shipped yet → informational.
+      Alert.alert(`${def.label} · Coming Soon`, `The ${def.label} layer arrives in the next Sky Lens update.`);
     },
-    [isPremium]
+    [isPremium, openPaywall]
   );
 
   const onSave = useCallback(

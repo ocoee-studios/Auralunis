@@ -6,7 +6,7 @@
 
 import React, { useState } from "react";
 import {
-  Linking, Modal, Pressable, ScrollView, StyleSheet,
+  Modal, ScrollView, StyleSheet,
   Text, TouchableOpacity, View,
 } from "react-native";
 import { AuraLunisColors } from "@/theme/tokens";
@@ -17,6 +17,9 @@ import {
   type PlanOption,
 } from "./MonetizationCatalog";
 import { tapLight, tapSuccess } from "@/services/HapticService";
+import { Starfield } from "@/components/Starfield";
+import { TermsScreen } from "@/screens/TermsScreen";
+import { PrivacyScreen } from "@/screens/PrivacyScreen";
 
 type Props = {
   visible: boolean;
@@ -25,11 +28,9 @@ type Props = {
   onRestore: () => void;
 };
 
-const TERMS_URL = "https://ocoeestudios.com/auralunis/terms";
-const PRIVACY_URL = "https://ocoeestudios.com/auralunis/privacy";
-
 export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore }: Props) {
   const [selected, setSelected] = useState<string>("premium_annual");
+  const [legal, setLegal] = useState<"terms" | "privacy" | null>(null);
 
   const annual   = plans.find(p => p.id === "premium_annual")!;
   const monthly  = plans.find(p => p.id === "premium_monthly")!;
@@ -48,10 +49,17 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
   const selectedPlan = plans.find(p => p.id === selected) ?? annual;
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
-      <View style={styles.overlay}>
-        <View style={styles.sheet}>
-          <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
+    <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
+      <View style={styles.screen}>
+        {/* living-sky background so the paywall feels like the rest of the app */}
+        <Starfield />
+
+        {/* close — users must always be able to dismiss without purchasing */}
+        <TouchableOpacity style={styles.closeBtn} onPress={() => { tapLight(); onClose(); }} hitSlop={12} accessibilityLabel="Close">
+          <Text style={styles.closeX}>✕</Text>
+        </TouchableOpacity>
+
+        <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
 
             {/* Header */}
             <Text style={styles.eyebrow}>AURALUNIS PREMIUM</Text>
@@ -101,21 +109,31 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
               </View>
             ))}
 
-            {/* Footer */}
+            {/* Footer — required Apple links, all tappable */}
             <View style={styles.footer}>
               <Text style={styles.footerLink} onPress={() => { tapLight(); onRestore(); }}>Restore Purchases</Text>
               <Text style={styles.footerDot}>·</Text>
-              <Text style={styles.footerLink} onPress={() => Linking.openURL(TERMS_URL)}>Terms</Text>
+              <Text style={styles.footerLink} onPress={() => { tapLight(); setLegal("terms"); }}>Terms</Text>
               <Text style={styles.footerDot}>·</Text>
-              <Text style={styles.footerLink} onPress={() => Linking.openURL(PRIVACY_URL)}>Privacy</Text>
+              <Text style={styles.footerLink} onPress={() => { tapLight(); setLegal("privacy"); }}>Privacy</Text>
             </View>
 
             <TouchableOpacity onPress={onClose} style={styles.skipBtn}>
               <Text style={styles.skipText}>Continue Free</Text>
             </TouchableOpacity>
 
-          </ScrollView>
-        </View>
+        </ScrollView>
+
+        {/* in-app Terms / Privacy */}
+        <Modal visible={legal !== null} animationType="slide" presentationStyle="fullScreen" onRequestClose={() => setLegal(null)}>
+          <View style={styles.screen}>
+            <TouchableOpacity style={styles.closeBtn} onPress={() => setLegal(null)} hitSlop={12} accessibilityLabel="Close">
+              <Text style={styles.closeX}>✕</Text>
+            </TouchableOpacity>
+            {legal === "terms" && <TermsScreen />}
+            {legal === "privacy" && <PrivacyScreen />}
+          </View>
+        </Modal>
       </View>
     </Modal>
   );
@@ -169,9 +187,10 @@ function PlanCard({
 }
 
 const styles = StyleSheet.create({
-  overlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.7)", justifyContent: "flex-end" },
-  sheet: { backgroundColor: AuraLunisColors.surface, borderTopLeftRadius: 28, borderTopRightRadius: 28, maxHeight: "92%", borderTopWidth: 1, borderColor: AuraLunisColors.borderGold },
-  content: { padding: 24, paddingBottom: 48 },
+  screen: { flex: 1, backgroundColor: AuraLunisColors.cosmicBlack },
+  closeBtn: { position: "absolute", top: 52, right: 20, zIndex: 10, width: 34, height: 34, borderRadius: 17, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(7,18,37,0.7)", borderWidth: 1, borderColor: AuraLunisColors.borderGold },
+  closeX: { color: AuraLunisColors.silver, fontSize: 16, fontWeight: "700", lineHeight: 18 },
+  content: { padding: 24, paddingTop: 72, paddingBottom: 48 },
   eyebrow: { color: AuraLunisColors.gold, fontSize: 10, fontWeight: "800", letterSpacing: 3, textAlign: "center", marginBottom: 6 },
   headline: { color: AuraLunisColors.gold2, fontSize: 24, fontWeight: "900", textAlign: "center", marginBottom: 6 },
   sub: { color: AuraLunisColors.muted, fontSize: 13, textAlign: "center", lineHeight: 20, marginBottom: 22 },
