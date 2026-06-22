@@ -107,6 +107,15 @@ export function constellationColor(id: string): string {
 // 4 vertical stops (zenith → mid → 30°alt → horizon) chosen by the Sun's altitude
 // from the ephemeris, per VISUAL_QUALITY_SPEC: navy overhead → indigo → violet/gold
 // near the horizon, brightening through twilight into golden hour and daytime blue.
+// Slight color variety for the dense background field (mostly white-blue, a
+// sprinkle of warm) so the starfield reads richer than a uniform wash.
+const DOME_TINTS = ["#EAF0FF", "#EAF0FF", "#EAF0FF", "#DCE6FF", "#FFEDD2", "#FFD9A8", "#CFE0FF", "#FFC9A0"];
+export function domeColor(id: string): string {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return DOME_TINTS[h % DOME_TINTS.length];
+}
+
 export function skyGradient(sunAltitudeDegrees: number): readonly [string, string, string, string] {
   const a = sunAltitudeDegrees;
   if (a < -18) return ["#030816", "#061028", "#0A1535", "#121D3A"]; // deep night

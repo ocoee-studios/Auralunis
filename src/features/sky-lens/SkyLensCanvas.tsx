@@ -9,6 +9,7 @@ import { DomeStarLayer } from "./layers/DomeStarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer } from "./layers/MoonLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
+import { NebulaLayer } from "./layers/NebulaLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject } from "./SkyLensVisual";
 import type { LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
@@ -44,6 +45,8 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {activeLayers.has("milkyway") && (
         <MilkyWayLayer band={sky.milkyWay} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
       )}
+      {/* Deep-sky nebulae glows sit just behind the stars */}
+      <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} />
       {activeLayers.has("grid") && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
       )}
