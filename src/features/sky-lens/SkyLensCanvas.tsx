@@ -28,6 +28,7 @@ type Props = {
   milkyWayBoost: number;
   isPremium: boolean;
   focus: FocusZone;
+  showcase: FocusZone;
   parallax: ParallaxOffset;
   onSelect: (object: SelectedObject) => void;
 };
@@ -36,7 +37,7 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, parallax, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, showcase, parallax, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
 
   // Celestial-dome depth: cloud layers float by a fraction of the gyro parallax
@@ -68,7 +69,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Deep-sky nebulae glows sit just behind the stars — float at full parallax */}
       <G transform={depth(1)}>
-        <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} onSelect={onSelect} />
+        <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} onSelect={onSelect} />
       </G>
       {activeLayers.has("grid") && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
@@ -99,11 +100,11 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Dense background field behind the named bright stars */}
       {activeLayers.has("stars") && (
-        <DomeStarLayer stars={sky.domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} />
+        <DomeStarLayer stars={sky.domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} />
       )}
       {activeLayers.has("stars") && (
         <G transform={depth(0.25)}>
-          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} onSelect={onSelect} />
+          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("planets") && (
