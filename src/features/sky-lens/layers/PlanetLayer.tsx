@@ -15,10 +15,10 @@ const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 
 // Per-planet "personality": disc radius + glow size. Brighter planets read bigger.
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  venus: { disc: 6, glow: 18 },
-  jupiter: { disc: 6, glow: 13 },
-  saturn: { disc: 5, glow: 12 },
-  mars: { disc: 4.5, glow: 14 },
+  venus: { disc: 6, glow: 22 },
+  jupiter: { disc: 6, glow: 16 },
+  saturn: { disc: 5, glow: 13 },
+  mars: { disc: 4.5, glow: 16 },
   mercury: { disc: 3.5, glow: 8 },
 };
 
@@ -57,25 +57,40 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
             <Circle cx={x} cy={y} r={st.glow} fill={color} opacity={0.12} />
             <Circle cx={x} cy={y} r={st.glow * 0.6} fill={color} opacity={0.26} />
 
-            {/* Mars — fiery ember halo */}
+            {/* Mars — deep red atmospheric aura (recognition: the red planet) */}
             {body.id === "mars" && !nightMode && (
-              <Circle cx={x} cy={y} r={st.glow * 1.25} fill="#FF5A33" opacity={0.12} />
-            )}
-
-            {/* Venus — brilliance: white-gold bloom + diffraction glints */}
-            {body.id === "venus" && !nightMode && (
               <>
-                <Circle cx={x} cy={y} r={st.glow * 1.4} fill="#FFFFFF" opacity={0.1} />
-                <Line x1={x - 13} y1={y} x2={x + 13} y2={y} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
-                <Line x1={x} y1={y - 13} x2={x} y2={y + 13} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
+                <Circle cx={x} cy={y} r={st.glow * 2.0} fill="#C8341A" opacity={0.08} />
+                <Circle cx={x} cy={y} r={st.glow * 1.25} fill="#FF5A33" opacity={0.16} />
               </>
             )}
 
-            {/* Saturn — ring system behind the disc */}
+            {/* Jupiter — subtle golden glow (recognition: the gold giant) */}
+            {body.id === "jupiter" && !nightMode && (
+              <Circle cx={x} cy={y} r={st.glow * 1.7} fill="#EBB44E" opacity={0.1} />
+            )}
+
+            {/* Venus — huge soft pearl halo + diffraction glints (recognition: the pearl) */}
+            {body.id === "venus" && !nightMode && (
+              <>
+                <Circle cx={x} cy={y} r={st.glow * 2.7} fill="#FBF3DC" opacity={0.055} />
+                <Circle cx={x} cy={y} r={st.glow * 1.5} fill="#FFFFFF" opacity={0.11} />
+                <Line x1={x - 15} y1={y} x2={x + 15} y2={y} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
+                <Line x1={x} y1={y - 15} x2={x} y2={y + 15} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
+              </>
+            )}
+
+            {/* Saturn — ring system behind the disc, with a bright shimmer highlight */}
             {body.id === "saturn" && (
               <G>
+                {/* soft golden glow cradling the rings */}
+                <Ellipse cx={x} cy={y} rx={d * 2.7} ry={d * 0.85} fill="#E8C77E" opacity={0.08} rotation={-18} originX={x} originY={y} />
                 <Ellipse cx={x} cy={y} rx={d * 2.2} ry={d * 0.66} fill="none" stroke={color} strokeWidth={1.4} strokeOpacity={0.9} rotation={-18} originX={x} originY={y} />
                 <Ellipse cx={x} cy={y} rx={d * 1.7} ry={d * 0.5} fill="none" stroke={color} strokeWidth={0.8} strokeOpacity={0.5} rotation={-18} originX={x} originY={y} />
+                {/* shimmer — a bright pearly highlight pass along the outer ring */}
+                {!nightMode && (
+                  <Ellipse cx={x} cy={y} rx={d * 2.2} ry={d * 0.66} fill="none" stroke="#FFF6E0" strokeWidth={0.6} strokeOpacity={0.7} rotation={-18} originX={x} originY={y} />
+                )}
               </G>
             )}
 
