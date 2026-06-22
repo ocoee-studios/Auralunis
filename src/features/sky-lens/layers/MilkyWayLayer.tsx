@@ -45,10 +45,10 @@ export function MilkyWayLayer({ band, project, box, nightMode, boost }: Props) {
         const str = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
         return (
           <G key={`mw-${i}`}>
-            {/* soft gold halo — thin, butt-capped so run-ends don't bloom into blobs */}
-            <Polyline points={str} fill="none" stroke="#D9A84E" strokeWidth={halo} strokeOpacity={o(0.04)} strokeLinecap="butt" strokeLinejoin="round" />
+            {/* soft gold halo — round caps so band ends never show hard edges */}
+            <Polyline points={str} fill="none" stroke="#D9A84E" strokeWidth={halo} strokeOpacity={o(0.06)} strokeLinecap="round" strokeLinejoin="round" />
             {/* warm golden core — the faint river wrapping Sagittarius→Cygnus→Cassiopeia */}
-            <Polyline points={str} fill="none" stroke="#EBCB86" strokeWidth={core} strokeOpacity={o(0.07)} strokeLinecap="butt" strokeLinejoin="round" />
+            <Polyline points={str} fill="none" stroke="#EBCB86" strokeWidth={core} strokeOpacity={o(0.1)} strokeLinecap="round" strokeLinejoin="round" />
           </G>
         );
       })}
