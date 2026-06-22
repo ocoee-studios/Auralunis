@@ -1,3 +1,5 @@
+import { moonPhaseName, MOON_PHASE_NAMES } from "@/services/MoonPhase";
+
 export interface MoonPrompt { phase: string; prompt: string; reflection: string; }
 
 export const moonPhasePrompts: MoonPrompt[] = [
@@ -12,14 +14,8 @@ export const moonPhasePrompts: MoonPrompt[] = [
 ];
 
 export function getPromptForIllumination(percent: number, isWaxing: boolean): MoonPrompt {
-  if (percent < 3) return moonPhasePrompts[0];
-  if (percent > 97) return moonPhasePrompts[4];
-  if (isWaxing) {
-    if (percent < 35) return moonPhasePrompts[1];
-    if (percent < 65) return moonPhasePrompts[2];
-    return moonPhasePrompts[3];
-  }
-  if (percent > 65) return moonPhasePrompts[5];
-  if (percent > 35) return moonPhasePrompts[6];
-  return moonPhasePrompts[7];
+  // Canonical phase name → matching prompt (moonPhasePrompts is in MOON_PHASE_NAMES order).
+  const name = moonPhaseName(percent, isWaxing);
+  const idx = MOON_PHASE_NAMES.indexOf(name as (typeof MOON_PHASE_NAMES)[number]);
+  return moonPhasePrompts[idx >= 0 ? idx : 0];
 }

@@ -22,7 +22,8 @@ export function predictEclipses(
 
   return eclipses.map(e => {
     const eventDate = new Date(e.date);
-    const daysUntil = Math.round((eventDate.getTime() - now.getTime()) / 86_400_000);
+    // Floor, not round — an event later TODAY is 0 days away, not 1.
+    const daysUntil = Math.floor((eventDate.getTime() - now.getTime()) / 86_400_000);
 
     // Simplified visibility check — lunar eclipses are visible from half the Earth,
     // solar eclipses only from a narrow path. In production, compute from geometry.

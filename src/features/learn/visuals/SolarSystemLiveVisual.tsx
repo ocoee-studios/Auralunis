@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { AuraLunisColors } from "@/theme/tokens";
 
+const C = 130; // center of the 260×260 orrery stage
+const P = C - 5; // planet dots are 10px — offset so they sit ON the orbit point
+
 export function SolarSystemLiveVisual() {
   const [step, setStep] = useState(0);
 
@@ -14,14 +17,16 @@ export function SolarSystemLiveVisual() {
     <View style={styles.card}>
       <Text style={styles.label}>LIVE ORRERY</Text>
       <View style={styles.center}>
-        <View style={styles.sun} />
-        {[42, 62, 86, 112].map((size, i) => (
-          <View key={size} style={[styles.orbit, { width: size * 2, height: size * 2, borderRadius: size }]} />
+        {/* Everything anchors to the same container center (C), so the planets
+            actually ride the orbit rings instead of orbiting an offset point. */}
+        <View style={[styles.sun, { top: C - 14, left: C - 14 }]} />
+        {[42, 62, 86, 112].map((size) => (
+          <View key={size} style={[styles.orbit, { width: size * 2, height: size * 2, borderRadius: size, top: C - size, left: C - size }]} />
         ))}
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 8) * 42, left: 154 + Math.cos(step / 8) * 42, backgroundColor: AuraLunisColors.gold2 }]} />
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 10 + 1.2) * 62, left: 154 + Math.cos(step / 10 + 1.2) * 62, backgroundColor: "#d0d8ff" }]} />
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 12 + 2.1) * 86, left: 154 + Math.cos(step / 12 + 2.1) * 86, backgroundColor: "#62CFFF" }]} />
-        <View style={[styles.planet, { top: 96 + Math.sin(step / 14 + 2.8) * 112, left: 154 + Math.cos(step / 14 + 2.8) * 112, backgroundColor: "#FFB07A" }]} />
+        <View style={[styles.planet, { top: P + Math.sin(step / 8) * 42, left: P + Math.cos(step / 8) * 42, backgroundColor: AuraLunisColors.gold2 }]} />
+        <View style={[styles.planet, { top: P + Math.sin(step / 10 + 1.2) * 62, left: P + Math.cos(step / 10 + 1.2) * 62, backgroundColor: "#d0d8ff" }]} />
+        <View style={[styles.planet, { top: P + Math.sin(step / 12 + 2.1) * 86, left: P + Math.cos(step / 12 + 2.1) * 86, backgroundColor: "#62CFFF" }]} />
+        <View style={[styles.planet, { top: P + Math.sin(step / 14 + 2.8) * 112, left: P + Math.cos(step / 14 + 2.8) * 112, backgroundColor: "#FFB07A" }]} />
       </View>
       <Text style={styles.caption}>A living mini-orrery for the Sun and planetary motion. Production can wire this to real orbital time scrubbing.</Text>
     </View>
@@ -40,9 +45,9 @@ const styles = StyleSheet.create({
   label: { color: AuraLunisColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
   center: {
     marginTop: 12,
+    width: 260,
     height: 260,
-    alignItems: "center",
-    justifyContent: "center"
+    alignSelf: "center"
   },
   sun: {
     position: "absolute",
