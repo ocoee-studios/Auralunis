@@ -168,6 +168,8 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
         <Circle cx={CENTER} cy={CENTER} r={RINGS.inner} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} fill="none" />
         <Circle cx={CENTER} cy={CENTER} r={RINGS.mid} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} fill="none" />
         <Circle cx={CENTER} cy={CENTER} r={RINGS.outer} stroke={AuraLunisColors.borderSubtle} strokeWidth={0.5} fill="none" />
+        {/* faint gold glow behind the outer rim */}
+        <Circle cx={CENTER} cy={CENTER} r={RINGS.rim} stroke={AuraLunisColors.gold} strokeWidth={4} fill="none" opacity={0.12} />
         <Circle cx={CENTER} cy={CENTER} r={RINGS.rim} stroke={AuraLunisColors.borderGold} strokeWidth={1.2} fill="none" />
 
         {/* Tick marks — every 15° */}
@@ -265,7 +267,9 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
           const isAbove = body.altitudeDegrees > 0;
           return (
             <G key={body.id} opacity={isAbove ? 1 : 0.25}>
-              <Circle cx={pos.x} cy={pos.y} r={5} fill={color} opacity={0.15} />
+              {/* soft colored glow halo */}
+              <Circle cx={pos.x} cy={pos.y} r={10} fill={color} opacity={0.08} />
+              <Circle cx={pos.x} cy={pos.y} r={6} fill={color} opacity={0.18} />
               <Circle cx={pos.x} cy={pos.y} r={3.5} fill={color} />
               <SvgText
                 x={pos.x} y={pos.y + 12}
