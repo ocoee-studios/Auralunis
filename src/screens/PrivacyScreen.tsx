@@ -85,7 +85,7 @@ export function PrivacyScreen() {
         Questions about your privacy? Contact us at admin@ocoeestudios.com
       </Text>
 
-      <Text style={styles.footer}>© 2026 Ocoee Studios · Ducktown, Tennessee</Text>
+      <Text style={styles.footer}>© 2026 Ocoee Studios</Text>
     </ScrollView>
   );
 }
