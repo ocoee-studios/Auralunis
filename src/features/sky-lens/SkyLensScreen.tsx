@@ -28,7 +28,7 @@ import { TargetPulse } from "./TargetPulse";
 import { HeroSpotlight } from "./HeroSpotlight";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
-import { skyGradient, starColor, type SelectedObject } from "./SkyLensVisual";
+import { skyGradient, starColor, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 
 // A Find-Mode target handed in from Learn ("See in Sky Lens") — RA/Dec + lesson copy.
 export type FocusTarget = {
@@ -271,6 +271,14 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     return p.behind ? null : p;
   }, [focusAzAlt, pointing, fov, box]);
 
+  // Focus zone handed to the canvas layers: the selected object's on-screen point +
+  // a boost radius. Layers swell/brighten nebulae and stars that fall inside it, so
+  // the spotlighted region literally intensifies (not just dims around it).
+  const focusZone = useMemo<FocusZone>(() => {
+    if (!focusProj || !focusProj.onScreen) return null;
+    return { x: focusProj.x, y: focusProj.y, r: Math.min(box.width, box.height) * 0.34 };
+  }, [focusProj, box]);
+
   // Below-horizon bleed guard: the screen-fixed decorative overlays (FX layers,
   // atmosphere glow, meteors) aren't sky-projected, so they'd render over the real
   // floor in camera mode. Fade them out as the camera tilts below the horizon —
@@ -390,6 +398,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               nightMode={nightMode}
               milkyWayBoost={milkyWayBoost}
               isPremium={isPremium}
+              focus={focusZone}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>

@@ -144,6 +144,20 @@ export function skyGradient(sunAltitudeDegrees: number): readonly [string, strin
   return ["#1E4FA0", "#2E6FC0", "#5A9FD4", "#BFD8EA"]; // daytime blue
 }
 
+// Hero Object Focus Mode: when an object is selected, its on-screen position +
+// radius form a focus zone. Layers call focusFactor() to find how strongly each
+// object sits inside it (1 at the center → 0 at the edge, eased), and boost their
+// own size/brightness accordingly. focus === null (nothing selected) → 0 everywhere,
+// so the whole system is inert until the user taps something.
+export type FocusZone = { x: number; y: number; r: number } | null;
+export function focusFactor(px: number, py: number, focus: FocusZone): number {
+  if (!focus) return 0;
+  const d = Math.hypot(px - focus.x, py - focus.y);
+  if (d >= focus.r) return 0;
+  const t = 1 - d / focus.r;
+  return t * t;
+}
+
 export type SelectedKind = "star" | "planet" | "moon" | "constellation" | "nebula" | "zodiac";
 
 export interface SelectedFact {

@@ -41,8 +41,14 @@ export function HeroSpotlight({ x, y, box, nightMode }: Props) {
           <RadialGradient id="heroScrim" cx={x} cy={y} r={R} gradientUnits="userSpaceOnUse">
             <Stop offset="0" stopColor="#030816" stopOpacity={0} />
             <Stop offset={c0} stopColor="#030816" stopOpacity={0} />
-            <Stop offset={c1} stopColor="#030816" stopOpacity={0.32} />
-            <Stop offset="1" stopColor="#030816" stopOpacity={0.62} />
+            <Stop offset={c1} stopColor="#030816" stopOpacity={0.4} />
+            <Stop offset="1" stopColor="#030816" stopOpacity={0.7} />
+          </RadialGradient>
+          {/* luminous lift — the focused region reads brighter, not just less-dimmed */}
+          <RadialGradient id="heroLift" cx={x} cy={y} r={clear * 1.1} gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor="#FFF6E0" stopOpacity={0.1} />
+            <Stop offset="0.5" stopColor="#FFF6E0" stopOpacity={0.035} />
+            <Stop offset="1" stopColor="#FFF6E0" stopOpacity={0} />
           </RadialGradient>
           {/* gold presence haze around the focused object */}
           <RadialGradient id="heroHalo" cx={x} cy={y} r={clear * 1.4} gradientUnits="userSpaceOnUse">
@@ -52,6 +58,7 @@ export function HeroSpotlight({ x, y, box, nightMode }: Props) {
           </RadialGradient>
         </Defs>
         <Rect width={box.width} height={box.height} fill="url(#heroScrim)" />
+        <Rect width={box.width} height={box.height} fill="url(#heroLift)" />
         <Rect width={box.width} height={box.height} fill="url(#heroHalo)" />
       </Svg>
     </Animated.View>
