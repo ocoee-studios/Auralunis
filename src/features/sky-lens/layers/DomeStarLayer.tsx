@@ -1,7 +1,7 @@
 import React from "react";
 import { Circle, G } from "react-native-svg";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
-import type { ProjectFn, SkyPalette } from "../SkyLensVisual";
+import { domeColor, type ProjectFn, type SkyPalette } from "../SkyLensVisual";
 
 type Props = {
   stars: HorizontalStar[];
@@ -15,7 +15,6 @@ type Props = {
 // hit-target) so even ~200 on-screen at once stays cheap. Only above-horizon,
 // on-screen stars render.
 export function DomeStarLayer({ stars, project, palette, nightMode }: Props) {
-  const color = nightMode ? palette.star : "#E8EEFF";
   return (
     <G>
       {stars.map((s) => {
@@ -24,6 +23,7 @@ export function DomeStarLayer({ stars, project, palette, nightMode }: Props) {
         if (!p.onScreen) return null;
         const r = Math.max(0.5, 2.2 - s.magnitude * 0.28);
         const opacity = Math.max(0.22, 1 - (s.magnitude - 3.8) / 3.4);
+        const color = nightMode ? palette.star : domeColor(s.id);
         return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={opacity} />;
       })}
     </G>

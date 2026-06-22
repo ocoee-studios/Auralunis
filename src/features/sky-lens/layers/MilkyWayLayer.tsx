@@ -47,25 +47,31 @@ export function MilkyWayLayer({ band, project, box, nightMode, boost }: Props) {
         const str = pts.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(" ");
         return (
           <G key={`mw-${i}`}>
+            {/* cool blue outer halo (edge regions) */}
+            <Polyline points={str} fill="none" stroke="#6E84C8" strokeWidth={wide * 1.15} strokeOpacity={o(0.035)} strokeLinecap="round" strokeLinejoin="round" />
             {/* diffuse amber haze */}
-            <Polyline points={str} fill="none" stroke="#C7984A" strokeWidth={wide} strokeOpacity={o(0.05)} strokeLinecap="round" strokeLinejoin="round" />
+            <Polyline points={str} fill="none" stroke="#CC9A48" strokeWidth={wide} strokeOpacity={o(0.085)} strokeLinecap="round" strokeLinejoin="round" />
             {/* warm gold body */}
-            <Polyline points={str} fill="none" stroke="#E6BE66" strokeWidth={mid} strokeOpacity={o(0.06)} strokeLinecap="round" strokeLinejoin="round" />
+            <Polyline points={str} fill="none" stroke="#ECC066" strokeWidth={mid} strokeOpacity={o(0.1)} strokeLinecap="round" strokeLinejoin="round" />
             {/* starlight core */}
-            <Polyline points={str} fill="none" stroke="#FFF1C8" strokeWidth={coreW} strokeOpacity={o(0.07)} strokeLinecap="round" strokeLinejoin="round" />
+            <Polyline points={str} fill="none" stroke="#FFF3CC" strokeWidth={coreW} strokeOpacity={o(0.12)} strokeLinecap="round" strokeLinejoin="round" />
             {/* dark dust lane (the Great Rift) */}
-            <Polyline points={str} fill="none" stroke="#05070F" strokeWidth={coreW * 0.34} strokeOpacity={o(0.45)} strokeLinecap="round" strokeLinejoin="round" />
-            {/* star clouds */}
-            {pts.map((p, k) => (k % 6 === 0 ? <Circle key={k} cx={p.x} cy={p.y} r={mid * 0.5} fill="#FFEFC0" opacity={o(0.035)} /> : null))}
+            <Polyline points={str} fill="none" stroke="#05070F" strokeWidth={coreW * 0.38} strokeOpacity={o(0.5)} strokeLinecap="round" strokeLinejoin="round" />
+            {/* star clouds — denser, brighter, varied */}
+            {pts.map((p, k) =>
+              k % 3 === 0 ? <Circle key={k} cx={p.x} cy={p.y} r={mid * (0.42 + ((k * 7) % 5) * 0.06)} fill="#FFEFC0" opacity={o(0.05)} /> : null
+            )}
           </G>
         );
       })}
       {showBulge && (
         <G>
-          {/* galactic-core ember bulge */}
-          <Circle cx={gc.x} cy={gc.y} r={wide * 0.6} fill="#E8B84E" opacity={o(0.08)} />
-          <Circle cx={gc.x} cy={gc.y} r={mid * 0.7} fill="#FFD27A" opacity={o(0.1)} />
-          <Circle cx={gc.x} cy={gc.y} r={coreW * 0.6} fill="#FFE9B0" opacity={o(0.14)} />
+          {/* galactic-core ember bulge — the brightest part of the band */}
+          <Circle cx={gc.x} cy={gc.y} r={wide * 0.8} fill="#E8B84E" opacity={o(0.07)} />
+          <Circle cx={gc.x} cy={gc.y} r={wide * 0.5} fill="#F2C45A" opacity={o(0.11)} />
+          <Circle cx={gc.x} cy={gc.y} r={mid * 0.65} fill="#FFD27A" opacity={o(0.15)} />
+          <Circle cx={gc.x} cy={gc.y} r={coreW * 0.7} fill="#FFEDB8" opacity={o(0.2)} />
+          <Circle cx={gc.x} cy={gc.y} r={coreW * 0.32} fill="#FFF8E0" opacity={o(0.24)} />
         </G>
       )}
     </G>
