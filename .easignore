@@ -6,3 +6,7 @@ qa/typescript-stub-harness
 *.zip
 *.html
 .DS_Store
+
+# Design references & QA artifacts — keep in the repo, never ship in the build.
+docs/
+qa/
