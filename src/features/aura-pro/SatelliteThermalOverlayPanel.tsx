@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Alert, Pressable, StyleSheet, Text, View } from "react-native";
+import Svg, { Circle, Defs, Ellipse, RadialGradient, Rect, Stop } from "react-native-svg";
 import { AuraLunisColors } from "@/theme/tokens";
 import {
   getSatelliteFixture,
@@ -79,28 +80,71 @@ export function SatelliteThermalOverlayPanel() {
       </View>
 
       <View style={styles.map}>
-        <View style={styles.earthGlow} />
-        <Text style={styles.mapLabel}>ORBITAL DENSITY PREVIEW</Text>
-        {snapshot.points.slice(0, 36).map((point) => {
-          const size = 6 + point.intensity * 8;
+        <Svg width="100%" height="100%" viewBox="0 0 320 178" style={StyleSheet.absoluteFill}>
+          <Defs>
+            <RadialGradient id="earthBody" cx="50%" cy="115%" r="60%">
+              <Stop offset="0%" stopColor="#1A3858" stopOpacity={0.9} />
+              <Stop offset="40%" stopColor="#0D2240" stopOpacity={0.7} />
+              <Stop offset="80%" stopColor="#061428" stopOpacity={0.4} />
+              <Stop offset="100%" stopColor="#030816" stopOpacity={0} />
+            </RadialGradient>
+            <RadialGradient id="earthAtmo" cx="45%" cy="110%" r="55%">
+              <Stop offset="0%" stopColor="#4FC8FF" stopOpacity={0.06} />
+              <Stop offset="50%" stopColor="#4FC8FF" stopOpacity={0.03} />
+              <Stop offset="100%" stopColor="#4FC8FF" stopOpacity={0} />
+            </RadialGradient>
+            <RadialGradient id="skyBg" cx="50%" cy="40%" r="70%">
+              <Stop offset="0%" stopColor="#0A1428" stopOpacity={1} />
+              <Stop offset="100%" stopColor="#030816" stopOpacity={1} />
+            </RadialGradient>
+          </Defs>
 
-          return (
-            <View
-              key={point.id}
-              style={[
-                styles.orbitPoint,
-                {
-                  width: size,
-                  height: size,
-                  borderRadius: size / 2,
-                  left: `${point.left}%`,
-                  top: `${point.top}%`,
-                  opacity: Math.max(0.48, point.intensity)
-                }
-              ]}
+          {/* Deep space background */}
+          <Rect width={320} height={178} fill="url(#skyBg)" />
+
+          {/* Background stars */}
+          {Array.from({ length: 40 }, (_, i) => (
+            <Circle
+              key={`bgstar-${i}`}
+              cx={((i * 47 + 13) % 310) + 5}
+              cy={((i * 31 + 7) % 130) + 5}
+              r={i % 7 === 0 ? 1 : 0.5}
+              fill={i % 3 === 0 ? "#D9A84E" : "#FFF6D6"}
+              opacity={0.15 + (i % 5) * 0.06}
             />
-          );
-        })}
+          ))}
+
+          {/* Orbital arcs (thin, subtle) */}
+          <Ellipse cx={160} cy={210} rx={150} ry={65} fill="none" stroke="rgba(217,168,78,0.06)" strokeWidth={0.5} strokeDasharray="3,5" />
+          <Ellipse cx={160} cy={210} rx={120} ry={52} fill="none" stroke="rgba(217,168,78,0.04)" strokeWidth={0.5} strokeDasharray="3,5" />
+          <Ellipse cx={160} cy={210} rx={90} ry={38} fill="none" stroke="rgba(217,168,78,0.04)" strokeWidth={0.5} strokeDasharray="3,5" />
+
+          {/* Earth atmosphere glow */}
+          <Circle cx={160} cy={235} r={100} fill="url(#earthAtmo)" />
+
+          {/* Earth body */}
+          <Circle cx={160} cy={235} r={80} fill="url(#earthBody)" />
+
+          {/* Earth terminator highlight */}
+          <Ellipse cx={145} cy={230} rx={75} ry={78} fill="none" stroke="rgba(79,200,255,0.08)" strokeWidth={1} />
+
+          {/* Satellite blips with glow */}
+          {snapshot.points.slice(0, 36).map((point) => {
+            const x = (point.left / 100) * 320;
+            const y = (point.top / 100) * 178;
+            const r = 2 + point.intensity * 3;
+            const isDecaying = mode === "decaying";
+            const dotColor = isDecaying ? "#FF6B4A" : mode === "stations" ? "#4FC8FF" : "#D9A84E";
+            return (
+              <React.Fragment key={point.id}>
+                <Circle cx={x} cy={y} r={r * 3} fill={dotColor} opacity={0.08} />
+                <Circle cx={x} cy={y} r={r * 1.5} fill={dotColor} opacity={0.15} />
+                <Circle cx={x} cy={y} r={r} fill={dotColor} opacity={0.7} />
+              </React.Fragment>
+            );
+          })}
+        </Svg>
+        <Text style={styles.mapLabel}>ORBITAL DENSITY PREVIEW</Text>
       </View>
 
       <Text style={styles.source}>
