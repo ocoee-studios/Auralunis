@@ -115,3 +115,25 @@ matching/filtering bug that's hiding valid constellations.
 All fixes go to: visual/polish-pass
 PR to main. Test on device before merging.
 Do NOT push directly to main.
+
+## FIX 5: Nebula visual consistency
+
+The Sagittarius screenshot is the gold standard for nebula rendering.
+In that view, nebulae look PERFECT — warm, subtle, integrated into
+the Milky Way texture. They feel like discoveries, not stickers.
+
+The NebulaLayer code is already sophisticated (signatures, lobes,
+filaments, focus zones). DO NOT rewrite it.
+
+The issue is that nebulae only look good when the Milky Way texture 
+is behind them. Fix the Milky Way band (FIX 1) and nebulae will 
+automatically look better everywhere.
+
+Additionally, ensure ALL nebula colors are warm-toned:
+- Emission nebulae: warm rose/gold (#E07060 range) NOT neon pink (#FF00FF)
+- Clusters: warm gold (#E0C870 range)
+- Planetary nebulae: subtle teal (#50B8A8) NOT bright green
+- Galaxies: faint silver-gold (#CFD0E0)
+
+The rule: nebulae should feel like they're PART OF the sky.
+Not overlays. Not neon signs. Warm. Integrated. Discovered.
