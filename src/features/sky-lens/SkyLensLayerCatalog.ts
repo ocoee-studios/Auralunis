@@ -30,7 +30,7 @@ export const SKY_LENS_LAYERS: ReadonlyArray<LayerDef> = [
   { key: "planets", label: "Planets", icon: "●", premium: false, available: true, defaultOn: true },
   { key: "grid", label: "Grid", icon: "#", premium: false, available: true, defaultOn: true },
   { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true },
-  { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: false, defaultOn: false },
+  { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: true, defaultOn: false },
   { key: "deepsky", label: "Deep Sky", icon: "✦", premium: true, available: true, defaultOn: true },
   { key: "ecliptic", label: "Ecliptic", icon: "~", premium: true, available: true, defaultOn: false }
 ];
