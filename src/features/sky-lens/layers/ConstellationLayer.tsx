@@ -69,8 +69,8 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
                   x={centroid.x}
                   y={centroid.y}
                   fill={nightMode ? palette.conLabel : GOLD}
-                  fontSize={10}
-                  fontWeight="600"
+                  fontSize={13}
+                  fontWeight="700"
                   letterSpacing={2}
                   textAnchor="middle"
                 >
@@ -80,7 +80,7 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
                 <Circle
                   cx={centroid.x}
                   cy={centroid.y - 3}
-                  r={24}
+                  r={32}
                   fill="transparent"
                   onPress={() =>
                     onSelect({

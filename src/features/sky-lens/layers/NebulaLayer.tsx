@@ -229,10 +229,10 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               x={p.x}
               y={p.y + Math.min(hazeR * 0.5, isShowcase ? 90 : 46) + 4}
               fill={palette.starLabel}
-              fontSize={9}
+              fontSize={12}
               fontWeight="600"
               textAnchor="middle"
-              opacity={0.55}
+              opacity={0.7}
             >
               {n.name}
             </SvgText>

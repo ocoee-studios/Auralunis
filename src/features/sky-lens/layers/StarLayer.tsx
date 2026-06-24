@@ -42,11 +42,11 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
 
         return (
           <G key={star.id}>
-            {/* Slightly larger invisible hit target for easy tapping */}
+            {/* Bigger invisible hit target — 24px minimum for easy tapping with AR jitter */}
             <Circle
               cx={p.x}
               cy={p.y}
-              r={Math.max(r + 12, 16)}
+              r={Math.max(r + 16, 24)}
               fill="transparent"
               onPress={() =>
                 onSelect({
@@ -85,7 +85,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
                 x={p.x + r + 3}
                 y={p.y + 3}
                 fill={palette.starLabel}
-                fontSize={10}
+                fontSize={13}
                 fontWeight="600"
               >
                 {star.name}

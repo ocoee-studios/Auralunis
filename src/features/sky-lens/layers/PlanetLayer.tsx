@@ -113,9 +113,9 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
             {!nightMode && <Circle cx={x - d * 0.3} cy={y - d * 0.3} r={Math.max(1.3, d * 0.3)} fill="#FFFFFF" opacity={0.5} />}
 
             {/* generous transparent tap target on top (≈15px beyond the disc) */}
-            <Circle cx={x} cy={y} r={Math.max(d + 15, 20)} fill="transparent" onPress={onPress} />
+            <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />
 
-            <SvgText x={x + st.glow * 0.6 + 4} y={y + 4} fill={palette.starLabel} fontSize={11} fontWeight="700">
+            <SvgText x={x + st.glow * 0.6 + 4} y={y + 4} fill={palette.starLabel} fontSize={14} fontWeight="700">
               {body.name}
             </SvgText>
           </G>
