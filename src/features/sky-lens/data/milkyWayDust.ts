@@ -34,9 +34,12 @@ export const MILKY_WAY_DUST: ReadonlyArray<BrightStar> = (() => {
     push("mwr", l, b);
   }
 
-  // 2. FRACTURES — tributary lanes peeling off the rift at an angle.
+  // 2. FRACTURES — tributary lanes peeling off the rift at an angle. More of them, at
+  // finer longitude spacing, so the rift frays into many branching dark filaments
+  // rather than a few clean ones (the organic, astrophotography look).
   const branches = [
-    { l: 6, dir: 1 }, { l: 24, dir: -1 }, { l: 48, dir: 1 }, { l: 74, dir: -1 }, { l: -10, dir: 1 }, { l: 33, dir: 1 },
+    { l: 6, dir: 1 }, { l: 14, dir: -1 }, { l: 24, dir: -1 }, { l: 33, dir: 1 }, { l: 42, dir: -1 },
+    { l: 48, dir: 1 }, { l: 60, dir: 1 }, { l: 74, dir: -1 }, { l: 88, dir: 1 }, { l: -10, dir: 1 }, { l: -2, dir: -1 },
   ];
   for (const br of branches) {
     const steps = 6 + Math.floor(rng() * 5);
@@ -58,9 +61,9 @@ export const MILKY_WAY_DUST: ReadonlyArray<BrightStar> = (() => {
     for (let i = 0; i < n; i++) push("mwk", k.l + gaussian(rng) * 2.4, k.b + gaussian(rng) * 1.6);
   }
 
-  // 4. scattered dark clouds — denser toward the bright inner galaxy.
+  // 4. scattered dark clouds — denser toward the bright inner galaxy (finer mottling).
   let guard = 0;
-  while (out.filter((d) => d.id.startsWith("mwc")).length < 70 && guard < 8000) {
+  while (out.filter((d) => d.id.startsWith("mwc")).length < 100 && guard < 12000) {
     guard++;
     const l = rng() * 360;
     if (rng() > 0.26 + 0.74 * coreProx(l)) continue;
