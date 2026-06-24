@@ -38,7 +38,9 @@ export function MilkyWayCoreLayer({ band, project, fov, box, nightMode, boost }:
   if (!band.galacticCenter.aboveHorizon) return null;
 
   const gc = project(band.galacticCenter.azimuthDegrees, band.galacticCenter.altitudeDegrees);
-  if (gc.behind) return null;
+  // Don't hide when gc is "behind" — the texture is large enough to still be
+  // partially visible even when the center is off-screen. Only hide when the
+  // galactic center is well below the horizon (not visible at all tonight).
 
   // Uniform scale from the horizontal field of view keeps the texture undistorted
   // (the crop's 150:70 aspect ≈ the image's native aspect). Scales with zoom: a

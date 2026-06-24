@@ -102,7 +102,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
   // Milky Way is a faint warm glow — feel more than see. A small boost in
   // Planetarium Mode (pure black background) keeps it from vanishing entirely.
-  const milkyWayBoost = planetarium ? 1.6 : 1;
+  const milkyWayBoost = planetarium ? 1.8 : 1.3;
   const togglePlanetarium = useCallback(() => {
     // Two independent state updates at the top level of the handler. NEVER nest one
     // setState inside another's updater — React runs the updater during its render

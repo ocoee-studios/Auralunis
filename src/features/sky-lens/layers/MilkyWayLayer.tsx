@@ -55,16 +55,16 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
   return (
     <G>
       <Defs>
-        {/* LAYER 3 — warm galactic glow */}
+        {/* LAYER 3 — warm galactic glow — BOOSTED to be clearly visible */}
         <RadialGradient id="mwGlow" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E8C77E" stopOpacity={o(0.055)} />
-          <Stop offset="50%" stopColor="#C99A52" stopOpacity={o(0.025)} />
+          <Stop offset="0%" stopColor="#E8C77E" stopOpacity={o(0.11)} />
+          <Stop offset="50%" stopColor="#C99A52" stopOpacity={o(0.05)} />
           <Stop offset="100%" stopColor="#C99A52" stopOpacity={0} />
         </RadialGradient>
-        {/* LAYER 4 — bright galactic core */}
+        {/* LAYER 4 — bright galactic core — BOOSTED for visible core glow */}
         <RadialGradient id="mwCore" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFE9B0" stopOpacity={o(0.17)} />
-          <Stop offset="32%" stopColor="#E8C77E" stopOpacity={o(0.085)} />
+          <Stop offset="0%" stopColor="#FFE9B0" stopOpacity={o(0.28)} />
+          <Stop offset="32%" stopColor="#E8C77E" stopOpacity={o(0.14)} />
           <Stop offset="100%" stopColor="#C99A52" stopOpacity={0} />
         </RadialGradient>
         {/* LAYERS 1 & 5 — dark dust (near-black navy, the contrast maker) */}
