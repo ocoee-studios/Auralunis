@@ -13,6 +13,7 @@ import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { ZodiacLayer } from "./layers/ZodiacLayer";
+import { SatelliteLayer, type SkyLensSatellite } from "./layers/SatelliteLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { type LayerKey } from "./SkyLensLayerCatalog";
 import type { SkyData } from "./hooks/useSkyProjection";
@@ -30,6 +31,7 @@ type Props = {
   focus: FocusZone;
   showcase: FocusZone;
   parallax: ParallaxOffset;
+  satellites: SkyLensSatellite[];
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -37,7 +39,7 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, showcase, parallax, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, showcase, parallax, satellites, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
 
   // Celestial-dome depth: cloud layers float by a fraction of the gyro parallax
@@ -117,6 +119,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           nightMode={nightMode}
           onSelect={onSelect}
         />
+      )}
+      {/* Tracked satellites on the live feed (ISS gold, Starlink pale-blue, others silver) */}
+      {activeLayers.has("satellites") && (
+        <SatelliteLayer satellites={satellites} project={project} palette={palette} nightMode={nightMode} onSelect={onSelect} />
       )}
       {/* Moon is always rendered (not a toggle) */}
       <MoonLayer

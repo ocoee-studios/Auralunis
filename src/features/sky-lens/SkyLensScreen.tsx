@@ -13,6 +13,9 @@ import { useObserverLocation } from "./ephemeris/useObserverLocation";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useDevicePointing } from "./ar/useDevicePointing";
 import { useParallaxOffset } from "./ar/useParallaxOffset";
+import { getFleet, simulateTick, syncLiveTLEData } from "@/services/AtmosphereExplorerService";
+import { computeAzimuthElevation } from "@/utils/alignmentEngine";
+import type { SkyLensSatellite } from "./layers/SatelliteLayer";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
 import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
@@ -71,6 +74,50 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const [box, setBox] = useState({ width: 360, height: 720 });
   const [active, setActive] = useState<Set<LayerKey>>(() => new Set(DEFAULT_ACTIVE_LAYERS));
+
+  // Live satellite tracking for the AR "Satellites" layer — reuses the Orbital fleet
+  // service (live-TLE-backed positions → absolute observer az/alt). Refreshed every
+  // 1 s; the projection uses the live pointing, so satellites track smoothly between
+  // updates. Only runs while the layer is on.
+  const [satellites, setSatellites] = useState<SkyLensSatellite[]>([]);
+  const satellitesActive = active.has("satellites");
+  useEffect(() => {
+    if (!satellitesActive) {
+      setSatellites([]);
+      return;
+    }
+    let alive = true;
+    void syncLiveTLEData().catch(() => {});
+    const tick = () => {
+      simulateTick();
+      if (!alive) return;
+      setSatellites(
+        getFleet().map((sat) => {
+          const { azimuth, elevation } = computeAzimuthElevation(location, {
+            id: sat.id,
+            name: sat.name,
+            latitudeDegrees: sat.latitudeDegrees,
+            longitudeDegrees: sat.longitudeDegrees,
+            altitudeKm: sat.altitudeKm,
+          });
+          return {
+            id: sat.id,
+            name: sat.name,
+            shortName: sat.shortName,
+            altitudeKm: sat.altitudeKm,
+            azimuthDegrees: azimuth,
+            elevationDegrees: elevation,
+          };
+        })
+      );
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => {
+      alive = false;
+      clearInterval(id);
+    };
+  }, [satellitesActive, location]);
   // Night Vision is shared with Settings: seed from the saved flag on open, write
   // back on toggle so the two stay in sync.
   const { settings, updateSetting } = useAuraLunisSettings();
@@ -420,6 +467,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               focus={focusZone}
               showcase={showcaseZone}
               parallax={parallax}
+              satellites={satellites}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>

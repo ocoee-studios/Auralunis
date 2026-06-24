@@ -158,7 +158,7 @@ export function focusFactor(px: number, py: number, focus: FocusZone): number {
   return t * t;
 }
 
-export type SelectedKind = "star" | "planet" | "moon" | "constellation" | "nebula" | "zodiac";
+export type SelectedKind = "star" | "planet" | "moon" | "constellation" | "nebula" | "zodiac" | "satellite";
 
 export interface SelectedFact {
   label: string;

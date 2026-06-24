@@ -60,7 +60,7 @@ function normalizeSigned(deg: number): number {
  * + simple geometric elevation (flat-earth approx works well for LEO targets
  * observed over short arcs; accuracy is ~0.2° for ISS).
  */
-function computeAzimuthElevation(
+export function computeAzimuthElevation(
   observer: ObserverLocation,
   target: SpatialTarget
 ): { azimuth: number; elevation: number } {
