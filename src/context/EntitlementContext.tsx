@@ -18,18 +18,21 @@ try {
   // not available in Expo Go
 }
 
+// Local-testing override: unlock premium when RevenueCat isn't available (e.g. Expo
+// Go) so the gated UI is testable WITHOUT a real purchase. Double-guarded — it is
+// only ever true when BOTH this flag is on AND the build is a dev build (`__DEV__` is
+// compiled to false in release), so it can never ship the App Store app unlocked.
+// Set ALLOW_DEV_PREMIUM to false to exercise the real paywall during development.
+const ALLOW_DEV_PREMIUM = true;
+const devPremium = (): boolean => __DEV__ && ALLOW_DEV_PREMIUM;
+
 async function fetchIsPremium(): Promise<boolean> {
-  if (!Purchases) {
-    // RevenueCat unavailable (e.g. Expo Go) — grant premium in dev so the app is
-    // testable. __DEV__ is false in release builds, so this never ships unlocked.
-    return __DEV__;
-  }
+  if (!Purchases) return devPremium(); // RevenueCat unavailable
   try {
     const info = await Purchases.getCustomerInfo();
     return Boolean(info.entitlements.active[RevenueCatIds.entitlement]);
   } catch {
-    // RC configured but errored (placeholder key, network) — premium in dev only.
-    return __DEV__;
+    return devPremium(); // RC configured but errored (placeholder key, network)
   }
 }
 
