@@ -104,9 +104,9 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         {nebulae.map((n) => (
           <React.Fragment key={`def-${n.id}`}>
             <RadialGradient id={`neb-haze-${n.id}`} cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.5" />
-              <Stop offset="30%" stopColor={n.hazeColor} stopOpacity="0.3" />
-              <Stop offset="65%" stopColor={n.hazeColor} stopOpacity="0.12" />
+              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.6" />
+              <Stop offset="30%" stopColor={n.hazeColor} stopOpacity="0.35" />
+              <Stop offset="65%" stopColor={n.hazeColor} stopOpacity="0.15" />
               <Stop offset="100%" stopColor={n.hazeColor} stopOpacity="0" />
             </RadialGradient>
             <RadialGradient id={`neb-core-${n.id}`} cx="50%" cy="50%" r="50%">
@@ -140,8 +140,8 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         const ff = focusFactor(p.x, p.y, focus);
         const sf = focusFactor(p.x, p.y, showcase);
         const eff = sig ? sig.scale : scaleFor(n.id);
-        const r = Math.max(isShowcase ? 40 : 16, n.radius * eff) * (1 + ff * 0.8) * (1 + sf * 0.4);
-        const opMul = (isShowcase ? 0.58 : 1) * (1 + ff * 0.7) * (1 + sf * 2.0); // huge clouds stay subtle (lower opacity)
+        const r = Math.max(isShowcase ? 44 : 22, n.radius * eff) * (1 + ff * 0.8) * (1 + sf * 0.4);
+        const opMul = (isShowcase ? 0.82 : 1) * (1 + ff * 0.7) * (1 + sf * 2.0); // showcase clouds: visible but not solid
         const hazeR = r * 3;
         const coreR = r * 1.1;
         const volR = r * 4.4; // volumetric outer edge
