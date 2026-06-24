@@ -67,10 +67,12 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
         </G>
       )}
-      {/* Deep-sky nebulae glows sit just behind the stars — float at full parallax */}
-      <G transform={depth(1)}>
-        <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} onSelect={onSelect} />
-      </G>
+      {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
+      {activeLayers.has("deepsky") && (
+        <G transform={depth(1)}>
+          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} onSelect={onSelect} />
+        </G>
+      )}
       {activeLayers.has("grid") && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
       )}
