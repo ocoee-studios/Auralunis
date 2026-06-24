@@ -39,7 +39,7 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
   const o = (v: number) => Math.min(0.22, v * boost);
   const glowR = Math.max(90, box.height * 0.42); // huge, soft
   const coreR = Math.max(130, box.height * 0.44);
-  const dustBase = Math.max(34, box.height * 0.12);
+  const dustBase = Math.max(42, box.height * 0.14);
 
   // galactic core glow (Sagittarius)
   const gc = band.galacticCenter;
@@ -69,8 +69,8 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         </RadialGradient>
         {/* LAYERS 1 & 5 — dark dust (near-black navy, the contrast maker) */}
         <RadialGradient id="mwDust" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#01030A" stopOpacity={Math.min(0.62, 0.5 * boost)} />
-          <Stop offset="48%" stopColor="#02040C" stopOpacity={Math.min(0.3, 0.24 * boost)} />
+          <Stop offset="0%" stopColor="#01030A" stopOpacity={Math.min(0.78, 0.65 * boost)} />
+          <Stop offset="48%" stopColor="#02040C" stopOpacity={Math.min(0.42, 0.35 * boost)} />
           <Stop offset="100%" stopColor="#02040C" stopOpacity={0} />
         </RadialGradient>
       </Defs>
