@@ -387,6 +387,15 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         <View style={StyleSheet.absoluteFill} collapsable={false}>
           {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
+
+          {/* Cosmic dark overlay — darkens camera feed so stars/nebulae pop.
+              Camera mode: 45% black. Planetarium: 95% black (nearly full dark). */}
+          <View
+            style={[StyleSheet.absoluteFillObject, {
+              backgroundColor: planetarium ? "rgba(3,8,22,0.95)" : "rgba(3,8,22,0.45)",
+            }]}
+            pointerEvents="none"
+          />
           {planetarium && !nightMode && (
             <LinearGradient
               colors={skyColors}
