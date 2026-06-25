@@ -1,3 +1,23 @@
+> ## ⛔ BRANCH PROTOCOL — READ FIRST (every agent: Claude, Gemini, ChatGPT, all)
+>
+> **NEVER commit or push directly to `main`.** Multiple AIs edit this repo in
+> parallel. Direct-to-main pushes have repeatedly collided, and on 2026-06-25 a
+> bad parallel merge committed conflict markers straight to `main` and **broke the
+> build** (it stopped compiling).
+>
+> Required flow for EVERY change — no exceptions:
+> 1. `git pull origin main` first; check `gh pr list` and recent `git log` so you
+>    don't rebuild what another agent is already doing.
+> 2. `git checkout -b <type>/<short-name>`  (e.g. `visual/…`, `fix/…`, `feat/…`)
+> 3. commit on that branch, then `git push origin <branch>`
+> 4. open a PR to `main`, device-test, then merge (and delete the branch).
+>
+> `main` must always be green: a branch may only merge if `npx tsc --noEmit`
+> reports **zero errors** and the Metro bundle builds. Never merge with conflict
+> markers (`<<<<<<<` / `>>>>>>>`) in any file.
+>
+> ---
+>
 # CLAUDE.md — AuraLunis Project Context
 
 ## What this is
