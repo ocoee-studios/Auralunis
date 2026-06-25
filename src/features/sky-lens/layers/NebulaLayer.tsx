@@ -3,6 +3,7 @@ import { Circle, Defs, Ellipse, G, RadialGradient, Stop, Text as SvgText } from 
 import type { HorizontalNebula } from "../ephemeris/Nebulae";
 import type { NebulaType } from "../data/nebulae";
 import { focusFactor, type ProjectFn, type SkyPalette, type SelectedObject, type FocusZone } from "../SkyLensVisual";
+import type { LabelPlacer } from "../labelLayout";
 
 type Props = {
   nebulae: HorizontalNebula[];
@@ -11,6 +12,7 @@ type Props = {
   nightMode: boolean;
   focus?: FocusZone;
   showcase?: FocusZone; // auto-lit hero region (e.g. Orion in view) — nebulae intensify
+  placeLabel?: LabelPlacer;
   onSelect: (object: SelectedObject) => void;
   time?: number;
 };
@@ -87,7 +89,7 @@ const scaleFor = (id: string) => (id === "m31" ? 3.2 : SHOWCASE.has(id) ? 2.4 : 
 // broad volumetric haze, a concentrated bright core, and a hot heart. Signature
 // objects get organic shapes; galaxies are tilted ellipses. Each gently breathes.
 // Tap opens the info card. Hidden at night.
-export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null, showcase = null, onSelect, time: timeProp }: Props) {
+export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null, showcase = null, placeLabel, onSelect, time: timeProp }: Props) {
   const [internalTime, setInternalTime] = useState(() => Date.now());
   useEffect(() => {
     if (timeProp !== undefined || nightMode) return;
@@ -226,17 +228,15 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
             </G>
 
             {/* label */}
-            <SvgText
-              x={p.x}
-              y={p.y + Math.min(hazeR * 0.5, isShowcase ? 90 : 46) + 4}
-              fill={palette.starLabel}
-              fontSize={12}
-              fontWeight="600"
-              textAnchor="middle"
-              opacity={0.7}
-            >
-              {n.name}
-            </SvgText>
+            {(() => {
+              const ly = p.y + Math.min(hazeR * 0.5, isShowcase ? 90 : 46) + 4;
+              const lp = placeLabel ? placeLabel(p.x, ly, n.name, 12) : { x: p.x, y: ly };
+              return (
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={12} fontWeight="600" textAnchor="middle" opacity={0.7}>
+                  {n.name}
+                </SvgText>
+              );
+            })()}
           </G>
         );
       })}

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef } from "react";
 import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { ProjectFn, SkyPalette, SelectedObject } from "../SkyLensVisual";
+import type { LabelPlacer } from "../labelLayout";
 
 // A tracked satellite resolved to absolute observer az/alt (built in SkyLensScreen
 // from the live-TLE fleet positions via computeAzimuthElevation).
@@ -18,6 +19,7 @@ type Props = {
   project: ProjectFn;
   palette: SkyPalette;
   nightMode: boolean;
+  placeLabel?: LabelPlacer;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -37,7 +39,7 @@ function satColor(id: string, name: string): string {
 // trailing line shows the orbital motion over the last tick (drawn from the previous
 // tick's projected position to the current one), persisting across the cheap
 // re-renders between 1 s ticks. Crash-safe: static SVG, refs for the trail.
-export function SatelliteLayer({ satellites, project, palette, nightMode, onSelect }: Props) {
+export function SatelliteLayer({ satellites, project, palette, nightMode, placeLabel, onSelect }: Props) {
   const lastRef = useRef<Map<string, { az: number; alt: number }>>(new Map());
   const prevRef = useRef<Map<string, { az: number; alt: number }>>(new Map());
 
@@ -97,9 +99,14 @@ export function SatelliteLayer({ satellites, project, palette, nightMode, onSele
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
 
             {/* label */}
-            <SvgText x={p.x + r + 4} y={p.y + 3} fill={palette.starLabel} fontSize={9} fontWeight="600" opacity={0.8}>
-              {s.shortName}
-            </SvgText>
+            {(() => {
+              const lp = placeLabel ? placeLabel(p.x + r + 4, p.y + 3, s.shortName, 9) : { x: p.x + r + 4, y: p.y + 3 };
+              return (
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={9} fontWeight="600" opacity={0.8}>
+                  {s.shortName}
+                </SvgText>
+              );
+            })()}
           </G>
         );
       })}
