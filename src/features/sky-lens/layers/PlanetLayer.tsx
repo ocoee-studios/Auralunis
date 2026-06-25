@@ -2,6 +2,7 @@ import React from "react";
 import { Circle, Ellipse, G, Line, Text as SvgText } from "react-native-svg";
 import type { SkyBody } from "../ephemeris/SkyEphemerisService";
 import { PLANET_COLORS, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+import { renderPlanetIllustration } from "./PlanetIllustrations";
 
 type Props = {
   bodies: SkyBody[];
@@ -94,23 +95,17 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
               </G>
             )}
 
-            {/* the planet disc (visual only — tap handled by the larger transparent
-                target on top, since the disc is tiny and visuals stack over it) */}
-            <Circle cx={x} cy={y} r={d} fill={color} />
-
-            {/* Jupiter — cloud bands + Galilean moons */}
-            {body.id === "jupiter" && (
-              <G>
-                <Line x1={x - d * 0.75} y1={y - d * 0.32} x2={x + d * 0.75} y2={y - d * 0.32} stroke="#C77F1E" strokeWidth={0.9} strokeOpacity={0.7} />
-                <Line x1={x - d * 0.8} y1={y + d * 0.3} x2={x + d * 0.8} y2={y + d * 0.3} stroke="#C77F1E" strokeWidth={1.1} strokeOpacity={0.7} />
-                {JUPITER_MOONS.map((dx, i) => (
-                  <Circle key={i} cx={x + dx} cy={y + (i % 2 === 0 ? -1 : 1)} r={1.1} fill="#EAF0FF" opacity={0.85} />
-                ))}
-              </G>
-            )}
-
-            {/* specular highlight for a 3-D feel */}
-            {!nightMode && <Circle cx={x - d * 0.3} cy={y - d * 0.3} r={Math.max(1.3, d * 0.3)} fill="#FFFFFF" opacity={0.5} />}
+            {/* Rich planet illustrations for major planets */}
+            {(() => {
+              const ill = renderPlanetIllustration(body.id, x, y, d, nightMode);
+              if (ill) return ill;
+              return (
+                <G>
+                  <Circle cx={x} cy={y} r={d} fill={color} />
+                  {!nightMode && <Circle cx={x - d * 0.3} cy={y - d * 0.3} r={Math.max(1.3, d * 0.3)} fill="#FFFFFF" opacity={0.5} />}
+                </G>
+              );
+            })()}
 
             {/* generous transparent tap target on top (≈15px beyond the disc) */}
             <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />
