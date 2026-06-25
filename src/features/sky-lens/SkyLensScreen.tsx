@@ -23,6 +23,7 @@ import { AstralBreathingLayer } from "./layers/AstralBreathingLayer";
 import { LuxuryStarfieldFXLayer } from "./layers/LuxuryStarfieldFXLayer";
 import { LunarGodRayLayer } from "./layers/LunarGodRayLayer";
 import { OrbitalGhostTrailsLayer } from "./layers/OrbitalGhostTrailsLayer";
+import { AuroraCurtainLayer } from "./layers/AuroraCurtainLayer";
 import { ConstellationForgeLayer, type ForgePoint, type ForgeSegment } from "./layers/ConstellationForgeLayer";
 import { SkyLensLayerBar } from "./SkyLensLayerBar";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
@@ -453,6 +454,20 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             trails={[]}
             nightVision={nightMode}
             intensity={(planetarium ? 0.9 : 0.6) * horizonFade}
+          />
+
+          {/* Aurora curtains — soft atmospheric light BEHIND the sky objects (this
+              sits above the background FX, below the star canvas + labels/cards, and
+              is pointerEvents="none"). v1 shows it only in Planetarium ("fantasy /
+              preview") mode; realistic camera mode stays off until an enable toggle /
+              live AuroraForecastService gate is wired. */}
+          <AuroraCurtainLayer
+            width={box.width}
+            height={box.height}
+            visible={planetarium}
+            intensity={0.55}
+            variant="cosmic"
+            nightVision={nightMode}
           />
 
           <SkyLensErrorBoundary>
