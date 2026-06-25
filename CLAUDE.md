@@ -21,10 +21,11 @@ Home · Sky · Watch · Learn · Settings
 - **Aura Pro** — Coming Later (do NOT enable purchase flows)
 - **Sovereign** — Waitlist, Coming Later (do NOT enable purchase flows)
 
-RevenueCat product IDs:
-- `com.ocoee.auralunis.premium.monthly`
-- `com.ocoee.auralunis.premium.annual`
-- `com.ocoee.auralunis.lifetime.founders`
+Bundle ID: `com.ocoeestudios.auralunis` (Ocoee Studios LLC). RevenueCat product IDs
+(must match App Store Connect exactly):
+- `com.ocoeestudios.auralunis.premium.monthly`
+- `com.ocoeestudios.auralunis.premium.annual`
+- `com.ocoeestudios.auralunis.lifetime.founders`
 
 Entitlement: `auralunis_premium` (all three products unlock this)
 

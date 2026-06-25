@@ -11,7 +11,7 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.ocoee.auralunis",
+      "bundleIdentifier": "com.ocoeestudios.auralunis",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSCameraUsageDescription": "AuraLunis uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view.",
@@ -50,7 +50,7 @@
       }
     },
     "android": {
-      "package": "com.ocoee.auralunis",
+      "package": "com.ocoeestudios.auralunis",
       "permissions": [
         "CAMERA",
         "ACCESS_FINE_LOCATION",
