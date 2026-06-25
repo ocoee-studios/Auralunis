@@ -401,8 +401,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               deepening to ground-glow at the bottom for a sense of depth. */}
           {!nightMode && !planetarium && (
             <LinearGradient
-              colors={["rgba(8,16,42,0)", "rgba(10,21,53,0.28)", "rgba(10,21,53,0.55)"] as const}
-              locations={[0, 0.55, 1]}
+              colors={["rgba(8,16,42,0)", "rgba(9,18,47,0.1)", "rgba(10,20,50,0.3)", "rgba(10,21,53,0.55)"] as const}
+              locations={[0, 0.42, 0.74, 1]}
               start={{ x: 0.5, y: 0 }}
               end={{ x: 0.5, y: 1 }}
               style={StyleSheet.absoluteFillObject}

@@ -67,18 +67,18 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
               </>
             )}
 
-            {/* Jupiter — subtle golden glow (recognition: the gold giant) */}
+            {/* Jupiter — tighter golden glow (crisper per feedback) */}
             {body.id === "jupiter" && !nightMode && (
-              <Circle cx={x} cy={y} r={st.glow * 1.7} fill="#EBB44E" opacity={0.1} />
+              <Circle cx={x} cy={y} r={st.glow * 1.3} fill="#EBB44E" opacity={0.11} />
             )}
 
-            {/* Venus — huge soft pearl halo + diffraction glints (recognition: the pearl) */}
+            {/* Venus — tighter pearl halo + diffraction glints (crisper per feedback) */}
             {body.id === "venus" && !nightMode && (
               <>
-                <Circle cx={x} cy={y} r={st.glow * 2.7} fill="#FBF3DC" opacity={0.055} />
-                <Circle cx={x} cy={y} r={st.glow * 1.5} fill="#FFFFFF" opacity={0.11} />
-                <Line x1={x - 15} y1={y} x2={x + 15} y2={y} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
-                <Line x1={x} y1={y - 15} x2={x} y2={y + 15} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
+                <Circle cx={x} cy={y} r={st.glow * 1.9} fill="#FBF3DC" opacity={0.06} />
+                <Circle cx={x} cy={y} r={st.glow * 1.2} fill="#FFFFFF" opacity={0.12} />
+                <Line x1={x - 13} y1={y} x2={x + 13} y2={y} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
+                <Line x1={x} y1={y - 13} x2={x} y2={y + 13} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
               </>
             )}
 
