@@ -89,3 +89,56 @@ Labels: readable, collision-free, slightly transparent
 ```
 
 Each layer distinct. No layer competes with another.
+
+---
+
+## NEBULA REFERENCE: assets/sky/nebula-reference-trifid.jpg
+
+This Trifid Nebula astrophoto is the target for nebula rendering.
+
+Key qualities to match in SVG:
+
+### DUAL COLOR — pink emission + blue reflection
+The Trifid has TWO distinct color regions:
+- Lower: warm pink/rose H-alpha emission (#E08878 → #D06070)
+- Upper: cool blue reflection nebulosity (#5090C0 → #70B0E0)
+- Transition zone where they blend
+
+EVERY major emission nebula has blue reflection regions nearby.
+Our nebulae are single-color. They need at MINIMUM two color 
+zones — warm core + cool outer haze.
+
+### DARK DUST LANES SPLITTING THE GLOW
+The Trifid literally means "three-split" — dark lanes carve 
+the pink emission into three lobes. This is what makes it 
+recognizable WITHOUT a label.
+
+Build dark lane paths into the signature nebulae:
+- Trifid: three dark lanes radiating from center (Y shape)
+- Orion: dark lane across the bright trapezium region
+- Lagoon: dark lane separating the two bright halves
+- Eagle: dark columnar shapes (Pillars of Creation silhouette)
+
+### IRREGULAR ORGANIC SHAPE
+Not a circle. Not an ellipse. An ORGANIC cloud with:
+- Ragged, uneven edges
+- Brighter core, dimmer outer wisps
+- Embedded bright stars (white dots inside the cloud)
+- Gradual fade to transparent at edges
+
+### DENSE EMBEDDED STAR FIELD
+Stars shine THROUGH the nebula, especially in the outer 
+regions. The nebula is translucent, not opaque.
+
+### Implementation approach
+For the 5 signature nebulae, build custom SVG Paths:
+- Multiple overlapping shapes at different opacities
+- Warm core shape + cool outer shape + dark lane paths
+- 5-8 embedded bright star dots inside the cloud
+- Overall opacity: 15-25% (translucent, not solid)
+
+This level of detail only applies to the BIG FIVE:
+  Orion (M42), Lagoon (M8), Trifid (M20), Eagle (M16), Carina (NGC 3372)
+
+Other nebulae stay as enhanced radial glows — they're too 
+small on screen to justify custom shapes.
