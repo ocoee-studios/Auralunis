@@ -422,18 +422,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             milkyWayVisible={active.has("milkyway")}
             intensity={(planetarium ? 0.9 : 0.55) * horizonFade}
           />
-          <AstralBreathingLayer
-            width={box.width}
-            height={box.height}
-            nightVision={nightMode}
-            intensity={(planetarium ? 0.8 : 0.45) * horizonFade}
-          />
-          <LuxuryStarfieldFXLayer
-            width={box.width}
-            height={box.height}
-            nightVision={nightMode}
-            intensity={(planetarium ? 0.8 : 0.45) * horizonFade}
-          />
+          {/* AstralBreathingLayer disabled — PremiumSkyBloomLayer covers atmosphere.
+              Re-enable when performance budget allows. */}
+          {/* LuxuryStarfieldFXLayer disabled — 110 particles + shimmer animation
+              is expensive. Re-enable when performance budget allows. */}
           {moonProj && (
             <LunarGodRayLayer
               width={box.width}

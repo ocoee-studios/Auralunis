@@ -12,14 +12,12 @@ function mulberry32(seed: number) {
   };
 }
 
-// ~3500 faint background stars spread uniformly over the celestial sphere (full
-// 0–24h RA, −90°…+90° Dec) — the naked eye sees ~4,500, so a dense dome is what
-// makes every direction read as real sky instead of a sparse scatter of dots.
-// Same RA/Dec→horizontal pipeline as the bright catalog.
+// ~2000 faint background stars — performance-optimized from 3500. Still covers
+// the full celestial sphere but renders fast enough for smooth 30fps AR.
 export const DOME_STARS: ReadonlyArray<BrightStar> = (() => {
   const rng = mulberry32(20260621);
   const out: BrightStar[] = [];
-  for (let i = 0; i < 3500; i++) {
+  for (let i = 0; i < 2000; i++) {
     const raHours = rng() * 24;
     // Uniform-on-sphere declination: dec = asin(2u - 1).
     const decDegrees = (Math.asin(2 * rng() - 1) * 180) / Math.PI;

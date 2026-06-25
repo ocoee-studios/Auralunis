@@ -23,6 +23,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
       {stars.map((star) => {
         // Render all stars, dim those below horizon
         const belowHorizon = !star.aboveHorizon;
+        if (belowHorizon && star.altitudeDegrees < -30) return null;
         const p = project(star.azimuthDegrees, star.altitudeDegrees);
         if (!p.onScreen) return null;
 

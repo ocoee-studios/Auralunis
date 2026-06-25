@@ -21,6 +21,7 @@ export function DomeStarLayer({ stars, project, palette, nightMode, focus = null
     <G>
       {stars.map((s) => {
         const belowHorizon = !s.aboveHorizon;
+        if (belowHorizon && s.altitudeDegrees < -30) return null;
         const p = project(s.azimuthDegrees, s.altitudeDegrees);
         if (!p.onScreen) return null;
         // Bigger stars so they're actually visible on a phone screen.

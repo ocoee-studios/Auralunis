@@ -129,6 +129,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
 
       {nebulae.map((n, i) => {
         const belowHorizon = !n.aboveHorizon;
+        if (belowHorizon && n.altitudeDegrees < -20) return null;
         const p = project(n.azimuthDegrees, n.altitudeDegrees);
         if (!p.onScreen) return null;
 
