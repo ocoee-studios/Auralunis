@@ -67,10 +67,11 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
           <Stop offset="32%" stopColor="#E8C77E" stopOpacity={o(0.14)} />
           <Stop offset="100%" stopColor="#C99A52" stopOpacity={0} />
         </RadialGradient>
-        {/* LAYERS 1 & 5 — dark dust (near-black navy, the contrast maker) */}
+        {/* LAYERS 1 & 5 — dark dust (near-black, the contrast maker). Darker per
+            feedback: a deeper Great Rift reads as dust, not a smooth glow. */}
         <RadialGradient id="mwDust" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#01030A" stopOpacity={Math.min(0.35, 0.28 * boost)} />
-          <Stop offset="48%" stopColor="#02040C" stopOpacity={Math.min(0.18, 0.14 * boost)} />
+          <Stop offset="0%" stopColor="#010208" stopOpacity={Math.min(0.5, 0.42 * boost)} />
+          <Stop offset="48%" stopColor="#02040C" stopOpacity={Math.min(0.28, 0.22 * boost)} />
           <Stop offset="100%" stopColor="#02040C" stopOpacity={0} />
         </RadialGradient>
       </Defs>
