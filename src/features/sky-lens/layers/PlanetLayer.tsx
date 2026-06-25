@@ -30,7 +30,8 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
   return (
     <G>
       {bodies.map((body) => {
-        if (!PLANET_IDS.has(body.id) || !body.aboveHorizon) return null;
+        if (!PLANET_IDS.has(body.id)) return null;
+        const belowHorizon = !body.aboveHorizon;
         const p = project(body.azimuthDegrees, body.altitudeDegrees);
         if (!p.onScreen) return null;
 
@@ -53,7 +54,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
           });
 
         return (
-          <G key={body.id}>
+          <G key={body.id} opacity={belowHorizon ? 0.2 : 1}>
             {/* base glow */}
             <Circle cx={x} cy={y} r={st.glow} fill={color} opacity={0.12} />
             <Circle cx={x} cy={y} r={st.glow * 0.6} fill={color} opacity={0.26} />

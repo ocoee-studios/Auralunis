@@ -21,7 +21,8 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
   return (
     <G>
       {stars.map((star) => {
-        if (!star.aboveHorizon) return null;
+        // Render all stars, dim those below horizon
+        const belowHorizon = !star.aboveHorizon;
         const p = project(star.azimuthDegrees, star.altitudeDegrees);
         if (!p.onScreen) return null;
 
@@ -41,7 +42,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         const labeled = star.name !== undefined && star.magnitude <= LABEL_MAG_LIMIT;
 
         return (
-          <G key={star.id}>
+          <G key={star.id} opacity={belowHorizon ? 0.25 : 1}>
             {/* Bigger invisible hit target — 24px minimum for easy tapping with AR jitter */}
             <Circle
               cx={p.x}

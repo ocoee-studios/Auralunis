@@ -33,15 +33,14 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
               projected[i] &&
               projected[j] &&
               !projected[i].behind &&
-              !projected[j].behind &&
-              c.points[i]?.aboveHorizon &&
-              c.points[j]?.aboveHorizon
+              !projected[j].behind
           )
           .map(([i, j], idx) => {
             const a = projected[i];
             const b = projected[j];
+            const belowH = !(c.points[i]?.aboveHorizon && c.points[j]?.aboveHorizon);
             return (
-              <G key={`${c.id}-l${idx}`}>
+              <G key={`${c.id}-l${idx}`} opacity={belowH ? 0.2 : 1}>
                 {/* soft 4px gold glow behind the line */}
                 <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={4} strokeOpacity={0.08} strokeLinecap="round" />
                 {/* crisp gold thread — rgba(217,168,78,0.6) */}

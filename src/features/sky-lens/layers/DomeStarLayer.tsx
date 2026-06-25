@@ -20,7 +20,7 @@ export function DomeStarLayer({ stars, project, palette, nightMode, focus = null
   return (
     <G>
       {stars.map((s) => {
-        if (!s.aboveHorizon) return null;
+        const belowHorizon = !s.aboveHorizon;
         const p = project(s.azimuthDegrees, s.altitudeDegrees);
         if (!p.onScreen) return null;
         // Bigger stars so they're actually visible on a phone screen.
@@ -36,7 +36,7 @@ export function DomeStarLayer({ stars, project, palette, nightMode, focus = null
           opacity = Math.min(1, opacity * (1 + ff * 0.7) * (1 + sf * 0.6));
         }
         const color = nightMode ? palette.star : domeColor(s.id);
-        return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={opacity} />;
+        return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={opacity * (belowHorizon ? 0.25 : 1)} />;
       })}
     </G>
   );

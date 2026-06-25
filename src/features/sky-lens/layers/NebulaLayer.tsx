@@ -128,7 +128,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
       </Defs>
 
       {nebulae.map((n, i) => {
-        if (!n.aboveHorizon) return null;
+        const belowHorizon = !n.aboveHorizon;
         const p = project(n.azimuthDegrees, n.altitudeDegrees);
         if (!p.onScreen) return null;
 
@@ -149,7 +149,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         const coreId = `url(#neb-core-${n.id})`;
 
         return (
-          <G key={n.id}>
+          <G key={n.id} opacity={belowHorizon ? 0.2 : 1}>
             {/* transparent hit target (doesn't breathe — always tappable) */}
             <Circle
               cx={p.x}
