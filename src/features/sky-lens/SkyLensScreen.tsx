@@ -149,7 +149,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
   // Milky Way is a faint warm glow — feel more than see. A small boost in
   // Planetarium Mode (pure black background) keeps it from vanishing entirely.
-  const milkyWayBoost = planetarium ? 1.8 : 1.3;
+  const milkyWayBoost = planetarium ? 2.4 : 1.9;
   const togglePlanetarium = useCallback(() => {
     // Two independent state updates at the top level of the handler. NEVER nest one
     // setState inside another's updater — React runs the updater during its render
@@ -388,11 +388,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
 
-          {/* Cosmic dark overlay — darkens camera feed so stars/nebulae pop.
-              Camera mode: 45% black. Planetarium: 95% black (nearly full dark). */}
+          {/* Immersive Sky dimming — darkens the camera feed so the bold sky pops
+              against near-black. Camera mode: 78% black (immersive). Planetarium:
+              96% (nearly full dark). The brighter Milky Way + star blooms read as
+              contrast against this, not a muddy wash over a bright camera. */}
           <View
             style={[StyleSheet.absoluteFillObject, {
-              backgroundColor: planetarium ? "rgba(3,8,22,0.95)" : "rgba(3,8,22,0.45)",
+              backgroundColor: planetarium ? "rgba(3,8,22,0.96)" : "rgba(3,8,22,0.78)",
             }]}
             pointerEvents="none"
           />

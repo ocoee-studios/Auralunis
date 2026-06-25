@@ -54,7 +54,7 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
     if (i % 3 === 0) glowPts.push({ x: p.x, y: p.y });
   }
 
-  const o = (v: number) => Math.min(0.22, v * boost);
+  const o = (v: number) => Math.min(0.6, v * boost); // bold pass: let the band actually glow
   const glowR = Math.max(90, box.height * 0.42); // huge, soft
   const coreR = Math.max(130, box.height * 0.44);
   const dustBase = Math.max(42, box.height * 0.14);
@@ -85,8 +85,8 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
       <Defs>
         {/* LAYER 3 — warm galactic glow — subtle warmth, not visible circles */}
         <RadialGradient id="mwGlow" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E8C77E" stopOpacity={o(0.04)} />
-          <Stop offset="50%" stopColor="#C99A52" stopOpacity={o(0.02)} />
+          <Stop offset="0%" stopColor="#E8C77E" stopOpacity={o(0.1)} />
+          <Stop offset="50%" stopColor="#C99A52" stopOpacity={o(0.05)} />
           <Stop offset="100%" stopColor="#C99A52" stopOpacity={0} />
         </RadialGradient>
         {/* LAYER 4 — galactic core: bright gold heart fading through amber to a rose
@@ -105,8 +105,8 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         </RadialGradient>
         {/* H-alpha emission (rose/magenta) star-forming regions in the band */}
         <RadialGradient id="mwEmission" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E06888" stopOpacity={o(0.1)} />
-          <Stop offset="45%" stopColor="#D870A0" stopOpacity={o(0.05)} />
+          <Stop offset="0%" stopColor="#E06888" stopOpacity={o(0.17)} />
+          <Stop offset="45%" stopColor="#D870A0" stopOpacity={o(0.09)} />
           <Stop offset="100%" stopColor="#D870A0" stopOpacity={0} />
         </RadialGradient>
         {/* reflection (ice blue → violet) accent near bright clusters */}
@@ -149,8 +149,8 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         if (!s.aboveHorizon) return null;
         const p = project(s.azimuthDegrees, s.altitudeDegrees);
         if (!p.onScreen) return null;
-        const r = Math.max(0.6, Math.min(2.4, 5.6 - s.magnitude));
-        const op = Math.max(0.3, Math.min(0.95, 1 - (s.magnitude - 4.0) / 3.4)) * Math.min(1.1, boost);
+        const r = Math.max(0.8, Math.min(2.9, 6.1 - s.magnitude));
+        const op = Math.max(0.45, Math.min(1, 1.15 - (s.magnitude - 4.0) / 3.2)) * Math.min(1.25, boost);
         const color = s.magnitude < 4.6 ? "#FFF1CE" : s.magnitude < 5.8 ? "#F2ECE0" : "#DCE4F2";
         return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={op} />;
       })}

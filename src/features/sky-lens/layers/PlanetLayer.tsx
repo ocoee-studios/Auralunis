@@ -18,11 +18,11 @@ const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 
 // Per-planet "personality": disc radius + glow size. Brighter planets read bigger.
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  venus: { disc: 6, glow: 22 },
-  jupiter: { disc: 6, glow: 16 },
-  saturn: { disc: 5, glow: 13 },
-  mars: { disc: 4.5, glow: 16 },
-  mercury: { disc: 3.5, glow: 8 },
+  venus: { disc: 8, glow: 20 },
+  jupiter: { disc: 9, glow: 16 },
+  saturn: { disc: 7, glow: 13 },
+  mars: { disc: 6, glow: 15 },
+  mercury: { disc: 5, glow: 8 },
 };
 
 // Galilean moons — small offsets along the ring plane, scattered like the real set.
@@ -57,9 +57,9 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, o
 
         return (
           <G key={body.id} opacity={belowHorizon ? 0.2 : 1}>
-            {/* base glow */}
-            <Circle cx={x} cy={y} r={st.glow} fill={color} opacity={0.12} />
-            <Circle cx={x} cy={y} r={st.glow * 0.6} fill={color} opacity={0.26} />
+            {/* base glow — dialed back so the planet BODY reads before the halo */}
+            <Circle cx={x} cy={y} r={st.glow} fill={color} opacity={0.08} />
+            <Circle cx={x} cy={y} r={st.glow * 0.55} fill={color} opacity={0.16} />
 
             {/* Mars — deep red atmospheric aura (recognition: the red planet) */}
             {body.id === "mars" && !nightMode && (
