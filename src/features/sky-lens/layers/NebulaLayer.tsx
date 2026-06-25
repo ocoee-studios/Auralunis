@@ -33,9 +33,9 @@ type Lobe = { dx: number; dy: number; s: number; op?: number };
 type Filament = { dx: number; dy: number; rx: number; ry: number; ang: number; op: number };
 type Signature = { scale: number; lobes?: Lobe[]; ring?: boolean; filaments?: Filament[] };
 const SIGNATURES: Record<string, Signature> = {
-  // Orion — a huge red-magenta cloud with sweeping wings
+  // Orion — red-magenta cloud with sweeping wings (tightened from 3.6)
   m42: {
-    scale: 3.6,
+    scale: 2.4,
     lobes: [
       { dx: 0, dy: 0, s: 1 },
       { dx: -0.55, dy: -0.75, s: 0.7, op: 0.7 },
@@ -53,8 +53,8 @@ const SIGNATURES: Record<string, Signature> = {
       { dx: -0.5, dy: 0.25, s: 0.5, op: 0.55 },
     ],
   },
-  // Rosette — a massive hollow rose bloom
-  ngc2237: { scale: 3.4, ring: true },
+  // Rosette — circular rose bloom, smaller than before (was dominating the sky)
+  ngc2237: { scale: 1.6, ring: true },
   // North America — a recognizable continent built from offset lobes
   ngc7000: {
     scale: 3.2,
@@ -66,9 +66,9 @@ const SIGNATURES: Record<string, Signature> = {
       { dx: 0.5, dy: -0.5, s: 0.55, op: 0.6 },
     ],
   },
-  // Veil — thin curved supernova filaments, not a cloud
+  // Veil — thin curved supernova filaments (tightened from 3.6)
   ngc6960: {
-    scale: 3.6,
+    scale: 2.4,
     filaments: [
       { dx: -0.2, dy: 0, rx: 2.6, ry: 0.26, ang: 18, op: 0.5 },
       { dx: 0.4, dy: 0.5, rx: 2.0, ry: 0.2, ang: -12, op: 0.42 },
