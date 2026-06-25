@@ -12,6 +12,7 @@ type Props = {
   focus?: FocusZone;
   showcase?: FocusZone; // auto-lit hero region (e.g. Orion in view) — stronger star glow
   placeLabel?: LabelPlacer;
+  labelMagLimit?: number; // progressive reveal: raised when zoomed so more labels appear
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -19,7 +20,7 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
-export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, onSelect }: Props) {
+export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, onSelect }: Props) {
   return (
     <G>
       {stars.map((star) => {
@@ -42,7 +43,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         const bright = !nightMode && star.magnitude < 2.0;
         const glint = !nightMode && star.magnitude < 1.2; // diffraction spike on the showpiece stars
         const spike = r + 9;
-        const labeled = star.name !== undefined && star.magnitude <= LABEL_MAG_LIMIT;
+        const labeled = star.name !== undefined && star.magnitude <= labelMagLimit;
 
         return (
           <G key={star.id} opacity={belowHorizon ? 0.25 : 1}>

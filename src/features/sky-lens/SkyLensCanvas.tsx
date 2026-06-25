@@ -1,7 +1,7 @@
 import React, { useCallback } from "react";
 import Svg, { G } from "react-native-svg";
 import { StyleSheet } from "react-native";
-import { projectTarget, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
+import { projectTarget, DEFAULT_FOV, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
 import { GridLayer } from "./layers/GridLayer";
 import { ConstellationLayer } from "./layers/ConstellationLayer";
 import { StarLayer } from "./layers/StarLayer";
@@ -62,6 +62,11 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
     [pointing, box, fov]
   );
 
+  // Progressive reveal: as the user pinch-zooms (FOV narrows), raise the star-label
+  // brightness cutoff so fainter named stars pick up labels. ~+0.7 mag per zoom step.
+  const zoomLevel = DEFAULT_FOV.horizontalDegrees / fov.horizontalDegrees;
+  const starLabelMag = 2.2 + Math.min(2.6, Math.max(0, zoomLevel - 1) * 0.7);
+
   const moon = sky.bodies.find((b) => b.id === "moon");
 
   return (
@@ -115,7 +120,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {activeLayers.has("stars") && (
         <G transform={depth(0.25)}>
-          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} onSelect={onSelect} />
+          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("planets") && (

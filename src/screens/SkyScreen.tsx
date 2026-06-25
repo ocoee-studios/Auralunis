@@ -23,6 +23,7 @@ import { AstroWeatherScreen } from "@/screens/AstroWeatherScreen";
 import { PhotoPlannerScreen } from "@/screens/PhotoPlannerScreen";
 import { SkyShareScreen } from "@/screens/SkyShareScreen";
 import { CelestialArchiveScreen } from "@/screens/CelestialArchiveScreen";
+import { CelestialCalendarScreen } from "@/screens/CelestialCalendarScreen";
 
 export function SkyScreen() {
   const [showPermission, setShowPermission] = useState(false);
@@ -33,6 +34,7 @@ export function SkyScreen() {
   const [birthSkyOpen, setBirthSkyOpen] = useState(false);
   const [astroWeatherOpen, setAstroWeatherOpen] = useState(false);
   const [photoPlannerOpen, setPhotoPlannerOpen] = useState(false);
+  const [calendarOpen, setCalendarOpen] = useState(false);
   const [skyShareOpen, setSkyShareOpen] = useState(false);
   const [archiveOpen, setArchiveOpen] = useState(false);
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(null);
@@ -46,9 +48,9 @@ export function SkyScreen() {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   useEffect(() => {
-    const immersive = skyLensOpen || alignmentOpen || birthSkyOpen || astroWeatherOpen || photoPlannerOpen || skyShareOpen || archiveOpen;
+    const immersive = skyLensOpen || alignmentOpen || birthSkyOpen || astroWeatherOpen || photoPlannerOpen || skyShareOpen || archiveOpen || calendarOpen;
     navigation.setOptions({ tabBarStyle: immersive ? { display: "none" } : TAB_BAR_STYLE });
-  }, [navigation, skyLensOpen, alignmentOpen, birthSkyOpen, astroWeatherOpen, photoPlannerOpen, skyShareOpen, archiveOpen]);
+  }, [navigation, skyLensOpen, alignmentOpen, birthSkyOpen, astroWeatherOpen, photoPlannerOpen, skyShareOpen, archiveOpen, calendarOpen]);
 
   // A Learn lesson can deep-link here with a target ("See in Sky Lens"): open the
   // lens straight to Find Mode on that object, then clear the param so it doesn't
@@ -127,6 +129,20 @@ export function SkyScreen() {
     return <CelestialArchiveScreen onClose={() => setArchiveOpen(false)} />;
   }
 
+  if (calendarOpen) {
+    return (
+      <CelestialCalendarScreen
+        onClose={() => setCalendarOpen(false)}
+        onSeeInSky={() => {
+          // Events have no precise coords yet — open the lens (AR) so the user can
+          // pan to the event's described direction. Coordinate deep-link is a TODO.
+          setCalendarOpen(false);
+          setShowPermission(true);
+        }}
+      />
+    );
+  }
+
   return (
     <ScreenShell title="Sky Lens + Archive" subtitle="Sky">
       {manualMapOpen ? <ManualSkyMap onClose={() => setManualMapOpen(false)} /> : null}
@@ -169,6 +185,13 @@ export function SkyScreen() {
           <Text style={styles.skyHint}>Default location · enable location for your exact sky.</Text>
         ) : null}
       </GlassPanel>
+
+      <FeatureCard
+        title="Celestial Calendar"
+        description="Upcoming meteor showers, eclipses, oppositions, and conjunctions for 2026–2027 — with the best time, where to look, and reminders."
+        actionLabel="Open Calendar"
+        onPress={() => setCalendarOpen(true)}
+      />
 
       <FeatureCard
         title="Find Mode"

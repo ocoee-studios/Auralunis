@@ -21,10 +21,13 @@ import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisSer
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherService";
 import { computeTonightScore } from "@/services/TonightScoreService";
+import { computeStargazingIndex } from "@/services/StargazingIndexService";
+import { StargazingIndexCard } from "@/components/StargazingIndexCard";
 import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
 import { generateCelestialMood } from "@/services/CelestialMoodService";
 import { tapLight } from "@/services/HapticService";
-import { scheduleSkyEventNotifications } from "@/services/NotificationService";
+import { scheduleSkyEventNotifications, scheduleCelestialEventNotifications } from "@/services/NotificationService";
+import { CELESTIAL_EVENTS } from "@/data/CelestialEvents";
 import { useNavigation } from "@react-navigation/native";
 
 function formatClock(iso: string | null): string {
@@ -52,7 +55,11 @@ export function HomeScreen() {
 
   useEffect(() => {
     if (settings.notificationsEnabled) {
-      scheduleSkyEventNotifications(sky).catch(() => {});
+      // Sky events cancel-all then reschedule; celestial events are additive and
+      // must run AFTER so they survive the cancel (no duplicate stacking).
+      scheduleSkyEventNotifications(sky)
+        .then(() => scheduleCelestialEventNotifications(CELESTIAL_EVENTS))
+        .catch(() => {});
     }
   }, [sky, settings.notificationsEnabled]);
 
@@ -60,6 +67,17 @@ export function HomeScreen() {
     () => computeTonightScore(sky, weather, settings.skyQuality),
     [sky, weather, settings.skyQuality]
   );
+
+  // ── Stargazing Index: one 0-100 number combining cloud, moon, seeing,
+  // transparency. Seeing/transparency are estimated from cloud cover (same model
+  // as AstroWeatherService) since the Home weather snapshot is lightweight.
+  const stargazing = useMemo(() => {
+    const moonAlt = sky.bodies.find((b) => b.id === "moon")?.altitudeDegrees ?? -90;
+    const cloud = weather.cloudPercent;
+    const seeingArcsec = cloud > 80 ? 4.5 : cloud > 50 ? 3.2 : cloud > 20 ? 2.2 : 1.5;
+    const transparencyMag = Math.max(3, 6.6 - cloud / 28);
+    return computeStargazingIndex(cloud, sky.moonIlluminationPercent, moonAlt, seeingArcsec, transparencyMag);
+  }, [sky, weather]);
 
   // ── Displayed sky: live, or recomputed at the scrubbed time when the user
   // drags the dial. computeTonightSky returns a full TonightSky, so planet
@@ -148,6 +166,9 @@ export function HomeScreen() {
           }
         </Text>
       </View>
+
+      {/* ── Stargazing Index — one number: should I go out tonight? ── */}
+      <StargazingIndexCard index={stargazing} />
 
       {/* ── Golden Hour Countdown ── */}
       {nextGolden && (
