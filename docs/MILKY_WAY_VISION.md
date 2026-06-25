@@ -98,3 +98,62 @@ At every point, the Milky Way should:
 - Have visible dark structure (not smooth)
 - Integrate with nearby nebulae
 - Feel like a galaxy, not a gradient
+
+---
+
+## REFERENCE IMAGE: assets/sky/milkyway-reference.webp
+
+This Bortle 1 astrophoto is the EXACT target for AuraLunis MW rendering.
+
+Study it. Match these specific qualities:
+
+### 1. WARM GOLDEN-PINK CORE
+The Sagittarius galactic center is NOT white. It's warm:
+- Inner core: golden amber (#E8C77E → #FFE0A0)
+- Mid-region: rose pink (#D08878) blending into the gold
+- Outer edges: lavender/violet (#9080B0) transitioning to blue sky
+Our current core is too pale/white. WARM IT UP.
+
+### 2. DARK DUST LANES — THE GREAT RIFT
+The most dramatic feature: a DARK river splitting the bright band.
+- Near-black (#0A0810) — dramatically darker than surrounding glow
+- Irregular edges (not smooth geometric curves)
+- Branches and tributaries splitting off the main rift
+- Gets wider toward Cygnus, narrower toward Sagittarius
+Our current dust is too faint. DARKEN IT 2-3×.
+
+### 3. MOTTLED TEXTURE
+The band is NOT a smooth gradient. It's CLUMPY:
+- Bright star cloud patches (like Scutum Star Cloud)
+- Dark knots scattered throughout (mini coal sacks)
+- Varying brightness across the band width
+- NO uniform opacity — every point slightly different
+Our current rendering is too smooth. ADD NOISE/VARIATION.
+
+### 4. DENSE STAR CONCENTRATION
+Thousands of individual stars concentrated IN the band:
+- Dense star count inside the MW band (2-3× density of dark sky)
+- Brighter, warmer-colored stars near the galactic center
+- Sparser, cooler stars in the outer band
+Our star cloud layer has ~50 stars. Need 200-300 IN the band.
+
+### 5. RAGGED BAND EDGES
+The MW band does NOT have clean geometric edges:
+- Irregular boundary where bright band meets dark sky
+- Star density gradually decreases (not a hard cutoff)
+- Some bright patches extend beyond the main band
+Our procedural glow has too-smooth circular edges.
+
+### 6. DEEP NAVY SKY (not pure black)
+The sky AWAY from the MW is deep navy (#0A1428), not black (#000).
+This creates separation — the MW is warm, the sky is cool.
+Our camera overlay provides this, but in planetarium mode
+the background should be navy, not pure black.
+
+### 7. COLOR HIERARCHY
+From center outward:
+  Bright gold → warm pink → cool lavender → deep blue sky
+NOT: white → gray → black
+
+The AuraLunis gold identity means we push the warm tones
+even further than reality. Our MW should feel GOLDEN, not blue.
