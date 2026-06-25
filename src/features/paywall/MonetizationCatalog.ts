@@ -5,9 +5,9 @@
 
 export const RevenueCatIds = {
   products: {
-    premiumMonthly:    "com.ocoee.auralunis.premium.monthly",
-    premiumAnnual:     "com.ocoee.auralunis.premium.annual",
-    lifetimeFounders:  "com.ocoee.auralunis.lifetime.founders",
+    premiumMonthly:    "com.ocoeestudios.auralunis.premium.monthly",
+    premiumAnnual:     "com.ocoeestudios.auralunis.premium.annual",
+    lifetimeFounders:  "com.ocoeestudios.auralunis.lifetime.founders",
   },
   packages: {
     premiumMonthly:    "premium_monthly",

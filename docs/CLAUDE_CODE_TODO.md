@@ -1,110 +1,55 @@
-# Claude Code — Launch Blocker Fix List
-Updated: June 22, 2026
-Bundle ID CONFIRMED: com.ocoeestudios.auralunis
-Apple Developer: Ocoee Studios LLC (ACTIVE)
+# AuraLunis — Launch Blocker Status
+Updated: 2026-06-24 (reconciled against actual code on `visual/polish-pass` / PR #73)
+Bundle ID: com.ocoeestudios.auralunis · Apple Developer: Ocoee Studios LLC (ACTIVE)
 App Store Connect: AuraLunis, SpicyCalc, Peptendium listed
 
-## Branch: visual/polish-pass → PR to main → device test → merge
+> NOTE TO CONTRIBUTORS: verify against the code before "rebuilding" anything below —
+> most of this list is already implemented. Each item lists where it lives.
 
 ---
 
-## 1. MILKY WAY (visual — highest priority)
+## 1. MILKY WAY — ✅ DONE (PR #73)
+- Full sky coverage: the procedural `MilkyWayLayer` already wraps the entire galactic
+  plane (glow + ~2200-star cloud + 332 dust blobs). `MilkyWayCoreLayer` no longer
+  returns null when the centre is behind camera (only when below horizon).
+- Vertical stripe boundaries: FIXED. The core photo's circular feather was clipping
+  the 2:1 band into a blob; replaced with an **elliptical feather aligned to the
+  galactic-plane tilt** (`gradientTransform`) so it melts on all 4 edges.
+- Device test: pan 360° — warm band visible in every direction.
 
-MilkyWayCoreLayer returns null when galactic center is behind camera.
-The procedural band wraps the full sky but the photo texture only
-shows near Sagittarius. Also has visible vertical stripe boundaries.
+## 2. PAYWALL — ✅ DONE (exists; see PaywallScreen.tsx → ThreeTierPaywallModal)
+Full-screen paywall is built and wired. `src/features/paywall/PaywallScreen.tsx` is the
+canonical export of `ThreeTierPaywallModal`:
+- Header "Unlock the Full Cosmos" + starfield bg; X close.
+- All 3 tiers visible/selectable: Annual $39.99/yr (BEST VALUE · SAVE 52%, 7-day trial,
+  pre-selected), Monthly $6.99/mo (no trial), Founders Lifetime $99.99 (FOUNDERS badge,
+  $167.88 anchor strikethrough; → $129.99 post-launch).
+- premiumFeatures list; Restore / Terms / Privacy (in-app modals); placeholder-safe.
+- Wired via `PaywallNavigationContext.openPaywall()` from Settings "Upgrade", Sky Lens
+  gated layers, PremiumModeGate, Onboarding. Purchase is package-based (all tiers),
+  refreshes the shared EntitlementContext app-wide on success.
+- Product IDs `com.ocoeestudios.auralunis.{premium.monthly,premium.annual,lifetime.founders}`
+  — **MUST match App Store Connect exactly** (owner: confirm).
 
-FIX:
-- Build a full galactic plane gradient band so MW wraps entire sky
-- Fix the elliptical feather on the core texture (PR pending merge)
-- Remove vertical stripe boundaries entirely
-- Test: pan 360° slowly — warm golden band visible in every direction
-  along the galactic plane (Sagittarius → Cygnus → Cassiopeia → Orion)
+## 3. DEAD FOLDER — ✅ DONE
+`src/features/future/` does not exist; zero imports anywhere.
 
-## 2. PAYWALL (revenue — critical blocker)
+## 4. SIM_LOCATION — ✅ DONE
+No NYC. Real device location via `useObserverLocation` is used in normal mode;
+`SIM_LOCATION` is only the indoor-sim fallback (Ducktown TN 35.04,-84.38).
 
-No full-screen PaywallScreen exists. Users cannot subscribe.
+## 5. ONBOARDING — ✅ DONE
+`App.tsx` checks `ONBOARDING_SEEN_KEY` on first launch, shows `OnboardingFlow`, sets the
+flag on completion (shown once).
 
-BUILD PaywallScreen.tsx:
-- Header: "Unlock the Full Cosmos" with starfield background
-- Three tiers ALL visible:
-  - Annual: $39.99/yr, "BEST VALUE · SAVE 52%", 7-day trial, gold CTA
-  - Monthly: $6.99/mo, no trial, secondary style
-  - Founders Lifetime: $99.99, "FOUNDERS" badge, strikethrough $167.88
-- Feature list from MonetizationCatalog premiumFeatures
-- Bottom links (MUST be tappable — Apple requires):
-  - Restore Purchases → RevenueCat restore
-  - Terms of Use → TermsScreen modal
-  - Privacy Policy → PrivacyScreen modal
-- Close X button (users must be able to dismiss)
-- Wire: PaywallNavigationContext.openPaywall() → PaywallScreen modal
-- Wire: Settings "Upgrade" button → PaywallScreen
-- Wire: Sky Lens gated layers → PaywallScreen
-- Wire: PremiumModeGate "Unlock" → PaywallScreen
-- With placeholder key: show "Subscriptions available after launch"
-
-Product IDs (must match App Store Connect EXACTLY):
-  com.ocoeestudios.auralunis.premium.monthly
-  com.ocoeestudios.auralunis.premium.annual
-  com.ocoeestudios.auralunis.lifetime.founders
-
-## 3. DEAD FOLDER (crash risk)
-
-src/features/future/ has 7 files for killed features:
-  DeskObeliskPreview, FutureLuxuryModulesPanel, SovereignSigil*,
-  AuraAmbientTypes, StellarPortalTypes
-
-These are imported by WatchScreen and SettingsScreen.
-DELETE the folder. Remove all imports. Remove UI sections that
-reference these dead features.
-
-## 4. SIM_LOCATION (accuracy)
-
-OrbitalAlignmentScreen.tsx has fallback location hardcoded to NYC
-(40.7128, -74.006). Change to use real device location from
-useObserverLocation hook. If unavailable, fall back to a generic
-mid-latitude default (35.0, -85.0) instead of NYC.
-
-## 5. ONBOARDING (first launch)
-
-OnboardingFlow.tsx exists but nothing triggers it.
-Add AsyncStorage check for 'hasOnboarded' flag:
-- If false/missing: show OnboardingFlow before RootTabs
-- On completion: set flag to true
-- User sees onboarding exactly once
-
-## 6. REVENUECAT KEY (pre-launch)
-
-app.json still has placeholder key. The dev bypass in
-useEntitlement.ts handles this gracefully (__DEV__ = premium).
-Verify that in production builds (__DEV__ = false), the app
-doesn't crash with the placeholder — it should show the paywall
-with "Subscriptions available after launch" or similar.
-
-Real key will be added when RevenueCat is configured.
+## 6. REVENUECAT — ✅ graceful (owner action: real key + confirm product IDs)
+Placeholder key degrades to "Subscriptions available after launch" (no crash in release).
+Dev unlock behind `ALLOW_DEV_PREMIUM` + `__DEV__` (never true in release). Remaining:
+drop in the live public key and confirm the three product IDs in App Store Connect.
 
 ---
 
-## DONE (completed this session)
-- [x] Bundle ID updated to com.ocoeestudios.auralunis
-- [x] SDK 54 upgrade
-- [x] Sky Lens AR running on device
-- [x] 35 constellations ungated (PR #51)
-- [x] 38 deep sky objects with multi-layer rendering
-- [x] 3,500 dome stars
-- [x] 6 Gemini FX layers pushed and wired
-- [x] Birth Sky screen built
-- [x] Astro Weather screen built
-- [x] Celestial Mood Engine wired into Home
-- [x] Learn with real lessons + Sky Lens deep-linking
-- [x] Zodiac layer with info cards
-- [x] Legal pages hardwired in-app
-- [x] Dead assets trimmed
-- [x] Sound Bath remnants removed
-- [x] Night Vision + Bortle settings
-- [x] Dev premium bypass for testing
-- [x] Deep Sky layer toggle fixed
-- [x] Tap targets enlarged for AR
-- [x] Orbital density preview redesigned
-- [x] App Store description written (2918 chars)
-- [x] Ducktown removed from all user-facing content
+## REMAINING (owner / device — not code)
+- [ ] Device / TestFlight pass (esp. Milky Way 360° + paywall sandbox flow)
+- [ ] Real RevenueCat public API keys in app.json (currently REPLACE_WITH_*)
+- [ ] Confirm the 3 IAP product IDs match App Store Connect exactly

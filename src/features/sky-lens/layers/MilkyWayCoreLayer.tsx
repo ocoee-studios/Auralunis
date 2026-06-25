@@ -61,12 +61,16 @@ export function MilkyWayCoreLayer({ band, project, fov, box, nightMode, boost }:
     }
   }
 
-  // Radial feather centered on the core — opaque at the core, fading to ZERO by the
-  // time it reaches the band photo's nearest (top/bottom) edge, so the rectangle's
-  // hard edges NEVER show (the old "awful line"). Tied to the image half-height so
-  // the mask is fully transparent before any image edge; the circle is rotation-
-  // invariant, so it melts cleanly regardless of the galactic-plane tilt.
+  // ELLIPTICAL feather aligned to the galactic plane — opaque at the core, fading to
+  // ZERO before EVERY edge of the (wide) band photo. A circular feather (old code)
+  // clipped the 2:1 image into a blob at the core (so the band read as "just
+  // Sagittarius") and its curved cut against the horizontal band showed as soft
+  // vertical stripe boundaries. The gradientTransform stretches the radial along the
+  // band (by the image aspect) and rotates it to the plane tilt, so the photo melts
+  // out smoothly on all four sides and the FULL band width shows.
   const radius = h * 0.5;
+  const stretch = (w / h).toFixed(3); // along-band half-extent → w/2
+  const featherTransform = `translate(${gc.x.toFixed(1)} ${gc.y.toFixed(1)}) rotate(${deg.toFixed(2)}) scale(${stretch} 1) translate(${(-gc.x).toFixed(1)} ${(-gc.y).toFixed(1)})`;
   // The hero. A warm golden river that GLOWS — dust lanes and star clouds clearly
   // visible, brightest at the galactic core (the radial mask centers there). ~35%
   // over the camera, brighter in Planetarium (pure-black backdrop).
@@ -75,7 +79,7 @@ export function MilkyWayCoreLayer({ band, project, fov, box, nightMode, boost }:
   return (
     <G>
       <Defs>
-        <RadialGradient id="mwCoreFade" cx={gc.x} cy={gc.y} r={radius} gradientUnits="userSpaceOnUse">
+        <RadialGradient id="mwCoreFade" cx={gc.x} cy={gc.y} r={radius} gradientUnits="userSpaceOnUse" gradientTransform={featherTransform}>
           <Stop offset="0" stopColor="#ffffff" stopOpacity="1" />
           <Stop offset="0.45" stopColor="#ffffff" stopOpacity="0.85" />
           <Stop offset="1" stopColor="#ffffff" stopOpacity="0" />
