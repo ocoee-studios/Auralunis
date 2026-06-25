@@ -12,6 +12,8 @@ import { GlassPanel } from "@/components/GlassPanel";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 import { LearnVisualForCategory } from "@/features/learn/LearnCategoryVisual";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import type { LearnTopic } from "@/features/learn/LearnTypes";
 
 interface LearnDetailScreenProps {
@@ -31,6 +33,8 @@ export function LearnDetailScreen({
   onNext,
   onOpenSkyLens,
 }: LearnDetailScreenProps) {
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   return (
     <ScreenShell title={topic.title} subtitle={categoryTitle} background={<Starfield />}>
       {/* Back + free-lesson badges */}
@@ -82,6 +86,21 @@ export function LearnDetailScreen({
           <Text style={styles.nextTitle}>{nextTopicTitle} →</Text>
         </Pressable>
       )}
+
+      {/* Soft Premium nudge — every lesson stays free; this gently surfaces Premium
+          at the end for free users only (never blocks the content). */}
+      {!isPremium && (
+        <View style={styles.nudge}>
+          <Text style={styles.nudgeTitle}>✦  Go deeper with Premium</Text>
+          <Text style={styles.nudgeBody}>
+            Every lesson is free. Premium adds Sky Lens AR over your live sky, your Birth
+            Sky chart, 88 constellations with cultural stories, and the full deep-sky catalogue.
+          </Text>
+          <Pressable style={styles.nudgeBtn} onPress={() => { tapLight(); openPaywall(); }}>
+            <Text style={styles.nudgeBtnText}>Unlock Premium</Text>
+          </Pressable>
+        </View>
+      )}
     </ScreenShell>
   );
 }
@@ -123,4 +142,12 @@ const styles = StyleSheet.create({
   },
   nextLabel: { fontSize: 9, fontWeight: "800", letterSpacing: 2, color: AuraLunisColors.faint, marginBottom: 3 },
   nextTitle: { fontSize: 15, fontWeight: "800", color: "#FFF" },
+  nudge: {
+    marginBottom: 28, borderRadius: 16, padding: 16,
+    backgroundColor: "rgba(217,168,78,0.07)", borderWidth: 1, borderColor: "rgba(217,168,78,0.22)",
+  },
+  nudgeTitle: { color: AuraLunisColors.gold2, fontSize: 14, fontWeight: "800", marginBottom: 6 },
+  nudgeBody: { color: AuraLunisColors.silver, fontSize: 13, lineHeight: 20, marginBottom: 12 },
+  nudgeBtn: { borderRadius: 12, paddingVertical: 11, alignItems: "center", backgroundColor: AuraLunisColors.gold },
+  nudgeBtnText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 13, letterSpacing: 0.3 },
 });
