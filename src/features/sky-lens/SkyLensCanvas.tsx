@@ -16,6 +16,7 @@ import { ZodiacLayer } from "./layers/ZodiacLayer";
 import { SatelliteLayer, type SkyLensSatellite } from "./layers/SatelliteLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { type LayerKey } from "./SkyLensLayerCatalog";
+import { makeLabelPlacer } from "./labelLayout";
 import type { SkyData } from "./hooks/useSkyProjection";
 import type { ParallaxOffset } from "./ar/useParallaxOffset";
 
@@ -41,6 +42,11 @@ type Props = {
 // screen transform re-runs as the phone moves.
 export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, showcase, parallax, satellites, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
+
+  // One shared label placer per render → cross-layer collision avoidance: each layer
+  // nudges its label into a free slot so nearby labels (Mercury/ISS/Jupiter,
+  // Beehive/Cancer, Orion nebulae) stack instead of overlapping.
+  const placeLabel = makeLabelPlacer(box);
 
   // Celestial-dome depth: cloud layers float by a fraction of the gyro parallax
   // offset while the deep dome stays anchored. translate(0 0) at rest = exact AR.
@@ -72,7 +78,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
       {activeLayers.has("deepsky") && (
         <G transform={depth(1)}>
-          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} onSelect={onSelect} />
+          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("grid") && (
@@ -88,6 +94,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           box={box}
           palette={palette}
           nightMode={nightMode}
+          placeLabel={placeLabel}
           onSelect={onSelect}
         />
       )}
@@ -108,7 +115,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {activeLayers.has("stars") && (
         <G transform={depth(0.25)}>
-          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} onSelect={onSelect} />
+          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("planets") && (
@@ -117,12 +124,13 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           project={project}
           palette={palette}
           nightMode={nightMode}
+          placeLabel={placeLabel}
           onSelect={onSelect}
         />
       )}
       {/* Tracked satellites on the live feed (ISS gold, Starlink pale-blue, others silver) */}
       {activeLayers.has("satellites") && (
-        <SatelliteLayer satellites={satellites} project={project} palette={palette} nightMode={nightMode} onSelect={onSelect} />
+        <SatelliteLayer satellites={satellites} project={project} palette={palette} nightMode={nightMode} placeLabel={placeLabel} onSelect={onSelect} />
       )}
       {/* Moon is always rendered (not a toggle) */}
       <MoonLayer

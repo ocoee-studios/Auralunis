@@ -2,6 +2,7 @@ import React from "react";
 import { Circle, Ellipse, G, Line, Text as SvgText } from "react-native-svg";
 import type { SkyBody } from "../ephemeris/SkyEphemerisService";
 import { PLANET_COLORS, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+import type { LabelPlacer } from "../labelLayout";
 import { renderPlanetIllustration } from "./PlanetIllustrations";
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
   project: ProjectFn;
   palette: SkyPalette;
   nightMode: boolean;
+  placeLabel?: LabelPlacer;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -26,7 +28,7 @@ const STYLE: Record<string, { disc: number; glow: number }> = {
 // Galilean moons — small offsets along the ring plane, scattered like the real set.
 const JUPITER_MOONS = [9, 14, -11, -17];
 
-export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: Props) {
+export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, onSelect }: Props) {
   return (
     <G>
       {bodies.map((body) => {
@@ -111,9 +113,15 @@ export function PlanetLayer({ bodies, project, palette, nightMode, onSelect }: P
             {/* generous transparent tap target on top (≈15px beyond the disc) */}
             <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />
 
-            <SvgText x={x + st.glow * 0.6 + 4} y={y + 4} fill={palette.starLabel} fontSize={14} fontWeight="700">
-              {body.name}
-            </SvgText>
+            {(() => {
+              const lx = x + st.glow * 0.6 + 4;
+              const lp = placeLabel ? placeLabel(lx, y + 4, body.name, 14) : { x: lx, y: y + 4 };
+              return (
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={14} fontWeight="700">
+                  {body.name}
+                </SvgText>
+              );
+            })()}
           </G>
         );
       })}

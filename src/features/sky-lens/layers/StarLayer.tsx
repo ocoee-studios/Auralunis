@@ -2,6 +2,7 @@ import React from "react";
 import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
 import { magnitudeToRadius, starColor, STAR_FEATURES, focusFactor, type ProjectFn, type SkyPalette, type SelectedObject, type FocusZone } from "../SkyLensVisual";
+import type { LabelPlacer } from "../labelLayout";
 
 type Props = {
   stars: HorizontalStar[];
@@ -10,6 +11,7 @@ type Props = {
   nightMode: boolean;
   focus?: FocusZone;
   showcase?: FocusZone; // auto-lit hero region (e.g. Orion in view) — stronger star glow
+  placeLabel?: LabelPlacer;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -17,7 +19,7 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
-export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, onSelect }: Props) {
+export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, onSelect }: Props) {
   return (
     <G>
       {stars.map((star) => {
@@ -82,17 +84,14 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
             {/* white-hot core for the showpiece stars */}
             {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.85} />}
-            {labeled && (
-              <SvgText
-                x={p.x + r + 3}
-                y={p.y + 3}
-                fill={palette.starLabel}
-                fontSize={13}
-                fontWeight="600"
-              >
-                {star.name}
-              </SvgText>
-            )}
+            {labeled && (() => {
+              const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 13) : { x: p.x + r + 3, y: p.y + 3 };
+              return (
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={13} fontWeight="600">
+                  {star.name}
+                </SvgText>
+              );
+            })()}
           </G>
         );
       })}

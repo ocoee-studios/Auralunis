@@ -2,6 +2,7 @@ import React from "react";
 import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { HorizontalConstellation } from "../ephemeris/StarPositions";
 import { type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+import type { LabelPlacer } from "../labelLayout";
 
 // AuraLunis brand gold — every other star app uses blue/white lines; we use gold.
 const GOLD = "#D9A84E"; // rgb(217, 168, 78)
@@ -12,10 +13,11 @@ type Props = {
   box: { width: number; height: number };
   palette: SkyPalette;
   nightMode: boolean;
+  placeLabel?: LabelPlacer;
   onSelect: (object: SelectedObject) => void;
 };
 
-export function ConstellationLayer({ constellations, project, box, palette, nightMode, onSelect }: Props) {
+export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, onSelect }: Props) {
   return (
     <G>
       {constellations.map((c) => {
@@ -62,38 +64,41 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
         return (
           <G key={c.id}>
             {segments}
-            {labelVisible && (
-              <>
-                <SvgText
-                  x={centroid.x}
-                  y={centroid.y}
-                  fill={nightMode ? palette.conLabel : GOLD}
-                  fontSize={13}
-                  fontWeight="700"
-                  letterSpacing={2}
-                  textAnchor="middle"
-                >
-                  {c.name.toUpperCase()}
-                </SvgText>
-                {/* generous transparent tap target over the label (≈20px hit area) */}
-                <Circle
-                  cx={centroid.x}
-                  cy={centroid.y - 3}
-                  r={32}
-                  fill="transparent"
-                  onPress={() =>
-                    onSelect({
-                      kind: "constellation",
-                      id: c.id,
-                      name: c.name,
-                      subtitle: "Constellation",
-                      facts: [{ label: "Best season", value: c.season }],
-                      description: c.myth
-                    })
-                  }
-                />
-              </>
-            )}
+            {labelVisible && (() => {
+              const lp = placeLabel ? placeLabel(centroid.x, centroid.y, c.name.toUpperCase(), 13) : { x: centroid.x, y: centroid.y };
+              return (
+                <>
+                  <SvgText
+                    x={lp.x}
+                    y={lp.y}
+                    fill={nightMode ? palette.conLabel : GOLD}
+                    fontSize={13}
+                    fontWeight="700"
+                    letterSpacing={2}
+                    textAnchor="middle"
+                  >
+                    {c.name.toUpperCase()}
+                  </SvgText>
+                  {/* generous transparent tap target over the label (≈20px hit area) */}
+                  <Circle
+                    cx={lp.x}
+                    cy={lp.y - 3}
+                    r={32}
+                    fill="transparent"
+                    onPress={() =>
+                      onSelect({
+                        kind: "constellation",
+                        id: c.id,
+                        name: c.name,
+                        subtitle: "Constellation",
+                        facts: [{ label: "Best season", value: c.season }],
+                        description: c.myth
+                      })
+                    }
+                  />
+                </>
+              );
+            })()}
           </G>
         );
       })}
