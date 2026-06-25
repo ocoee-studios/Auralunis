@@ -178,18 +178,19 @@ export const CONSTELLATION_LINES: ReadonlyArray<ConstellationLine> = [
     lines: [[3, 0], [0, 2], [0, 1], [0, 4]]
   },
   {
-    id: "canis-major",
+    id: "canis_major",
     name: "Canis Major",
     season: "Winter",
-    myth: "The Greater Dog of Orion, led by Sirius, brightest of all night stars.",
+    myth: "The Great Dog at Orion's heel, blazing with Sirius — the brightest star in the entire night sky.",
     stars: [
-      { raHours: 6.7525, decDegrees: -16.716 }, // 0 Sirius
-      { raHours: 6.3783, decDegrees: -17.956 }, // 1 Mirzam
-      { raHours: 7.1399, decDegrees: -26.393 }, // 2 Wezen
-      { raHours: 6.9770, decDegrees: -28.972 }, // 3 Adhara
-      { raHours: 7.4014, decDegrees: -29.303 }  // 4 Aludra
+      { raHours: 6.752, decDegrees: -16.716 },  // 0 Sirius
+      { raHours: 6.378, decDegrees: -17.956 },  // 1 Mirzam
+      { raHours: 7.140, decDegrees: -26.393 },  // 2 Wezen
+      { raHours: 6.977, decDegrees: -28.972 },  // 3 Adhara
+      { raHours: 7.402, decDegrees: -29.303 },  // 4 Aludra
+      { raHours: 7.063, decDegrees: -15.633 }   // 5 Muliphein
     ],
-    lines: [[0, 1], [0, 2], [2, 3], [2, 4]]
+    lines: [[1, 0], [0, 5], [0, 2], [2, 3], [3, 4], [2, 4]]
   },
   {
     id: "canis-minor",
@@ -404,37 +405,6 @@ export const CONSTELLATION_LINES: ReadonlyArray<ConstellationLine> = [
     lines: [[0, 2], [2, 3], [3, 1], [1, 0], [1, 4]]
   },
   {
-    id: "ursa_major",
-    name: "Ursa Major",
-    season: "Spring",
-    myth: "The Great Bear. Its seven brightest stars form the Big Dipper — the most famous pattern in the northern sky.",
-    stars: [
-      { raHours: 11.062, decDegrees: 61.751 }, // 0 Dubhe
-      { raHours: 11.031, decDegrees: 56.382 }, // 1 Merak
-      { raHours: 11.897, decDegrees: 53.695 }, // 2 Phecda
-      { raHours: 12.257, decDegrees: 57.033 }, // 3 Megrez
-      { raHours: 12.900, decDegrees: 55.960 }, // 4 Alioth
-      { raHours: 13.399, decDegrees: 54.925 }, // 5 Mizar
-      { raHours: 13.792, decDegrees: 49.313 }  // 6 Alkaid
-    ],
-    lines: [[0, 1], [1, 2], [2, 3], [3, 0], [3, 4], [4, 5], [5, 6]]
-  },
-  {
-    id: "ursa_minor",
-    name: "Ursa Minor",
-    season: "All year (north)",
-    myth: "The Little Bear, anchored by Polaris — the North Star, which barely moves as the sky wheels around it.",
-    stars: [
-      { raHours: 2.530, decDegrees: 89.264 },  // 0 Polaris
-      { raHours: 17.537, decDegrees: 86.586 }, // 1 Yildun
-      { raHours: 16.766, decDegrees: 82.037 }, // 2 Epsilon
-      { raHours: 15.734, decDegrees: 77.794 }, // 3 Zeta
-      { raHours: 14.845, decDegrees: 74.156 }, // 4 Kochab
-      { raHours: 15.345, decDegrees: 71.834 }  // 5 Pherkad
-    ],
-    lines: [[0, 1], [1, 2], [2, 3], [3, 4], [4, 5], [5, 2]]
-  },
-  {
     id: "draco",
     name: "Draco",
     season: "All year (north)",
@@ -493,21 +463,6 @@ export const CONSTELLATION_LINES: ReadonlyArray<ConstellationLine> = [
     lines: [[0, 1], [1, 3], [3, 2], [2, 0]]
   },
   {
-    id: "canis_major",
-    name: "Canis Major",
-    season: "Winter",
-    myth: "The Great Dog at Orion's heel, blazing with Sirius — the brightest star in the entire night sky.",
-    stars: [
-      { raHours: 6.752, decDegrees: -16.716 },  // 0 Sirius
-      { raHours: 6.378, decDegrees: -17.956 },  // 1 Mirzam
-      { raHours: 7.140, decDegrees: -26.393 },  // 2 Wezen
-      { raHours: 6.977, decDegrees: -28.972 },  // 3 Adhara
-      { raHours: 7.402, decDegrees: -29.303 },  // 4 Aludra
-      { raHours: 7.063, decDegrees: -15.633 }   // 5 Muliphein
-    ],
-    lines: [[1, 0], [0, 5], [0, 2], [2, 3], [3, 4], [2, 4]]
-  },
-  {
     id: "hercules",
     name: "Hercules",
     season: "Summer",
@@ -550,20 +505,6 @@ export const CONSTELLATION_LINES: ReadonlyArray<ConstellationLine> = [
       { raHours: 15.846, decDegrees: 4.477 }   // 4 Epsilon
     ],
     lines: [[2, 0], [0, 4], [4, 1], [1, 3]]
-  },
-  {
-    id: "corona_borealis",
-    name: "Corona Borealis",
-    season: "Summer",
-    myth: "The Northern Crown — a delicate arc of seven stars, the jeweled crown of Ariadne.",
-    stars: [
-      { raHours: 15.578, decDegrees: 26.715 }, // 0 Alphecca
-      { raHours: 15.464, decDegrees: 29.106 }, // 1 Beta
-      { raHours: 15.713, decDegrees: 26.296 }, // 2 Gamma
-      { raHours: 15.558, decDegrees: 31.359 }, // 3 Theta
-      { raHours: 15.960, decDegrees: 26.878 }  // 4 Epsilon
-    ],
-    lines: [[3, 1], [1, 0], [0, 2], [2, 4]]
   },
   {
     id: "camelopardalis",
