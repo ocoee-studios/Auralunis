@@ -70,10 +70,10 @@ export const PremiumSkyBloomLayer = memo(function PremiumSkyBloomLayer({
         <Rect width={width} height={height} fill="url(#auralunisDeepBloom)" />
         <Rect y={height * 0.56} width={width} height={height * 0.44} fill="url(#auralunisHorizonGlow)" />
         <Circle cx={width * 0.74} cy={height * 0.20} r={Math.min(width, height) * 0.46} fill="url(#auralunisMoonHalo)" />
-        <G opacity={milkyWayVisible ? 1 : 0}>
-          <Path d={`M ${-width * 0.2} ${height * 0.88} C ${width * 0.1} ${height * 0.68}, ${width * 0.28} ${height * 0.40}, ${width * 0.5} ${height * 0.22} C ${width * 0.72} ${height * 0.04}, ${width * 0.96} ${height * 0.16}, ${width * 1.2} ${-height * 0.05} L ${width * 1.25} ${height * 0.26} C ${width * 0.98} ${height * 0.34}, ${width * 0.78} ${height * 0.30}, ${width * 0.56} ${height * 0.48} C ${width * 0.34} ${height * 0.66}, ${width * 0.16} ${height * 0.88}, ${-width * 0.12} ${height * 1.04} Z`} fill="url(#auralunisMilkySilk)" />
-          <Path d={`M ${width * 0.03} ${height * 0.83} C ${width * 0.24} ${height * 0.66}, ${width * 0.36} ${height * 0.49}, ${width * 0.56} ${height * 0.34} C ${width * 0.75} ${height * 0.21}, ${width * 0.94} ${height * 0.24}, ${width * 1.1} ${height * 0.08}`} stroke="#030816" strokeWidth={42} strokeOpacity={0.18} fill="none" strokeLinecap="round" />
-        </G>
+        {/* Milky silk band REMOVED — it was a hardcoded screen-space diagonal
+            that rendered in every direction, creating visible stripes even when
+            pointing away from the galactic plane. The real MilkyWayLayer and
+            MilkyWayCoreLayer handle galactic plane rendering correctly. */}
       </Svg>
     </Animated.View>
   );
