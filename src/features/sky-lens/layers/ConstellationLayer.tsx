@@ -15,10 +15,11 @@ type Props = {
   nightMode: boolean;
   placeLabel?: LabelPlacer;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → gold threads only
+  showNodes?: boolean; // premium: gold junction nodes + tapered glow lines. free: thin plain lines.
   onSelect: (object: SelectedObject) => void;
 };
 
-export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, showLabels = true, onSelect }: Props) {
+export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, showLabels = true, showNodes = true, onSelect }: Props) {
   return (
     <G>
       {constellations.map((c) => {
@@ -50,6 +51,15 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
             // fine where it meets a star. Reads handcrafted, not a uniform CAD line.
             const ix0 = a.x + (b.x - a.x) * 0.16, iy0 = a.y + (b.y - a.y) * 0.16;
             const ix1 = a.x + (b.x - a.x) * 0.84, iy1 = a.y + (b.y - a.y) * 0.84;
+            // Free tier: a single thin, plain gold line — a clean star-map figure
+            // without the handcrafted glow/taper that premium gets.
+            if (!showNodes) {
+              return (
+                <G key={`${c.id}-l${idx}`} opacity={belowH ? 0.2 : 1}>
+                  <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.8} strokeOpacity={0.5} strokeLinecap="round" />
+                </G>
+              );
+            }
             return (
               <G key={`${c.id}-l${idx}`} opacity={belowH ? 0.2 : 1}>
                 {/* soft gold glow behind the line (subtle so it doesn't compete) */}
@@ -66,7 +76,8 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
 
         // GOLD NODES — a tiny luminous dot at each star where lines meet, with a soft
         // glow, so the figure reads as a luxury instrument panel rather than a diagram.
-        const nodes = [...usedPts].map((pi) => {
+        // Premium only; free tier shows the bare lines.
+        const nodes = showNodes ? [...usedPts].map((pi) => {
           const pt = projected[pi];
           if (!pt || pt.behind) return null;
           const dim = !c.points[pi]?.aboveHorizon;
@@ -76,7 +87,7 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
               <Circle cx={pt.x} cy={pt.y} r={1.5} fill={lineColor} opacity={0.9} />
             </G>
           );
-        });
+        }) : null;
 
         const centroid = project(c.centroid.azimuthDegrees, c.centroid.altitudeDegrees);
         const labelVisible =

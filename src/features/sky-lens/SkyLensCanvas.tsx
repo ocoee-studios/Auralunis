@@ -20,6 +20,7 @@ import { type LayerKey } from "./SkyLensLayerCatalog";
 import { makeLabelPlacer } from "./labelLayout";
 import type { SkyData } from "./hooks/useSkyProjection";
 import type { ParallaxOffset } from "./ar/useParallaxOffset";
+import { getVisualGate, type VisualGateConfig } from "./PremiumVisualGating";
 
 type Props = {
   box: { width: number; height: number };
@@ -38,6 +39,7 @@ type Props = {
   parallax: ParallaxOffset;
   satellites: SkyLensSatellite[];
   cinematic?: boolean; // Immersive Sky mode: hide labels + data overlays, dim con-lines
+  gate?: VisualGateConfig; // premium visual gating: spectral stars, gold nodes, hero moon, etc.
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -45,8 +47,11 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
+  // Premium visual gate — falls back to the isPremium-derived config if a caller
+  // doesn't pass one explicitly, so the canvas is never ungated by accident.
+  const vg = gate ?? getVisualGate(isPremium);
   // Bortle dome-star thinning: City keeps only the brightest stars, Dark Site all
   // of them. Dome magnitudes span ~3.2–6.0, so a magnitude cutoff scaled by the
   // multiplier keeps the brightest fraction — exactly what light pollution leaves
@@ -118,6 +123,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
             nightMode={nightMode}
             placeLabel={placeLabel}
             showLabels={showLabels}
+            showNodes={vg.goldNodes}
             onSelect={onSelect}
           />
         </G>
@@ -135,7 +141,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Dense background field behind the named bright stars */}
       {activeLayers.has("stars") && (
-        <DomeStarLayer stars={domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} extinction={extinction} />
+        <DomeStarLayer stars={domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} extinction={extinction} useSpectralColors={vg.spectralColors} />
       )}
       {activeLayers.has("stars") && (
         <G transform={depth(0.25)}>
@@ -144,8 +150,8 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Rare shooting stars streak across the field (~one every 8-12 min) — above
           the stars, below the planet/moon labels. Self-scheduling, crash-safe (JS
-          clock + setState over static SVG lines). */}
-      <ShootingStarLayer width={box.width} height={box.height} nightMode={nightMode} />
+          clock + setState over static SVG lines). Premium only. */}
+      {vg.shootingStars && <ShootingStarLayer width={box.width} height={box.height} nightMode={nightMode} />}
       {activeLayers.has("planets") && (
         <PlanetLayer
           bodies={sky.bodies}
@@ -154,6 +160,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           nightMode={nightMode}
           placeLabel={placeLabel}
           showLabels={showLabels}
+          useIllustrations={vg.planetIllustrations}
           onSelect={onSelect}
         />
       )}
@@ -169,6 +176,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         palette={palette}
         nightMode={nightMode}
         showLabels={showLabels}
+        heroMode={vg.heroMoon}
         onSelect={onSelect}
       />
     </Svg>

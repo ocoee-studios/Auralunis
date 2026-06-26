@@ -12,6 +12,7 @@ type Props = {
   nightMode: boolean;
   placeLabel?: LabelPlacer;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → bodies only, no names
+  useIllustrations?: boolean; // premium: Jupiter bands, Saturn rings, moons, auras. free: colored dots.
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -32,7 +33,7 @@ const STYLE: Record<string, { disc: number; glow: number }> = {
 // Galilean moons — small offsets along the ring plane, scattered like the real set.
 const JUPITER_MOONS = [9, 14, -11, -17];
 
-export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, onSelect }: Props) {
+export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, useIllustrations = true, onSelect }: Props) {
   return (
     <G>
       {bodies.map((body) => {
@@ -66,7 +67,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
             <Circle cx={x} cy={y} r={st.glow * 0.6} fill={color} opacity={0.26} />
 
             {/* Mars — deep red atmospheric aura (recognition: the red planet) */}
-            {body.id === "mars" && !nightMode && (
+            {useIllustrations && body.id === "mars" && !nightMode && (
               <>
                 <Circle cx={x} cy={y} r={st.glow * 2.0} fill="#C8341A" opacity={0.08} />
                 <Circle cx={x} cy={y} r={st.glow * 1.25} fill="#FF5A33" opacity={0.16} />
@@ -74,20 +75,20 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
             )}
 
             {/* Jupiter — tighter golden glow (crisper per feedback) */}
-            {body.id === "jupiter" && !nightMode && (
+            {useIllustrations && body.id === "jupiter" && !nightMode && (
               <Circle cx={x} cy={y} r={st.glow * 1.3} fill="#EBB44E" opacity={0.11} />
             )}
 
             {/* Jupiter — the four GALILEAN MOONS strung along the equatorial plane (a
                 slight tilt), the detail that makes Jupiter instantly recognisable in a
                 telescope/binoculars. Tiny bright pinpoints just off the disc. */}
-            {body.id === "jupiter" && !nightMode &&
+            {useIllustrations && body.id === "jupiter" && !nightMode &&
               JUPITER_MOONS.map((mx, idx) => (
                 <Circle key={`jmoon-${idx}`} cx={x + mx} cy={y - mx * 0.12} r={1.3} fill="#FFF8E8" opacity={0.92} />
               ))}
 
             {/* Venus — tighter pearl halo + diffraction glints (crisper per feedback) */}
-            {body.id === "venus" && !nightMode && (
+            {useIllustrations && body.id === "venus" && !nightMode && (
               <>
                 <Circle cx={x} cy={y} r={st.glow * 1.9} fill="#FBF3DC" opacity={0.06} />
                 <Circle cx={x} cy={y} r={st.glow * 1.2} fill="#FFFFFF" opacity={0.12} />
@@ -99,7 +100,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
             {/* Saturn — ring system behind the disc: A ring, a dark CASSINI DIVISION,
                 then the brighter B ring, with a pearly shimmer highlight. The Cassini
                 gap is what makes Saturn read as Saturn and not "a dot with a line". */}
-            {body.id === "saturn" && (
+            {useIllustrations && body.id === "saturn" && (
               <G>
                 {/* soft golden glow cradling the rings */}
                 <Ellipse cx={x} cy={y} rx={d * 2.7} ry={d * 0.85} fill="#E8C77E" opacity={0.08} rotation={-18} originX={x} originY={y} />
@@ -116,10 +117,13 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
               </G>
             )}
 
-            {/* Rich planet illustrations for major planets */}
+            {/* Rich planet illustrations for major planets (premium). Free tier falls
+                through to the basic colored disc below. */}
             {(() => {
-              const ill = renderPlanetIllustration(body.id, x, y, d, nightMode);
-              if (ill) return ill;
+              if (useIllustrations) {
+                const ill = renderPlanetIllustration(body.id, x, y, d, nightMode);
+                if (ill) return ill;
+              }
               return (
                 <G>
                   <Circle cx={x} cy={y} r={d} fill={color} />
