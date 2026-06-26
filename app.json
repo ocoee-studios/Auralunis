@@ -96,9 +96,8 @@
       "backgroundColor": "#050B14"
     },
     "extra": {
-      "revenueCatIosApiKey": "test_PDKYApxGRsLUDETByKnbcRSEpVn",
-      "revenueCatAndroidApiKey": "REPLACE_WITH_REVENUECAT_PUBLIC_ANDROID_API_KEY",
-      "openWeatherMapApiKey": "REPLACE_WITH_OPENWEATHERMAP_API_KEY",
+      "revenueCatIosApiKey": "appl_wFLNgxZEHwoGKyJYEMUspGVphen",
+      "openWeatherMapApiKey": "",
       "alternateIconsReady": false,
       "alternateIconNames": [
         "midnight",

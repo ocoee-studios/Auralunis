@@ -48,7 +48,7 @@ const PAGES: TutorialPage[] = [
   {
     title: "Lock On",
     subtitle: "100% ALIGNMENT",
-    body: "When a blip reaches the center reticle, you hit a Lock. Your watch buzzes, the blip turns green, and the event is saved to your Cosmic Drift galaxy — your personal star map of discoveries.",
+    body: "When a blip reaches the center reticle, you hit a Lock. Your phone pulses, the blip turns green, and the event is saved to your Cosmic Drift galaxy — your personal star map of discoveries.",
     illustration: "lock",
   },
 ];

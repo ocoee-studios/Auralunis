@@ -30,7 +30,7 @@ import { ATMOSPHERE_CATALOG } from "@/data/AtmosphereCatalog";
 import { SatelliteDataCard } from "@/components/SatelliteDataCard";
 import { SpaceRadarGrid, type RadarBlip } from "@/components/SpaceRadarGrid";
 import { HapticController } from "@/utils/hapticController";
-import { WatchHaptics } from "@/modules/WatchHaptics";
+import { tapLight } from "@/services/HapticService";
 import { computePlanetaryTargets, planetAlignmentDiff } from "@/utils/planetaryEphemeris";
 import { getStarlinkTrainBlips, tickStarlinkLive, tickStarlinkMock, initStarlinkTrainLive, trainHapticInterval, isTrainLive, getTrainNodeCount } from "@/services/StarlinkTrainService";
 import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
@@ -313,12 +313,12 @@ export function OrbitalAlignmentScreen() {
       const act = trainBlips.find(b => b.isActive);
       const interval = trainHapticInterval(act?.totalAngularError ?? 999);
       if (trainHapticRef.current) clearInterval(trainHapticRef.current);
-      if (interval) trainHapticRef.current = setInterval(() => WatchHaptics.triggerCompassTick(), interval);
+      if (interval) trainHapticRef.current = setInterval(() => tapLight(), interval);
     }
     if (mode === "meteor" && activeShowers.length) {
       const interval = activeShowers[0].sonarInterval;
       if (trainHapticRef.current) clearInterval(trainHapticRef.current);
-      if (interval) trainHapticRef.current = setInterval(() => WatchHaptics.triggerCompassTick(), interval);
+      if (interval) trainHapticRef.current = setInterval(() => tapLight(), interval);
     }
   }, [activeScore, isLocked, mode, trainBlips, activeShowers]);
 
