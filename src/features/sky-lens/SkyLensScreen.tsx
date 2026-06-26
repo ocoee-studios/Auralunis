@@ -19,7 +19,7 @@ import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherSer
 import { useDevicePointing } from "./ar/useDevicePointing";
 import { useParallaxOffset } from "./ar/useParallaxOffset";
 import { getFleet, simulateTick, syncLiveTLEData } from "@/services/AtmosphereExplorerService";
-import { onObjectTapped, onObjectCentered, onRareEvent } from "@/services/HapticDiscoveryService";
+import { onObjectTapped, onObjectCentered } from "@/services/HapticDiscoveryService";
 import { computeAzimuthElevation } from "@/utils/alignmentEngine";
 import type { SkyLensSatellite } from "./layers/SatelliteLayer";
 import { useSkyData } from "./hooks/useSkyProjection";
@@ -36,7 +36,6 @@ import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
 import { TimeScrubBar } from "./TimeScrubBar";
-import { MeteorOverlay } from "./MeteorOverlay";
 import { TargetPulse } from "./TargetPulse";
 import { HeroSpotlight } from "./HeroSpotlight";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
@@ -684,8 +683,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           )}
           {/* Crash-safe twinkle: View-opacity animation over the bright stars */}
           <TwinkleOverlay targets={twinkleStars} nightMode={nightMode} />
-          {/* Crash-safe shooting stars: View transform + opacity */}
-          {horizonFade > 0.2 && <MeteorOverlay box={box} nightMode={nightMode} onMeteor={onRareEvent} />}
+          {/* Shooting stars now live in ShootingStarLayer (inside SkyLensCanvas):
+              moving head + trailing tail, 8-12 min schedule, its own haptic pulse.
+              The old View-based MeteorOverlay was retired to avoid two meteor
+              systems firing on different clocks + double haptics. */}
           {/* Find-Mode arrival pulse on the lesson target */}
           {targetProj?.onScreen && <TargetPulse x={targetProj.x} y={targetProj.y} />}
           {/* Hero Object Spotlight — dims the field around the selected object so it
