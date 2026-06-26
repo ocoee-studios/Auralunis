@@ -168,8 +168,8 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
             river torn through the band, not a smooth grey gradient. Near-opaque core,
             wider dark plateau (stop pushed out 48%→54%) so the rift carves harder. */}
         <RadialGradient id="mwDust" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#000003" stopOpacity={Math.min(0.97, 0.94 * boost)} />
-          <Stop offset="54%" stopColor="#010208" stopOpacity={Math.min(0.66, 0.58 * boost)} />
+          <Stop offset="0%" stopColor="#000003" stopOpacity={Math.min(0.99, 0.99 * boost)} />
+          <Stop offset="54%" stopColor="#010208" stopOpacity={Math.min(0.86, 0.82 * boost)} />
           <Stop offset="100%" stopColor="#010208" stopOpacity={0} />
         </RadialGradient>
       </Defs>
