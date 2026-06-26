@@ -13,7 +13,7 @@ type Props = {
   onSelect: (object: SelectedObject) => void;
 };
 
-const R = 22; // hero moon disc radius (enlarged for presence)
+const R = 26; // hero moon disc radius — the largest object on screen
 
 // The Moon as THE hero object — the thing that makes users stop and stare. On top
 // of the lit sphere-shaded disc (limb darkening, maria, craters, blue earthshine on
