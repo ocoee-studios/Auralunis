@@ -24,36 +24,52 @@ export function ShootingStarLayer({ width, height, nightMode }: Props) {
   const [meteor, setMeteor] = useState<Meteor | null>(null);
   const idRef = useRef(0);
   const frameRef = useRef<number | null>(null);
+  // The self-rescheduling meteor timer reassigns its handle on every cycle, so we
+  // track the LIVE handle in a ref (clearing only the first one would leak every
+  // later timer). aliveRef gates all async callbacks so neither a pending timer
+  // nor an in-flight animation frame calls setState after unmount. sizeRef keeps
+  // width/height current for fireMeteor, which is captured once by the [] effect.
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const aliveRef = useRef(true);
+  const sizeRef = useRef({ width, height });
+  sizeRef.current = { width, height };
 
   useEffect(() => {
+    aliveRef.current = true;
+
     function scheduleMeteor() {
       // Random delay: 8-12 minutes (480-720 seconds)
       const delay = (480 + Math.random() * 240) * 1000;
-      const timer = setTimeout(() => {
+      timerRef.current = setTimeout(() => {
+        if (!aliveRef.current) return;
         fireMeteor();
         scheduleMeteor();
       }, delay);
-      return timer;
     }
 
     // First meteor in 30-90 seconds so user sees one quickly
     const firstTimer = setTimeout(() => {
+      if (!aliveRef.current) return;
       fireMeteor();
     }, (30 + Math.random() * 60) * 1000);
 
-    const recurringTimer = scheduleMeteor();
+    scheduleMeteor();
 
     return () => {
+      aliveRef.current = false;
       clearTimeout(firstTimer);
-      clearTimeout(recurringTimer);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
   }, []);
 
   function fireMeteor() {
+    if (!aliveRef.current) return;
     const id = ++idRef.current;
+    const { width: w, height: h } = sizeRef.current;
     // Random start point (upper 60% of sky)
-    const x1 = Math.random() * width;
-    const y1 = Math.random() * height * 0.6;
+    const x1 = Math.random() * w;
+    const y1 = Math.random() * h * 0.6;
     // Random direction and length (100-200px streak)
     const angle = Math.PI * 0.15 + Math.random() * Math.PI * 0.4; // mostly downward
     const len = 100 + Math.random() * 120;
@@ -68,6 +84,7 @@ export function ShootingStarLayer({ width, height, nightMode }: Props) {
     const start = Date.now();
     const duration = 600;
     function animate() {
+      if (!aliveRef.current) return;
       const elapsed = Date.now() - start;
       const t = Math.min(1, elapsed / duration);
       const opacity = t < 0.2 ? t / 0.2 : t > 0.7 ? (1 - t) / 0.3 : 1;
@@ -80,12 +97,6 @@ export function ShootingStarLayer({ width, height, nightMode }: Props) {
     }
     frameRef.current = requestAnimationFrame(animate);
   }
-
-  useEffect(() => {
-    return () => {
-      if (frameRef.current) cancelAnimationFrame(frameRef.current);
-    };
-  }, []);
 
   if (!meteor || meteor.opacity <= 0) return null;
 
