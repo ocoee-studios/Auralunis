@@ -25,6 +25,7 @@ import { computeStargazingIndex } from "@/services/StargazingIndexService";
 import { StargazingIndexCard } from "@/components/StargazingIndexCard";
 import { computeSunPosition, findNextGoldenEvents, formatCountdown } from "@/services/ChronoLightService";
 import { generateCelestialMood } from "@/services/CelestialMoodService";
+import { getTonightInsight } from "@/services/SkyIntelligenceService";
 import { tapLight } from "@/services/HapticService";
 import { scheduleSkyEventNotifications, scheduleCelestialEventNotifications } from "@/services/NotificationService";
 import { CELESTIAL_EVENTS } from "@/data/CelestialEvents";
@@ -113,6 +114,24 @@ export function HomeScreen() {
     });
   }, [sky, weather, tonightScore.score, sunPos.isGoldenHour]);
 
+  // ── Tonight's hero insight — the ONE most interesting thing in the sky right
+  // now (event > magnificent night > new/full moon > bright planets). A single
+  // compelling headline at the very top, above the dial. Planet ids stay
+  // lowercase ("jupiter"…) to match the service's checks.
+  const tonightInsight = useMemo(() => {
+    const moonAlt = sky.bodies.find((b) => b.id === "moon")?.altitudeDegrees ?? -90;
+    const visiblePlanets = sky.visibleBodies
+      .filter((b) => b.id !== "sun" && b.id !== "moon" && b.altitudeDegrees > 0)
+      .map((b) => b.id);
+    return getTonightInsight(
+      sky.moonIlluminationPercent,
+      moonAlt,
+      weather.cloudPercent,
+      visiblePlanets,
+      stargazing.score,
+    );
+  }, [sky, weather, stargazing.score]);
+
   // ── Visible planets ──────────────────────────────────────────────────────
   const visibleBodies = displaySky.visibleBodies.filter(
     (b) => b.id !== "sun" && b.altitudeDegrees > 0
@@ -140,6 +159,30 @@ export function HomeScreen() {
           weekday: "long", month: "long", day: "numeric",
         }).toUpperCase()}
       </Text>
+
+      {/* ── Tonight's hero insight — the ONE most interesting thing in the sky.
+          Taps through to Sky Lens when the insight suggests an action. ── */}
+      <TouchableOpacity
+        activeOpacity={tonightInsight.action ? 0.85 : 1}
+        onPress={() => {
+          if (!tonightInsight.action) return;
+          tapLight();
+          navigation.navigate("Sky");
+        }}
+      >
+        <GlassPanel accent style={styles.insightCard}>
+          <View style={styles.insightRow}>
+            <Text style={styles.insightIcon}>{tonightInsight.icon}</Text>
+            <View style={styles.insightTextCol}>
+              <Text style={styles.insightHeadline}>{tonightInsight.headline}</Text>
+              <Text style={styles.insightDetail}>{tonightInsight.detail}</Text>
+              {tonightInsight.action ? (
+                <Text style={styles.insightAction}>{tonightInsight.action}  ›</Text>
+              ) : null}
+            </View>
+          </View>
+        </GlassPanel>
+      </TouchableOpacity>
 
       {/* ── The Celestial Dial ── */}
       <CelestialDial
@@ -341,6 +384,42 @@ const styles = StyleSheet.create({
     fontSize: 9,
     color: AuraLunisColors.faint,
     marginTop: 1,
+  },
+  insightCard: {
+    marginBottom: 14,
+    padding: 16,
+  },
+  insightRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+  },
+  insightIcon: {
+    fontSize: 30,
+    marginRight: 12,
+    marginTop: 1,
+  },
+  insightTextCol: {
+    flex: 1,
+  },
+  insightHeadline: {
+    fontSize: 17,
+    fontWeight: "900",
+    color: AuraLunisColors.gold2,
+    letterSpacing: -0.3,
+    lineHeight: 22,
+  },
+  insightDetail: {
+    fontSize: 13,
+    color: AuraLunisColors.silver,
+    lineHeight: 19,
+    marginTop: 5,
+  },
+  insightAction: {
+    fontSize: 12,
+    fontWeight: "800",
+    color: AuraLunisColors.gold,
+    marginTop: 10,
+    letterSpacing: 0.2,
   },
   moodCard: {
     borderRadius: 18,
