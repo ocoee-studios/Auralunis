@@ -2,7 +2,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
-import * as MediaLibrary from "expo-media-library";
 import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { CameraView } from "expo-camera";
@@ -81,38 +80,28 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   );
   const sky = useSkyData(location, undefined, observerTime);
 
-  // Photo Overlay — capture the sky scene and share or save.
+  // Photo Overlay — capture the sky scene and share.
   const sceneRef = useRef<View>(null);
   const [capturing, setCapturing] = useState(false);
   const flash = useRef(new Animated.Value(0)).current;
   const captureSky = useCallback(async () => {
     if (capturing) return;
     setCapturing(true);
-    // Flash feedback
     flash.setValue(0);
     Animated.sequence([
       Animated.timing(flash, { toValue: 0.9, duration: 70, useNativeDriver: true }),
       Animated.timing(flash, { toValue: 0, duration: 280, useNativeDriver: true }),
     ]).start();
     try {
-      await new Promise((r) => setTimeout(r, 120));
-      const uri = await captureRef(sceneRef, { format: "jpg", quality: 0.95 });
-
-      // Try to save to photo library first
-      const { status } = await MediaLibrary.requestPermissionsAsync();
-      if (status === "granted") {
-        await MediaLibrary.saveToLibraryAsync(uri);
-        Alert.alert("Saved!", "Sky photo saved to your camera roll.", [
-          { text: "Share", onPress: () => Sharing.isAvailableAsync().then(ok => ok && Sharing.shareAsync(uri, { mimeType: "image/jpeg", dialogTitle: "Share your sky" })) },
-          { text: "Done", style: "default" },
-        ]);
-      } else if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: "image/jpeg", dialogTitle: "Share your sky" });
+      await new Promise((r) => setTimeout(r, 150));
+      const uri = await captureRef(sceneRef, { format: "png", quality: 1.0 });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: "image/png", dialogTitle: "Share your sky" });
       } else {
-        Alert.alert("Captured!", "Sky photo captured. Enable photo library access in Settings to save.");
+        Alert.alert("Captured!", "Sky photo ready but sharing is not available on this device.");
       }
     } catch (e) {
-      Alert.alert("Couldn't capture", "The sky photo couldn't be saved. Try switching to Planetarium mode for best results.");
+      Alert.alert("Capture failed", String(e));
     } finally {
       setCapturing(false);
     }
