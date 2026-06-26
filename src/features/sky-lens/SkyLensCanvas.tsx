@@ -11,6 +11,7 @@ import { MoonLayer } from "./layers/MoonLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
 import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
+import { ShootingStarLayer } from "./layers/ShootingStarLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { ZodiacLayer } from "./layers/ZodiacLayer";
 import { SatelliteLayer, type SkyLensSatellite } from "./layers/SatelliteLayer";
@@ -141,6 +142,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} showLabels={showLabels} extinction={extinction} onSelect={onSelect} />
         </G>
       )}
+      {/* Rare shooting stars streak across the field (~one every 8-12 min) — above
+          the stars, below the planet/moon labels. Self-scheduling, crash-safe (JS
+          clock + setState over static SVG lines). */}
+      <ShootingStarLayer width={box.width} height={box.height} nightMode={nightMode} />
       {activeLayers.has("planets") && (
         <PlanetLayer
           bodies={sky.bodies}
