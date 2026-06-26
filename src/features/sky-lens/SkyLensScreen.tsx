@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { captureRef } from "react-native-view-shot";
+import { captureRef, captureScreen } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
 import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
@@ -80,7 +80,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   );
   const sky = useSkyData(location, undefined, observerTime);
 
-  // Photo capture — fast, simple, reliable.
+  // Photo capture — captureScreen grabs the full rendered screen including SVG
   const sceneRef = useRef<View>(null);
   const [capturing, setCapturing] = useState(false);
   const flash = useRef(new Animated.Value(0)).current;
@@ -88,15 +88,17 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     if (capturing) return;
     setCapturing(true);
     try {
-      await new Promise((r) => setTimeout(r, 100));
-      const uri = await captureRef(sceneRef, { format: "jpg", quality: 0.8, result: "tmpfile" });
+      const uri = await captureScreen({ format: "jpg", quality: 0.85, result: "tmpfile" });
       setCapturing(false);
       if (await Sharing.isAvailableAsync()) {
         Sharing.shareAsync(uri, { mimeType: "image/jpeg" });
       }
     } catch (e) {
       setCapturing(false);
-      Alert.alert("Capture failed", String(e));
+      Alert.alert(
+        "Tip: Use iOS Screenshot",
+        "Press Power + Volume Up for the best sky photos. Captures everything perfectly including the camera feed."
+      );
     }
   }, [capturing]);
   const { isPremium } = useEntitlement();
@@ -423,12 +425,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
 
-          {/* Cosmic dark overlay — extra dark during photo capture for clean screenshots */}
+          {/* Cosmic dark overlay */}
           <View
             style={[StyleSheet.absoluteFillObject, {
-              backgroundColor: capturing
-                ? "rgba(3,8,22,0.88)"
-                : planetarium
+              backgroundColor: planetarium
                 ? "rgba(3,8,22,0.95)"
                 : immersive
                 ? "rgba(3,8,22,0.75)"
