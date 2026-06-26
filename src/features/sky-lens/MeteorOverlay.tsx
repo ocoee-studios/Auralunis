@@ -47,9 +47,12 @@ function Meteor({ x0, y0, angle, length, onDone }: MeteorSpec & { onDone: () => 
 }
 
 // Spawns a shooting star every ~5–14s for ambiance. Disabled in Night Mode.
-export function MeteorOverlay({ box, nightMode }: { box: { width: number; height: number }; nightMode: boolean }) {
+// onMeteor fires on each spawn (a rare-event haptic whisper — Apple-delight).
+export function MeteorOverlay({ box, nightMode, onMeteor }: { box: { width: number; height: number }; nightMode: boolean; onMeteor?: () => void }) {
   const [meteors, setMeteors] = useState<MeteorSpec[]>([]);
   const idRef = useRef(0);
+  const onMeteorRef = useRef(onMeteor);
+  onMeteorRef.current = onMeteor;
 
   useEffect(() => {
     if (nightMode) return;
@@ -57,6 +60,7 @@ export function MeteorOverlay({ box, nightMode }: { box: { width: number; height
     const schedule = () => {
       timer = setTimeout(() => {
         const angle = Math.PI * 0.72 + (Math.random() - 0.5) * 0.7; // mostly downward-diagonal
+        onMeteorRef.current?.();
         setMeteors((prev) => [
           ...prev,
           {

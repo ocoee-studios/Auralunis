@@ -16,6 +16,7 @@ import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useDevicePointing } from "./ar/useDevicePointing";
 import { useParallaxOffset } from "./ar/useParallaxOffset";
 import { getFleet, simulateTick, syncLiveTLEData } from "@/services/AtmosphereExplorerService";
+import { onObjectTapped, onObjectCentered, onRareEvent } from "@/services/HapticDiscoveryService";
 import { computeAzimuthElevation } from "@/utils/alignmentEngine";
 import type { SkyLensSatellite } from "./layers/SatelliteLayer";
 import { useSkyData } from "./hooks/useSkyProjection";
@@ -492,6 +493,29 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   }, [selected?.id, selected?.kind]);
   useEffect(() => () => { if (forgeTimer.current) clearTimeout(forgeTimer.current); }, []);
 
+  // Apple-delight haptics (HapticDiscoveryService): a soft pulse when you tap an object,
+  // and a whisper the first time a hero object drifts into the centre of the view.
+  useEffect(() => {
+    if (selected?.id) onObjectTapped(selected.id);
+  }, [selected?.id]);
+  const heroCenteredRef = useRef<Set<string>>(new Set());
+  useEffect(() => {
+    const cx = box.width / 2, cy = box.height / 2;
+    const rad = Math.min(box.width, box.height) * 0.22; // ≈ the centre 30° of the view
+    const now = new Set<string>();
+    const check = (id: string, az: number, alt: number) => {
+      const p = projectTarget(pointing, az, alt, fov, box);
+      if (p.behind || !p.onScreen) return;
+      if (Math.hypot(p.x - cx, p.y - cy) <= rad) {
+        now.add(id);
+        if (!heroCenteredRef.current.has(id)) onObjectCentered(id); // service dedupes + cools down
+      }
+    };
+    for (const b of sky.bodies) if (b.aboveHorizon && b.id !== "sun") check(b.id, b.azimuthDegrees, b.altitudeDegrees);
+    for (const s of sky.stars) if (s.aboveHorizon && s.magnitude < 1.3) check(s.id, s.azimuthDegrees, s.altitudeDegrees);
+    heroCenteredRef.current = now;
+  }, [pointing, sky.bodies, sky.stars, fov, box]);
+
   return (
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={sceneGesture}>
@@ -614,7 +638,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Crash-safe twinkle: View-opacity animation over the bright stars */}
           <TwinkleOverlay targets={twinkleStars} nightMode={nightMode} />
           {/* Crash-safe shooting stars: View transform + opacity */}
-          {horizonFade > 0.2 && <MeteorOverlay box={box} nightMode={nightMode} />}
+          {horizonFade > 0.2 && <MeteorOverlay box={box} nightMode={nightMode} onMeteor={onRareEvent} />}
           {/* Find-Mode arrival pulse on the lesson target */}
           {targetProj?.onScreen && <TargetPulse x={targetProj.x} y={targetProj.y} />}
           {/* Hero Object Spotlight — dims the field around the selected object so it

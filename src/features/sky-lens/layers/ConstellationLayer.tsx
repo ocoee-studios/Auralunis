@@ -30,6 +30,7 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
         // Only draw a segment when both endpoints are in front of the camera AND
         // above the horizon — otherwise lines streak across the view or dive into
         // the ground for stars that have already set.
+        const usedPts = new Set<number>();
         const segments = c.lines
           .filter(
             ([i, j]) =>
@@ -39,20 +40,43 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
               !projected[j].behind
           )
           .map(([i, j], idx) => {
+            usedPts.add(i);
+            usedPts.add(j);
             const a = projected[i];
             const b = projected[j];
             const belowH = !(c.points[i]?.aboveHorizon && c.points[j]?.aboveHorizon);
+            // TAPERED THREAD — a fine full-length line (fading at the joints) under a
+            // thicker INSET centre segment, so each stroke is wide in the middle and
+            // fine where it meets a star. Reads handcrafted, not a uniform CAD line.
+            const ix0 = a.x + (b.x - a.x) * 0.16, iy0 = a.y + (b.y - a.y) * 0.16;
+            const ix1 = a.x + (b.x - a.x) * 0.84, iy1 = a.y + (b.y - a.y) * 0.84;
             return (
               <G key={`${c.id}-l${idx}`} opacity={belowH ? 0.2 : 1}>
-                {/* soft 4px gold glow behind the line (subtle so it doesn't compete with the sky) */}
+                {/* soft gold glow behind the line (subtle so it doesn't compete) */}
                 <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={4} strokeOpacity={0.06} strokeLinecap="round" />
-                {/* crisp gold thread */}
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={1.2} strokeOpacity={0.45} strokeLinecap="round" />
+                {/* fine tapered endpoints */}
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.6} strokeOpacity={0.4} strokeLinecap="round" />
+                {/* fuller centre */}
+                <Line x1={ix0} y1={iy0} x2={ix1} y2={iy1} stroke={lineColor} strokeWidth={1.6} strokeOpacity={0.5} strokeLinecap="round" />
               </G>
             );
           });
 
         if (segments.length === 0) return null;
+
+        // GOLD NODES — a tiny luminous dot at each star where lines meet, with a soft
+        // glow, so the figure reads as a luxury instrument panel rather than a diagram.
+        const nodes = [...usedPts].map((pi) => {
+          const pt = projected[pi];
+          if (!pt || pt.behind) return null;
+          const dim = !c.points[pi]?.aboveHorizon;
+          return (
+            <G key={`${c.id}-n${pi}`} opacity={dim ? 0.2 : 1}>
+              <Circle cx={pt.x} cy={pt.y} r={6} fill={lineColor} opacity={0.1} />
+              <Circle cx={pt.x} cy={pt.y} r={1.5} fill={lineColor} opacity={0.9} />
+            </G>
+          );
+        });
 
         const centroid = project(c.centroid.azimuthDegrees, c.centroid.altitudeDegrees);
         const labelVisible =
@@ -66,6 +90,7 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
         return (
           <G key={c.id}>
             {segments}
+            {nodes}
             {labelVisible && (() => {
               const lp = placeLabel ? placeLabel(centroid.x, centroid.y, c.name.toUpperCase(), 13) : { x: centroid.x, y: centroid.y };
               return (
