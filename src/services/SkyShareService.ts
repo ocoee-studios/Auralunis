@@ -129,7 +129,7 @@ export function prepareVaultEntry(observation: SkyObservation): {
   // For now, return the structure the vault expects.
   return {
     id: observation.id,
-    encryptedPayload: JSON.stringify(observation), // placeholder for tweetnacl encryption
+    encryptedPayload: JSON.stringify(observation), // v1: plain JSON — encrypt with tweetnacl in v1.1
     timestamp: observation.timestamp,
     searchableFields: {
       locationName: observation.locationName,

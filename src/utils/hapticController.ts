@@ -1,7 +1,6 @@
 // hapticController.ts
 // Centralized proximity haptic cadence for the Orbital Alignment screen.
-// Uses CoreHaptics via WatchHaptics for precise, warm tactile feedback on iOS.
-// Falls back to HapticService on non-CoreHaptics devices.
+// Uses expo-haptics for tactile feedback on iOS.
 //
 // Proximity zones (by alignmentScore):
 //   score ≤ 70   → silent
@@ -9,7 +8,7 @@
 //   score > 85   → compass tick every 250ms ("near lock")
 //   LOCKED       → one-shot lock pulse, then silent
 
-import { WatchHaptics } from "@/modules/WatchHaptics";
+import { tapLight, tapSuccess } from "@/services/HapticService";
 
 type Zone = "silent" | "approaching" | "nearLock" | "locked";
 
@@ -34,7 +33,7 @@ export class HapticController {
 
     // One-shot lock confirmation
     if (isLocked && !this.wasLocked) {
-      WatchHaptics.triggerLockPulse();
+      tapSuccess();
     }
     this.wasLocked = isLocked;
 
@@ -46,7 +45,7 @@ export class HapticController {
       case "approaching":
         // Slower tick — user is getting warm
         this.intervalId = setInterval(
-          () => WatchHaptics.triggerCompassTick(),
+          () => tapLight(),
           500
         );
         break;
@@ -54,7 +53,7 @@ export class HapticController {
       case "nearLock":
         // Faster tick — almost there
         this.intervalId = setInterval(
-          () => WatchHaptics.triggerCompassTick(),
+          () => tapLight(),
           250
         );
         break;

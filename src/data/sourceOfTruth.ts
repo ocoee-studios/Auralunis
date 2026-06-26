@@ -38,19 +38,6 @@ export const SourceOfTruth = {
       "Satellite + Space-Junk Thermal Overlay",
       "Light Pollution + AstroPhoto Predictor"
     ],
-    Watch: [
-      "AuraLunis Watch Face",
-      "Moon Complication",
-      "Tonight Score Complication",
-      "Watch Face Gallery",
-      "Complication Picker",
-      "Watch Theme Selector",
-      "Curated Watch Setup",
-      "Portal Stack Widgets",
-      "Haptic Breathing",
-      "Taptic Astrolabe Future Module",
-      "Desk Obelisk Future Module"
-    ],
     Learn: [
       "Solar System",
       "Moon",
@@ -70,7 +57,6 @@ export const SourceOfTruth = {
       "Privacy",
       "Permissions",
       "Native Device QA",
-      "Watch",
       "Widgets",
       "Audio",
       "Learning",

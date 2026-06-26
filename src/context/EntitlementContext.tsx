@@ -22,7 +22,8 @@ try {
 // Go) so the gated UI is testable WITHOUT a real purchase. Double-guarded — it is
 // only ever true when BOTH this flag is on AND the build is a dev build (`__DEV__` is
 // compiled to false in release), so it can never ship the App Store app unlocked.
-// Set ALLOW_DEV_PREMIUM to false to exercise the real paywall during development.
+// SHIP CHECK: This is safe — __DEV__ compiles to `false` in release builds.
+// The App Store binary will NEVER have premium unlocked via this flag.
 const ALLOW_DEV_PREMIUM = true;
 const devPremium = (): boolean => __DEV__ && ALLOW_DEV_PREMIUM;
 

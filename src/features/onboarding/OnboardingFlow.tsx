@@ -115,7 +115,6 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
             <View style={s.card}><Text style={s.cardLabel}>ALARMS</Text><Text style={s.cardTitle}>Celestial Alarms</Text><Text style={s.cardBody}>Moonrise, sunset, visible-planet, and wind-down reminders.</Text></View>
             <View style={s.card}><Text style={s.cardLabel}>AR</Text><Text style={s.cardTitle}>Sky Lens</Text><Text style={s.cardBody}>Point your phone at the sky. Real positions, compass-aligned overlay.</Text></View>
             <View style={s.card}><Text style={s.cardLabel}>LEARN</Text><Text style={s.cardTitle}>30 Nights of Stargazing</Text><Text style={s.cardBody}>Guided lessons from the Moon to deep-sky nebulae.</Text></View>
-            <View style={s.card}><Text style={s.cardLabel}>WATCH</Text><Text style={s.cardTitle}>Watch Faces & Widgets</Text><Text style={s.cardBody}>Six astral faces, ten complications, StandBy widgets.</Text></View>
             <View style={s.card}><Text style={s.cardLabel}>VAULT</Text><Text style={s.cardTitle}>Cosmic Vault</Text><Text style={s.cardBody}>Encrypted notes and sky captures. Your astronomy journal.</Text></View>
             <View style={s.card}><Text style={s.cardLabel}>TONIGHT</Text><Text style={s.cardTitle}>Tonight Score</Text><Text style={s.cardBody}>Viewing quality from cloud cover, moon brightness, and your location.</Text></View>
 
