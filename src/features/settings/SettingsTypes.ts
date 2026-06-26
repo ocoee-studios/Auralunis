@@ -1,5 +1,3 @@
-import type { WatchComplicationId, WatchFaceId, WatchThemeId } from "@/features/watch/WatchFaceCatalog";
-
 export type AuraLunisThemeMode = "system" | "midnight_gold" | "soft_moon" | "deep_space";
 export type SkyQuality = "urban" | "suburban" | "rural" | "dark";
 
@@ -18,11 +16,7 @@ export interface AuraLunisSettingsState {
   locationPermissionExplained: boolean;
   photoSavePermissionExplained: boolean;
   motionPermissionExplained: boolean;
-  watchSyncEnabled: boolean;
   widgetsEnabled: boolean;
-  selectedWatchFaceId: WatchFaceId;
-  selectedWatchThemeId: WatchThemeId;
-  selectedWatchComplicationIds: WatchComplicationId[];
 }
 
 export const defaultAuraLunisSettings: AuraLunisSettingsState = {
@@ -40,9 +34,5 @@ export const defaultAuraLunisSettings: AuraLunisSettingsState = {
   locationPermissionExplained: true,
   photoSavePermissionExplained: true,
   motionPermissionExplained: true,
-  watchSyncEnabled: false,
-  widgetsEnabled: false,
-  selectedWatchFaceId: "living_astrolabe",
-  selectedWatchThemeId: "midnight_gold",
-  selectedWatchComplicationIds: ["moon_phase", "tonight_score", "next_event", "sky_lens_shortcut"]
+  widgetsEnabled: false
 };

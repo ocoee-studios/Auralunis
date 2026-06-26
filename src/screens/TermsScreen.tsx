@@ -14,13 +14,13 @@ export function TermsScreen() {
 
       <Text style={styles.heading}>Description</Text>
       <Text style={styles.body}>
-        AuraLunis is a premium interactive astronomy app that transforms your iPhone into a living celestial instrument. Features include an AR sky overlay, satellite tracking, constellation charts, and astrophotography planning, with an Apple Watch companion coming soon. Your observations stay on your device.
+        AuraLunis is a premium interactive astronomy app that transforms your iPhone into a living celestial instrument. Features include an AR sky overlay, satellite tracking, constellation charts, and astrophotography planning. Your observations stay on your device.
       </Text>
 
       <Text style={styles.heading}>Subscriptions</Text>
       <Text style={styles.body}>
         Free: Celestial Dial, basic sky view, 10 constellations, ISS tracking, Learn section.{"\n\n"}
-        Premium ($6.99/month or $39.99/year): Full Sky Lens AR, 88 constellations, all satellites, Birth Sky, Astro Weather, Astrophotography Planner, Cultural Sky Stories, Night Vision, Dark Sky Finder, encrypted vault. (An Apple Watch companion is coming in a future update.){"\n\n"}
+        Premium ($6.99/month or $39.99/year): Full Sky Lens AR, 88 constellations, all satellites, Birth Sky, Astro Weather, Astrophotography Planner, Cultural Sky Stories, Night Vision, Dark Sky Finder, encrypted vault.{"\n\n"}
         Founders Lifetime ($99.99 one-time): All Premium features permanently. Limited availability. Price increases after launch period.
       </Text>
 
