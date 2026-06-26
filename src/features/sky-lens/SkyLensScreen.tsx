@@ -13,6 +13,7 @@ import { useEntitlement } from "@/hooks/useEntitlement";
 import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { useObserverLocation } from "./ephemeris/useObserverLocation";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
+import { SKY_PROFILES, type SkyQuality } from "@/services/SkyQualityService";
 import { useDevicePointing } from "./ar/useDevicePointing";
 import { useParallaxOffset } from "./ar/useParallaxOffset";
 import { getFleet, simulateTick, syncLiveTLEData } from "@/services/AtmosphereExplorerService";
@@ -210,7 +211,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
   // Milky Way brightens as the camera fades out: faint over a live feed, bold over
   // black. AR (1.4) → Immersive (1.9) → Planetarium (2.4).
-  const milkyWayBoost = planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4;
+  // Sky quality profile transforms the entire visual based on Bortle setting
+  const skyProfile = SKY_PROFILES[settings.skyQuality as SkyQuality] ?? SKY_PROFILES.dark;
+  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity;
   const cycleSkyMode = useCallback(() => {
     // Half-moon button cycles AR → Immersive → Planetarium → AR. Entering Planetarium
     // turns the Milky Way layer on. Both state updates stay at the TOP LEVEL of the
