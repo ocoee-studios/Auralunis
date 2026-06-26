@@ -40,6 +40,20 @@ const REFLECTION_KNOTS = [
   { l: 166, s: 0.7 },  // Pleiades direction
   { l: 84, s: 0.5 },   // Cygnus reflection accent
 ];
+// LAYER B — bright STAR CLOUDS: the famous dense knots where the band visibly
+// BRIGHTENS (Large Sagittarius / Scutum / Cygnus / Norma / Carina / Cas-Per). The
+// reference photo's band isn't a smooth glow — it's clumpy, brightening into these
+// pale-gold star clouds and darkening between them. Rendered as soft pale-gold
+// patches WITHIN the band (under the dark dust, which then carves them), so the
+// galaxy reads as mottled regions of light rather than one even ribbon.
+const STAR_CLOUD_KNOTS = [
+  { l: 6, s: 1.0 },    // Large Sagittarius Star Cloud — the brightest swell
+  { l: 27, s: 0.85 },  // Scutum Star Cloud
+  { l: 75, s: 0.9 },   // Cygnus Star Cloud (Cygnus rift region)
+  { l: 330, s: 0.7 },  // Norma Star Cloud
+  { l: 287, s: 0.7 },  // Carina
+  { l: 124, s: 0.6 },  // Cassiopeia / Perseus segment — keeps the far band alive
+];
 
 export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boost }: Props) {
   if (nightMode) return null;
@@ -94,10 +108,18 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
             warm gold→pink, NOT white — so we push saturation here to colour the
             (naturally grey) photographic core riding on top. This is the visual anchor. */}
         <RadialGradient id="mwCore" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFD583" stopOpacity={o(0.62)} />
-          <Stop offset="26%" stopColor="#F4AE63" stopOpacity={o(0.42)} />
-          <Stop offset="58%" stopColor="#E47A9E" stopOpacity={o(0.22)} />
-          <Stop offset="100%" stopColor="#C76FB0" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#FFE9B0" stopOpacity={o(0.62)} />
+          <Stop offset="24%" stopColor="#E8C77E" stopOpacity={o(0.44)} />
+          <Stop offset="56%" stopColor="#E06888" stopOpacity={o(0.22)} />
+          <Stop offset="100%" stopColor="#9080B0" stopOpacity={0} />
+        </RadialGradient>
+        {/* LAYER B — bright star cloud: pale gold melting to white at the heart, the
+            colour of a dense stellar swell (Scutum/Sagittarius clouds). Low opacity so
+            it brightens the band, not bleaches it. */}
+        <RadialGradient id="mwStarCloud" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor="#FFF6D6" stopOpacity={o(0.17)} />
+          <Stop offset="45%" stopColor="#F2E6C8" stopOpacity={o(0.08)} />
+          <Stop offset="100%" stopColor="#F2E6C8" stopOpacity={0} />
         </RadialGradient>
         {/* wide rose → lavender → violet-blue halo cradling the core (the gold→pink→
             lavender→deep-blue colour run from the reference). Stronger lavender step. */}
@@ -135,6 +157,14 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
       {glowPts.map((p, i) => (
         <Circle key={`g-${i}`} cx={p.x} cy={p.y} r={glowR * (0.78 + ((i * 37) % 100) / 100 * 0.54)} fill="url(#mwGlow)" />
       ))}
+
+      {/* LAYER B — bright star clouds: pale-gold swells where the band thickens with
+          stars. Above the diffuse glow, below the emission/dust so the rivers of dust
+          carve through them. Per-knot radius varies so the swells read organic. */}
+      {STAR_CLOUD_KNOTS.map((k, i) => {
+        const p = knotPoint(k.l);
+        return p ? <Circle key={`sc-${i}`} cx={p.x} cy={p.y} r={glowR * (0.46 + ((i * 53) % 100) / 100 * 0.22) * k.s} fill="url(#mwStarCloud)" /> : null;
+      })}
 
       {/* H-alpha emission patches — rose star-forming regions woven into the band */}
       {EMISSION_KNOTS.map((k, i) => {
