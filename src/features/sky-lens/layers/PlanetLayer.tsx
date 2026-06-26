@@ -21,13 +21,15 @@ const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 // Per-planet "personality": disc radius + glow size. Brighter planets read bigger.
 // Bodies bumped ~30% (Path-to-10) so each planet reads instantly from across the
 // screen WITHOUT its label: Jupiter ≈26px and Saturn ≈22px across (disc = radius),
-// Mars/Venus/Mercury scaled to match. Glows held tight so the body, not fog, leads.
+// Mars/Venus/Mercury scaled to match. Glows held to ≤~1.3× the disc so the BODY (and
+// its illustration) leads, not atmospheric fog — Venus/Mars/Mercury glows tightened
+// from 1.5× down to 1.3× per the final-polish pass (Jupiter/Saturn were already tight).
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  venus: { disc: 13, glow: 20 },
+  venus: { disc: 13, glow: 17 },
   jupiter: { disc: 18, glow: 22 },
   saturn: { disc: 15, glow: 18 },
-  mars: { disc: 10, glow: 15 },
-  mercury: { disc: 6, glow: 9 },
+  mars: { disc: 10, glow: 13 },
+  mercury: { disc: 6, glow: 8 },
 };
 
 // Galilean moons — small offsets along the ring plane, scattered like the real set.
