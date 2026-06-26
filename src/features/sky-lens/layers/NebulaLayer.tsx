@@ -32,27 +32,167 @@ const TYPE_LABEL: Record<NebulaType, string> = {
 type Lobe = { dx: number; dy: number; s: number; op?: number };
 type Filament = { dx: number; dy: number; rx: number; ry: number; ang: number; op: number };
 type Signature = { scale: number; lobes?: Lobe[]; ring?: boolean; filaments?: Filament[] };
-const SIGNATURES: Record<string, Signature> = {
-  // Orion — red-magenta cloud with sweeping wings (tightened from 3.6)
+
+// THE BIG FIVE — modelled directly on the Trifid astrophoto in assets/sky/. A real
+// emission nebula is NOT a single-colour blob: warm pink H-alpha emission AND cool
+// blue reflection nebulosity coexist, carved by DARK DUST LANES into recognisable
+// lobes, with bright embedded stars shining through. Each is built from three layers:
+//   warm[] — pink/orange emission lobes (uses the nebula's coreColor/hazeColor)
+//   cool[] — blue reflection lobes, offset to one region (the Trifid's blue cap)
+//   lanes[] — dark dust ellipses that SPLIT the glow (the "tri-fid" three-way cleft)
+//   stars[] — embedded bright stars (white dots) the translucent cloud shines around
+// All offsets/sizes are in units of the base radius r. coolColor drives a dedicated
+// blue radial gradient built per-object in <Defs>.
+type DustLane = { dx: number; dy: number; rx: number; ry: number; ang: number; op?: number };
+type EmbStar = { dx: number; dy: number; r: number; op?: number };
+type BigFive = {
+  scale: number;
+  coolColor: string;
+  warm: Lobe[];
+  cool: Lobe[];
+  lanes: DustLane[];
+  stars: EmbStar[];
+};
+const BIG_FIVE: Record<string, BigFive> = {
+  // Trifid (M20) — the reference. Pink emission below, blue reflection cap above, a
+  // three-way dark cleft radiating from the heart. The signature dual-colour nebula.
+  m20: {
+    scale: 2.4,
+    coolColor: "#6FB6F2",
+    warm: [
+      { dx: 0, dy: 0.22, s: 0.95 },
+      { dx: -0.45, dy: 0.5, s: 0.62, op: 0.82 },
+      { dx: 0.48, dy: 0.46, s: 0.66, op: 0.82 },
+      { dx: 0, dy: 0.12, s: 0.7, op: 0.92 },
+    ],
+    cool: [
+      { dx: 0, dy: -0.82, s: 0.82 },
+      { dx: -0.48, dy: -0.62, s: 0.58, op: 0.85 },
+      { dx: 0.44, dy: -0.78, s: 0.54, op: 0.8 },
+    ],
+    lanes: [
+      { dx: 0, dy: -0.05, rx: 0.1, ry: 0.95, ang: 2, op: 0.85 },
+      { dx: -0.32, dy: 0.5, rx: 0.09, ry: 0.8, ang: -44, op: 0.8 },
+      { dx: 0.34, dy: 0.48, rx: 0.09, ry: 0.8, ang: 44, op: 0.8 },
+    ],
+    stars: [
+      { dx: 0.04, dy: 0.18, r: 1.7, op: 0.95 },
+      { dx: -0.58, dy: -0.32, r: 1.0, op: 0.7 },
+      { dx: 0.52, dy: 0.08, r: 1.1, op: 0.75 },
+      { dx: 0.2, dy: 0.72, r: 0.9, op: 0.7 },
+      { dx: -0.32, dy: 0.6, r: 0.8, op: 0.65 },
+      { dx: 0.66, dy: -0.5, r: 0.9, op: 0.7 },
+      { dx: -0.2, dy: -0.9, r: 0.85, op: 0.7 },
+    ],
+  },
+  // Orion (M42) — magenta wings sweeping down, a blue "Running Man" reflection cap to
+  // the north, a dark intrusion (the Fish's Mouth) biting into the bright trapezium.
   m42: {
     scale: 2.4,
-    lobes: [
+    coolColor: "#6A86E6",
+    warm: [
       { dx: 0, dy: 0, s: 1 },
       { dx: -0.55, dy: -0.75, s: 0.7, op: 0.7 },
       { dx: 0.6, dy: 0.55, s: 0.85, op: 0.75 },
       { dx: 0.15, dy: 1.15, s: 0.55, op: 0.6 },
       { dx: -0.9, dy: 0.3, s: 0.5, op: 0.5 },
     ],
-  },
-  // Lagoon — a bright core trailing gold haze
-  m8: {
-    scale: 3.0,
-    lobes: [
-      { dx: 0, dy: 0, s: 1 },
-      { dx: 0.55, dy: 0.15, s: 0.65, op: 0.7 },
-      { dx: -0.5, dy: 0.25, s: 0.5, op: 0.55 },
+    cool: [
+      { dx: -0.2, dy: -1.3, s: 0.55, op: 0.7 },
+      { dx: 0.12, dy: -1.55, s: 0.45, op: 0.6 },
+    ],
+    lanes: [
+      { dx: 0.34, dy: -0.12, rx: 0.5, ry: 0.13, ang: -25, op: 0.78 },
+      { dx: -0.2, dy: 0.22, rx: 0.36, ry: 0.1, ang: 20, op: 0.58 },
+    ],
+    stars: [
+      { dx: 0, dy: 0, r: 1.6, op: 0.95 },
+      { dx: 0.09, dy: 0.05, r: 1.0, op: 0.9 },
+      { dx: -0.08, dy: 0.06, r: 0.9, op: 0.85 },
+      { dx: 0.05, dy: -0.07, r: 0.9, op: 0.85 },
+      { dx: 0.5, dy: 0.5, r: 0.9, op: 0.7 },
+      { dx: -0.6, dy: -0.55, r: 0.85, op: 0.7 },
     ],
   },
+  // Lagoon (M8) — a rose cloud cleft by the dark "lagoon" channel, the open cluster
+  // NGC 6530 sparking on its eastern edge, a faint blue haze off one flank.
+  m8: {
+    scale: 3.0,
+    coolColor: "#5C8FD0",
+    warm: [
+      { dx: 0, dy: 0, s: 1 },
+      { dx: 0.55, dy: 0.12, s: 0.68, op: 0.75 },
+      { dx: -0.55, dy: 0.08, s: 0.6, op: 0.7 },
+      { dx: 0.1, dy: -0.42, s: 0.5, op: 0.62 },
+    ],
+    cool: [{ dx: 0.72, dy: -0.42, s: 0.42, op: 0.55 }],
+    lanes: [
+      { dx: 0, dy: 0, rx: 0.12, ry: 1.0, ang: 12, op: 0.8 },
+      { dx: 0.16, dy: 0.12, rx: 0.1, ry: 0.7, ang: -32, op: 0.55 },
+    ],
+    stars: [
+      { dx: 0.42, dy: -0.06, r: 1.4, op: 0.9 },
+      { dx: 0.52, dy: 0.12, r: 0.95, op: 0.78 },
+      { dx: 0.34, dy: 0.2, r: 0.85, op: 0.72 },
+      { dx: -0.42, dy: 0.22, r: 1.0, op: 0.72 },
+      { dx: -0.1, dy: -0.3, r: 0.85, op: 0.7 },
+    ],
+  },
+  // Eagle (M16) — amber-magenta glow with the dark Pillars of Creation reaching up
+  // from the core, the cluster NGC 6611 scattered across the top.
+  m16: {
+    scale: 2.4,
+    coolColor: "#7FA0E0",
+    warm: [
+      { dx: 0, dy: 0, s: 1 },
+      { dx: -0.42, dy: -0.5, s: 0.6, op: 0.7 },
+      { dx: 0.46, dy: -0.4, s: 0.6, op: 0.7 },
+      { dx: 0, dy: 0.52, s: 0.55, op: 0.6 },
+    ],
+    cool: [{ dx: 0, dy: -0.72, s: 0.42, op: 0.5 }],
+    lanes: [
+      { dx: 0, dy: 0.18, rx: 0.09, ry: 0.58, ang: -8, op: 0.85 },
+      { dx: -0.18, dy: 0.22, rx: 0.07, ry: 0.46, ang: 12, op: 0.75 },
+      { dx: 0.16, dy: 0.24, rx: 0.06, ry: 0.4, ang: -18, op: 0.7 },
+    ],
+    stars: [
+      { dx: -0.2, dy: -0.6, r: 1.2, op: 0.85 },
+      { dx: 0.3, dy: -0.5, r: 1.0, op: 0.8 },
+      { dx: 0, dy: -0.32, r: 0.9, op: 0.75 },
+      { dx: 0.46, dy: -0.62, r: 0.85, op: 0.72 },
+      { dx: -0.45, dy: -0.35, r: 0.8, op: 0.7 },
+    ],
+  },
+  // Carina (NGC 3372) — a vast irregular cloud of hot pink and orange, split by the
+  // dark Keyhole lane, blazing Eta Carinae at its heart.
+  ngc3372: {
+    scale: 2.4,
+    coolColor: "#6CA0D8",
+    warm: [
+      { dx: 0, dy: 0, s: 1 },
+      { dx: -0.7, dy: -0.3, s: 0.72, op: 0.75 },
+      { dx: 0.7, dy: 0.2, s: 0.76, op: 0.78 },
+      { dx: -0.3, dy: 0.7, s: 0.6, op: 0.65 },
+      { dx: 0.5, dy: -0.6, s: 0.55, op: 0.6 },
+      { dx: 0, dy: -0.2, s: 0.82, op: 0.85 },
+    ],
+    cool: [{ dx: -0.6, dy: 0.5, s: 0.46, op: 0.5 }],
+    lanes: [
+      { dx: 0, dy: 0, rx: 0.14, ry: 0.9, ang: 35, op: 0.78 },
+      { dx: -0.1, dy: -0.1, rx: 0.5, ry: 0.1, ang: -15, op: 0.68 },
+      { dx: 0.22, dy: 0.26, rx: 0.08, ry: 0.42, ang: 60, op: 0.58 },
+    ],
+    stars: [
+      { dx: 0.05, dy: 0, r: 1.9, op: 0.95 },
+      { dx: -0.5, dy: 0.3, r: 1.0, op: 0.75 },
+      { dx: 0.42, dy: -0.42, r: 1.0, op: 0.75 },
+      { dx: 0.62, dy: 0.5, r: 0.9, op: 0.7 },
+      { dx: -0.7, dy: -0.4, r: 0.9, op: 0.7 },
+    ],
+  },
+};
+
+const SIGNATURES: Record<string, Signature> = {
   // Rosette — circular rose bloom, smaller than before (was dominating the sky)
   ngc2237: { scale: 1.6, ring: true },
   // North America — a recognizable continent built from offset lobes
@@ -125,6 +265,14 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                 <Stop offset="100%" stopColor={n.hazeColor} stopOpacity="0" />
               </RadialGradient>
             )}
+            {BIG_FIVE[n.id] && (
+              /* cool blue reflection nebulosity — the second colour zone */
+              <RadialGradient id={`neb-cool-${n.id}`} cx="50%" cy="50%" r="50%">
+                <Stop offset="0%" stopColor={BIG_FIVE[n.id].coolColor} stopOpacity="0.55" />
+                <Stop offset="40%" stopColor={BIG_FIVE[n.id].coolColor} stopOpacity="0.3" />
+                <Stop offset="100%" stopColor={BIG_FIVE[n.id].coolColor} stopOpacity="0" />
+              </RadialGradient>
+            )}
           </React.Fragment>
         ))}
       </Defs>
@@ -138,11 +286,12 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         const breathe = 0.9 + Math.sin(time * 0.00157 + i * 0.7) * 0.1;
         const isShowcase = SHOWCASE.has(n.id);
         const sig = SIGNATURES[n.id];
+        const bf = BIG_FIVE[n.id];
         // Focus mode (tap) + auto showcase region (e.g. Orion in view): a nebula in the
         // lit region swells and intensifies. Showcase pushes intensity up to ~3× (+200%).
         const ff = focusFactor(p.x, p.y, focus);
         const sf = focusFactor(p.x, p.y, showcase);
-        const eff = sig ? sig.scale : scaleFor(n.id);
+        const eff = bf ? bf.scale : sig ? sig.scale : scaleFor(n.id);
         const r = Math.max(isShowcase ? 44 : 22, n.radius * eff) * (1 + ff * 0.8) * (1 + sf * 0.4);
         const opMul = (isShowcase ? 0.82 : 1) * (1 + ff * 0.7) * (1 + sf * 2.0); // showcase clouds: visible but not solid
         const hazeR = r * 3;
@@ -150,6 +299,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         const volR = r * 4.4; // volumetric outer edge
         const hazeId = `url(#neb-haze-${n.id})`;
         const coreId = `url(#neb-core-${n.id})`;
+        const coolId = `url(#neb-cool-${n.id})`;
 
         return (
           <G key={n.id} opacity={belowHorizon ? 0.2 : 1}>
@@ -178,7 +328,55 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
             />
 
             <G opacity={Math.min(1, breathe * opMul)}>
-              {sig?.ring ? (
+              {bf ? (
+                /* BIG FIVE — dual-colour astrophoto cloud: blue reflection + pink
+                   emission, carved by dark dust lanes, embedded bright stars. */
+                <>
+                  {/* cool blue reflection nebulosity (behind, offset to one region) */}
+                  <Circle cx={p.x} cy={p.y} r={volR * 0.8} fill={coolId} opacity={0.3} />
+                  {bf.cool.map((lb, k) => (
+                    <Circle
+                      key={`cool-${k}`}
+                      cx={p.x + lb.dx * r}
+                      cy={p.y + lb.dy * r}
+                      r={hazeR * lb.s}
+                      fill={coolId}
+                      opacity={(lb.op ?? 1) * 0.9}
+                    />
+                  ))}
+                  {/* warm pink/orange emission */}
+                  <Circle cx={p.x} cy={p.y} r={volR} fill={hazeId} opacity={0.38} />
+                  {bf.warm.map((lb, k) => (
+                    <Circle
+                      key={`warm-${k}`}
+                      cx={p.x + lb.dx * r}
+                      cy={p.y + lb.dy * r}
+                      r={hazeR * lb.s}
+                      fill={hazeId}
+                      opacity={lb.op ?? 1}
+                    />
+                  ))}
+                  {/* bright concentrated core */}
+                  <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
+                  {/* dark dust lanes — carve the glow into recognisable lobes */}
+                  {bf.lanes.map((ln, k) => (
+                    <G key={`lane-${k}`} transform={`rotate(${ln.ang} ${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
+                      <Ellipse
+                        cx={p.x + ln.dx * r}
+                        cy={p.y + ln.dy * r}
+                        rx={r * ln.rx}
+                        ry={r * ln.ry}
+                        fill="#06040E"
+                        opacity={ln.op ?? 0.8}
+                      />
+                    </G>
+                  ))}
+                  {/* embedded bright stars shining through the translucent cloud */}
+                  {bf.stars.map((st, k) => (
+                    <Circle key={`emb-${k}`} cx={p.x + st.dx * r} cy={p.y + st.dy * r} r={st.r} fill="#FFFDF5" opacity={st.op ?? 0.9} />
+                  ))}
+                </>
+              ) : sig?.ring ? (
                 /* Rosette — hollow rose bloom + a faint outer halo */
                 <>
                   <Circle cx={p.x} cy={p.y} r={volR * 0.7} fill={hazeId} opacity={0.4} />
@@ -223,8 +421,9 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                   <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
                 </>
               )}
-              {/* hot heart — the central star / cluster (rings stay hollow) */}
-              {!sig?.ring && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
+              {/* hot heart — the central star / cluster (rings stay hollow; Big Five
+                  supply their own embedded stars) */}
+              {!sig?.ring && !bf && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
             </G>
 
             {/* label */}
