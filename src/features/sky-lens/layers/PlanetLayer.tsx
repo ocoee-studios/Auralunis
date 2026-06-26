@@ -138,10 +138,21 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
               );
             })()}
 
+            {/* 3D LIGHTING — a soft terminator SHADOW on the far (lower-right)
+                hemisphere + a tiny SPECULAR highlight on the near (upper-left) side, so
+                the planet reads as a lit sphere SUSPENDED in space, not a flat disc.
+                Both stay within the disc; !nightMode only (keep one consistent light). */}
+            {!nightMode && (
+              <>
+                <Circle cx={x + d * 0.42} cy={y + d * 0.42} r={d * 0.58} fill="#01030A" opacity={0.18} />
+                <Circle cx={x - d * 0.34} cy={y - d * 0.34} r={Math.max(1.4, d * 0.15)} fill="#FFFFFF" opacity={0.4} />
+              </>
+            )}
+
             {/* ATMOSPHERE — a thin color-matched limb ring hugging the disc, the
                 terminator-glow that makes the body read as a lit sphere in space
                 rather than a flat dot. Above the illustration so it rims the planet. */}
-            {!nightMode && <Circle cx={x} cy={y} r={d + 1} fill="none" stroke={color} strokeWidth={2} strokeOpacity={0.2} />}
+            {!nightMode && <Circle cx={x} cy={y} r={d + 1} fill="none" stroke={color} strokeWidth={2} strokeOpacity={0.3} />}
 
             {/* generous transparent tap target on top (≈15px beyond the disc) */}
             <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />

@@ -374,26 +374,23 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                 /* BIG FIVE — dual-colour astrophoto cloud: blue reflection + pink
                    emission, carved by dark dust lanes, embedded bright stars. */
                 <>
-                  {/* cool blue reflection nebulosity (behind, offset to one region) */}
-                  <Circle cx={p.x} cy={p.y} r={volR * 0.8} fill={coolId} opacity={0.3} />
+                  {/* cool blue reflection nebulosity — wispy gas (irregular paths, not
+                      circles), keeping the cool/warm dual-colour structure. */}
+                  <Path d={blobPath(p.x, p.y, volR * 0.8, seed + 5)} fill={coolId} opacity={0.3} />
                   {bf.cool.map((lb, k) => (
-                    <Circle
+                    <Path
                       key={`cool-${k}`}
-                      cx={p.x + lb.dx * r}
-                      cy={p.y + lb.dy * r}
-                      r={hazeR * lb.s}
+                      d={blobPath(p.x + lb.dx * r, p.y + lb.dy * r, hazeR * lb.s, seed + k * 13 + 1)}
                       fill={coolId}
                       opacity={(lb.op ?? 1) * 0.9}
                     />
                   ))}
-                  {/* warm pink/orange emission */}
-                  <Circle cx={p.x} cy={p.y} r={volR} fill={hazeId} opacity={0.38} />
+                  {/* warm pink/orange emission — wispy cloud lobes */}
+                  <Path d={blobPath(p.x, p.y, volR, seed + 9)} fill={hazeId} opacity={0.38} />
                   {bf.warm.map((lb, k) => (
-                    <Circle
+                    <Path
                       key={`warm-${k}`}
-                      cx={p.x + lb.dx * r}
-                      cy={p.y + lb.dy * r}
-                      r={hazeR * lb.s}
+                      d={blobPath(p.x + lb.dx * r, p.y + lb.dy * r, hazeR * lb.s, seed + k * 17 + 3)}
                       fill={hazeId}
                       opacity={lb.op ?? 1}
                     />
