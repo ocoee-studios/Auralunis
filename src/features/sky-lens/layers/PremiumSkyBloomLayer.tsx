@@ -55,8 +55,8 @@ export const PremiumSkyBloomLayer = memo(function PremiumSkyBloomLayer({
             <Stop offset="100%" stopColor={gold} stopOpacity={0} />
           </RadialGradient>
           <LinearGradient id="auralunisHorizonGlow" x1="0%" y1="100%" x2="0%" y2="0%">
-            <Stop offset="0%" stopColor={gold} stopOpacity={0.20 * intensity} />
-            <Stop offset="35%" stopColor={violet} stopOpacity={0.09 * intensity} />
+            <Stop offset="0%" stopColor={gold} stopOpacity={0.08 * intensity} />
+            <Stop offset="25%" stopColor={violet} stopOpacity={0.04 * intensity} />
             <Stop offset="100%" stopColor="#030816" stopOpacity={0} />
           </LinearGradient>
           <LinearGradient id="auralunisMilkySilk" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -68,7 +68,7 @@ export const PremiumSkyBloomLayer = memo(function PremiumSkyBloomLayer({
           </LinearGradient>
         </Defs>
         <Rect width={width} height={height} fill="url(#auralunisDeepBloom)" />
-        <Rect y={height * 0.56} width={width} height={height * 0.44} fill="url(#auralunisHorizonGlow)" />
+        <Rect y={height * 0.75} width={width} height={height * 0.25} fill="url(#auralunisHorizonGlow)" />
         <Circle cx={width * 0.74} cy={height * 0.20} r={Math.min(width, height) * 0.46} fill="url(#auralunisMoonHalo)" />
         {/* Milky silk band REMOVED — it was a hardcoded screen-space diagonal
             that rendered in every direction, creating visible stripes even when
