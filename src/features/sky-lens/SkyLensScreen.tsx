@@ -1,7 +1,18 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Animated, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { captureRef, captureScreen } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
+
+// react-native-view-shot isn't bundled in Expo Go — load it lazily (guarded require,
+// same pattern as ShareCardService) so Sky Lens still renders there. When it's
+// unavailable the capture button falls back to the iOS-screenshot tip.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let ViewShot: { captureScreen?: (opts: any) => Promise<string> } | null = null;
+try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  ViewShot = require("react-native-view-shot");
+} catch {
+  // unavailable (e.g. Expo Go) — capture degrades gracefully.
+}
 import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { CameraView } from "expo-camera";
@@ -91,9 +102,17 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const flash = useRef(new Animated.Value(0)).current;
   const captureSky = useCallback(async () => {
     if (capturing) return;
+    if (!ViewShot?.captureScreen) {
+      // Expo Go / module unavailable — point the user at the system screenshot.
+      Alert.alert(
+        "Tip: Use iOS Screenshot",
+        "Press Power + Volume Up for the best sky photos. Captures everything perfectly including the camera feed."
+      );
+      return;
+    }
     setCapturing(true);
     try {
-      const uri = await captureScreen({ format: "jpg", quality: 0.85, result: "tmpfile" });
+      const uri = await ViewShot.captureScreen({ format: "jpg", quality: 0.85, result: "tmpfile" });
       setCapturing(false);
       if (await Sharing.isAvailableAsync()) {
         Sharing.shareAsync(uri, { mimeType: "image/jpeg" });
