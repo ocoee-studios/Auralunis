@@ -6,19 +6,9 @@ import {
   type AuraLunisThemeMode,
   type SkyQuality
 } from "@/features/settings/SettingsTypes";
-import {
-  defaultWatchComplications,
-  watchComplicationOptions,
-  watchFaceOptions,
-  watchThemeOptions,
-  type WatchComplicationId,
-  type WatchFaceId,
-  type WatchThemeId
-} from "@/features/watch/WatchFaceCatalog";
 import { AuraLunisThemes, type AuraLunisThemePalette } from "@/theme/tokens";
 
 const SETTINGS_STORAGE_KEY = "auralunis.settings.v2";
-const MAX_WATCH_COMPLICATIONS = 4;
 
 type SettingsContextValue = {
   settings: AuraLunisSettingsState;
@@ -34,26 +24,9 @@ type SettingsContextValue = {
 const SettingsContext = createContext<SettingsContextValue | undefined>(undefined);
 
 const validThemeModes: AuraLunisThemeMode[] = ["system", "midnight_gold", "soft_moon", "deep_space"];
-const validWatchFaceIds = new Set<WatchFaceId>(watchFaceOptions.map((item) => item.id));
-const validWatchThemeIds = new Set<WatchThemeId>(watchThemeOptions.map((item) => item.id));
-const validComplicationIds = new Set<WatchComplicationId>(
-  watchComplicationOptions.map((item) => item.id)
-);
 
 function isBoolean(value: unknown): value is boolean {
   return typeof value === "boolean";
-}
-
-function sanitizeWatchComplications(value: unknown): WatchComplicationId[] {
-  if (!Array.isArray(value)) return defaultWatchComplications;
-
-  const valid = value.filter(
-    (item): item is WatchComplicationId =>
-      typeof item === "string" && validComplicationIds.has(item as WatchComplicationId)
-  );
-
-  const unique = Array.from(new Set(valid)).slice(0, MAX_WATCH_COMPLICATIONS);
-  return unique.length > 0 ? unique : defaultWatchComplications;
 }
 
 function sanitizeSettings(value: unknown): AuraLunisSettingsState {
@@ -109,25 +82,9 @@ function sanitizeSettings(value: unknown): AuraLunisSettingsState {
     motionPermissionExplained: isBoolean(saved.motionPermissionExplained)
       ? saved.motionPermissionExplained
       : defaultAuraLunisSettings.motionPermissionExplained,
-    watchSyncEnabled: isBoolean(saved.watchSyncEnabled)
-      ? saved.watchSyncEnabled
-      : defaultAuraLunisSettings.watchSyncEnabled,
     widgetsEnabled: isBoolean(saved.widgetsEnabled)
       ? saved.widgetsEnabled
-      : defaultAuraLunisSettings.widgetsEnabled,
-    selectedWatchFaceId:
-      typeof saved.selectedWatchFaceId === "string" &&
-      validWatchFaceIds.has(saved.selectedWatchFaceId as WatchFaceId)
-        ? (saved.selectedWatchFaceId as WatchFaceId)
-        : defaultAuraLunisSettings.selectedWatchFaceId,
-    selectedWatchThemeId:
-      typeof saved.selectedWatchThemeId === "string" &&
-      validWatchThemeIds.has(saved.selectedWatchThemeId as WatchThemeId)
-        ? (saved.selectedWatchThemeId as WatchThemeId)
-        : defaultAuraLunisSettings.selectedWatchThemeId,
-    selectedWatchComplicationIds: sanitizeWatchComplications(
-      saved.selectedWatchComplicationIds
-    )
+      : defaultAuraLunisSettings.widgetsEnabled
   };
 }
 

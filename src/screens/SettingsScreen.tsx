@@ -223,8 +223,7 @@ export function SettingsScreen() {
         </Pressable>
       </SettingsSection>
 
-      <SettingsSection title="Watch + Widgets">
-        <SettingRow title="Apple Watch Sync" description="Coming soon — sync watch face state, Moon stats, and the next sky event to your Apple Watch." value={settings.watchSyncEnabled} onValueChange={(value) => updateSetting("watchSyncEnabled", value)} />
+      <SettingsSection title="Widgets">
         <SettingRow title="Portal Stack Widgets" description="Moon, Tonight Score, Note, Event, Alarm, and mini astrolabe widgets." value={settings.widgetsEnabled} onValueChange={(value) => updateSetting("widgetsEnabled", value)} />
       </SettingsSection>
 

@@ -5,7 +5,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { AuraLunisColors } from "@/theme/tokens";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { SkyScreen } from "@/screens/SkyScreen";
-import { WatchScreen } from "@/screens/WatchScreen";
 import { LearnScreen } from "@/screens/LearnScreen";
 import { SettingsScreen } from "@/screens/SettingsScreen";
 
@@ -26,7 +25,6 @@ function TabBarBackground() {
 export type RootTabParamList = {
   Home: undefined;
   Sky: undefined;
-  Watch: undefined;
   Learn: undefined;
   Settings: undefined;
 };
@@ -47,7 +45,6 @@ export const TAB_BAR_STYLE = {
 const icons: Record<keyof RootTabParamList, keyof typeof Ionicons.glyphMap> = {
   Home: "home-outline",
   Sky: "moon-outline",
-  Watch: "watch-outline",
   Learn: "book-outline",
   Settings: "settings-outline"
 };
@@ -68,7 +65,6 @@ export function RootTabs() {
     >
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Sky" component={SkyScreen} />
-      <Tab.Screen name="Watch" component={WatchScreen} />
       <Tab.Screen name="Learn" component={LearnScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
