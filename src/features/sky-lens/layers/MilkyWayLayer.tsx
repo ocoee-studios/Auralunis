@@ -89,25 +89,27 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
           <Stop offset="50%" stopColor="#C99A52" stopOpacity={o(0.05)} />
           <Stop offset="100%" stopColor="#C99A52" stopOpacity={0} />
         </RadialGradient>
-        {/* LAYER 4 — galactic core: bright gold heart fading through amber to a rose
-            edge (the Sagittarius drama). ~2× brighter so the core reads as the
-            visual anchor of the band. */}
+        {/* LAYER 4 — galactic core: a SATURATED golden heart melting through amber into
+            a rose-pink edge (the Sagittarius drama). The reference photo's core is
+            warm gold→pink, NOT white — so we push saturation here to colour the
+            (naturally grey) photographic core riding on top. This is the visual anchor. */}
         <RadialGradient id="mwCore" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFE9B0" stopOpacity={o(0.55)} />
-          <Stop offset="28%" stopColor="#F0C888" stopOpacity={o(0.34)} />
-          <Stop offset="62%" stopColor="#E08AA8" stopOpacity={o(0.13)} />
-          <Stop offset="100%" stopColor="#E08AA8" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#FFD583" stopOpacity={o(0.62)} />
+          <Stop offset="26%" stopColor="#F4AE63" stopOpacity={o(0.42)} />
+          <Stop offset="58%" stopColor="#E47A9E" stopOpacity={o(0.22)} />
+          <Stop offset="100%" stopColor="#C76FB0" stopOpacity={0} />
         </RadialGradient>
-        {/* wide rose→violet halo cradling the core */}
+        {/* wide rose → lavender → violet-blue halo cradling the core (the gold→pink→
+            lavender→deep-blue colour run from the reference). Stronger lavender step. */}
         <RadialGradient id="mwCoreHalo" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E08AA8" stopOpacity={o(0.05)} />
-          <Stop offset="55%" stopColor="#9A6CC0" stopOpacity={o(0.025)} />
-          <Stop offset="100%" stopColor="#9A6CC0" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#E79AC6" stopOpacity={o(0.09)} />
+          <Stop offset="52%" stopColor="#A77BD8" stopOpacity={o(0.05)} />
+          <Stop offset="100%" stopColor="#7E6CD0" stopOpacity={0} />
         </RadialGradient>
         {/* H-alpha emission (rose/magenta) star-forming regions in the band */}
         <RadialGradient id="mwEmission" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E06888" stopOpacity={o(0.2)} />
-          <Stop offset="45%" stopColor="#D870A0" stopOpacity={o(0.1)} />
+          <Stop offset="0%" stopColor="#E85C82" stopOpacity={o(0.26)} />
+          <Stop offset="45%" stopColor="#D870A0" stopOpacity={o(0.13)} />
           <Stop offset="100%" stopColor="#D870A0" stopOpacity={0} />
         </RadialGradient>
         {/* reflection (ice blue → violet) accent near bright clusters */}
@@ -116,18 +118,22 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
           <Stop offset="50%" stopColor="#7B5CF6" stopOpacity={o(0.03)} />
           <Stop offset="100%" stopColor="#7B5CF6" stopOpacity={0} />
         </RadialGradient>
-        {/* LAYERS 1 & 5 — dark dust (near-black, the contrast maker). Darker per
-            feedback: a deeper Great Rift reads as dust, not a smooth glow. */}
+        {/* LAYERS 1 & 5 — dark dust (near-black, the contrast maker). DRAMATICALLY
+            deeper per the Week-1 reference: the Great Rift should look like a black
+            river torn through the band, not a smooth grey gradient. Near-opaque core,
+            wider dark plateau (stop pushed out 48%→54%) so the rift carves harder. */}
         <RadialGradient id="mwDust" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#000005" stopOpacity={Math.min(0.85, 0.7 * boost)} />
-          <Stop offset="48%" stopColor="#01030A" stopOpacity={Math.min(0.5, 0.4 * boost)} />
-          <Stop offset="100%" stopColor="#01030A" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#000003" stopOpacity={Math.min(0.97, 0.94 * boost)} />
+          <Stop offset="54%" stopColor="#010208" stopOpacity={Math.min(0.66, 0.58 * boost)} />
+          <Stop offset="100%" stopColor="#010208" stopOpacity={0} />
         </RadialGradient>
       </Defs>
 
-      {/* LAYER 3 — soft glow binding the band */}
+      {/* LAYER 3 — soft glow binding the band. Per-point radius varies (0.78–1.32×) so
+          the band's outer envelope frays into ragged edges instead of reading as a row
+          of equal circles (reference: organic, not geometric). */}
       {glowPts.map((p, i) => (
-        <Circle key={`g-${i}`} cx={p.x} cy={p.y} r={glowR} fill="url(#mwGlow)" />
+        <Circle key={`g-${i}`} cx={p.x} cy={p.y} r={glowR * (0.78 + ((i * 37) % 100) / 100 * 0.54)} fill="url(#mwGlow)" />
       ))}
 
       {/* H-alpha emission patches — rose star-forming regions woven into the band */}
@@ -166,9 +172,9 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         const v = (hash(d.id) % 100) / 100;
         let base = dustBase * 0.72;
         let op = 0.82;
-        if (d.id.startsWith("mwk")) { base = dustBase * 1.6; op = 1; } // Coalsack-like deep knot
-        else if (d.id.startsWith("mwr")) { base = dustBase * 1.15; op = 1; } // rift
-        else if (d.id.startsWith("mwf")) { base = dustBase * 0.6; op = 0.9; } // thin fracture
+        if (d.id.startsWith("mwk")) { base = dustBase * 1.8; op = 1; } // Coalsack-like deep knot
+        else if (d.id.startsWith("mwr")) { base = dustBase * 1.4; op = 1; } // rift — wider, blacker river
+        else if (d.id.startsWith("mwf")) { base = dustBase * 0.62; op = 0.95; } // thin fracture
         // Wider size spread (0.55–1.7×) frays the dust edges so the lanes read as
         // irregular clouds, not smooth blobs.
         const r = base * (0.55 + v * 1.15);
