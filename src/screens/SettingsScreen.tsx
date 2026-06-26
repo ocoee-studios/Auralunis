@@ -191,11 +191,22 @@ export function SettingsScreen() {
           ))}
         </View>
 
-        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Sky Lens Calibration", "Move your phone slowly in a figure-eight, then recenter on a visible object such as the Moon.")}>
-          <Text style={styles.secondaryButtonText}>Run Sky Lens Calibration</Text>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert(
+          "Calibrate Sky Lens",
+          "To calibrate your compass for accurate sky pointing:\n\n1. Hold your phone away from metal objects\n2. Move it slowly in a figure-eight pattern 3 times\n3. Open Sky Lens and point at a known bright object (Moon, Venus, or a bright star)\n4. If it's misaligned, repeat the figure-eight\n\nMost calibration issues are caused by magnetic interference from cases, mounts, or nearby electronics.",
+          [{ text: "Got it", style: "default" }]
+        )}>
+          <Text style={styles.secondaryButtonText}>Compass Calibration Guide</Text>
         </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Manual Sky Map", "If location services are unavailable, Sky Lens uses your last known position.\n\nFor privacy, you can use Planetarium mode — no camera or location needed.\n\nSky tab → Sky Lens → tap the half-moon icon for Planetarium mode.")}>
-          <Text style={styles.secondaryButtonText}>Manual Sky Map Instructions</Text>
+        <Pressable style={styles.secondaryButton} onPress={() => Linking.openSettings()}>
+          <Text style={styles.secondaryButtonText}>Manage App Permissions</Text>
+        </Pressable>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert(
+          "Privacy-Safe Sky Map",
+          "AuraLunis works without location or camera access:\n\n• Planetarium Mode — full sky view with no camera, no location needed\n• Manual Location — set your city in iOS Settings → Privacy → Location Services\n• Offline — all star data is on-device, no internet required\n\nYour location is only used locally for sky calculations. It is never sent to any server.",
+          [{ text: "OK", style: "default" }]
+        )}>
+          <Text style={styles.secondaryButtonText}>Privacy-Safe Sky Map</Text>
         </Pressable>
       </SettingsSection>
 
@@ -204,8 +215,8 @@ export function SettingsScreen() {
         <SettingRow title="Cloud Sync" description="Optional future device sync. Off by default." value={settings.cloudSyncEnabled} onValueChange={(value) => updateSetting("cloudSyncEnabled", value)} />
         <SettingRow title="AI Oracle Opt-In" description="Enable personalized Oracle briefings only when you choose." value={settings.aiOracleOptIn} onValueChange={(value) => updateSetting("aiOracleOptIn", value)} />
         <Text style={styles.localCount}>{items.length} local prototype Vault items</Text>
-        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Permissions", "Camera: Sky Lens only\nLocation: local sky calculations\nMotion: alignment\nPhotos: only when saving")}>
-          <Text style={styles.secondaryButtonText}>Review Permissions</Text>
+        <Pressable style={styles.secondaryButton} onPress={() => Linking.openSettings()}>
+          <Text style={styles.secondaryButtonText}>Review App Permissions in Settings</Text>
         </Pressable>
         <Pressable style={styles.dangerButton} onPress={() => clearPrototypeVault().then(() => Alert.alert("Prototype Vault", "Local prototype Vault items cleared."))}>
           <Text style={styles.dangerButtonText}>Clear Prototype Vault</Text>
