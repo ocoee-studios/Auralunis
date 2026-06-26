@@ -60,9 +60,11 @@ export const PLANET_COLORS: Record<string, string> = {
 // clear hierarchy, not a field of identical dots: mag-0 showpieces (Vega, Deneb,
 // Sirius) ~5px, visible named stars ~2.5px, dim catalog stars clamp to ~0.8px.
 export function magnitudeToRadius(magnitude: number): number {
-  // Sized for visibility on a phone screen: mag 0 ≈ 6px down to mag 6 ≈ 1px.
-  const r = 6 - magnitude;
-  return Math.max(1, Math.min(6.5, r));
+  // WIDE brightness hierarchy (device-feedback pass): Sirius (mag -1.46) should read
+  // dramatically bigger than an average mag-4 star — ~8-10×, not 2-3×. Steeper slope
+  // + lower floor: mag -1.5 ≈ 11px, mag 0 ≈ 8.5px, mag 2 ≈ 4.9px, mag 4 ≈ 1.3px.
+  const r = 8.5 - 1.8 * magnitude;
+  return Math.max(0.8, Math.min(11, r));
 }
 
 // Approximate spectral colors for the brightest named stars (by spectral class),
@@ -118,13 +120,15 @@ export interface StarFeature {
   glowColor: string;
 }
 export const STAR_FEATURES: Record<string, StarFeature> = {
-  sirius: { radius: 6.5, glowRadius: 20, glowColor: "rgba(190,224,255,0.30)" }, // brightest star — blue-white bloom + spikes
-  vega: { radius: 5.5, glowRadius: 15, glowColor: "rgba(170,207,255,0.26)" }, // icy blue-white glow
-  rigel: { radius: 6, glowRadius: 16, glowColor: "rgba(150,190,255,0.28)" }, // electric blue shimmer
-  betelgeuse: { radius: 6, glowRadius: 17, glowColor: "rgba(255,110,60,0.28)" }, // ember-red aura
-  arcturus: { radius: 5, glowRadius: 13, glowColor: "rgba(255,178,74,0.22)" }, // warm amber
-  antares: { radius: 6, glowRadius: 14, glowColor: "rgba(240,100,100,0.25)" }, // red ember, heart of Scorpius
-  shaula: { radius: 4, glowRadius: 10, glowColor: "rgba(255,246,214,0.15)" } // warm-white, the stinger
+  // Radii bumped to match the new wide brightness curve so the showpieces stay the
+  // biggest stars in the sky (Sirius the clear king), not capped below mag-0 dots.
+  sirius: { radius: 11, glowRadius: 24, glowColor: "rgba(190,224,255,0.30)" }, // brightest star — blue-white bloom + spikes
+  vega: { radius: 9, glowRadius: 18, glowColor: "rgba(170,207,255,0.26)" }, // icy blue-white glow
+  rigel: { radius: 9.5, glowRadius: 19, glowColor: "rgba(150,190,255,0.28)" }, // electric blue shimmer
+  betelgeuse: { radius: 9.5, glowRadius: 20, glowColor: "rgba(255,110,60,0.28)" }, // ember-red aura
+  arcturus: { radius: 8.5, glowRadius: 16, glowColor: "rgba(255,178,74,0.22)" }, // warm amber
+  antares: { radius: 9, glowRadius: 17, glowColor: "rgba(240,100,100,0.25)" }, // red ember, heart of Scorpius
+  shaula: { radius: 6, glowRadius: 12, glowColor: "rgba(255,246,214,0.15)" } // warm-white, the stinger
 };
 
 // Subtle per-constellation tints so each figure reads as distinct without turning

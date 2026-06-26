@@ -25,6 +25,14 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
+// deterministic per-star hash → a tiny, repeatable wobble so each showpiece bloom is
+// a slightly different soft shape (feathered, not an identical perfect circle).
+const hashStar = (s: string) => {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+  return h;
+};
+
 export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, extinction = false, bloom = true, fullSphere = false, onSelect }: Props) {
   return (
     <G>
@@ -79,13 +87,25 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             />
             {/* focus/showcase aura: any star in a lit region gets a soft halo */}
             {lit > 0 && <Circle cx={p.x} cy={p.y} r={(r + 9) * (1 + lit)} fill={color} opacity={0.16 * lit} />}
-            {/* hand-tuned ember glow for showpiece stars — grows in a showcase region
-                so Betelgeuse/Rigel blaze when Orion is on screen */}
-            {bloom && feature && <Circle cx={p.x} cy={p.y} r={feature.glowRadius * (1 + sf * 1.2)} fill={feature.glowColor} />}
-            {/* wide 8px glow ring so the magnitude-0 stars genuinely POP */}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.1} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.16} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.32} />}
+            {/* SHOWPIECE BLOOM — a soft FEATHERED falloff (faint wide halo → brighter
+                core) instead of one hard-edged disc, with a tiny per-star centre offset
+                so each bloom is a slightly different organic shape, not a sharp circle. */}
+            {bloom && feature && (() => {
+              const gr = feature.glowRadius * 0.85 * (1 + sf * 1.0);
+              const h = hashStar(star.id);
+              const ox = ((h % 7) - 3) * 0.1, oy = (((h >> 3) % 7) - 3) * 0.1; // ±0.3·gr
+              return (
+                <G>
+                  <Circle cx={p.x + gr * ox} cy={p.y + gr * oy} r={gr} fill={color} opacity={0.045} />
+                  <Circle cx={p.x} cy={p.y} r={gr * 0.68} fill={color} opacity={0.09} />
+                  <Circle cx={p.x - gr * ox * 0.5} cy={p.y - gr * oy * 0.5} r={gr * 0.42} fill={color} opacity={0.18} />
+                </G>
+              );
+            })()}
+            {/* softer, smaller glow rings on the magnitude-0 stars (feathered, not geometric) */}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.06} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.1} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 2} fill={color} opacity={0.22} />}
             {glint && (
               <>
                 <Line x1={p.x - spike} y1={p.y} x2={p.x + spike} y2={p.y} stroke={color} strokeWidth={0.9} strokeOpacity={0.5} strokeLinecap="round" />

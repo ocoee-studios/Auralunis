@@ -1,9 +1,30 @@
 import React, { useEffect, useState } from "react";
-import { Circle, Defs, Ellipse, G, RadialGradient, Stop, Text as SvgText } from "react-native-svg";
+import { Circle, Defs, Ellipse, G, Path, RadialGradient, Stop, Text as SvgText } from "react-native-svg";
 import type { HorizontalNebula } from "../ephemeris/Nebulae";
 import type { NebulaType } from "../data/nebulae";
 import { focusFactor, type ProjectFn, type SkyPalette, type SelectedObject, type FocusZone } from "../SkyLensVisual";
 import type { LabelPlacer } from "../labelLayout";
+
+// Irregular, smooth CLOSED blob path around (cx,cy) of approximate radius r, with a
+// deterministic wobble keyed by `seed`. Filled with a soft radial gradient it reads as
+// an organic, feathered cloud — wispy and uneven, NOT a perfect circle (device pass).
+function blobPath(cx: number, cy: number, r: number, seed: number, n = 9): string {
+  const pts: [number, number][] = [];
+  for (let i = 0; i < n; i++) {
+    const a = (i / n) * Math.PI * 2;
+    const f = Math.abs(Math.sin((seed + 1) * 12.9898 + i * 78.233) * 43758.5453) % 1;
+    const rr = r * (0.62 + f * 0.56); // 0.62–1.18× → ragged silhouette
+    pts.push([cx + Math.cos(a) * rr, cy + Math.sin(a) * rr]);
+  }
+  const mid = (i: number, j: number): [number, number] => [(pts[i][0] + pts[j][0]) / 2, (pts[i][1] + pts[j][1]) / 2];
+  const [sx, sy] = mid(n - 1, 0);
+  let d = `M ${sx.toFixed(1)} ${sy.toFixed(1)}`;
+  for (let i = 0; i < n; i++) {
+    const [mx, my] = mid(i, (i + 1) % n);
+    d += ` Q ${pts[i][0].toFixed(1)} ${pts[i][1].toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)}`;
+  }
+  return d + " Z";
+}
 
 type Props = {
   nebulae: HorizontalNebula[];
@@ -296,6 +317,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         if (!p.onScreen) return null;
 
         const breathe = 0.9 + Math.sin(time * 0.00157 + i * 0.7) * 0.1;
+        const seed = (n.id.charCodeAt(0) || 1) + n.id.length * 7; // stable per-nebula blob shape
         const isShowcase = SHOWCASE.has(n.id);
         const sig = SIGNATURES[n.id];
         const bf = BIG_FIVE[n.id];
@@ -344,8 +366,8 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                 /* FREE — a simple radial-glow cloud (no dual-colour silhouettes, dust
                    lanes, or embedded stars). Premium unlocks the astrophoto shapes. */
                 <>
-                  {isShowcase && <Circle cx={p.x} cy={p.y} r={volR} fill={hazeId} opacity={0.45} />}
-                  <Circle cx={p.x} cy={p.y} r={hazeR} fill={hazeId} />
+                  {isShowcase && <Path d={blobPath(p.x, p.y, volR, seed + 2)} fill={hazeId} opacity={0.45} />}
+                  <Path d={blobPath(p.x, p.y, hazeR, seed)} fill={hazeId} />
                   <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
                 </>
               ) : bf ? (
@@ -400,10 +422,12 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                   ))}
                 </>
               ) : sig?.ring ? (
-                /* Rosette — hollow rose bloom + a faint outer halo */
+                /* Rosette — a SOFT filled rose glow, NOT a hollow ring/donut (device
+                   feedback). ~50% smaller and ~40% dimmer than the old ring so it's a
+                   blush within the band, not a pink target floating on top. */
                 <>
-                  <Circle cx={p.x} cy={p.y} r={volR * 0.7} fill={hazeId} opacity={0.4} />
-                  <Circle cx={p.x} cy={p.y} r={r * 2.4} fill={`url(#neb-ring-${n.id})`} />
+                  <Path d={blobPath(p.x, p.y, hazeR * 0.6, seed)} fill={hazeId} opacity={0.26} />
+                  <Circle cx={p.x} cy={p.y} r={coreR * 0.8} fill={coreId} opacity={0.55} />
                 </>
               ) : sig?.lobes ? (
                 /* organic multi-lobe cloud (Orion, Lagoon, North America) */
@@ -439,8 +463,8 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                 </G>
               ) : (
                 <>
-                  {isShowcase && <Circle cx={p.x} cy={p.y} r={volR} fill={hazeId} opacity={0.45} />}
-                  <Circle cx={p.x} cy={p.y} r={hazeR} fill={hazeId} />
+                  {isShowcase && <Path d={blobPath(p.x, p.y, volR, seed + 2)} fill={hazeId} opacity={0.45} />}
+                  <Path d={blobPath(p.x, p.y, hazeR, seed)} fill={hazeId} />
                   <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
                 </>
               )}
