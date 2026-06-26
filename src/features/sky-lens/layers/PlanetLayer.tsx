@@ -76,6 +76,14 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, o
               <Circle cx={x} cy={y} r={st.glow * 1.3} fill="#EBB44E" opacity={0.11} />
             )}
 
+            {/* Jupiter — the four GALILEAN MOONS strung along the equatorial plane (a
+                slight tilt), the detail that makes Jupiter instantly recognisable in a
+                telescope/binoculars. Tiny bright pinpoints just off the disc. */}
+            {body.id === "jupiter" && !nightMode &&
+              JUPITER_MOONS.map((mx, idx) => (
+                <Circle key={`jmoon-${idx}`} cx={x + mx} cy={y - mx * 0.12} r={1.3} fill="#FFF8E8" opacity={0.92} />
+              ))}
+
             {/* Venus — tighter pearl halo + diffraction glints (crisper per feedback) */}
             {body.id === "venus" && !nightMode && (
               <>
@@ -86,13 +94,19 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, o
               </>
             )}
 
-            {/* Saturn — ring system behind the disc, with a bright shimmer highlight */}
+            {/* Saturn — ring system behind the disc: A ring, a dark CASSINI DIVISION,
+                then the brighter B ring, with a pearly shimmer highlight. The Cassini
+                gap is what makes Saturn read as Saturn and not "a dot with a line". */}
             {body.id === "saturn" && (
               <G>
                 {/* soft golden glow cradling the rings */}
                 <Ellipse cx={x} cy={y} rx={d * 2.7} ry={d * 0.85} fill="#E8C77E" opacity={0.08} rotation={-18} originX={x} originY={y} />
-                <Ellipse cx={x} cy={y} rx={d * 2.2} ry={d * 0.66} fill="none" stroke={color} strokeWidth={1.4} strokeOpacity={0.9} rotation={-18} originX={x} originY={y} />
-                <Ellipse cx={x} cy={y} rx={d * 1.7} ry={d * 0.5} fill="none" stroke={color} strokeWidth={0.8} strokeOpacity={0.5} rotation={-18} originX={x} originY={y} />
+                {/* A ring (outer) */}
+                <Ellipse cx={x} cy={y} rx={d * 2.2} ry={d * 0.66} fill="none" stroke={color} strokeWidth={1.5} strokeOpacity={0.9} rotation={-18} originX={x} originY={y} />
+                {/* Cassini division — a dark gap carved between A and B rings */}
+                <Ellipse cx={x} cy={y} rx={d * 1.96} ry={d * 0.588} fill="none" stroke="#080B18" strokeWidth={0.9} strokeOpacity={0.85} rotation={-18} originX={x} originY={y} />
+                {/* B ring (inner, brighter) */}
+                <Ellipse cx={x} cy={y} rx={d * 1.72} ry={d * 0.516} fill="none" stroke={color} strokeWidth={1.2} strokeOpacity={0.62} rotation={-18} originX={x} originY={y} />
                 {/* shimmer — a bright pearly highlight pass along the outer ring */}
                 {!nightMode && (
                   <Ellipse cx={x} cy={y} rx={d * 2.2} ry={d * 0.66} fill="none" stroke="#FFF6E0" strokeWidth={0.6} strokeOpacity={0.7} rotation={-18} originX={x} originY={y} />
