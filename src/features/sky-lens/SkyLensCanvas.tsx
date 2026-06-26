@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import { projectTarget, DEFAULT_FOV, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
 import { GridLayer } from "./layers/GridLayer";
 import { ConstellationLayer } from "./layers/ConstellationLayer";
+import { ConstellationArtLayer } from "./layers/ConstellationArtLayer";
 import { StarLayer } from "./layers/StarLayer";
 import { DomeStarLayer } from "./layers/DomeStarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
@@ -140,6 +141,11 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {activeLayers.has("ecliptic") && !cinematic && (
         <EclipticLayer points={sky.ecliptic} project={project} palette={palette} nightMode={nightMode} />
+      )}
+      {/* §Task 5 — faint gold mythology engravings BEHIND the constellation lines
+          (premium-only, fade in near screen centre). */}
+      {activeLayers.has("constellations") && (
+        <ConstellationArtLayer constellations={constellations} project={project} box={box} fov={fov} enabled={isPremium} />
       )}
       {activeLayers.has("constellations") && (
         <G opacity={cinematic ? 0.62 : 1}>
