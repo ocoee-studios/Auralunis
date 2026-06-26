@@ -100,5 +100,56 @@ export async function scheduleSkyEventNotifications(
   return scheduled;
 }
 
+// Schedule reminders for upcoming celestial events (meteor showers, eclipses,
+// oppositions…). ADDITIVE — does NOT cancel existing notifications, so it composes
+// with scheduleSkyEventNotifications (call it right after, since that one cancels
+// all first → no duplicate stacking across reschedules). Capped to the next few
+// highlight events to stay well under the OS pending-notification limit.
+export async function scheduleCelestialEventNotifications(
+  events: Array<{ id: string; name: string; date: string; type: string; bestTime: string; rating: number }>,
+  maxEvents = 6
+): Promise<number> {
+  const granted = await requestNotificationPermission();
+  if (!granted) return 0;
+
+  const now = Date.now();
+  const todayISO = new Date(now).toISOString().slice(0, 10);
+  const upcoming = events
+    .filter((e) => e.date > todayISO && e.rating >= 3)
+    .sort((a, b) => a.date.localeCompare(b.date))
+    .slice(0, maxEvents);
+
+  let scheduled = 0;
+  for (const e of upcoming) {
+    // Day-of at 7 PM local — the observing window is tonight.
+    const dayOf = new Date(`${e.date}T19:00:00`).getTime();
+    if (dayOf > now) {
+      await Notifs.scheduleNotificationAsync({
+        content: {
+          title: `Tonight: ${e.name}`,
+          body: `${e.bestTime}. Open AuraLunis to find it in the sky.`,
+          data: { event: "celestial", id: e.id },
+        },
+        trigger: { date: new Date(dayOf) },
+      });
+      scheduled += 1;
+    }
+    // 1 day before at 7 PM — a heads-up to plan.
+    const dayBefore = dayOf - 24 * 60 * 60 * 1000;
+    if (dayBefore > now) {
+      await Notifs.scheduleNotificationAsync({
+        content: {
+          title: `Tomorrow night: ${e.name}`,
+          body: `${e.bestTime}. Don't miss it.`,
+          data: { event: "celestial", id: e.id },
+        },
+        trigger: { date: new Date(dayBefore) },
+      });
+      scheduled += 1;
+    }
+  }
+  return scheduled;
+}
+
 // Re-export ISS pass computation for use in notification scheduling.
 export { computeNextISSPasses } from "@/services/ISSPassService";

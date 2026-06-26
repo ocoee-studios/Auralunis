@@ -40,13 +40,23 @@ export interface SkyData {
 // so recomputing on a slow tick is plenty — the per-frame screen projection from
 // device pointing happens in SkyLensCanvas, which is cheap. Default 20s refresh
 // keeps things live without spinning astronomy-engine on every sensor sample.
-export function useSkyData(location: ObserverLocation, refreshMs = 20000): SkyData {
-  const [now, setNow] = useState(() => new Date());
+// `timeOverride` drives Time Scrub: when set, the whole sky is computed for that
+// instant (and the live tick is ignored) so dragging the scrub bar fast-forwards /
+// rewinds the sky. Null/undefined → live, ticking on `refreshMs`.
+export function useSkyData(
+  location: ObserverLocation,
+  refreshMs = 20000,
+  timeOverride?: Date | null
+): SkyData {
+  const [liveNow, setLiveNow] = useState(() => new Date());
 
   useEffect(() => {
-    const id = setInterval(() => setNow(new Date()), refreshMs);
+    if (timeOverride) return; // frozen to the scrubbed time — don't tick
+    const id = setInterval(() => setLiveNow(new Date()), refreshMs);
     return () => clearInterval(id);
-  }, [refreshMs]);
+  }, [refreshMs, timeOverride]);
+
+  const now = timeOverride ?? liveNow;
 
   return useMemo<SkyData>(() => {
     const sky = computeTonightSky(location, now);

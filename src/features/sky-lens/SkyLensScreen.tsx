@@ -1,5 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { captureRef } from "react-native-view-shot";
+import * as Sharing from "expo-sharing";
 import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { CameraView } from "expo-camera";
@@ -29,6 +31,7 @@ import { SkyLensLayerBar } from "./SkyLensLayerBar";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
+import { TimeScrubBar } from "./TimeScrubBar";
 import { MeteorOverlay } from "./MeteorOverlay";
 import { TargetPulse } from "./TargetPulse";
 import { HeroSpotlight } from "./HeroSpotlight";
@@ -68,7 +71,39 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const smoothAlpha = Math.max(0.1, 0.32 - (zoom - 1) * 0.02);
   const { pointing, available } = useDevicePointing(120, 0, smoothAlpha);
   const parallax = useParallaxOffset();
-  const sky = useSkyData(location);
+  // Time Scrub: when the scrub bar is dragged, freeze the sky to the offset instant.
+  const [timeOffsetMin, setTimeOffsetMin] = useState(0);
+  const [scrubVisible, setScrubVisible] = useState(false);
+  const observerTime = useMemo(
+    () => (timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000)),
+    [timeOffsetMin]
+  );
+  const sky = useSkyData(location, undefined, observerTime);
+
+  // Photo Overlay — capture the sky scene (camera + overlay baked together) and share.
+  const sceneRef = useRef<View>(null);
+  const [capturing, setCapturing] = useState(false);
+  const flash = useRef(new Animated.Value(0)).current;
+  const captureSky = useCallback(async () => {
+    setCapturing(true);
+    flash.setValue(0);
+    Animated.sequence([
+      Animated.timing(flash, { toValue: 0.9, duration: 70, useNativeDriver: true }),
+      Animated.timing(flash, { toValue: 0, duration: 280, useNativeDriver: true }),
+    ]).start();
+    try {
+      // Let the watermark mount into the captured subtree before the snapshot.
+      await new Promise((r) => setTimeout(r, 90));
+      const uri = await captureRef(sceneRef, { format: "jpg", quality: 0.95 });
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(uri, { mimeType: "image/jpeg", dialogTitle: "Share your sky" });
+      }
+    } catch {
+      Alert.alert("Couldn't capture", "The sky photo couldn't be saved. Please try again.");
+    } finally {
+      setCapturing(false);
+    }
+  }, [flash]);
   const { isPremium } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
   const { addItem } = useAuraLunisVault();
@@ -389,7 +424,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   return (
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={pinch}>
-        <View style={StyleSheet.absoluteFill} collapsable={false}>
+        <View ref={sceneRef} collapsable={false} style={StyleSheet.absoluteFill}>
           {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
 
@@ -513,8 +548,23 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             segments={forge.segments}
             nightVision={nightMode}
           />
+          {/* Watermark — baked into the captured photo only (mounts during capture) */}
+          {capturing && (
+            <View style={[styles.watermark, { bottom: insets.bottom + 16 }]} pointerEvents="none">
+              <Text style={styles.watermarkBrand}>✦ AuraLunis</Text>
+              <Text style={styles.watermarkSub}>
+                {(observerTime ?? new Date()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </Text>
+            </View>
+          )}
         </View>
       </GestureDetector>
+
+      {/* Capture flash — white pulse over the scene (View opacity, crash-safe) */}
+      <Animated.View
+        style={[StyleSheet.absoluteFillObject, { backgroundColor: "#FFFFFF", opacity: flash }]}
+        pointerEvents="none"
+      />
 
       {/* Zoom indicator — pinch to zoom, tap to reset */}
       {zoom > 1.05 && (
@@ -546,6 +596,17 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
         <View style={styles.toggleRow} pointerEvents="box-none">
           <TouchableOpacity
+            style={[styles.iconBtn, scrubVisible && { backgroundColor: "rgba(217,168,78,0.32)" }]}
+            onPress={() => {
+              // Hiding the bar snaps back to the live sky so we never leave it frozen.
+              if (scrubVisible && timeOffsetMin !== 0) setTimeOffsetMin(0);
+              setScrubVisible((v) => !v);
+            }}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.iconBtnText}>🕐</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={[styles.iconBtn, skyMode !== "ar" && { backgroundColor: "rgba(217,168,78,0.32)" }]}
             onPress={cycleSkyMode}
             activeOpacity={0.8}
@@ -575,8 +636,26 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         </View>
       )}
 
+      {/* Photo shutter — capture the sky + overlay, baked with watermark, to share */}
+      {!selected && (
+        <TouchableOpacity
+          style={[styles.shutterBtn, { bottom: insets.bottom + 168, borderColor: accent }]}
+          onPress={captureSky}
+          disabled={capturing}
+          activeOpacity={0.8}
+        >
+          <Text style={styles.shutterIcon}>{capturing ? "…" : "📷"}</Text>
+        </TouchableOpacity>
+      )}
+
       {/* Bottom controls */}
       <View style={[styles.bottom, { paddingBottom: insets.bottom + 6 }]} pointerEvents="box-none">
+        {/* Time Scrub — drag to fast-forward / rewind the whole sky */}
+        {scrubVisible && !selected && (
+          <View style={{ marginBottom: 10 }}>
+            <TimeScrubBar offsetMinutes={timeOffsetMin} onChange={setTimeOffsetMin} accent={accent} />
+          </View>
+        )}
         {selected ? (
           <SkyLensInfoCard
             object={selected}
@@ -613,6 +692,21 @@ const styles = StyleSheet.create({
   },
   zoomText: { fontSize: 12, fontWeight: "800", fontVariant: ["tabular-nums"] },
   toggleRow: { flexDirection: "row", gap: 8 },
+  shutterBtn: {
+    position: "absolute",
+    right: 18,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    borderWidth: 2,
+    backgroundColor: "rgba(7,10,19,0.7)",
+    alignItems: "center",
+    justifyContent: "center"
+  },
+  shutterIcon: { fontSize: 22 },
+  watermark: { position: "absolute", left: 18, alignItems: "flex-start" },
+  watermarkBrand: { color: "#F4E3B8", fontSize: 16, fontWeight: "800", letterSpacing: 0.5 },
+  watermarkSub: { color: "rgba(244,227,184,0.75)", fontSize: 11, fontWeight: "600", marginTop: 1 },
   finder: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   finderText: {
     backgroundColor: "rgba(7,18,37,0.78)",
