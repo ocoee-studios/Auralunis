@@ -161,7 +161,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
               const lx = x + st.glow * 0.6 + 4;
               const lp = placeLabel ? placeLabel(lx, y + 4, body.name, 14) : { x: lx, y: y + 4 };
               return (
-                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={14} fontWeight="700">
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={14} fontWeight="800" opacity={1}>
                   {body.name}
                 </SvgText>
               );
