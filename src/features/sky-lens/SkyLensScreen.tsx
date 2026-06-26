@@ -80,33 +80,25 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   );
   const sky = useSkyData(location, undefined, observerTime);
 
-  // Photo Overlay — capture the sky scene and share.
+  // Photo capture — fast, simple, reliable.
   const sceneRef = useRef<View>(null);
   const [capturing, setCapturing] = useState(false);
   const flash = useRef(new Animated.Value(0)).current;
   const captureSky = useCallback(async () => {
     if (capturing) return;
-    setCapturing(true); // triggers 85% darken via style below
-    flash.setValue(0);
-    Animated.sequence([
-      Animated.timing(flash, { toValue: 0.9, duration: 70, useNativeDriver: true }),
-      Animated.timing(flash, { toValue: 0, duration: 280, useNativeDriver: true }),
-    ]).start();
+    setCapturing(true);
     try {
-      // Wait for the dark overlay to render before capturing
-      await new Promise((r) => setTimeout(r, 300));
-      const uri = await captureRef(sceneRef, { format: "png", quality: 1.0 });
+      await new Promise((r) => setTimeout(r, 100));
+      const uri = await captureRef(sceneRef, { format: "jpg", quality: 0.8, result: "tmpfile" });
+      setCapturing(false);
       if (await Sharing.isAvailableAsync()) {
-        await Sharing.shareAsync(uri, { mimeType: "image/png", dialogTitle: "Share your sky" });
-      } else {
-        Alert.alert("Captured!", "Sky photo ready but sharing is not available.");
+        Sharing.shareAsync(uri, { mimeType: "image/jpeg" });
       }
     } catch (e) {
-      Alert.alert("Capture failed", String(e));
-    } finally {
       setCapturing(false);
+      Alert.alert("Capture failed", String(e));
     }
-  }, [flash, capturing]);
+  }, [capturing]);
   const { isPremium } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
   const { addItem } = useAuraLunisVault();
