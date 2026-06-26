@@ -24,6 +24,7 @@ import { computeAzimuthElevation } from "@/utils/alignmentEngine";
 import type { SkyLensSatellite } from "./layers/SatelliteLayer";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
+import { SkyVignette } from "./SkyVignette";
 import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
 import { AstralBreathingLayer } from "./layers/AstralBreathingLayer";
 import { LuxuryStarfieldFXLayer } from "./layers/LuxuryStarfieldFXLayer";
@@ -726,6 +727,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             segments={forge.segments}
             nightVision={nightMode}
           />
+          {/* §12 — cinematic vignette framing the whole scene (clear centre → ~15%
+              dark corners). Topmost sky layer, below the HUD; pointerEvents none. */}
+          <SkyVignette width={box.width} height={box.height} />
           {/* Watermark — baked into the captured photo only (mounts during capture) */}
           {capturing && (
             <View style={[styles.watermark, { bottom: insets.bottom + 16 }]} pointerEvents="none">

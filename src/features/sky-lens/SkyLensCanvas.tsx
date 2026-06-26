@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import Svg, { G } from "react-native-svg";
+import Svg, { Circle, Defs, G, RadialGradient, Stop } from "react-native-svg";
 import { StyleSheet } from "react-native";
 import { projectTarget, DEFAULT_FOV, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
 import { GridLayer } from "./layers/GridLayer";
@@ -89,9 +89,35 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
   const starLabelMag = 2.2 + Math.min(2.6, Math.max(0, zoomLevel - 1) * 0.7);
 
   const moon = sky.bodies.find((b) => b.id === "moon");
+  // §2/§6 — THE MOON IS THE HERO. When it's on screen everything else steps back
+  // ~15% so the eye lands on the Moon first; a faint gold "lens adaptation" wash
+  // pools around it (eye adjusting to the brightest thing in the sky). Presence-
+  // based: the instant the Moon leaves frame, the field returns to full strength.
+  const moonProj = moon && moon.aboveHorizon ? project(moon.azimuthDegrees, moon.altitudeDegrees) : null;
+  const moonOnScreen = !!moonProj?.onScreen;
+  const heroDim = moonOnScreen ? 0.85 : 1;
+  // ~30° of sky around the Moon, in screen px (clamped so a wide FOV stays sane).
+  const lensR = Math.min(box.height * 0.95, box.height * (30 / Math.max(8, fov.verticalDegrees)));
 
   return (
     <Svg style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
+      <Defs>
+        {/* faint gold lens-adaptation wash around the hero Moon */}
+        <RadialGradient id="moonLensAdapt" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor="#FFE9B0" stopOpacity={0.05} />
+          <Stop offset="55%" stopColor="#D9A84E" stopOpacity={0.02} />
+          <Stop offset="100%" stopColor="#D9A84E" stopOpacity={0} />
+        </RadialGradient>
+      </Defs>
+
+      {/* lens-adaptation wash sits at the very back, behind the field, only when the
+          Moon is on screen (and not in Night Mode, which stays flat-red). */}
+      {moonOnScreen && !nightMode && moonProj && (
+        <Circle cx={moonProj.x} cy={moonProj.y} r={lensR} fill="url(#moonLensAdapt)" />
+      )}
+
+      {/* Everything EXCEPT the Moon steps back while the Moon holds the scene. */}
+      <G opacity={heroDim}>
       {/* Milky Way behind everything: a thin procedural band wraps the full galactic
           plane (Sagittarius→Cygnus→Cassiopeia→Orion), then the REAL photographic core
           glows on top at Sagittarius. */}
@@ -168,7 +194,9 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {activeLayers.has("satellites") && !cinematic && (
         <SatelliteLayer satellites={satellites} project={project} palette={palette} nightMode={nightMode} placeLabel={placeLabel} onSelect={onSelect} />
       )}
-      {/* Moon is always rendered (not a toggle) */}
+      </G>
+      {/* Moon is always rendered (not a toggle) — OUTSIDE the hero-dim group so it
+          holds full brightness while the rest of the sky steps back around it. */}
       <MoonLayer
         moon={moon}
         illuminationPercent={sky.moonIlluminationPercent}

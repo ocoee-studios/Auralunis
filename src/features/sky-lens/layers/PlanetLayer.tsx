@@ -64,7 +64,10 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
 
         return (
           <G key={body.id} opacity={belowHorizon ? 0.2 : 1}>
-            {/* base glow */}
+            {/* SCATTERING — ultra-faint outermost halo (~3× the disc) so the planet's
+                light feels like it scatters into space around it, not a hard cutout. */}
+            <Circle cx={x} cy={y} r={d * 3} fill={color} opacity={0.02} />
+            {/* base glow / BLOOM */}
             <Circle cx={x} cy={y} r={st.glow} fill={color} opacity={0.12} />
             <Circle cx={x} cy={y} r={st.glow * 0.6} fill={color} opacity={0.26} />
 
@@ -133,6 +136,11 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
                 </G>
               );
             })()}
+
+            {/* ATMOSPHERE — a thin color-matched limb ring hugging the disc, the
+                terminator-glow that makes the body read as a lit sphere in space
+                rather than a flat dot. Above the illustration so it rims the planet. */}
+            {!nightMode && <Circle cx={x} cy={y} r={d + 1} fill="none" stroke={color} strokeWidth={2} strokeOpacity={0.2} />}
 
             {/* generous transparent tap target on top (≈15px beyond the disc) */}
             <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />
