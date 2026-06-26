@@ -28,6 +28,10 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
 
   const f = Math.max(0, Math.min(1, illuminationPercent / 100));
   const shadowCx = p.x + f * 2 * R;
+  // Earthshine colour for the unlit hemisphere — split into colour + opacity so the
+  // terminator can be a SOFT radial gradient (feathered edge) instead of a hard circle.
+  const shadowColor = nightMode ? "#300A0A" : "#142040";
+  const shadowOp = nightMode ? 0.8 : 0.78;
   // 1 at the horizon, fading to 0 above ~14° — drives the warm low-Moon reddening.
   const low = Math.max(0, Math.min(1, (14 - moon.altitudeDegrees) / 14));
   const flare = f * (nightMode ? 0 : 1); // lens flare only on the bright lit Moon, day palette
@@ -35,7 +39,6 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
   const surfaceBright = nightMode ? "#E08A8A" : "#FFFDF5";
   const surfaceMid = palette.moon;
   const surfaceLimb = nightMode ? "#7A1C1C" : "#C7CDDC";
-  const earthshine = nightMode ? "rgba(48,10,10,0.80)" : "rgba(20,32,64,0.78)";
   const mare = nightMode ? "rgba(120,30,30,0.40)" : "rgba(74,82,104,0.42)";
   const craterShade = nightMode ? "rgba(90,22,22,0.45)" : "rgba(60,68,92,0.5)";
   const craterRim = nightMode ? "rgba(230,150,150,0.5)" : "rgba(255,253,240,0.6)";
@@ -65,6 +68,15 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
           <Stop offset="0%" stopColor="#FFFBEF" stopOpacity="0.5" />
           <Stop offset="55%" stopColor={palette.moon} stopOpacity="0.18" />
           <Stop offset="100%" stopColor={palette.moon} stopOpacity="0" />
+        </RadialGradient>
+        {/* SOFT TERMINATOR — the day/night boundary feathered over ~30% of the radius
+            instead of a hard circle edge. Centred on the phase shadow circle (userSpace),
+            opaque earthshine in the core, fading to transparent at the rim so the lit
+            crescent/gibbous melts into shadow the way a real Moon does. */}
+        <RadialGradient id="skylens-moon-terminator" cx={shadowCx} cy={cy} r={R} gradientUnits="userSpaceOnUse">
+          <Stop offset="0" stopColor={shadowColor} stopOpacity={shadowOp} />
+          <Stop offset="0.7" stopColor={shadowColor} stopOpacity={shadowOp} />
+          <Stop offset="1" stopColor={shadowColor} stopOpacity={0} />
         </RadialGradient>
         {/* sphere shading — bright near-side, darkening to the limb */}
         <RadialGradient id="skylens-moon-surface" cx="43%" cy="40%" r="64%">
@@ -108,8 +120,8 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
         <Circle cx={cx + R * 0.5} cy={cy + R * 0.44} r={R * 0.1} fill="none" stroke={craterRim} strokeWidth={0.5} />
         <Circle cx={cx - R * 0.5} cy={cy + R * 0.34} r={R * 0.08} fill={craterShade} />
         <Circle cx={cx + R * 0.08} cy={cy - R * 0.52} r={R * 0.07} fill={craterShade} />
-        {/* phase shadow rendered as dim EARTHSHINE (not black) */}
-        <Circle cx={shadowCx} cy={cy} r={R} fill={earthshine} />
+        {/* phase shadow rendered as dim EARTHSHINE (not black), SOFT terminator edge */}
+        <Circle cx={shadowCx} cy={cy} r={R} fill="url(#skylens-moon-terminator)" />
         {/* warm reddening when the Moon is low on the horizon */}
         {low > 0.02 && <Circle cx={cx} cy={cy} r={R} fill="#F0A24E" opacity={0.3 * low} />}
       </G>
