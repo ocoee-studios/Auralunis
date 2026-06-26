@@ -14,6 +14,7 @@ type Props = {
   showcase?: FocusZone; // auto-lit hero region (e.g. Orion in view) — nebulae intensify
   placeLabel?: LabelPlacer;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → glowing clouds only
+  customShapes?: boolean; // premium: dual-colour silhouettes (Trifid lanes etc). free: radial glows.
   onSelect: (object: SelectedObject) => void;
   time?: number;
 };
@@ -230,7 +231,7 @@ const scaleFor = (id: string) => (id === "m31" ? 3.2 : SHOWCASE.has(id) ? 2.4 : 
 // broad volumetric haze, a concentrated bright core, and a hot heart. Signature
 // objects get organic shapes; galaxies are tilted ellipses. Each gently breathes.
 // Tap opens the info card. Hidden at night.
-export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null, showcase = null, placeLabel, showLabels = true, onSelect, time: timeProp }: Props) {
+export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null, showcase = null, placeLabel, showLabels = true, customShapes = true, onSelect, time: timeProp }: Props) {
   const [internalTime, setInternalTime] = useState(() => Date.now());
   useEffect(() => {
     if (timeProp !== undefined || nightMode) return;
@@ -338,7 +339,15 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
             />
 
             <G opacity={Math.min(1, breathe * opMul)}>
-              {bf ? (
+              {!customShapes ? (
+                /* FREE — a simple radial-glow cloud (no dual-colour silhouettes, dust
+                   lanes, or embedded stars). Premium unlocks the astrophoto shapes. */
+                <>
+                  {isShowcase && <Circle cx={p.x} cy={p.y} r={volR} fill={hazeId} opacity={0.45} />}
+                  <Circle cx={p.x} cy={p.y} r={hazeR} fill={hazeId} />
+                  <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
+                </>
+              ) : bf ? (
                 /* BIG FIVE — dual-colour astrophoto cloud: blue reflection + pink
                    emission, carved by dark dust lanes, embedded bright stars. */
                 <>
@@ -436,7 +445,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               )}
               {/* hot heart — the central star / cluster (rings stay hollow; Big Five
                   supply their own embedded stars) */}
-              {!sig?.ring && !bf && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
+              {(!customShapes || (!sig?.ring && !bf)) && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
             </G>
 
             {/* label */}

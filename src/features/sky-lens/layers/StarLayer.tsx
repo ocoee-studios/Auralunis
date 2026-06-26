@@ -16,6 +16,7 @@ type Props = {
   labelMagLimit?: number; // progressive reveal: raised when zoomed so more labels appear
   showLabels?: boolean; // false in cinematic Immersive Sky mode → dots only, no text
   extinction?: boolean; // warm low-altitude stars toward orange (atmospheric extinction)
+  bloom?: boolean; // premium: bright stars bloom (glow rings + diffraction spikes). free: clean dots.
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -23,7 +24,7 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
-export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, extinction = false, onSelect }: Props) {
+export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, extinction = false, bloom = true, onSelect }: Props) {
   return (
     <G>
       {stars.map((star) => {
@@ -45,9 +46,11 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         // Atmospheric extinction: stars low on the horizon redden (more air in the
         // line of sight). Skipped in Night Mode (monochrome red for dark adaptation).
         const color = extinction && !nightMode ? warmShift(baseColor, getExtinctionWarmth(star.altitudeDegrees)) : baseColor;
-        const brightest = !nightMode && star.magnitude < 1.5; // Vega, Deneb, Sirius… — the showpieces
-        const bright = !nightMode && star.magnitude < 2.0;
-        const glint = !nightMode && star.magnitude < 1.2; // diffraction spike on the showpiece stars
+        // Bloom (glow rings + diffraction spikes + white-hot core) is premium. Free
+        // keeps the spectral disc + interactive lit-region aura, just no bloom.
+        const brightest = bloom && !nightMode && star.magnitude < 1.5; // Vega, Deneb, Sirius… — the showpieces
+        const bright = bloom && !nightMode && star.magnitude < 2.0;
+        const glint = bloom && !nightMode && star.magnitude < 1.2; // diffraction spike on the showpiece stars
         const spike = r + 9;
         const labeled = showLabels && star.name !== undefined && star.magnitude <= labelMagLimit;
 
@@ -77,7 +80,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             {lit > 0 && <Circle cx={p.x} cy={p.y} r={(r + 9) * (1 + lit)} fill={color} opacity={0.16 * lit} />}
             {/* hand-tuned ember glow for showpiece stars — grows in a showcase region
                 so Betelgeuse/Rigel blaze when Orion is on screen */}
-            {feature && <Circle cx={p.x} cy={p.y} r={feature.glowRadius * (1 + sf * 1.2)} fill={feature.glowColor} />}
+            {bloom && feature && <Circle cx={p.x} cy={p.y} r={feature.glowRadius * (1 + sf * 1.2)} fill={feature.glowColor} />}
             {/* wide 8px glow ring so the magnitude-0 stars genuinely POP */}
             {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.1} />}
             {bright && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.16} />}
