@@ -10,6 +10,7 @@ type Props = {
   palette: SkyPalette;
   nightMode: boolean;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → no "Moon" caption
+  heroMode?: boolean; // premium: craters, earthshine, bloom, lens flare. free: plain disc + phase.
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -22,7 +23,7 @@ const R = 26; // hero moon disc radius — the largest object on screen
 // the optical axis), and a warm GOLDEN HORIZON GLOW that reddens the disc and pools
 // light beneath it when the Moon hangs low. All static SVG — crash-safe. The animated
 // god-ray halo (LunarGodRayLayer) sits behind this. Always-on per spec.
-export function MoonLayer({ moon, illuminationPercent, project, palette, nightMode, showLabels = true, onSelect }: Props) {
+export function MoonLayer({ moon, illuminationPercent, project, palette, nightMode, showLabels = true, heroMode = true, onSelect }: Props) {
   if (!moon || !moon.aboveHorizon) return null;
   const p = project(moon.azimuthDegrees, moon.altitudeDegrees);
   if (!p.onScreen) return null;
@@ -99,42 +100,47 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
         </RadialGradient>
       </Defs>
 
-      {/* atmospheric scatter (wide) + warm horizon pool beneath the disc */}
-      <Circle cx={cx} cy={cy} r={R * 4.6} fill="url(#skylens-moon-scatter)" />
-      {low > 0.02 && (
+      {/* atmospheric scatter (wide) + warm horizon pool beneath the disc — premium */}
+      {heroMode && <Circle cx={cx} cy={cy} r={R * 4.6} fill="url(#skylens-moon-scatter)" />}
+      {heroMode && low > 0.02 && (
         <Circle cx={cx} cy={cy + R * 0.6} r={R * 3.6} fill="url(#skylens-moon-horizon)" />
       )}
-      <Circle cx={cx} cy={cy} r={R * 1.9} fill="url(#skylens-moon-bloom)" />
+      {heroMode && <Circle cx={cx} cy={cy} r={R * 1.9} fill="url(#skylens-moon-bloom)" />}
 
-      {/* lit disc with limb darkening */}
-      <Circle cx={cx} cy={cy} r={R} fill="url(#skylens-moon-surface)" />
+      {/* lit disc: sphere-shaded (premium) or a plain bright disc (free) */}
+      <Circle cx={cx} cy={cy} r={R} fill={heroMode ? "url(#skylens-moon-surface)" : (nightMode ? palette.moon : "#EDEFF5")} />
 
-      {/* surface detail + phase + low-Moon warming, clipped to the disc */}
+      {/* surface detail + phase + low-Moon warming, clipped to the disc. The phase
+          shadow is shown to everyone; maria/craters/low-warming are premium. */}
       <G clipPath="url(#skylens-moon-clip)">
-        {/* maria (dark seas) */}
-        <Circle cx={cx - R * 0.34} cy={cy - R * 0.24} r={R * 0.34} fill={mare} />
-        <Circle cx={cx + R * 0.16} cy={cy + R * 0.32} r={R * 0.26} fill={mare} />
-        <Circle cx={cx + R * 0.42} cy={cy - R * 0.36} r={R * 0.17} fill={mare} />
-        <Circle cx={cx - R * 0.06} cy={cy + R * 0.08} r={R * 0.2} fill={mare} />
-        {/* craters: shaded pit + bright rim */}
-        <Circle cx={cx + R * 0.5} cy={cy + R * 0.46} r={R * 0.1} fill={craterShade} />
-        <Circle cx={cx + R * 0.5} cy={cy + R * 0.44} r={R * 0.1} fill="none" stroke={craterRim} strokeWidth={0.5} />
-        <Circle cx={cx - R * 0.5} cy={cy + R * 0.34} r={R * 0.08} fill={craterShade} />
-        <Circle cx={cx + R * 0.08} cy={cy - R * 0.52} r={R * 0.07} fill={craterShade} />
+        {heroMode && (
+          <>
+            {/* maria (dark seas) */}
+            <Circle cx={cx - R * 0.34} cy={cy - R * 0.24} r={R * 0.34} fill={mare} />
+            <Circle cx={cx + R * 0.16} cy={cy + R * 0.32} r={R * 0.26} fill={mare} />
+            <Circle cx={cx + R * 0.42} cy={cy - R * 0.36} r={R * 0.17} fill={mare} />
+            <Circle cx={cx - R * 0.06} cy={cy + R * 0.08} r={R * 0.2} fill={mare} />
+            {/* craters: shaded pit + bright rim */}
+            <Circle cx={cx + R * 0.5} cy={cy + R * 0.46} r={R * 0.1} fill={craterShade} />
+            <Circle cx={cx + R * 0.5} cy={cy + R * 0.44} r={R * 0.1} fill="none" stroke={craterRim} strokeWidth={0.5} />
+            <Circle cx={cx - R * 0.5} cy={cy + R * 0.34} r={R * 0.08} fill={craterShade} />
+            <Circle cx={cx + R * 0.08} cy={cy - R * 0.52} r={R * 0.07} fill={craterShade} />
+          </>
+        )}
         {/* phase shadow rendered as dim EARTHSHINE (not black), SOFT terminator edge */}
         <Circle cx={shadowCx} cy={cy} r={R} fill="url(#skylens-moon-terminator)" />
-        {/* warm reddening when the Moon is low on the horizon */}
-        {low > 0.02 && <Circle cx={cx} cy={cy} r={R} fill="#F0A24E" opacity={0.3 * low} />}
+        {/* warm reddening when the Moon is low on the horizon — premium */}
+        {heroMode && low > 0.02 && <Circle cx={cx} cy={cy} r={R} fill="#F0A24E" opacity={0.3 * low} />}
       </G>
 
-      {/* crisp limb + chromatic flare ring just outside it */}
+      {/* crisp limb + chromatic flare ring just outside it (ring is premium) */}
       <Circle cx={cx} cy={cy} r={R} fill="none" stroke={palette.moon} strokeOpacity={0.5} strokeWidth={0.6} />
-      {flare > 0.05 && (
+      {heroMode && flare > 0.05 && (
         <Circle cx={cx} cy={cy} r={R * 1.22} fill="none" stroke="#BFD8FF" strokeOpacity={0.14 * flare} strokeWidth={1.1} />
       )}
 
-      {/* LENS FLARE: anamorphic horizontal streak + colored ghost orbs along the axis */}
-      {flare > 0.05 && (
+      {/* LENS FLARE: anamorphic horizontal streak + colored ghost orbs along the axis — premium */}
+      {heroMode && flare > 0.05 && (
         <G>
           <Ellipse cx={cx} cy={cy} rx={R * 5.2} ry={R * 0.1} fill="#DCEBFF" opacity={0.12 * flare} />
           <Circle cx={g1.x} cy={g1.y} r={R * 0.42} fill="url(#skylens-moon-ghost)" opacity={0.7 * flare} />

@@ -41,6 +41,7 @@ import { HeroSpotlight } from "./HeroSpotlight";
 import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject, type FocusZone } from "./SkyLensVisual";
+import { getVisualGate } from "./PremiumVisualGating";
 
 // A Find-Mode target handed in from Learn ("See in Sky Lens") — RA/Dec + lesson copy.
 export type FocusTarget = {
@@ -105,6 +106,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     }
   }, [capturing]);
   const { isPremium } = useEntitlement();
+  // Premium visual gate — FREE sees a good sky map, PREMIUM the living universe.
+  // Drives star colours, constellation nodes, planet/moon detail, MW boost, shooting
+  // stars, and the cinematic/immersive/night-vision/capture modes (all below).
+  const gate = useMemo(() => getVisualGate(isPremium), [isPremium]);
   const { openPaywall } = usePaywallNavigation();
   const { addItem } = useAuraLunisVault();
 
@@ -157,7 +162,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Night Vision is shared with Settings: seed from the saved flag on open, write
   // back on toggle so the two stay in sync.
   const { settings, updateSetting } = useAuraLunisSettings();
-  const [nightMode, setNightMode] = useState(settings.nightVision);
+  // Night Vision is premium — free users always start in normal (day) palette even
+  // if a stale saved flag says otherwise.
+  const [nightMode, setNightMode] = useState(gate.nightVision && settings.nightVision);
   // Three sky modes cycled by the half-moon button: AR (camera, 45% dim) → Immersive
   // (camera, 75% dim — screenshot mode) → Planetarium (camera off, 95% dim) → AR.
   const [skyMode, setSkyMode] = useState<"ar" | "immersive" | "planetarium">("ar");
@@ -195,11 +202,17 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         .onUpdate((e) => setZoom(Math.max(1, Math.min(12, zoomStart.current * e.scale)))),
     []
   );
+  // Cinematic Immersive Sky is premium. Free users who try to enter it get the
+  // paywall instead — the locked mode IS the pitch.
+  const enterCinematic = useCallback(() => {
+    if (!gate.cinematicMode) { openPaywall(); return; }
+    setCinematic(true);
+  }, [gate.cinematicMode, openPaywall]);
   // Triple-tap anywhere enters cinematic Immersive Sky. Runs alongside pinch so zoom
   // still works; single taps fall through to the object hit-targets as before.
   const cinematicTap = useMemo(
-    () => Gesture.Tap().numberOfTaps(3).runOnJS(true).onEnd(() => setCinematic(true)),
-    []
+    () => Gesture.Tap().numberOfTaps(3).runOnJS(true).onEnd(() => enterCinematic()),
+    [enterCinematic]
   );
   const sceneGesture = useMemo(() => Gesture.Simultaneous(pinch, cinematicTap), [pinch, cinematicTap]);
   const fov = useMemo(
@@ -236,7 +249,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const magnificentBoost = getMagnificentBoost(stargazingScore);
   // Milky Way brightens as the camera fades out (AR 1.4 → Immersive 1.9 →
   // Planetarium 2.4), then scales by Bortle MW opacity × magnificent-night boost.
-  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity * magnificentBoost;
+  // Free tier multiplies the whole thing by 0.4 → a faint smooth band; premium 1.0×.
+  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity * magnificentBoost * gate.milkyWayBoostMultiplier;
   // Nebula glow visibility: Bortle nebula opacity × magnificent-night boost (clamped).
   const nebulaOpacity = Math.min(1, skyProfile.nebulaOpacity * magnificentBoost);
   // 2. SEASONAL COLOR — a barely-perceptible warm (summer / MW season) or cool
@@ -250,10 +264,14 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     // turns the Milky Way layer on. Both state updates stay at the TOP LEVEL of the
     // handler — never nest a setState inside another's updater (React runs updaters
     // during render → "Cannot update a component while rendering" throw).
-    const next = skyMode === "ar" ? "immersive" : skyMode === "immersive" ? "planetarium" : "ar";
+    // Immersive (75% dim screenshot mode) is premium — free users skip straight
+    // from AR to Planetarium and back.
+    const next = skyMode === "ar"
+      ? (gate.immersiveMode ? "immersive" : "planetarium")
+      : skyMode === "immersive" ? "planetarium" : "ar";
     if (next === "planetarium") setActive((prev) => (prev.has("milkyway") ? prev : new Set(prev).add("milkyway")));
     setSkyMode(next);
-  }, [skyMode]);
+  }, [skyMode, gate.immersiveMode]);
 
   const onLayout = useCallback((e: LayoutEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -660,6 +678,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               activeLayers={activeWithPreview}
               nightMode={nightMode}
               milkyWayBoost={milkyWayBoost}
+              gate={gate}
               domeStarMultiplier={skyProfile.domeStarMultiplier}
               nebulaOpacity={nebulaOpacity}
               extinction={!nightMode}
@@ -777,7 +796,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           <TouchableOpacity
             style={[styles.iconBtn, skyMode !== "ar" && { backgroundColor: "rgba(217,168,78,0.32)" }]}
             onPress={cycleSkyMode}
-            onLongPress={() => setCinematic(true)}
+            onLongPress={enterCinematic}
             delayLongPress={400}
             activeOpacity={0.8}
           >
@@ -785,7 +804,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconBtn, nightMode && { backgroundColor: "rgba(139,32,32,0.5)" }]}
-            onPress={() => { const next = !nightMode; setNightMode(next); updateSetting("nightVision", next); }}
+            onPress={() => {
+              if (!gate.nightVision) { openPaywall(); return; } // red dark-adapt mode is premium
+              const next = !nightMode; setNightMode(next); updateSetting("nightVision", next);
+            }}
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>{nightMode ? "🌙" : "◐"}</Text>
@@ -807,8 +829,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         </View>
       )}
 
-      {/* Photo shutter — capture the sky + overlay, baked with watermark, to share */}
-      {!cinematic && !selected && (
+      {/* Photo shutter — capture the sky + overlay, baked with watermark, to share.
+          Premium only (gate.photoCapture). */}
+      {!cinematic && !selected && gate.photoCapture && (
         <TouchableOpacity
           style={[styles.shutterBtn, { bottom: insets.bottom + 168, borderColor: accent }]}
           onPress={captureSky}
