@@ -94,6 +94,22 @@ export function starColor(id: string, magnitude: number): string {
   return STAR_COLORS[id] ?? (magnitude < 2 ? "#EAF2FF" : magnitude < 3.2 ? "#D2E0FF" : "#BFD2FF");
 }
 
+// Atmospheric extinction tint: lerp a #RRGGBB star color toward a warm horizon
+// orange by `amount` (0 = unchanged, ~0.2 = strongly warmed). Stars low in the
+// sky redden as their light passes through more air — the real "sunset" effect on
+// every rising/setting star. Pure + defensive (bad input → original color), so it
+// never throws inside an SVG render path.
+export function warmShift(hex: string, amount: number): string {
+  if (amount <= 0 || typeof hex !== "string" || hex.length !== 7 || hex[0] !== "#") return hex;
+  const n = parseInt(hex.slice(1), 16);
+  if (Number.isNaN(n)) return hex;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const a = Math.min(0.2, amount);
+  const mix = (c: number, t: number) => Math.round(c + (t - c) * a);
+  const to2 = (v: number) => v.toString(16).padStart(2, "0");
+  return `#${to2(mix(r, 255))}${to2(mix(g, 150))}${to2(mix(b, 70))}`;
+}
+
 // Showpiece stars that earn a hand-tuned size + glow ring beyond the usual
 // magnitude curve — the ones people point at and screenshot.
 export interface StarFeature {

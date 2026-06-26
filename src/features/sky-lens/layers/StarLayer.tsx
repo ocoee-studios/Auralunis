@@ -1,7 +1,8 @@
 import React from "react";
 import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
-import { magnitudeToRadius, starColor, STAR_FEATURES, focusFactor, type ProjectFn, type SkyPalette, type SelectedObject, type FocusZone } from "../SkyLensVisual";
+import { magnitudeToRadius, starColor, warmShift, STAR_FEATURES, focusFactor, type ProjectFn, type SkyPalette, type SelectedObject, type FocusZone } from "../SkyLensVisual";
+import { getExtinctionWarmth } from "@/services/SkyQualityService";
 import type { LabelPlacer } from "../labelLayout";
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
   placeLabel?: LabelPlacer;
   labelMagLimit?: number; // progressive reveal: raised when zoomed so more labels appear
   showLabels?: boolean; // false in cinematic Immersive Sky mode → dots only, no text
+  extinction?: boolean; // warm low-altitude stars toward orange (atmospheric extinction)
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -21,7 +23,7 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
-export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, onSelect }: Props) {
+export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, extinction = false, onSelect }: Props) {
   return (
     <G>
       {stars.map((star) => {
@@ -39,7 +41,10 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         const r = (feature ? feature.radius : magnitudeToRadius(star.magnitude)) * (1 + ff * 0.4 + sf * 0.3);
         // Night Mode stays monochrome red for dark adaptation; otherwise stars
         // take their spectral color, and the brightest get a soft colored glow.
-        const color = nightMode ? palette.star : starColor(star.id, star.magnitude);
+        const baseColor = nightMode ? palette.star : starColor(star.id, star.magnitude);
+        // Atmospheric extinction: stars low on the horizon redden (more air in the
+        // line of sight). Skipped in Night Mode (monochrome red for dark adaptation).
+        const color = extinction && !nightMode ? warmShift(baseColor, getExtinctionWarmth(star.altitudeDegrees)) : baseColor;
         const brightest = !nightMode && star.magnitude < 1.5; // Vega, Deneb, Sirius… — the showpieces
         const bright = !nightMode && star.magnitude < 2.0;
         const glint = !nightMode && star.magnitude < 1.2; // diffraction spike on the showpiece stars

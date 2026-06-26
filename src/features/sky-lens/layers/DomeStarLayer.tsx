@@ -1,7 +1,8 @@
 import React from "react";
 import { Circle, G } from "react-native-svg";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
-import { domeColor, focusFactor, type ProjectFn, type SkyPalette, type FocusZone } from "../SkyLensVisual";
+import { domeColor, warmShift, focusFactor, type ProjectFn, type SkyPalette, type FocusZone } from "../SkyLensVisual";
+import { getExtinctionWarmth } from "@/services/SkyQualityService";
 
 type Props = {
   stars: HorizontalStar[];
@@ -10,13 +11,14 @@ type Props = {
   nightMode: boolean;
   focus?: FocusZone;
   showcase?: FocusZone; // auto-lit hero region (e.g. Orion in view) — denser local sky
+  extinction?: boolean; // warm low-altitude stars toward orange (atmospheric extinction)
 };
 
 // The dense background starfield — hundreds of faint dots filling the sky between
 // the named bright stars. Deliberately minimal per star (one Circle, no glow/label/
 // hit-target) so even ~200 on-screen at once stays cheap. Only above-horizon,
 // on-screen stars render.
-export function DomeStarLayer({ stars, project, palette, nightMode, focus = null, showcase = null }: Props) {
+export function DomeStarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, extinction = false }: Props) {
   return (
     <G>
       {stars.map((s) => {
@@ -36,7 +38,8 @@ export function DomeStarLayer({ stars, project, palette, nightMode, focus = null
           r *= (1 + ff * 0.8) * (1 + sf * 0.5);
           opacity = Math.min(1, opacity * (1 + ff * 0.7) * (1 + sf * 0.6));
         }
-        const color = nightMode ? palette.star : domeColor(s.id);
+        const baseColor = nightMode ? palette.star : domeColor(s.id);
+        const color = extinction && !nightMode ? warmShift(baseColor, getExtinctionWarmth(s.altitudeDegrees)) : baseColor;
         return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={opacity * (belowHorizon ? 0.25 : 1)} />;
       })}
     </G>

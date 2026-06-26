@@ -28,6 +28,9 @@ type Props = {
   activeLayers: Set<LayerKey>;
   nightMode: boolean;
   milkyWayBoost: number;
+  domeStarMultiplier?: number; // Bortle: fraction of dome stars to show (City 0.15 → Dark 1.0)
+  nebulaOpacity?: number; // Bortle × magnificent-night: nebula glow visibility (0 hides them)
+  extinction?: boolean; // atmospheric extinction: warm low-altitude stars toward orange
   isPremium: boolean;
   focus: FocusZone;
   showcase: FocusZone;
@@ -41,8 +44,16 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, showcase, parallax, satellites, cinematic = false, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
+  // Bortle dome-star thinning: City keeps only the brightest stars, Dark Site all
+  // of them. Dome magnitudes span ~3.2–6.0, so a magnitude cutoff scaled by the
+  // multiplier keeps the brightest fraction — exactly what light pollution leaves
+  // to the naked eye (a prefix slice would drop random stars, since the field is
+  // generated in random-magnitude order, not sorted).
+  const domeStars = domeStarMultiplier < 1
+    ? sky.domeStars.filter((s) => s.magnitude <= 3.2 + 2.8 * domeStarMultiplier)
+    : sky.domeStars;
   // Cinematic Immersive Sky: no text labels, no data overlays (grid/ecliptic/zodiac/
   // satellites) — only the beauty set. Constellation lines drop to ~62%.
   const showLabels = !cinematic;
@@ -85,8 +96,8 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         </G>
       )}
       {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
-      {activeLayers.has("deepsky") && (
-        <G transform={depth(1)}>
+      {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
+        <G transform={depth(1)} opacity={nebulaOpacity}>
           <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} onSelect={onSelect} />
         </G>
       )}
@@ -123,11 +134,11 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Dense background field behind the named bright stars */}
       {activeLayers.has("stars") && (
-        <DomeStarLayer stars={sky.domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} />
+        <DomeStarLayer stars={domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} extinction={extinction} />
       )}
       {activeLayers.has("stars") && (
         <G transform={depth(0.25)}>
-          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} showLabels={showLabels} onSelect={onSelect} />
+          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} showLabels={showLabels} extinction={extinction} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("planets") && (

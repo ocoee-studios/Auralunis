@@ -13,7 +13,9 @@ import { useEntitlement } from "@/hooks/useEntitlement";
 import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { useObserverLocation } from "./ephemeris/useObserverLocation";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
-import { SKY_PROFILES, type SkyQuality } from "@/services/SkyQualityService";
+import { SKY_PROFILES, getSeasonalTint, getMagnificentBoost, type SkyQuality } from "@/services/SkyQualityService";
+import { computeStargazingIndex } from "@/services/StargazingIndexService";
+import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherService";
 import { useDevicePointing } from "./ar/useDevicePointing";
 import { useParallaxOffset } from "./ar/useParallaxOffset";
 import { getFleet, simulateTick, syncLiveTLEData } from "@/services/AtmosphereExplorerService";
@@ -211,9 +213,39 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
   // Milky Way brightens as the camera fades out: faint over a live feed, bold over
   // black. AR (1.4) → Immersive (1.9) → Planetarium (2.4).
-  // Sky quality profile transforms the entire visual based on Bortle setting
+  // ── Sky Quality (Bortle) + live conditions drive the entire visual ─────────
+  // Lightweight weather snapshot (cloud cover) feeds the magnificent-night boost.
+  const [weather, setWeather] = useState<WeatherSnapshot>({
+    cloudPercent: 30, humidity: 50, tempCelsius: 20, description: "loading…", source: "unavailable",
+  });
+  useEffect(() => {
+    fetchCurrentWeather(location).then(setWeather).catch(() => {});
+  }, [location]);
+  // 1. BORTLE PRESET — the profile for the user's Sky Quality setting. Drives MW
+  // opacity (below), nebula opacity, and dome-star count (both in SkyLensCanvas).
   const skyProfile = SKY_PROFILES[settings.skyQuality as SkyQuality] ?? SKY_PROFILES.dark;
-  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity;
+  // 3. MAGNIFICENT NIGHT — a great Stargazing Index (>85) blazes the MW + nebulae
+  // 15-30% brighter. Cloud cover from the weather snapshot; seeing/transparency
+  // estimated from it (same model as Home's Stargazing Index).
+  const stargazingScore = useMemo(() => {
+    const moonAlt = sky.bodies.find((b) => b.id === "moon")?.altitudeDegrees ?? -90;
+    const cloud = weather.cloudPercent;
+    const seeingArcsec = cloud > 80 ? 4.5 : cloud > 50 ? 3.2 : cloud > 20 ? 2.2 : 1.5;
+    const transparencyMag = Math.max(3, 6.6 - cloud / 28);
+    return computeStargazingIndex(cloud, sky.moonIlluminationPercent, moonAlt, seeingArcsec, transparencyMag).score;
+  }, [sky, weather]);
+  const magnificentBoost = getMagnificentBoost(stargazingScore);
+  // Milky Way brightens as the camera fades out (AR 1.4 → Immersive 1.9 →
+  // Planetarium 2.4), then scales by Bortle MW opacity × magnificent-night boost.
+  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity * magnificentBoost;
+  // Nebula glow visibility: Bortle nebula opacity × magnificent-night boost (clamped).
+  const nebulaOpacity = Math.min(1, skyProfile.nebulaOpacity * magnificentBoost);
+  // 2. SEASONAL COLOR — a barely-perceptible warm (summer / MW season) or cool
+  // (winter / Orion season) grade, by month + hemisphere.
+  const seasonalTint = useMemo(
+    () => getSeasonalTint((observerTime ?? new Date()).getMonth(), location?.latitudeDegrees ?? 0),
+    [observerTime, location?.latitudeDegrees]
+  );
   const cycleSkyMode = useCallback(() => {
     // Half-moon button cycles AR → Immersive → Planetarium → AR. Entering Planetarium
     // turns the Milky Way layer on. Both state updates stay at the TOP LEVEL of the
@@ -629,6 +661,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               activeLayers={activeWithPreview}
               nightMode={nightMode}
               milkyWayBoost={milkyWayBoost}
+              domeStarMultiplier={skyProfile.domeStarMultiplier}
+              nebulaOpacity={nebulaOpacity}
+              extinction={!nightMode}
               isPremium={isPremium}
               focus={focusZone}
               showcase={showcaseZone}
@@ -638,6 +673,15 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>
+          {/* 2. SEASONAL COLOR — a whisper of warm (summer / MW season) or cool
+              (winter / Orion season) grade over the sky. pointerEvents none so it
+              never blocks taps; opacity ≤8% so it's felt, not seen. */}
+          {seasonalTint.warm > 0 && (
+            <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { backgroundColor: `rgba(217,168,78,${seasonalTint.warm})` }]} />
+          )}
+          {seasonalTint.cool > 0 && (
+            <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { backgroundColor: `rgba(100,140,220,${seasonalTint.cool})` }]} />
+          )}
           {/* Crash-safe twinkle: View-opacity animation over the bright stars */}
           <TwinkleOverlay targets={twinkleStars} nightMode={nightMode} />
           {/* Crash-safe shooting stars: View transform + opacity */}
