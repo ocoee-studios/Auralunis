@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Alert, Animated, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { captureRef } from "react-native-view-shot";
 import * as Sharing from "expo-sharing";
+import * as MediaLibrary from "expo-media-library";
 import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { CameraView } from "expo-camera";
@@ -80,30 +81,42 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   );
   const sky = useSkyData(location, undefined, observerTime);
 
-  // Photo Overlay — capture the sky scene (camera + overlay baked together) and share.
+  // Photo Overlay — capture the sky scene and share or save.
   const sceneRef = useRef<View>(null);
   const [capturing, setCapturing] = useState(false);
   const flash = useRef(new Animated.Value(0)).current;
   const captureSky = useCallback(async () => {
+    if (capturing) return;
     setCapturing(true);
+    // Flash feedback
     flash.setValue(0);
     Animated.sequence([
       Animated.timing(flash, { toValue: 0.9, duration: 70, useNativeDriver: true }),
       Animated.timing(flash, { toValue: 0, duration: 280, useNativeDriver: true }),
     ]).start();
     try {
-      // Let the watermark mount into the captured subtree before the snapshot.
-      await new Promise((r) => setTimeout(r, 90));
+      await new Promise((r) => setTimeout(r, 120));
       const uri = await captureRef(sceneRef, { format: "jpg", quality: 0.95 });
-      if (await Sharing.isAvailableAsync()) {
+
+      // Try to save to photo library first
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status === "granted") {
+        await MediaLibrary.saveToLibraryAsync(uri);
+        Alert.alert("Saved!", "Sky photo saved to your camera roll.", [
+          { text: "Share", onPress: () => Sharing.isAvailableAsync().then(ok => ok && Sharing.shareAsync(uri, { mimeType: "image/jpeg", dialogTitle: "Share your sky" })) },
+          { text: "Done", style: "default" },
+        ]);
+      } else if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: "image/jpeg", dialogTitle: "Share your sky" });
+      } else {
+        Alert.alert("Captured!", "Sky photo captured. Enable photo library access in Settings to save.");
       }
-    } catch {
-      Alert.alert("Couldn't capture", "The sky photo couldn't be saved. Please try again.");
+    } catch (e) {
+      Alert.alert("Couldn't capture", "The sky photo couldn't be saved. Try switching to Planetarium mode for best results.");
     } finally {
       setCapturing(false);
     }
-  }, [flash]);
+  }, [flash, capturing]);
   const { isPremium } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
   const { addItem } = useAuraLunisVault();
@@ -694,16 +707,16 @@ const styles = StyleSheet.create({
   toggleRow: { flexDirection: "row", gap: 8 },
   shutterBtn: {
     position: "absolute",
-    right: 18,
-    width: 52,
-    height: 52,
-    borderRadius: 26,
-    borderWidth: 2,
-    backgroundColor: "rgba(7,10,19,0.7)",
+    right: 16,
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    borderWidth: 2.5,
+    backgroundColor: "rgba(7,10,19,0.75)",
     alignItems: "center",
     justifyContent: "center"
   },
-  shutterIcon: { fontSize: 22 },
+  shutterIcon: { fontSize: 26 },
   watermark: { position: "absolute", left: 18, alignItems: "flex-start" },
   watermarkBrand: { color: "#F4E3B8", fontSize: 16, fontWeight: "800", letterSpacing: 0.5 },
   watermarkSub: { color: "rgba(244,227,184,0.75)", fontSize: 11, fontWeight: "600", marginTop: 1 },
