@@ -9,6 +9,7 @@ type Props = {
   project: ProjectFn;
   palette: SkyPalette;
   nightMode: boolean;
+  showLabels?: boolean; // false in cinematic Immersive Sky mode → no "Moon" caption
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -21,7 +22,7 @@ const R = 22; // hero moon disc radius (enlarged for presence)
 // the optical axis), and a warm GOLDEN HORIZON GLOW that reddens the disc and pools
 // light beneath it when the Moon hangs low. All static SVG — crash-safe. The animated
 // god-ray halo (LunarGodRayLayer) sits behind this. Always-on per spec.
-export function MoonLayer({ moon, illuminationPercent, project, palette, nightMode, onSelect }: Props) {
+export function MoonLayer({ moon, illuminationPercent, project, palette, nightMode, showLabels = true, onSelect }: Props) {
   if (!moon || !moon.aboveHorizon) return null;
   const p = project(moon.azimuthDegrees, moon.altitudeDegrees);
   if (!p.onScreen) return null;
@@ -162,9 +163,11 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
           })
         }
       />
-      <SvgText x={cx + R + 5} y={cy + 4} fill={palette.starLabel} fontSize={11} fontWeight="700">
-        Moon
-      </SvgText>
+      {showLabels && (
+        <SvgText x={cx + R + 5} y={cy + 4} fill={palette.starLabel} fontSize={11} fontWeight="700">
+          Moon
+        </SvgText>
+      )}
     </G>
   );
 }

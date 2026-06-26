@@ -33,6 +33,7 @@ type Props = {
   showcase: FocusZone;
   parallax: ParallaxOffset;
   satellites: SkyLensSatellite[];
+  cinematic?: boolean; // Immersive Sky mode: hide labels + data overlays, dim con-lines
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -40,8 +41,13 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, showcase, parallax, satellites, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, isPremium, focus, showcase, parallax, satellites, cinematic = false, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
+  // Cinematic Immersive Sky: no text labels, no data overlays (grid/ecliptic/zodiac/
+  // satellites) — only the beauty set (stars, constellation threads, Milky Way,
+  // nebulae, planets, Moon). Constellation lines drop to ~30% so they read as faint
+  // gold threads in the dark, not diagrams.
+  const showLabels = !cinematic;
 
   // One shared label placer per render → cross-layer collision avoidance: each layer
   // nudges its label into a free slot so nearby labels (Mercury/ISS/Jupiter,
@@ -83,28 +89,31 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
       {activeLayers.has("deepsky") && (
         <G transform={depth(1)}>
-          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} onSelect={onSelect} />
+          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} onSelect={onSelect} />
         </G>
       )}
-      {activeLayers.has("grid") && (
+      {activeLayers.has("grid") && !cinematic && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
       )}
-      {activeLayers.has("ecliptic") && (
+      {activeLayers.has("ecliptic") && !cinematic && (
         <EclipticLayer points={sky.ecliptic} project={project} palette={palette} nightMode={nightMode} />
       )}
       {activeLayers.has("constellations") && (
-        <ConstellationLayer
-          constellations={constellations}
-          project={project}
-          box={box}
-          palette={palette}
-          nightMode={nightMode}
-          placeLabel={placeLabel}
-          onSelect={onSelect}
-        />
+        <G opacity={cinematic ? 0.62 : 1}>
+          <ConstellationLayer
+            constellations={constellations}
+            project={project}
+            box={box}
+            palette={palette}
+            nightMode={nightMode}
+            placeLabel={placeLabel}
+            showLabels={showLabels}
+            onSelect={onSelect}
+          />
+        </G>
       )}
       {/* Zodiac: the 12 signs along the ecliptic (free "find your sign" layer) */}
-      {activeLayers.has("zodiac") && (
+      {activeLayers.has("zodiac") && !cinematic && (
         <ZodiacLayer
           zodiac={sky.zodiac}
           project={project}
@@ -120,7 +129,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {activeLayers.has("stars") && (
         <G transform={depth(0.25)}>
-          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} onSelect={onSelect} />
+          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} showLabels={showLabels} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("planets") && (
@@ -130,11 +139,12 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           palette={palette}
           nightMode={nightMode}
           placeLabel={placeLabel}
+          showLabels={showLabels}
           onSelect={onSelect}
         />
       )}
       {/* Tracked satellites on the live feed (ISS gold, Starlink pale-blue, others silver) */}
-      {activeLayers.has("satellites") && (
+      {activeLayers.has("satellites") && !cinematic && (
         <SatelliteLayer satellites={satellites} project={project} palette={palette} nightMode={nightMode} placeLabel={placeLabel} onSelect={onSelect} />
       )}
       {/* Moon is always rendered (not a toggle) */}
@@ -144,6 +154,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         project={project}
         palette={palette}
         nightMode={nightMode}
+        showLabels={showLabels}
         onSelect={onSelect}
       />
     </Svg>
