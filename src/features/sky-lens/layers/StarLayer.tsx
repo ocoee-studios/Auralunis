@@ -17,6 +17,7 @@ type Props = {
   showLabels?: boolean; // false in cinematic Immersive Sky mode → dots only, no text
   extinction?: boolean; // warm low-altitude stars toward orange (atmospheric extinction)
   bloom?: boolean; // premium: bright stars bloom (glow rings + diffraction spikes). free: clean dots.
+  fullSphere?: boolean; // Planetarium: show below-horizon stars at full brightness (no dim/cull)
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -24,13 +25,13 @@ type Props = {
 // as dots only to avoid clutter.
 const LABEL_MAG_LIMIT = 2.2;
 
-export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, extinction = false, bloom = true, onSelect }: Props) {
+export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, extinction = false, bloom = true, fullSphere = false, onSelect }: Props) {
   return (
     <G>
       {stars.map((star) => {
         // Render all stars, dim those below horizon
         const belowHorizon = !star.aboveHorizon;
-        if (belowHorizon && star.altitudeDegrees < -30) return null;
+        if (belowHorizon && !fullSphere && star.altitudeDegrees < -30) return null;
         const p = project(star.azimuthDegrees, star.altitudeDegrees);
         if (!p.onScreen) return null;
 
@@ -55,7 +56,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         const labeled = showLabels && star.name !== undefined && star.magnitude <= labelMagLimit;
 
         return (
-          <G key={star.id} opacity={belowHorizon ? 0.25 : 1}>
+          <G key={star.id} opacity={belowHorizon && !fullSphere ? 0.25 : 1}>
             {/* Bigger invisible hit target — 24px minimum for easy tapping with AR jitter */}
             <Circle
               cx={p.x}

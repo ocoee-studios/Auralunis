@@ -13,6 +13,7 @@ type Props = {
   placeLabel?: LabelPlacer;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → bodies only, no names
   useIllustrations?: boolean; // premium: Jupiter bands, Saturn rings, moons, auras. free: colored dots.
+  fullSphere?: boolean; // Planetarium: show below-horizon planets at full brightness
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -35,7 +36,7 @@ const STYLE: Record<string, { disc: number; glow: number }> = {
 // just outside Jupiter's much larger disc, scattered like the real set along the plane.
 const JUPITER_MOONS = [1.45, 2.05, -1.55, -2.2];
 
-export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, useIllustrations = true, onSelect }: Props) {
+export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, useIllustrations = true, fullSphere = false, onSelect }: Props) {
   return (
     <G>
       {bodies.map((body) => {
@@ -63,7 +64,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
           });
 
         return (
-          <G key={body.id} opacity={belowHorizon ? 0.2 : 1}>
+          <G key={body.id} opacity={belowHorizon && !fullSphere ? 0.2 : 1}>
             {/* SCATTERING — ultra-faint outermost halo (~3× the disc) so the planet's
                 light feels like it scatters into space around it, not a hard cutout. */}
             <Circle cx={x} cy={y} r={d * 3} fill={color} opacity={0.02} />

@@ -15,6 +15,7 @@ type Props = {
   placeLabel?: LabelPlacer;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → glowing clouds only
   customShapes?: boolean; // premium: dual-colour silhouettes (Trifid lanes etc). free: radial glows.
+  fullSphere?: boolean; // Planetarium: show below-horizon nebulae at full brightness
   onSelect: (object: SelectedObject) => void;
   time?: number;
 };
@@ -231,7 +232,7 @@ const scaleFor = (id: string) => (id === "m31" ? 3.2 : SHOWCASE.has(id) ? 2.4 : 
 // broad volumetric haze, a concentrated bright core, and a hot heart. Signature
 // objects get organic shapes; galaxies are tilted ellipses. Each gently breathes.
 // Tap opens the info card. Hidden at night.
-export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null, showcase = null, placeLabel, showLabels = true, customShapes = true, onSelect, time: timeProp }: Props) {
+export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null, showcase = null, placeLabel, showLabels = true, customShapes = true, fullSphere = false, onSelect, time: timeProp }: Props) {
   const [internalTime, setInternalTime] = useState(() => Date.now());
   useEffect(() => {
     if (timeProp !== undefined || nightMode) return;
@@ -290,7 +291,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
 
       {nebulae.map((n, i) => {
         const belowHorizon = !n.aboveHorizon;
-        if (belowHorizon && n.altitudeDegrees < -20) return null;
+        if (belowHorizon && !fullSphere && n.altitudeDegrees < -20) return null;
         const p = project(n.azimuthDegrees, n.altitudeDegrees);
         if (!p.onScreen) return null;
 
@@ -313,7 +314,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         const coolId = `url(#neb-cool-${n.id})`;
 
         return (
-          <G key={n.id} opacity={belowHorizon ? 0.2 : 1}>
+          <G key={n.id} opacity={belowHorizon && !fullSphere ? 0.2 : 1}>
             {/* transparent hit target (doesn't breathe — always tappable) */}
             <Circle
               cx={p.x}

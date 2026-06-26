@@ -16,10 +16,11 @@ type Props = {
   placeLabel?: LabelPlacer;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → gold threads only
   showNodes?: boolean; // premium: gold junction nodes + tapered glow lines. free: thin plain lines.
+  fullSphere?: boolean; // Planetarium: show below-horizon figures at full brightness
   onSelect: (object: SelectedObject) => void;
 };
 
-export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, showLabels = true, showNodes = true, onSelect }: Props) {
+export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, showLabels = true, showNodes = true, fullSphere = false, onSelect }: Props) {
   return (
     <G>
       {constellations.map((c) => {
@@ -55,13 +56,13 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
             // without the handcrafted glow/taper that premium gets.
             if (!showNodes) {
               return (
-                <G key={`${c.id}-l${idx}`} opacity={belowH ? 0.2 : 1}>
+                <G key={`${c.id}-l${idx}`} opacity={belowH && !fullSphere ? 0.2 : 1}>
                   <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.8} strokeOpacity={0.5} strokeLinecap="round" />
                 </G>
               );
             }
             return (
-              <G key={`${c.id}-l${idx}`} opacity={belowH ? 0.2 : 1}>
+              <G key={`${c.id}-l${idx}`} opacity={belowH && !fullSphere ? 0.2 : 1}>
                 {/* soft gold glow behind the line (subtle so it doesn't compete) */}
                 <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={4} strokeOpacity={0.06} strokeLinecap="round" />
                 {/* fine tapered endpoints */}
@@ -82,7 +83,7 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
           if (!pt || pt.behind) return null;
           const dim = !c.points[pi]?.aboveHorizon;
           return (
-            <G key={`${c.id}-n${pi}`} opacity={dim ? 0.2 : 1}>
+            <G key={`${c.id}-n${pi}`} opacity={dim && !fullSphere ? 0.2 : 1}>
               <Circle cx={pt.x} cy={pt.y} r={6} fill={lineColor} opacity={0.1} />
               <Circle cx={pt.x} cy={pt.y} r={1.5} fill={lineColor} opacity={0.9} />
             </G>
