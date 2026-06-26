@@ -234,17 +234,57 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     });
   }, []);
 
+  // THE CONVERSION MOMENT (Paywall Strategy): when a free user taps premium content we
+  // never show a bare lock — we let them EXPERIENCE the value first. Temp-enable the
+  // layer for 2s (full glory), then gently fade the scene and surface "✦ Unlock the
+  // living universe". Tapping the prompt opens the paywall; it auto-dismisses if ignored.
+  const [preview, setPreview] = useState<{ key: LayerKey; label: string; phase: "show" | "prompt" } | null>(null);
+  const previewFade = useRef(new Animated.Value(0)).current;
+  const previewTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const endPreview = useCallback(() => {
+    previewTimers.current.forEach(clearTimeout);
+    previewTimers.current = [];
+    previewFade.setValue(0);
+    setPreview(null);
+  }, [previewFade]);
+  const startPreview = useCallback(
+    (def: LayerDef) => {
+      previewTimers.current.forEach(clearTimeout);
+      previewTimers.current = [];
+      previewFade.setValue(0);
+      setPreview({ key: def.key, label: def.label, phase: "show" });
+      // After 2s of full beauty, fade to the unlock prompt.
+      previewTimers.current.push(
+        setTimeout(() => {
+          setPreview((p) => (p ? { ...p, phase: "prompt" } : null));
+          Animated.timing(previewFade, { toValue: 1, duration: 500, useNativeDriver: true }).start();
+        }, 2000)
+      );
+      // Auto-dismiss if the user never taps the prompt.
+      previewTimers.current.push(setTimeout(() => setPreview(null), 9000));
+    },
+    [previewFade]
+  );
+  useEffect(() => () => { previewTimers.current.forEach(clearTimeout); }, []);
+
   const onLockedPress = useCallback(
     (def: LayerDef) => {
-      // Free user tapping a premium layer → open the paywall (the sales moment).
       if (!isPremium) {
-        openPaywall();
+        // Conversion moment: preview the beauty, then prompt — never a bare lock icon.
+        if (def.available) { startPreview(def); return; }
+        Alert.alert(`${def.label} · Coming Soon`, `The ${def.label} layer arrives in the next Sky Lens update.`);
         return;
       }
       // Premium user, layer simply not shipped yet → informational.
       Alert.alert(`${def.label} · Coming Soon`, `The ${def.label} layer arrives in the next Sky Lens update.`);
     },
-    [isPremium, openPaywall]
+    [isPremium, startPreview]
+  );
+
+  // Layers actually rendered = the user's set, plus any premium layer being previewed.
+  const activeWithPreview = useMemo(
+    () => (preview ? new Set(active).add(preview.key) : active),
+    [active, preview]
   );
 
   const onSave = useCallback(
@@ -559,7 +599,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               pointing={pointing}
               sky={sky}
               fov={fov}
-              activeLayers={active}
+              activeLayers={activeWithPreview}
               nightMode={nightMode}
               milkyWayBoost={milkyWayBoost}
               isPremium={isPremium}
@@ -735,6 +775,18 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         )}
       </View>
       )}
+
+      {/* THE CONVERSION MOMENT — after a 2s preview of the premium beauty, the scene
+          gently fades and the unlock prompt rises. Tap anywhere on it → the paywall. */}
+      {preview?.phase === "prompt" && (
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => { endPreview(); openPaywall(); }}>
+          <Animated.View style={[StyleSheet.absoluteFill, styles.previewScrim, { opacity: previewFade }]} pointerEvents="none" />
+          <Animated.View style={[styles.previewPrompt, { bottom: insets.bottom + 132, opacity: previewFade }]} pointerEvents="none">
+            <Text style={styles.previewTitle}>✦ Unlock the living universe</Text>
+            <Text style={styles.previewSub}>Tap to see {preview.label} like never before</Text>
+          </Animated.View>
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -807,6 +859,27 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 12,
     alignItems: "center"
+  },
+  previewScrim: { backgroundColor: "rgba(3,8,22,0.5)" },
+  previewPrompt: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    alignItems: "center",
+  },
+  previewTitle: {
+    color: "#F4E3B8",
+    fontSize: 18,
+    fontWeight: "900",
+    letterSpacing: 0.5,
+    textShadowColor: "rgba(0,0,0,0.6)",
+    textShadowRadius: 8,
+  },
+  previewSub: {
+    color: "rgba(244,227,184,0.82)",
+    fontSize: 13,
+    fontWeight: "600",
+    marginTop: 6,
   },
   cinematicHint: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   cinematicHintText: {

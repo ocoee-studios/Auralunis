@@ -38,14 +38,20 @@ export function SkyLensLayerBar({ active, isPremium, nightMode, onToggle, onLock
               styles.pill,
               { borderColor: accent },
               on && { backgroundColor: accent, borderColor: accent },
-              (locked || comingSoon) && styles.pillDim
+              comingSoon && styles.pillDim
             ]}
           >
             <Text style={[styles.icon, on && styles.iconOn]}>{def.icon}</Text>
             <Text style={[styles.label, on && styles.labelOn]} numberOfLines={1}>
               {def.label}
             </Text>
-            {(locked || comingSoon) && <Text style={styles.lock}>{locked ? " 🔒" : " ◷"}</Text>}
+            {/* No lock icon (Paywall Strategy) — premium layers stay enticing with a
+                gold sparkle; tapping previews the beauty, then offers the upgrade. */}
+            {comingSoon ? (
+              <Text style={styles.lock}> ◷</Text>
+            ) : locked && !on ? (
+              <Text style={[styles.lock, { color: accent }]}> ✦</Text>
+            ) : null}
           </TouchableOpacity>
         );
       })}
