@@ -96,10 +96,6 @@ export async function purchaseAuraLunisTier(
 }> {
   const product = { productId: billingPeriod === "annual" ? RevenueCatIds.products.premiumAnnual : RevenueCatIds.products.premiumMonthly, packageId: billingPeriod === "annual" ? RevenueCatIds.packages.premiumAnnual : RevenueCatIds.packages.premiumMonthly };
 
-  if (!product) {
-    return { status: "not_available", productId: "" };
-  }
-
   const configuration = await configureRevenueCat();
 
   if (configuration.status !== "configured") {

@@ -73,9 +73,13 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
+  const mountedRef = useRef(true);
+  useEffect(() => () => { mountedRef.current = false; }, []);
+
   const refresh = useCallback(async () => {
     setIsLoading(true);
     const premium = await fetchIsPremium();
+    if (!mountedRef.current) return; // guard: don't setState after unmount
     setIsPremium(premium);
     setIsLoading(false);
   }, []);
