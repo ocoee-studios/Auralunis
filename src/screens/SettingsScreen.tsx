@@ -194,7 +194,7 @@ export function SettingsScreen() {
         <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Sky Lens Calibration", "Move your phone slowly in a figure-eight, then recenter on a visible object such as the Moon.")}>
           <Text style={styles.secondaryButtonText}>Run Sky Lens Calibration</Text>
         </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Manual Sky Map", "Open the Sky tab and choose Manual Sky Map for the privacy-safe fallback.")}>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Manual Sky Map", "If location services are unavailable, Sky Lens uses your last known position.\n\nFor privacy, you can use Planetarium mode — no camera or location needed.\n\nSky tab → Sky Lens → tap the half-moon icon for Planetarium mode.")}>
           <Text style={styles.secondaryButtonText}>Manual Sky Map Instructions</Text>
         </Pressable>
       </SettingsSection>
@@ -218,7 +218,7 @@ export function SettingsScreen() {
       </SettingsSection>
 
       <SettingsSection title="Learning">
-        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Learning Preferences", "Teacher Mode, difficulty, pronunciation help, quizzes, and saved progress direction prepared.")}>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Learning Preferences", "Lesson difficulty and content preferences are coming in a future update.\n\nCurrently all Learn content is free and accessible to everyone — no settings needed.")}>
           <Text style={styles.secondaryButtonText}>Learning Preferences</Text>
         </Pressable>
       </SettingsSection>
