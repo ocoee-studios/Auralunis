@@ -137,8 +137,10 @@ export function computeBirthSky(
   const risingSign = getRisingConstellation(month, hourUTC);
   const dominantConstellation = (CONSTELLATIONS_BY_MONTH[month] ?? ["Orion"])[0];
 
-  // Compute planet positions at birth time using existing ephemeris
-  const targets = computePlanetaryTargets(location);
+  // Compute planet positions AT THE BIRTH MOMENT (not now) — the date arg is required,
+  // otherwise computePlanetaryTargets defaults to new Date() and the whole birth chart
+  // shows today's planets.
+  const targets = computePlanetaryTargets(location, birthDate);
   const planets: BirthPlanet[] = targets.map(t => ({
     name: t.planet.name,
     azimuth: Math.round(t.azimuth),

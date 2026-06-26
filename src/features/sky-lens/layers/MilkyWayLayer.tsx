@@ -61,14 +61,18 @@ const STAR_CLOUD_KNOTS = [
 
 export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boost }: Props) {
   // §4 breathing — a ~0.5px vertical drift over 30s so the band feels alive, not pasted.
-  // Low-frequency JS clock (600ms → imperceptible sub-0.1px steps). Static SVG + setState,
-  // no animated-SVG props → crash-safe. Hook runs before the Night-Mode early return.
+  // The value is rounded to 0.1px and the functional setState RETURNS THE SAME REFERENCE
+  // when unchanged, so React bails out of re-rendering this (heavy) layer on the many
+  // ticks where the drift hasn't moved a tenth of a pixel — no continuous re-render of
+  // hundreds of SVG nodes. Static SVG, crash-safe. Hook runs before the Night-Mode
+  // early return.
   const [driftY, setDriftY] = useState(0);
   useEffect(() => {
     if (nightMode) return;
     const start = Date.now();
     const id = setInterval(() => {
-      setDriftY(Math.sin(((Date.now() - start) / 1000 / 30) * Math.PI * 2) * 0.5);
+      const next = Math.round(Math.sin(((Date.now() - start) / 1000 / 30) * Math.PI * 2) * 0.5 * 10) / 10;
+      setDriftY((prev) => (prev === next ? prev : next));
     }, 600);
     return () => clearInterval(id);
   }, [nightMode]);
