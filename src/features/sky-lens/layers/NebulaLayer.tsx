@@ -275,6 +275,15 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
             )}
           </React.Fragment>
         ))}
+        {/* Shared SOFT dark dust-lane gradient — a feathered shadow that fades to
+            transparent at every edge, so dust lanes read as DIM SHADOWS within the
+            glow (no hard outline, no opaque "stamp"). Darkness is then scaled right
+            down at render so peak opacity lands ~15–22%. */}
+        <RadialGradient id="nebLaneSoft" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor="#04020A" stopOpacity="0.85" />
+          <Stop offset="50%" stopColor="#04020A" stopOpacity="0.42" />
+          <Stop offset="100%" stopColor="#04020A" stopOpacity="0" />
+        </RadialGradient>
       </Defs>
 
       {nebulae.map((n, i) => {
@@ -358,16 +367,19 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                   ))}
                   {/* bright concentrated core */}
                   <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
-                  {/* dark dust lanes — carve the glow into recognisable lobes */}
+                  {/* dark dust lanes — SOFT feathered shadows (~15–22% peak) that hint
+                      the cleft into lobes, NOT opaque geometric stamps. Widened across
+                      the lane + edge-feathered (nebLaneSoft) so they melt into the glow
+                      like real dust shadows. */}
                   {bf.lanes.map((ln, k) => (
                     <G key={`lane-${k}`} transform={`rotate(${ln.ang} ${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
                       <Ellipse
                         cx={p.x + ln.dx * r}
                         cy={p.y + ln.dy * r}
-                        rx={r * ln.rx}
+                        rx={r * ln.rx * 1.9}
                         ry={r * ln.ry}
-                        fill="#06040E"
-                        opacity={ln.op ?? 0.8}
+                        fill="url(#nebLaneSoft)"
+                        opacity={Math.min(0.26, (ln.op ?? 0.8) * 0.3)}
                       />
                     </G>
                   ))}
