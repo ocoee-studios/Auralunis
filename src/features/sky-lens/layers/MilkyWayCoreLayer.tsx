@@ -72,9 +72,10 @@ export function MilkyWayCoreLayer({ band, project, fov, box, nightMode, boost }:
   const stretch = (w / h).toFixed(3); // along-band half-extent → w/2
   const featherTransform = `translate(${gc.x.toFixed(1)} ${gc.y.toFixed(1)}) rotate(${deg.toFixed(2)}) scale(${stretch} 1) translate(${(-gc.x).toFixed(1)} ${(-gc.y).toFixed(1)})`;
   // The hero. A warm golden river that GLOWS — dust lanes and star clouds clearly
-  // visible, brightest at the galactic core (the radial mask centers there). ~35%
-  // over the camera, brighter in Planetarium (pure-black backdrop).
-  const op = Math.min(0.5, 0.35 * boost);
+  // visible, brightest at the galactic core (the radial mask centers there). Pushed up
+  // (~43% over the camera, brighter in Planetarium) so the real ESO texture carries the
+  // band, with the saturated procedural gold/rose washes warming its naturally-grey tone.
+  const op = Math.min(0.6, 0.43 * boost);
 
   return (
     <G>
