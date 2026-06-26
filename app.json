@@ -96,7 +96,7 @@
       "backgroundColor": "#050B14"
     },
     "extra": {
-      "revenueCatIosApiKey": "REPLACE_WITH_REVENUECAT_PUBLIC_IOS_API_KEY",
+      "revenueCatIosApiKey": "test_PDKYApxGRsLUDETByKnbcRSEpVn",
       "revenueCatAndroidApiKey": "REPLACE_WITH_REVENUECAT_PUBLIC_ANDROID_API_KEY",
       "openWeatherMapApiKey": "REPLACE_WITH_OPENWEATHERMAP_API_KEY",
       "alternateIconsReady": false,
