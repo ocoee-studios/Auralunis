@@ -86,19 +86,20 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const flash = useRef(new Animated.Value(0)).current;
   const captureSky = useCallback(async () => {
     if (capturing) return;
-    setCapturing(true);
+    setCapturing(true); // triggers 85% darken via style below
     flash.setValue(0);
     Animated.sequence([
       Animated.timing(flash, { toValue: 0.9, duration: 70, useNativeDriver: true }),
       Animated.timing(flash, { toValue: 0, duration: 280, useNativeDriver: true }),
     ]).start();
     try {
-      await new Promise((r) => setTimeout(r, 150));
+      // Wait for the dark overlay to render before capturing
+      await new Promise((r) => setTimeout(r, 300));
       const uri = await captureRef(sceneRef, { format: "png", quality: 1.0 });
       if (await Sharing.isAvailableAsync()) {
         await Sharing.shareAsync(uri, { mimeType: "image/png", dialogTitle: "Share your sky" });
       } else {
-        Alert.alert("Captured!", "Sky photo ready but sharing is not available on this device.");
+        Alert.alert("Captured!", "Sky photo ready but sharing is not available.");
       }
     } catch (e) {
       Alert.alert("Capture failed", String(e));
@@ -430,11 +431,12 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
 
-          {/* Cosmic dark overlay — darkens camera feed so stars/nebulae pop.
-              AR: 45% black. Immersive: 75% (screenshot mode). Planetarium: 95%. */}
+          {/* Cosmic dark overlay — extra dark during photo capture for clean screenshots */}
           <View
             style={[StyleSheet.absoluteFillObject, {
-              backgroundColor: planetarium
+              backgroundColor: capturing
+                ? "rgba(3,8,22,0.88)"
+                : planetarium
                 ? "rgba(3,8,22,0.95)"
                 : immersive
                 ? "rgba(3,8,22,0.75)"
