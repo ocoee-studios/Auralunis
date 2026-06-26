@@ -22,11 +22,11 @@ const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 // screen WITHOUT its label: Jupiter ≈26px and Saturn ≈22px across (disc = radius),
 // Mars/Venus/Mercury scaled to match. Glows held tight so the body, not fog, leads.
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  venus: { disc: 10.5, glow: 22 },
-  jupiter: { disc: 13, glow: 17 },
-  saturn: { disc: 11, glow: 14 },
-  mars: { disc: 7.8, glow: 16 },
-  mercury: { disc: 5.9, glow: 8 },
+  venus: { disc: 13, glow: 20 },
+  jupiter: { disc: 18, glow: 22 },
+  saturn: { disc: 15, glow: 18 },
+  mars: { disc: 10, glow: 15 },
+  mercury: { disc: 6, glow: 9 },
 };
 
 // Galilean moons — small offsets along the ring plane, scattered like the real set.
