@@ -1,7 +1,7 @@
 import type { BrightStar } from "./brightStars";
 import { galacticToEquatorial, mulberry32, gaussian, coreProx, GALACTIC_KNOTS } from "./galacticGeom";
 
-// LAYER 2 — the star-cloud TEXTURE. ~2200 stars packed along the galactic plane, but
+// LAYER 2 — the star-cloud TEXTURE. ~2450 stars packed along the galactic plane, but
 // CLUMPY rather than smooth: most are scattered around a set of cluster seeds (the
 // named star clouds — Sagittarius, Scutum, Cygnus, Carina — plus procedural knots),
 // so the band reads as mottled clusters with brightness variation, not a gradient.
@@ -30,7 +30,7 @@ export const MILKY_WAY_STARS: ReadonlyArray<BrightStar> = (() => {
 
   const out: BrightStar[] = [];
   let guard = 0;
-  while (out.length < 2200 && guard < 120000) {
+  while (out.length < 2450 && guard < 140000) {
     guard++;
     let l: number, b: number;
     if (rng() < 0.8) {

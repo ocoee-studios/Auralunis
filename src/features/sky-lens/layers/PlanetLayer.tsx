@@ -17,12 +17,14 @@ type Props = {
 const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 
 // Per-planet "personality": disc radius + glow size. Brighter planets read bigger.
+// Body radii sized so the planet itself reads BEFORE its halo: Jupiter ≈20px and
+// Saturn ≈17px across (disc = radius), Mars/Venus bumped ~30% to match.
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  venus: { disc: 6, glow: 22 },
-  jupiter: { disc: 6, glow: 16 },
-  saturn: { disc: 5, glow: 13 },
-  mars: { disc: 4.5, glow: 16 },
-  mercury: { disc: 3.5, glow: 8 },
+  venus: { disc: 8, glow: 22 },
+  jupiter: { disc: 10, glow: 16 },
+  saturn: { disc: 8.5, glow: 13 },
+  mars: { disc: 6, glow: 16 },
+  mercury: { disc: 4.5, glow: 8 },
 };
 
 // Galilean moons — small offsets along the ring plane, scattered like the real set.
