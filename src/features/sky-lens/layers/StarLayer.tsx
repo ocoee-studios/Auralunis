@@ -118,7 +118,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             {labeled && (() => {
               const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 13) : { x: p.x + r + 3, y: p.y + 3 };
               return (
-                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={13} fontWeight="600">
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={13} fontWeight="500" opacity={0.9}>
                   {star.name}
                 </SvgText>
               );

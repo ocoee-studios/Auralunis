@@ -217,8 +217,8 @@ const BIG_FIVE: Record<string, BigFive> = {
 };
 
 const SIGNATURES: Record<string, Signature> = {
-  // Rosette — circular rose bloom, smaller than before (was dominating the sky)
-  ngc2237: { scale: 1.6, ring: true },
+  // Rosette — small WISPY blush (was a saturated pink ring dominating the sky)
+  ngc2237: { scale: 0.9, ring: true },
   // North America — a recognizable continent built from offset lobes
   ngc7000: {
     scale: 3.2,
@@ -280,15 +280,6 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               <Stop offset="40%" stopColor={n.coreColor} stopOpacity="0.45" />
               <Stop offset="100%" stopColor={n.coreColor} stopOpacity="0" />
             </RadialGradient>
-            {SIGNATURES[n.id]?.ring && (
-              <RadialGradient id={`neb-ring-${n.id}`} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0" />
-                <Stop offset="38%" stopColor={n.coreColor} stopOpacity="0" />
-                <Stop offset="58%" stopColor={n.coreColor} stopOpacity="0.5" />
-                <Stop offset="80%" stopColor={n.hazeColor} stopOpacity="0.2" />
-                <Stop offset="100%" stopColor={n.hazeColor} stopOpacity="0" />
-              </RadialGradient>
-            )}
             {BIG_FIVE[n.id] && (
               /* cool blue reflection nebulosity — the second colour zone */
               <RadialGradient id={`neb-cool-${n.id}`} cx="50%" cy="50%" r="50%">
@@ -423,19 +414,17 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                    feedback). ~50% smaller and ~40% dimmer than the old ring so it's a
                    blush within the band, not a pink target floating on top. */
                 <>
-                  <Path d={blobPath(p.x, p.y, hazeR * 0.6, seed)} fill={hazeId} opacity={0.26} />
-                  <Circle cx={p.x} cy={p.y} r={coreR * 0.8} fill={coreId} opacity={0.55} />
+                  <Path d={blobPath(p.x, p.y, hazeR * 0.38, seed)} fill={hazeId} opacity={0.16} />
+                  <Circle cx={p.x} cy={p.y} r={coreR * 0.6} fill={coreId} opacity={0.4} />
                 </>
               ) : sig?.lobes ? (
-                /* organic multi-lobe cloud (Orion, Lagoon, North America) */
+                /* organic multi-lobe cloud — wispy gas (irregular paths, not circles) */
                 <>
-                  <Circle cx={p.x} cy={p.y} r={volR} fill={hazeId} opacity={0.4} />
+                  <Path d={blobPath(p.x, p.y, volR, seed + 7)} fill={hazeId} opacity={0.4} />
                   {sig.lobes.map((lb, k) => (
-                    <Circle
+                    <Path
                       key={`lobe-${k}`}
-                      cx={p.x + lb.dx * r}
-                      cy={p.y + lb.dy * r}
-                      r={hazeR * lb.s}
+                      d={blobPath(p.x + lb.dx * r, p.y + lb.dy * r, hazeR * lb.s, seed + k * 11 + 4)}
                       fill={hazeId}
                       opacity={lb.op ?? 1}
                     />
@@ -443,9 +432,9 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                   <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
                 </>
               ) : sig?.filaments ? (
-                /* Veil — thin curved filaments over a faint base haze */
+                /* Veil — thin curved filaments over a faint wispy base haze */
                 <>
-                  <Circle cx={p.x} cy={p.y} r={hazeR * 0.7} fill={hazeId} opacity={0.28} />
+                  <Path d={blobPath(p.x, p.y, hazeR * 0.7, seed + 6)} fill={hazeId} opacity={0.28} />
                   {sig.filaments.map((fl, k) => (
                     <G key={`fil-${k}`} transform={`rotate(${fl.ang} ${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>
                       <Ellipse cx={p.x + fl.dx * r} cy={p.y + fl.dy * r} rx={r * fl.rx} ry={r * fl.ry} fill={hazeId} opacity={fl.op} />
@@ -475,7 +464,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               const ly = p.y + Math.min(hazeR * 0.5, isShowcase ? 90 : 46) + 4;
               const lp = placeLabel ? placeLabel(p.x, ly, n.name, 12) : { x: p.x, y: ly };
               return (
-                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={12} fontWeight="600" textAnchor="middle" opacity={0.7}>
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={12} fontWeight="400" textAnchor="middle" opacity={0.7}>
                   {n.name}
                 </SvgText>
               );

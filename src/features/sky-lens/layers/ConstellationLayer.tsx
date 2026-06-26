@@ -112,8 +112,9 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
                     y={lp.y}
                     fill={nightMode ? palette.conLabel : GOLD}
                     fontSize={13}
-                    fontWeight="700"
-                    letterSpacing={2}
+                    fontWeight="400"
+                    letterSpacing={3.5}
+                    opacity={0.5}
                     textAnchor="middle"
                   >
                     {c.name.toUpperCase()}

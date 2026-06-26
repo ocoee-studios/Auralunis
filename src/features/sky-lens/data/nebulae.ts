@@ -40,7 +40,7 @@ const TEAL_HAZE = "#3AA0B0"; // planetary haze
 
 export const NEBULAE: ReadonlyArray<Nebula> = [
   // ── Emission nebulae — glowing hydrogen ───────────────────────────────────
-  { id: "m42", catalog: "M42", name: "Orion Nebula", raHours: 5.588, decDegrees: -5.39, type: "emission", con: "Ori", constellation: "Orion", coreColor: "#F25CC0", hazeColor: "#6A86E6", radius: 27, distanceLy: "1,344 ly", visibility: "Naked eye",
+  { id: "m42", catalog: "M42", name: "Orion Nebula", raHours: 5.588, decDegrees: -5.39, type: "emission", con: "Ori", constellation: "Orion", coreColor: "#C77AA0", hazeColor: "#7E96D8", radius: 27, distanceLy: "1,344 ly", visibility: "Naked eye",
     description: "A vast stellar nursery in Orion's sword, where new suns are igniting inside glowing curtains of hydrogen.", bestMonths: "December–March" },
   { id: "m8", catalog: "M8", name: "Lagoon Nebula", raHours: 18.06, decDegrees: -24.38, type: "emission", con: "Sgr", constellation: "Sagittarius", coreColor: PINK, hazeColor: ORANGE, radius: 20, distanceLy: "4,100 ly", visibility: "Naked eye",
     description: "A rose-colored cloud split by a dark lagoon of dust, drifting in the heart of the Milky Way.", bestMonths: "June–September" },
@@ -54,7 +54,7 @@ export const NEBULAE: ReadonlyArray<Nebula> = [
     description: "Also called the Omega — a luminous swan floating on a river of star-forming gas.", bestMonths: "June–September" },
   { id: "m20", catalog: "M20", name: "Trifid Nebula", raHours: 18.045, decDegrees: -23.03, type: "emission", con: "Sgr", constellation: "Sagittarius", coreColor: PINK, hazeColor: "#6090FF", radius: 15, distanceLy: "5,200 ly", visibility: "Binoculars",
     description: "A rare pairing: a pink emission cloud cleft into three, hugged by a cool blue reflection halo.", bestMonths: "June–September" },
-  { id: "ngc2237", catalog: "NGC 2237", name: "Rosette Nebula", raHours: 6.525, decDegrees: 4.95, type: "emission", con: "Mon", constellation: "Monoceros", coreColor: "#FF7FB0", hazeColor: "#E85C92", radius: 18, distanceLy: "5,000 ly", visibility: "Binoculars",
+  { id: "ngc2237", catalog: "NGC 2237", name: "Rosette Nebula", raHours: 6.525, decDegrees: 4.95, type: "emission", con: "Mon", constellation: "Monoceros", coreColor: "#CC93A6", hazeColor: "#B0788A", radius: 11, distanceLy: "5,000 ly", visibility: "Binoculars",
     description: "A deep-red flower of gas with a cluster of hot young stars blooming at its center.", bestMonths: "December–March" },
 
   // ── Reflection nebula — scattered starlight ───────────────────────────────

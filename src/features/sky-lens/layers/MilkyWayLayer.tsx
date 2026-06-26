@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Circle, Defs, Ellipse, G, RadialGradient, Stop } from "react-native-svg";
 import type { MilkyWayBand } from "../ephemeris/MilkyWay";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
@@ -35,7 +35,7 @@ const EMISSION_KNOTS: { l: number; s: number; op?: number }[] = [
   { l: 16, s: 0.85 },  // Eagle / Omega (Serpens/Sagittarius)
   { l: 49, s: 0.6 },   // Scutum star cloud
   { l: 78, s: 0.95 },  // Cygnus — North America / Pelican
-  { l: 207, s: 0.25, op: 0.37 }, // Orion / Rosette — tamed AGAIN (2nd device pass):
+  { l: 207, s: 0.18, op: 0.28 }, // Orion / Rosette — tamed AGAIN (2nd device pass):
                                  // another ~50% smaller + ~40% dimmer. It was still a
                                  // pink wash; now barely a blush within the gold band.
   { l: 287, s: 0.85 }, // Carina
@@ -60,6 +60,19 @@ const STAR_CLOUD_KNOTS = [
 ];
 
 export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boost }: Props) {
+  // §4 breathing — a ~0.5px vertical drift over 30s so the band feels alive, not pasted.
+  // Low-frequency JS clock (600ms → imperceptible sub-0.1px steps). Static SVG + setState,
+  // no animated-SVG props → crash-safe. Hook runs before the Night-Mode early return.
+  const [driftY, setDriftY] = useState(0);
+  useEffect(() => {
+    if (nightMode) return;
+    const start = Date.now();
+    const id = setInterval(() => {
+      setDriftY(Math.sin(((Date.now() - start) / 1000 / 30) * Math.PI * 2) * 0.5);
+    }, 600);
+    return () => clearInterval(id);
+  }, [nightMode]);
+
   if (nightMode) return null;
 
   // band-following points (galactic equator) for the soft glow
@@ -118,7 +131,7 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
   };
 
   return (
-    <G>
+    <G transform={`translate(0 ${driftY.toFixed(2)})`}>
       <Defs>
         {/* LAYER 3 — warm galactic glow — subtle warmth, not visible circles */}
         <RadialGradient id="mwGlow" cx="50%" cy="50%" r="50%">
@@ -153,9 +166,9 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         </RadialGradient>
         {/* H-alpha emission (rose/magenta) star-forming regions in the band */}
         <RadialGradient id="mwEmission" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E85C82" stopOpacity={o(0.26)} />
-          <Stop offset="45%" stopColor="#D870A0" stopOpacity={o(0.13)} />
-          <Stop offset="100%" stopColor="#D870A0" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#C77A8E" stopOpacity={o(0.2)} />
+          <Stop offset="45%" stopColor="#B57F9C" stopOpacity={o(0.1)} />
+          <Stop offset="100%" stopColor="#B57F9C" stopOpacity={0} />
         </RadialGradient>
         {/* reflection (ice blue → violet) accent near bright clusters */}
         <RadialGradient id="mwReflection" cx="50%" cy="50%" r="50%">

@@ -9,6 +9,7 @@ import { StarLayer } from "./layers/StarLayer";
 import { DomeStarLayer } from "./layers/DomeStarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer } from "./layers/MoonLayer";
+import { CosmicDustLayer } from "./layers/CosmicDustLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
 import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
@@ -121,6 +122,9 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
 
       {/* Everything EXCEPT the Moon steps back while the Moon holds the scene. */}
       <G opacity={heroDim}>
+      {/* §1 — ambient warm wash + ultra-faint gold dust so the sky shimmers, not voids.
+          Backmost layer, behind the Milky Way and stars. */}
+      <CosmicDustLayer box={box} nightMode={nightMode} />
       {/* Milky Way behind everything: a thin procedural band wraps the full galactic
           plane (Sagittarius→Cygnus→Cassiopeia→Orion), then the REAL photographic core
           glows on top at Sagittarius. */}
