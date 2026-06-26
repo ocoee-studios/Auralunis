@@ -1,5 +1,5 @@
 import React from "react";
-import { Circle, Defs, G, RadialGradient, Stop } from "react-native-svg";
+import { Circle, Defs, Ellipse, G, RadialGradient, Stop } from "react-native-svg";
 import type { MilkyWayBand } from "../ephemeris/MilkyWay";
 import type { HorizontalStar } from "../ephemeris/StarPositions";
 import type { ProjectFn } from "../SkyLensVisual";
@@ -28,12 +28,16 @@ type Props = {
 // are soft coloured patches WITHIN the band so the major nebulae read as brighter
 // regions of the galaxy itself, not floating circles. Gold stays dominant; pink and
 // blue are low-opacity accents per the AuraLunis palette.
-const EMISSION_KNOTS = [
+// `op` optionally scales a knot's opacity below the gradient default, used to keep an
+// emission patch a BLUSH within the gold band rather than a pink spotlight.
+const EMISSION_KNOTS: { l: number; s: number; op?: number }[] = [
   { l: 6, s: 1.0 },    // Lagoon / Trifid (Sagittarius)
   { l: 16, s: 0.85 },  // Eagle / Omega (Serpens/Sagittarius)
   { l: 49, s: 0.6 },   // Scutum star cloud
   { l: 78, s: 0.95 },  // Cygnus — North America / Pelican
-  { l: 207, s: 0.9 },  // Orion / Rosette
+  { l: 207, s: 0.5, op: 0.62 },  // Orion / Rosette — tamed (device-screenshot pass):
+                                 // ~45% smaller + ~38% dimmer so it's an accent inside
+                                 // the gold band, not a pink wash over Orion's belt.
   { l: 287, s: 0.85 }, // Carina
 ];
 const REFLECTION_KNOTS = [
@@ -79,12 +83,31 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
 
   // Project the band point nearest a given galactic longitude (for emission/reflection
   // knots). Returns null if below horizon / behind / off-screen.
+  const knotIdx = (l: number) => Math.round((((l % 360) + 360) % 360) / 4) % band.center.length;
   const knotPoint = (l: number) => {
-    const idx = Math.round((((l % 360) + 360) % 360) / 4) % band.center.length;
+    const idx = knotIdx(l);
     const pt = band.center[idx];
     if (!pt || !pt.aboveHorizon) return null;
     const p = project(pt.azimuthDegrees, pt.altitudeDegrees);
     return p.behind || !p.onScreen ? null : p;
+  };
+
+  // Like knotPoint, but also returns the band's local screen direction (degrees) from
+  // the neighbouring centre points — so a patch can be stretched ALONG the galactic
+  // plane (an ellipse following the river) instead of sitting as a flat circle on top.
+  const knotPose = (l: number) => {
+    const p = knotPoint(l);
+    if (!p) return null;
+    const idx = knotIdx(l);
+    const a = band.center[(idx - 1 + band.center.length) % band.center.length];
+    const b = band.center[(idx + 1) % band.center.length];
+    let angle = 0;
+    if (a?.aboveHorizon && b?.aboveHorizon) {
+      const pa = project(a.azimuthDegrees, a.altitudeDegrees);
+      const pb = project(b.azimuthDegrees, b.altitudeDegrees);
+      if (!pa.behind && !pb.behind) angle = (Math.atan2(pb.y - pa.y, pb.x - pa.x) * 180) / Math.PI;
+    }
+    return { x: p.x, y: p.y, angle };
   };
 
   // tiny deterministic hash for per-blob size variation
@@ -166,15 +189,29 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         return p ? <Circle key={`sc-${i}`} cx={p.x} cy={p.y} r={glowR * (0.46 + ((i * 53) % 100) / 100 * 0.22) * k.s} fill="url(#mwStarCloud)" /> : null;
       })}
 
-      {/* H-alpha emission patches — rose star-forming regions woven into the band */}
+      {/* H-alpha emission patches — rose star-forming regions woven into the band.
+          Per-knot `op` keeps strong patches (Orion) a blush, not a pink spotlight. */}
       {EMISSION_KNOTS.map((k, i) => {
         const p = knotPoint(k.l);
-        return p ? <Circle key={`em-${i}`} cx={p.x} cy={p.y} r={glowR * 0.55 * k.s} fill="url(#mwEmission)" /> : null;
+        return p ? <Circle key={`em-${i}`} cx={p.x} cy={p.y} r={glowR * 0.55 * k.s} fill="url(#mwEmission)" opacity={k.op ?? 1} /> : null;
       })}
-      {/* reflection accents — cool blue near bright clusters */}
+      {/* reflection accents — cool blue near bright clusters. Stretched ALONG the band
+          (ellipse on the galactic tangent) + a small offset dab, so it reads as an
+          organic brightening within the river rather than a flat circular blob on top
+          (device-screenshot pass: the Pleiades patch was too round/flat). */}
       {REFLECTION_KNOTS.map((k, i) => {
-        const p = knotPoint(k.l);
-        return p ? <Circle key={`rf-${i}`} cx={p.x} cy={p.y} r={glowR * 0.45 * k.s} fill="url(#mwReflection)" /> : null;
+        const pose = knotPose(k.l);
+        if (!pose) return null;
+        const R = glowR * 0.42 * k.s;
+        const rad = (pose.angle * Math.PI) / 180;
+        const dx = Math.cos(rad) * R * 0.8;
+        const dy = Math.sin(rad) * R * 0.8;
+        return (
+          <G key={`rf-${i}`}>
+            <Ellipse cx={pose.x} cy={pose.y} rx={R * 1.7} ry={R * 0.6} rotation={pose.angle} originX={pose.x} originY={pose.y} fill="url(#mwReflection)" opacity={0.78} />
+            <Ellipse cx={pose.x + dx} cy={pose.y + dy} rx={R * 0.75} ry={R * 0.5} rotation={pose.angle} originX={pose.x + dx} originY={pose.y + dy} fill="url(#mwReflection)" opacity={0.6} />
+          </G>
+        );
       })}
 
       {/* LAYER 4 — galactic core toward Sagittarius (rose/violet halo + bright heart) */}
