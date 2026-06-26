@@ -26,6 +26,28 @@ function blobPath(cx: number, cy: number, r: number, seed: number, n = 9): strin
   return d + " Z";
 }
 
+// Star clusters aren't smooth glows — they're a tight concentration of individual
+// stars. Generate 15–25 deterministic dots (seeded so they don't twinkle-jump per
+// render), biased toward the centre (pow 1.7 → dense core), each varying slightly in
+// size + brightness. Caller paints them in the cluster's coreColor over a faint glow.
+function clusterDots(cx: number, cy: number, radius: number, seed: number): { x: number; y: number; r: number; o: number }[] {
+  let s = (seed * 2654435761 + 1) >>> 0;
+  const rng = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 0xffffffff);
+  const count = 15 + Math.floor(rng() * 11); // 15–25
+  const out: { x: number; y: number; r: number; o: number }[] = [];
+  for (let i = 0; i < count; i++) {
+    const ang = rng() * Math.PI * 2;
+    const dr = Math.pow(rng(), 1.7) * radius; // centre-dense
+    out.push({
+      x: cx + Math.cos(ang) * dr,
+      y: cy + Math.sin(ang) * dr,
+      r: 0.5 + rng() * 1.1, // 0.5–1.6px
+      o: 0.55 + rng() * 0.45, // 0.55–1.0
+    });
+  }
+  return out;
+}
+
 type Props = {
   nebulae: HorizontalNebula[];
   project: ProjectFn;
@@ -353,7 +375,16 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
             />
 
             <G opacity={Math.min(1, breathe * opMul)}>
-              {!customShapes ? (
+              {n.type === "cluster" ? (
+                /* STAR CLUSTER — not a smooth glow but a tight swarm of individual
+                   stars. A very faint glow (5%) ties them together; the dots lead. */
+                <>
+                  <Circle cx={p.x} cy={p.y} r={r * 1.4} fill={n.coreColor} opacity={0.05} />
+                  {clusterDots(p.x, p.y, r * 1.25, seed).map((d, k) => (
+                    <Circle key={`cl-${k}`} cx={d.x} cy={d.y} r={d.r} fill={n.coreColor} opacity={d.o} />
+                  ))}
+                </>
+              ) : !customShapes ? (
                 /* FREE — a simple radial-glow cloud (no dual-colour silhouettes, dust
                    lanes, or embedded stars). Premium unlocks the astrophoto shapes. */
                 <>
@@ -456,7 +487,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               )}
               {/* hot heart — the central star / cluster (rings stay hollow; Big Five
                   supply their own embedded stars) */}
-              {(!customShapes || (!sig?.ring && !bf)) && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
+              {n.type !== "cluster" && (!customShapes || (!sig?.ring && !bf)) && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
             </G>
 
             {/* label */}
