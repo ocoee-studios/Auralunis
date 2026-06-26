@@ -4,9 +4,25 @@
 import React, { useEffect, useState } from "react";
 import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from "react-native";
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LogoMark } from "@/components/LogoMark";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapSuccess } from "@/services/HapticService";
+import { computeBirthSky, BIRTHDAY_STORAGE_KEY, type BirthSkyProfile } from "@/services/BirthSkyService";
+import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
+
+// Parse the onboarding birthday field (placeholder "MM / DD / YYYY", but tolerate
+// YYYY-MM-DD too) into a noon-UTC ISO string. Returns null if it isn't a real date.
+function parseBirthdayToISO(input: string): string | null {
+  const d = input.replace(/\D/g, "");
+  if (d.length !== 8) return null;
+  let y = Number(d.slice(4, 8)), m = Number(d.slice(0, 2)), day = Number(d.slice(2, 4)); // MMDDYYYY
+  if (m > 12) { y = Number(d.slice(0, 4)); m = Number(d.slice(4, 6)); day = Number(d.slice(6, 8)); } // YYYYMMDD
+  if (m < 1 || m > 12 || day < 1 || day > 31 || y < 1900 || y > 2100) return null;
+  const pad = (n: number) => String(n).padStart(2, "0");
+  const date = new Date(`${y}-${pad(m)}-${pad(day)}T12:00:00Z`);
+  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+}
 
 type Props = {
   visible: boolean;
@@ -17,6 +33,26 @@ type Props = {
 export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
   const [step, setStep] = useState(0);
   const [birthday, setBirthday] = useState("");
+  const [profile, setProfile] = useState<BirthSkyProfile | null>(null);
+  const { location, status } = useObserverLocation();
+
+  // Real birth-sky reveal: parse the birthday, compute the sky for the device location
+  // (DEFAULT_OBSERVER fallback is baked into useObserverLocation), persist it for
+  // BirthSkyScreen, and advance. A blank/invalid entry → no profile (graceful skip copy).
+  function handleReveal() {
+    const iso = parseBirthdayToISO(birthday);
+    if (iso) {
+      try {
+        setProfile(computeBirthSky(iso, location, status === "fallback" ? "Default Location" : "Your Location"));
+        AsyncStorage.setItem(BIRTHDAY_STORAGE_KEY, iso).catch(() => {});
+      } catch {
+        setProfile(null);
+      }
+    } else {
+      setProfile(null);
+    }
+    setStep(2);
+  }
 
   // Birth sky reveal animation
   const ringScale = useSharedValue(0.3);
@@ -78,10 +114,10 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
               onChangeText={setBirthday}
               keyboardType="numbers-and-punctuation"
             />
-            <Pressable style={s.cta} onPress={() => setStep(2)}>
+            <Pressable style={s.cta} onPress={handleReveal}>
               <Text style={s.ctaText}>Reveal My Birth Sky</Text>
             </Pressable>
-            <Pressable onPress={() => setStep(2)}>
+            <Pressable onPress={() => { setProfile(null); setStep(2); }}>
               <Text style={s.skipText}>Skip for now</Text>
             </Pressable>
           </View>
@@ -95,11 +131,34 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
             <Animated.View style={[s.revealRing, ringStyle]}>
               <Animated.View style={[s.revealCore, coreStyle]} />
             </Animated.View>
-            <Text style={s.bodyText}>
-              {birthday
-                ? `On the night of ${birthday}, these stars were above you. Your celestial fingerprint is part of AuraLunis now.`
-                : "Your celestial fingerprint awaits. Add your birthday anytime in Settings to unlock your birth sky."}
-            </Text>
+            {profile ? (
+              <>
+                <Text style={s.birthSignature}>{profile.cosmicSignature}</Text>
+                <View style={s.birthStats}>
+                  <View style={s.birthStat}>
+                    <Text style={s.birthStatValue}>{profile.moonPhase}</Text>
+                    <Text style={s.birthStatLabel}>MOON · {Math.round(profile.moonIllumination)}%</Text>
+                  </View>
+                  <View style={s.birthStat}>
+                    <Text style={s.birthStatValue}>{profile.sunSign}</Text>
+                    <Text style={s.birthStatLabel}>SUN SIGN</Text>
+                  </View>
+                  <View style={s.birthStat}>
+                    <Text style={s.birthStatValue}>{profile.visibleCount}</Text>
+                    <Text style={s.birthStatLabel}>PLANETS UP</Text>
+                  </View>
+                </View>
+                {profile.planets.some((p) => p.visible) && (
+                  <Text style={s.birthPlanets}>
+                    Above the horizon: {profile.planets.filter((p) => p.visible).map((p) => p.name).join(", ")}
+                  </Text>
+                )}
+              </>
+            ) : (
+              <Text style={s.bodyText}>
+                Add your birthday anytime in Settings to reveal your birth sky.
+              </Text>
+            )}
             <Pressable style={s.cta} onPress={() => setStep(3)}>
               <Text style={s.ctaText}>Continue</Text>
             </Pressable>
@@ -146,6 +205,12 @@ const s = StyleSheet.create({
   skipText: { color: AuraLunisColors.gold2, fontWeight: "800", fontSize: 13, marginTop: 16 },
   revealRing: { width: 160, height: 160, borderRadius: 80, borderWidth: 2, borderColor: "rgba(199,166,106,0.6)", alignItems: "center", justifyContent: "center", marginTop: 24, marginBottom: 12 },
   revealCore: { width: 48, height: 48, borderRadius: 24, backgroundColor: AuraLunisColors.gold },
+  birthSignature: { color: AuraLunisColors.gold2, fontSize: 15, lineHeight: 22, textAlign: "center", fontStyle: "italic", marginTop: 14, maxWidth: 320 },
+  birthStats: { flexDirection: "row", justifyContent: "center", gap: 22, marginTop: 20 },
+  birthStat: { alignItems: "center", maxWidth: 110 },
+  birthStatValue: { color: AuraLunisColors.gold, fontSize: 15, fontWeight: "900", textAlign: "center" },
+  birthStatLabel: { color: AuraLunisColors.muted, fontSize: 9, fontWeight: "800", letterSpacing: 1, marginTop: 4, textAlign: "center" },
+  birthPlanets: { color: AuraLunisColors.silver, fontSize: 12, lineHeight: 18, textAlign: "center", marginTop: 16, maxWidth: 300 },
   cta: { width: "100%", borderRadius: 15, backgroundColor: AuraLunisColors.gold, paddingVertical: 15, alignItems: "center", marginTop: 24 },
   ctaText: { color: "#17120B", fontWeight: "900", fontSize: 15 },
   secondaryCta: { width: "100%", borderRadius: 15, borderWidth: 1, borderColor: "rgba(199,166,106,0.34)", backgroundColor: "rgba(199,166,106,0.11)", paddingVertical: 14, alignItems: "center", marginTop: 10 },
