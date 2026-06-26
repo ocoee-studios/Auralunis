@@ -370,16 +370,27 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     return { x: focusProj.x, y: focusProj.y, r: Math.min(box.width, box.height) * 0.34 };
   }, [focusProj, box]);
 
-  // Auto showcase region: when Orion's heart (M42) is in view, light up the whole
-  // region — no tap needed. Layers boost nebula intensity (~3×), local star density,
-  // and showcase-star glow inside this zone, so Orion (M42 + Flame + Horsehead +
-  // Rosette + Betelgeuse + Rigel) becomes the most dramatic patch of sky on screen.
+  // Permanent HERO REGIONS — focal zones where everything reinforces, so the sky isn't
+  // uniformly bright. When a hero's anchor is in view, the whole region lights up (no
+  // tap): layers boost nebula intensity (~3×), local star density, and showcase-star
+  // glow inside the zone. Sagittarius is THE showpiece (largest zone) — Lagoon + Trifid
+  // + Swan + Eagle + the galactic core all overlap → "Whoa." Then Orion (winter), then
+  // Carina (southern). First anchor that's on-screen wins; Sagittarius is checked first.
+  const HERO_REGIONS: ReadonlyArray<{ id: string; r: number }> = [
+    { id: "m8", r: 0.66 },     // Sagittarius core — showpiece, widest zone
+    { id: "m42", r: 0.55 },    // Orion
+    { id: "ngc3372", r: 0.5 }, // Carina
+  ];
   const showcaseZone = useMemo<FocusZone>(() => {
-    const m42 = sky.nebulae.find((n) => n.id === "m42");
-    if (!m42 || !m42.aboveHorizon) return null;
-    const sp = projectTarget(pointing, m42.azimuthDegrees, m42.altitudeDegrees, fov, box);
-    if (sp.behind || !sp.onScreen) return null;
-    return { x: sp.x, y: sp.y, r: Math.min(box.width, box.height) * 0.55 };
+    for (const hero of HERO_REGIONS) {
+      const n = sky.nebulae.find((x) => x.id === hero.id);
+      if (!n || !n.aboveHorizon) continue;
+      const sp = projectTarget(pointing, n.azimuthDegrees, n.altitudeDegrees, fov, box);
+      if (sp.behind || !sp.onScreen) continue;
+      return { x: sp.x, y: sp.y, r: Math.min(box.width, box.height) * hero.r };
+    }
+    return null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sky.nebulae, pointing, fov, box]);
 
   // Below-horizon bleed guard: the screen-fixed decorative overlays (FX layers,
@@ -471,8 +482,16 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             milkyWayVisible={active.has("milkyway")}
             intensity={(planetarium ? 0.9 : 0.55) * horizonFade}
           />
-          {/* AstralBreathingLayer disabled — PremiumSkyBloomLayer covers atmosphere.
-              Re-enable when performance budget allows. */}
+          {/* AstralBreathingLayer — re-enabled at LOW intensity (Path-to-10 §6): a
+              barely-perceptible 22s breathing swell so the sky feels alive, not static.
+              Crash-safe (single Animated.View + useAnimatedStyle over a static Svg).
+              Faded out below the horizon with the other screen-fixed FX. */}
+          <AstralBreathingLayer
+            width={box.width}
+            height={box.height}
+            nightVision={nightMode}
+            intensity={(planetarium ? 0.55 : 0.4) * horizonFade}
+          />
           {/* LuxuryStarfieldFXLayer disabled — 110 particles + shimmer animation
               is expensive. Re-enable when performance budget allows. */}
           {moonProj && (
