@@ -14,8 +14,12 @@ export const RevenueCatIds = {
     premiumAnnual:     "premium_annual",
     lifetimeFounders:  "lifetime_founders",
   },
-  // All three products unlock this single entitlement
-  entitlement: "auralunis_premium",
+  // All three products unlock this single entitlement. This MUST match the
+  // entitlement IDENTIFIER in the RevenueCat dashboard EXACTLY — it is literally
+  // "AuraLunis Premium" (with the space and capitals), not a snake_case slug. A
+  // mismatch means purchases succeed but never unlock premium, so do not "tidy"
+  // this into auralunis_premium.
+  entitlement: "AuraLunis Premium",
 } as const;
 
 export interface PlanOption {
@@ -46,7 +50,7 @@ export const plans: PlanOption[] = [
     displayPrice: "$39.99/year",
     subtitle: "$3.33/month, billed annually",
     revenueCatPackageId: RevenueCatIds.packages.premiumAnnual,
-    badge: "BEST VALUE · SAVE 52%",
+    badge: "Most Popular",
     effectiveMonthly: "$3.33/mo",
     trial: true,   // 7-day free trial on annual only
   },
@@ -66,9 +70,9 @@ export const plans: PlanOption[] = [
     name: "Founders Lifetime",
     interval: "lifetime",
     displayPrice: "$99.99",
-    subtitle: "One-time purchase · Never pay again",
+    subtitle: "Pay once. Own the sky forever.",
     revenueCatPackageId: RevenueCatIds.packages.lifetimeFounders,
-    badge: "FOUNDERS",
+    badge: "Limited time",
     trial: false,
     anchorPrice: "$167.88", // what 24 months of annual would cost — anchor comparison
   },
@@ -79,7 +83,7 @@ export const plans: PlanOption[] = [
 /** Tracking modes accessible on the free tier */
 export const FREE_TRACKING_MODES = ["fleet", "deep-space", "golden", "meteor"] as const;
 
-/** Tracking modes that require auralunis_premium */
+/** Tracking modes that require the "AuraLunis Premium" entitlement */
 export const PREMIUM_TRACKING_MODES = ["train", "debris", "reentry", "chain", "static"] as const;
 
 export type FreeTrackingMode    = typeof FREE_TRACKING_MODES[number];

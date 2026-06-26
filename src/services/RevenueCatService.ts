@@ -30,11 +30,23 @@ type ConfigureResult =
 
 let configured = false;
 
+// RevenueCat PUBLIC SDK key for iOS. Public (`appl_`) keys are designed to ship in
+// the client binary — they cannot read or mutate account data — so this is safe to
+// hardcode, and it keeps the live key out of app.json (which only carries a
+// placeholder). A real `extra.revenueCatIosApiKey` in app.json still wins if present,
+// so a build can override per-environment without a code change.
+const REVENUECAT_IOS_PUBLIC_KEY = "appl_wFLNgxZEHwoGKyJYEMUspGVphen";
+
+function isPlaceholderKey(value?: string) {
+  return !value || value.startsWith("REPLACE_WITH_");
+}
+
 function getPublicApiKey() {
   const extra = Constants.expoConfig?.extra ?? {};
 
   if (Platform.OS === "ios") {
-    return extra.revenueCatIosApiKey as string | undefined;
+    const fromConfig = extra.revenueCatIosApiKey as string | undefined;
+    return isPlaceholderKey(fromConfig) ? REVENUECAT_IOS_PUBLIC_KEY : fromConfig;
   }
 
   if (Platform.OS === "android") {
@@ -42,10 +54,6 @@ function getPublicApiKey() {
   }
 
   return undefined;
-}
-
-function isPlaceholderKey(value?: string) {
-  return !value || value.startsWith("REPLACE_WITH_");
 }
 
 export async function configureRevenueCat(): Promise<ConfigureResult> {
