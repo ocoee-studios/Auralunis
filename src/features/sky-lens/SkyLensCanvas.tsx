@@ -4,6 +4,7 @@ import { StyleSheet } from "react-native";
 import { projectTarget, DEFAULT_FOV, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
 import { GridLayer } from "./layers/GridLayer";
 import { ConstellationLayer } from "./layers/ConstellationLayer";
+import { ConstellationArtLayer } from "./layers/ConstellationArtLayer";
 import { StarLayer } from "./layers/StarLayer";
 import { DomeStarLayer } from "./layers/DomeStarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
@@ -40,6 +41,8 @@ type Props = {
   satellites: SkyLensSatellite[];
   cinematic?: boolean; // Immersive Sky mode: hide labels + data overlays, dim con-lines
   gate?: VisualGateConfig; // premium visual gating: spectral stars, gold nodes, hero moon, etc.
+  fullSphere?: boolean; // Planetarium mode: render the WHOLE sphere — below-horizon objects
+                        // at full brightness (point the phone at the floor → the sky below)
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -47,7 +50,7 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, fullSphere = false, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
   // Premium visual gate — falls back to the isPremium-derived config if a caller
   // doesn't pass one explicitly, so the canvas is never ungated by accident.
@@ -130,7 +133,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
       {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
         <G transform={depth(1)} opacity={nebulaOpacity}>
-          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} onSelect={onSelect} />
+          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} fullSphere={fullSphere} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("grid") && !cinematic && (
@@ -138,6 +141,11 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {activeLayers.has("ecliptic") && !cinematic && (
         <EclipticLayer points={sky.ecliptic} project={project} palette={palette} nightMode={nightMode} />
+      )}
+      {/* §Task 5 — faint gold mythology engravings BEHIND the constellation lines
+          (premium-only, fade in near screen centre). */}
+      {activeLayers.has("constellations") && (
+        <ConstellationArtLayer constellations={constellations} project={project} box={box} fov={fov} enabled={isPremium} />
       )}
       {activeLayers.has("constellations") && (
         <G opacity={cinematic ? 0.62 : 1}>
@@ -150,6 +158,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
             placeLabel={placeLabel}
             showLabels={showLabels}
             showNodes={vg.goldNodes}
+            fullSphere={fullSphere}
             onSelect={onSelect}
           />
         </G>
@@ -167,11 +176,11 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Dense background field behind the named bright stars */}
       {activeLayers.has("stars") && (
-        <DomeStarLayer stars={domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} extinction={extinction} useSpectralColors={vg.spectralColors} />
+        <DomeStarLayer stars={domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} extinction={extinction} useSpectralColors={vg.spectralColors} fullSphere={fullSphere} />
       )}
       {activeLayers.has("stars") && (
         <G transform={depth(0.25)}>
-          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} showLabels={showLabels} extinction={extinction} bloom={vg.starBloom} onSelect={onSelect} />
+          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} showLabels={showLabels} extinction={extinction} bloom={vg.starBloom} fullSphere={fullSphere} onSelect={onSelect} />
         </G>
       )}
       {/* Rare shooting stars streak across the field (~one every 8-12 min) — above
@@ -187,6 +196,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           placeLabel={placeLabel}
           showLabels={showLabels}
           useIllustrations={vg.planetIllustrations}
+          fullSphere={fullSphere}
           onSelect={onSelect}
         />
       )}
@@ -205,6 +215,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         nightMode={nightMode}
         showLabels={showLabels}
         heroMode={vg.heroMoon}
+        fullSphere={fullSphere}
         onSelect={onSelect}
       />
     </Svg>

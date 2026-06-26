@@ -27,12 +27,19 @@ const ALLOW_DEV_PREMIUM = true;
 const devPremium = (): boolean => __DEV__ && ALLOW_DEV_PREMIUM;
 
 async function fetchIsPremium(): Promise<boolean> {
-  if (!Purchases) return devPremium(); // RevenueCat unavailable
+  // DEV BYPASS: in a dev build, unlock premium unconditionally so every gated feature
+  // is visible/testable on device without a purchase. Short-circuits BEFORE RevenueCat
+  // — previously the bypass only fired when RC was unavailable/errored, so on a working
+  // dev build getCustomerInfo() succeeded, returned false, and the app stayed locked.
+  // Double-guarded (__DEV__ compiles to false in release), so it can never ship the
+  // App Store app unlocked. Flip ALLOW_DEV_PREMIUM to false to exercise the paywall.
+  if (devPremium()) return true;
+  if (!Purchases) return false; // RevenueCat unavailable in a release build
   try {
     const info = await Purchases.getCustomerInfo();
     return Boolean(info.entitlements.active[RevenueCatIds.entitlement]);
   } catch {
-    return devPremium(); // RC configured but errored (placeholder key, network)
+    return false; // RC configured but errored — fail CLOSED in production
   }
 }
 

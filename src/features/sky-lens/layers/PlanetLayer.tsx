@@ -13,29 +13,30 @@ type Props = {
   placeLabel?: LabelPlacer;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → bodies only, no names
   useIllustrations?: boolean; // premium: Jupiter bands, Saturn rings, moons, auras. free: colored dots.
+  fullSphere?: boolean; // Planetarium: show below-horizon planets at full brightness
   onSelect: (object: SelectedObject) => void;
 };
 
 const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 
-// Per-planet "personality": disc radius + glow size. Brighter planets read bigger.
-// Bodies bumped ~30% (Path-to-10) so each planet reads instantly from across the
-// screen WITHOUT its label: Jupiter ≈26px and Saturn ≈22px across (disc = radius),
-// Mars/Venus/Mercury scaled to match. Glows held to ≤~1.3× the disc so the BODY (and
-// its illustration) leads, not atmospheric fog — Venus/Mars/Mercury glows tightened
-// from 1.5× down to 1.3× per the final-polish pass (Jupiter/Saturn were already tight).
+// Per-planet "personality": disc radius + glow size. Bumped ~2.5× (SkyView-parity
+// pass) so planets read as prominent spheres, not small illustrations: Jupiter 45px,
+// Saturn 38px (+ rings beyond), Venus 32, Mars 25, Mercury 15. The SVG illustrations
+// (bands/rings/markings) are vector, so they scale up cleanly. Glows held to ≤1.2× the
+// disc so the BODY leads, not fog (tighter than before since the bodies are big now).
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  venus: { disc: 13, glow: 17 },
-  jupiter: { disc: 18, glow: 22 },
-  saturn: { disc: 15, glow: 18 },
-  mars: { disc: 10, glow: 13 },
-  mercury: { disc: 6, glow: 8 },
+  venus: { disc: 32, glow: 38 },
+  jupiter: { disc: 45, glow: 54 },
+  saturn: { disc: 38, glow: 45 },
+  mars: { disc: 25, glow: 30 },
+  mercury: { disc: 15, glow: 18 },
 };
 
-// Galilean moons — small offsets along the ring plane, scattered like the real set.
-const JUPITER_MOONS = [9, 14, -11, -17];
+// Galilean moons — offsets as MULTIPLES of the disc radius (× d at render) so they sit
+// just outside Jupiter's much larger disc, scattered like the real set along the plane.
+const JUPITER_MOONS = [1.45, 2.05, -1.55, -2.2];
 
-export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, useIllustrations = true, onSelect }: Props) {
+export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, useIllustrations = true, fullSphere = false, onSelect }: Props) {
   return (
     <G>
       {bodies.map((body) => {
@@ -63,7 +64,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
           });
 
         return (
-          <G key={body.id} opacity={belowHorizon ? 0.2 : 1}>
+          <G key={body.id} opacity={belowHorizon && !fullSphere ? 0.2 : 1}>
             {/* SCATTERING — ultra-faint outermost halo (~3× the disc) so the planet's
                 light feels like it scatters into space around it, not a hard cutout. */}
             <Circle cx={x} cy={y} r={d * 3} fill={color} opacity={0.02} />
@@ -88,8 +89,8 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
                 slight tilt), the detail that makes Jupiter instantly recognisable in a
                 telescope/binoculars. Tiny bright pinpoints just off the disc. */}
             {useIllustrations && body.id === "jupiter" && !nightMode &&
-              JUPITER_MOONS.map((mx, idx) => (
-                <Circle key={`jmoon-${idx}`} cx={x + mx} cy={y - mx * 0.12} r={1.3} fill="#FFF8E8" opacity={0.92} />
+              JUPITER_MOONS.map((mf, idx) => (
+                <Circle key={`jmoon-${idx}`} cx={x + mf * d} cy={y - mf * d * 0.12} r={Math.max(1.5, d * 0.05)} fill="#FFF8E8" opacity={0.92} />
               ))}
 
             {/* Venus — tighter pearl halo + diffraction glints (crisper per feedback) */}
@@ -97,8 +98,8 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
               <>
                 <Circle cx={x} cy={y} r={st.glow * 1.9} fill="#FBF3DC" opacity={0.06} />
                 <Circle cx={x} cy={y} r={st.glow * 1.2} fill="#FFFFFF" opacity={0.12} />
-                <Line x1={x - 13} y1={y} x2={x + 13} y2={y} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
-                <Line x1={x} y1={y - 13} x2={x} y2={y + 13} stroke="#FFF6D6" strokeWidth={0.8} strokeOpacity={0.55} strokeLinecap="round" />
+                <Line x1={x - d * 1.05} y1={y} x2={x + d * 1.05} y2={y} stroke="#FFF6D6" strokeWidth={Math.max(0.8, d * 0.035)} strokeOpacity={0.55} strokeLinecap="round" />
+                <Line x1={x} y1={y - d * 1.05} x2={x} y2={y + d * 1.05} stroke="#FFF6D6" strokeWidth={Math.max(0.8, d * 0.035)} strokeOpacity={0.55} strokeLinecap="round" />
               </>
             )}
 

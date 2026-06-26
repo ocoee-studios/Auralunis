@@ -11,6 +11,7 @@ type Props = {
   nightMode: boolean;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → no "Moon" caption
   heroMode?: boolean; // premium: craters, earthshine, bloom, lens flare. free: plain disc + phase.
+  fullSphere?: boolean; // Planetarium: render the Moon even when it's below the horizon
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -23,8 +24,8 @@ const R = 26; // hero moon disc radius — the largest object on screen
 // the optical axis), and a warm GOLDEN HORIZON GLOW that reddens the disc and pools
 // light beneath it when the Moon hangs low. All static SVG — crash-safe. The animated
 // god-ray halo (LunarGodRayLayer) sits behind this. Always-on per spec.
-export function MoonLayer({ moon, illuminationPercent, project, palette, nightMode, showLabels = true, heroMode = true, onSelect }: Props) {
-  if (!moon || !moon.aboveHorizon) return null;
+export function MoonLayer({ moon, illuminationPercent, project, palette, nightMode, showLabels = true, heroMode = true, fullSphere = false, onSelect }: Props) {
+  if (!moon || (!moon.aboveHorizon && !fullSphere)) return null;
   const p = project(moon.azimuthDegrees, moon.altitudeDegrees);
   if (!p.onScreen) return null;
 

@@ -35,9 +35,9 @@ const EMISSION_KNOTS: { l: number; s: number; op?: number }[] = [
   { l: 16, s: 0.85 },  // Eagle / Omega (Serpens/Sagittarius)
   { l: 49, s: 0.6 },   // Scutum star cloud
   { l: 78, s: 0.95 },  // Cygnus — North America / Pelican
-  { l: 207, s: 0.5, op: 0.62 },  // Orion / Rosette — tamed (device-screenshot pass):
-                                 // ~45% smaller + ~38% dimmer so it's an accent inside
-                                 // the gold band, not a pink wash over Orion's belt.
+  { l: 207, s: 0.25, op: 0.37 }, // Orion / Rosette — tamed AGAIN (2nd device pass):
+                                 // another ~50% smaller + ~40% dimmer. It was still a
+                                 // pink wash; now barely a blush within the gold band.
   { l: 287, s: 0.85 }, // Carina
 ];
 const REFLECTION_KNOTS = [

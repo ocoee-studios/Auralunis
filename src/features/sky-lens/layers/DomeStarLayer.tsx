@@ -13,18 +13,19 @@ type Props = {
   showcase?: FocusZone; // auto-lit hero region (e.g. Orion in view) — denser local sky
   extinction?: boolean; // warm low-altitude stars toward orange (atmospheric extinction)
   useSpectralColors?: boolean; // premium: blue/gold/orange dome tints. free: all white.
+  fullSphere?: boolean; // Planetarium: show below-horizon dome stars at full brightness
 };
 
 // The dense background starfield — hundreds of faint dots filling the sky between
 // the named bright stars. Deliberately minimal per star (one Circle, no glow/label/
 // hit-target) so even ~200 on-screen at once stays cheap. Only above-horizon,
 // on-screen stars render.
-export function DomeStarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, extinction = false, useSpectralColors = true }: Props) {
+export function DomeStarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, extinction = false, useSpectralColors = true, fullSphere = false }: Props) {
   return (
     <G>
       {stars.map((s) => {
         const belowHorizon = !s.aboveHorizon;
-        if (belowHorizon && s.altitudeDegrees < -30) return null;
+        if (belowHorizon && !fullSphere && s.altitudeDegrees < -30) return null;
         const p = project(s.azimuthDegrees, s.altitudeDegrees);
         if (!p.onScreen) return null;
         // Bigger stars so they're actually visible on a phone screen.
@@ -42,7 +43,7 @@ export function DomeStarLayer({ stars, project, palette, nightMode, focus = null
         // Free tier: every dome star renders the same warm white (no spectral tints).
         const baseColor = nightMode ? palette.star : useSpectralColors ? domeColor(s.id) : "#FFF6D6";
         const color = extinction && !nightMode ? warmShift(baseColor, getExtinctionWarmth(s.altitudeDegrees)) : baseColor;
-        return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={opacity * (belowHorizon ? 0.25 : 1)} />;
+        return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={opacity * (belowHorizon && !fullSphere ? 0.25 : 1)} />;
       })}
     </G>
   );

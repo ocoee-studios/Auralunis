@@ -695,6 +695,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               parallax={parallax}
               satellites={satellites}
               cinematic={cinematic}
+              fullSphere={planetarium}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>
