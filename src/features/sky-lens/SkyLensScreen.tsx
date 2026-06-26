@@ -123,7 +123,11 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // back on toggle so the two stay in sync.
   const { settings, updateSetting } = useAuraLunisSettings();
   const [nightMode, setNightMode] = useState(settings.nightVision);
-  const [planetarium, setPlanetarium] = useState(false); // camera off → portable planetarium
+  // Three sky modes cycled by the half-moon button: AR (camera, 45% dim) → Immersive
+  // (camera, 75% dim — screenshot mode) → Planetarium (camera off, 95% dim) → AR.
+  const [skyMode, setSkyMode] = useState<"ar" | "immersive" | "planetarium">("ar");
+  const planetarium = skyMode === "planetarium";
+  const immersive = skyMode === "immersive";
   const [selected, setSelected] = useState<SelectedObject | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set());
 
@@ -148,18 +152,18 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     [zoom]
   );
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
-  // Milky Way is a faint warm glow — feel more than see. A small boost in
-  // Planetarium Mode (pure black background) keeps it from vanishing entirely.
-  const milkyWayBoost = planetarium ? 1.8 : 1.3;
-  const togglePlanetarium = useCallback(() => {
-    // Two independent state updates at the top level of the handler. NEVER nest one
-    // setState inside another's updater — React runs the updater during its render
-    // phase, so a nested setState throws "Cannot update a component while rendering a
-    // different component". Reading `planetarium` (with it in deps) is the clean way
-    // to know we're turning ON.
-    if (!planetarium) setActive((prev) => (prev.has("milkyway") ? prev : new Set(prev).add("milkyway")));
-    setPlanetarium((on) => !on);
-  }, [planetarium]);
+  // Milky Way brightens as the camera fades out: faint over a live feed, bold over
+  // black. AR (1.4) → Immersive (1.9) → Planetarium (2.4).
+  const milkyWayBoost = planetarium ? 2.4 : immersive ? 1.9 : 1.4;
+  const cycleSkyMode = useCallback(() => {
+    // Half-moon button cycles AR → Immersive → Planetarium → AR. Entering Planetarium
+    // turns the Milky Way layer on. Both state updates stay at the TOP LEVEL of the
+    // handler — never nest a setState inside another's updater (React runs updaters
+    // during render → "Cannot update a component while rendering" throw).
+    const next = skyMode === "ar" ? "immersive" : skyMode === "immersive" ? "planetarium" : "ar";
+    if (next === "planetarium") setActive((prev) => (prev.has("milkyway") ? prev : new Set(prev).add("milkyway")));
+    setSkyMode(next);
+  }, [skyMode]);
 
   const onLayout = useCallback((e: LayoutEvent) => {
     const { width, height } = e.nativeEvent.layout;
@@ -390,10 +394,14 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
 
           {/* Cosmic dark overlay — darkens camera feed so stars/nebulae pop.
-              Camera mode: 45% black. Planetarium: 95% black (nearly full dark). */}
+              AR: 45% black. Immersive: 75% (screenshot mode). Planetarium: 95%. */}
           <View
             style={[StyleSheet.absoluteFillObject, {
-              backgroundColor: planetarium ? "rgba(3,8,22,0.95)" : "rgba(3,8,22,0.45)",
+              backgroundColor: planetarium
+                ? "rgba(3,8,22,0.95)"
+                : immersive
+                ? "rgba(3,8,22,0.75)"
+                : "rgba(3,8,22,0.45)",
             }]}
             pointerEvents="none"
           />
@@ -529,6 +537,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           <Text style={[styles.hudText, { color: accent }]}>{hud}</Text>
           {planetarium ? (
             <Text style={styles.hudSub}>🔭 Planetarium — pan to explore</Text>
+          ) : immersive ? (
+            <Text style={styles.hudSub}>🌌 Immersive — dimmed for photos</Text>
           ) : status === "fallback" ? (
             <Text style={styles.hudSub}>Default location</Text>
           ) : null}
@@ -536,11 +546,11 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
         <View style={styles.toggleRow} pointerEvents="box-none">
           <TouchableOpacity
-            style={[styles.iconBtn, planetarium && { backgroundColor: "rgba(217,168,78,0.32)" }]}
-            onPress={togglePlanetarium}
+            style={[styles.iconBtn, skyMode !== "ar" && { backgroundColor: "rgba(217,168,78,0.32)" }]}
+            onPress={cycleSkyMode}
             activeOpacity={0.8}
           >
-            <Text style={styles.iconBtnText}>🔭</Text>
+            <Text style={styles.iconBtnText}>{planetarium ? "🔭" : immersive ? "🌌" : "📷"}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconBtn, nightMode && { backgroundColor: "rgba(139,32,32,0.5)" }]}

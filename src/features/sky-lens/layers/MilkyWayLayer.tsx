@@ -54,7 +54,7 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
     if (i % 3 === 0) glowPts.push({ x: p.x, y: p.y });
   }
 
-  const o = (v: number) => Math.min(0.22, v * boost);
+  const o = (v: number) => Math.min(0.6, v * boost);
   const glowR = Math.max(90, box.height * 0.42); // huge, soft
   const coreR = Math.max(130, box.height * 0.44);
   const dustBase = Math.max(42, box.height * 0.14);
@@ -85,16 +85,17 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
       <Defs>
         {/* LAYER 3 — warm galactic glow — subtle warmth, not visible circles */}
         <RadialGradient id="mwGlow" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E8C77E" stopOpacity={o(0.04)} />
-          <Stop offset="50%" stopColor="#C99A52" stopOpacity={o(0.02)} />
+          <Stop offset="0%" stopColor="#E8C77E" stopOpacity={o(0.1)} />
+          <Stop offset="50%" stopColor="#C99A52" stopOpacity={o(0.05)} />
           <Stop offset="100%" stopColor="#C99A52" stopOpacity={0} />
         </RadialGradient>
         {/* LAYER 4 — galactic core: bright gold heart fading through amber to a rose
-            edge (the Sagittarius drama). */}
+            edge (the Sagittarius drama). ~2× brighter so the core reads as the
+            visual anchor of the band. */}
         <RadialGradient id="mwCore" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFE9B0" stopOpacity={o(0.3)} />
-          <Stop offset="28%" stopColor="#F0C888" stopOpacity={o(0.17)} />
-          <Stop offset="62%" stopColor="#E08AA8" stopOpacity={o(0.06)} />
+          <Stop offset="0%" stopColor="#FFE9B0" stopOpacity={o(0.55)} />
+          <Stop offset="28%" stopColor="#F0C888" stopOpacity={o(0.34)} />
+          <Stop offset="62%" stopColor="#E08AA8" stopOpacity={o(0.13)} />
           <Stop offset="100%" stopColor="#E08AA8" stopOpacity={0} />
         </RadialGradient>
         {/* wide rose→violet halo cradling the core */}
@@ -105,8 +106,8 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         </RadialGradient>
         {/* H-alpha emission (rose/magenta) star-forming regions in the band */}
         <RadialGradient id="mwEmission" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E06888" stopOpacity={o(0.1)} />
-          <Stop offset="45%" stopColor="#D870A0" stopOpacity={o(0.05)} />
+          <Stop offset="0%" stopColor="#E06888" stopOpacity={o(0.2)} />
+          <Stop offset="45%" stopColor="#D870A0" stopOpacity={o(0.1)} />
           <Stop offset="100%" stopColor="#D870A0" stopOpacity={0} />
         </RadialGradient>
         {/* reflection (ice blue → violet) accent near bright clusters */}
@@ -118,9 +119,9 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         {/* LAYERS 1 & 5 — dark dust (near-black, the contrast maker). Darker per
             feedback: a deeper Great Rift reads as dust, not a smooth glow. */}
         <RadialGradient id="mwDust" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#010208" stopOpacity={Math.min(0.5, 0.42 * boost)} />
-          <Stop offset="48%" stopColor="#02040C" stopOpacity={Math.min(0.28, 0.22 * boost)} />
-          <Stop offset="100%" stopColor="#02040C" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#000005" stopOpacity={Math.min(0.85, 0.7 * boost)} />
+          <Stop offset="48%" stopColor="#01030A" stopOpacity={Math.min(0.5, 0.4 * boost)} />
+          <Stop offset="100%" stopColor="#01030A" stopOpacity={0} />
         </RadialGradient>
       </Defs>
 
@@ -149,8 +150,8 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         if (!s.aboveHorizon) return null;
         const p = project(s.azimuthDegrees, s.altitudeDegrees);
         if (!p.onScreen) return null;
-        const r = Math.max(0.6, Math.min(2.4, 5.6 - s.magnitude));
-        const op = Math.max(0.3, Math.min(0.95, 1 - (s.magnitude - 4.0) / 3.4)) * Math.min(1.1, boost);
+        const r = Math.max(0.8, Math.min(2.9, 6.1 - s.magnitude));
+        const op = Math.max(0.42, Math.min(1, 1.15 - (s.magnitude - 4.0) / 3.2)) * Math.min(1.3, boost);
         const color = s.magnitude < 4.6 ? "#FFF1CE" : s.magnitude < 5.8 ? "#F2ECE0" : "#DCE4F2";
         return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={op} />;
       })}
@@ -163,12 +164,14 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         const p = project(d.azimuthDegrees, d.altitudeDegrees);
         if (!p.onScreen) return null;
         const v = (hash(d.id) % 100) / 100;
-        let base = dustBase * 0.7;
-        let op = 0.72;
-        if (d.id.startsWith("mwk")) { base = dustBase * 1.5; op = 1; } // Coalsack-like deep knot
-        else if (d.id.startsWith("mwr")) { base = dustBase * 1.1; op = 1; } // rift
-        else if (d.id.startsWith("mwf")) { base = dustBase * 0.58; op = 0.82; } // thin fracture
-        const r = base * (0.7 + v * 0.8);
+        let base = dustBase * 0.72;
+        let op = 0.82;
+        if (d.id.startsWith("mwk")) { base = dustBase * 1.6; op = 1; } // Coalsack-like deep knot
+        else if (d.id.startsWith("mwr")) { base = dustBase * 1.15; op = 1; } // rift
+        else if (d.id.startsWith("mwf")) { base = dustBase * 0.6; op = 0.9; } // thin fracture
+        // Wider size spread (0.55–1.7×) frays the dust edges so the lanes read as
+        // irregular clouds, not smooth blobs.
+        const r = base * (0.55 + v * 1.15);
         return <Circle key={d.id} cx={p.x} cy={p.y} r={r} fill="url(#mwDust)" opacity={op} />;
       })}
     </G>
