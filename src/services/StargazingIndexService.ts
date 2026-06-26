@@ -36,7 +36,7 @@ export function computeStargazingIndex(
   const seeingScore = Math.max(0, Math.min(100, (5 - seeingArcsec) * 25));
 
   // Transparency score: mag 6.5+ = 100, mag 3 = 0
-  const transparencyScore = Math.max(0, Math.min(100, (transparencyMag - 3) * 28.5));
+  const transparencyScore = Math.max(0, Math.min(100, ((transparencyMag - 3) / 3.5) * 100));
 
   // Weighted combination
   const score = Math.round(
