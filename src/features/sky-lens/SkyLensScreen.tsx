@@ -235,7 +235,11 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   }, [location]);
   // 1. BORTLE PRESET — the profile for the user's Sky Quality setting. Drives MW
   // opacity (below), nebula opacity, and dome-star count (both in SkyLensCanvas).
-  const skyProfile = SKY_PROFILES[settings.skyQuality as SkyQuality] ?? SKY_PROFILES.dark;
+  // Bortle presets are premium — free users are locked to the "dark" default, so
+  // their Sky Quality setting doesn't transform the Sky Lens visual.
+  const skyProfile = gate.skyQualityPresets
+    ? (SKY_PROFILES[settings.skyQuality as SkyQuality] ?? SKY_PROFILES.dark)
+    : SKY_PROFILES.dark;
   // 3. MAGNIFICENT NIGHT — a great Stargazing Index (>85) blazes the MW + nebulae
   // 15-30% brighter. Cloud cover from the weather snapshot; seeing/transparency
   // estimated from it (same model as Home's Stargazing Index).
@@ -547,11 +551,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   // Apple-delight haptics (HapticDiscoveryService): a soft pulse when you tap an object,
   // and a whisper the first time a hero object drifts into the centre of the view.
+  // Premium only — free users feel nothing (gate.hapticDiscovery).
   useEffect(() => {
-    if (selected?.id) onObjectTapped(selected.id);
-  }, [selected?.id]);
+    if (gate.hapticDiscovery && selected?.id) onObjectTapped(selected.id);
+  }, [selected?.id, gate.hapticDiscovery]);
   const heroCenteredRef = useRef<Set<string>>(new Set());
   useEffect(() => {
+    if (!gate.hapticDiscovery) return;
     const cx = box.width / 2, cy = box.height / 2;
     const rad = Math.min(box.width, box.height) * 0.22; // ≈ the centre 30° of the view
     const now = new Set<string>();
@@ -566,7 +572,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     for (const b of sky.bodies) if (b.aboveHorizon && b.id !== "sun") check(b.id, b.azimuthDegrees, b.altitudeDegrees);
     for (const s of sky.stars) if (s.aboveHorizon && s.magnitude < 1.3) check(s.id, s.azimuthDegrees, s.altitudeDegrees);
     heroCenteredRef.current = now;
-  }, [pointing, sky.bodies, sky.stars, fov, box]);
+  }, [pointing, sky.bodies, sky.stars, fov, box, gate.hapticDiscovery]);
 
   return (
     <View style={styles.root} onLayout={onLayout}>
@@ -856,6 +862,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             object={selected}
             nightMode={nightMode}
             saved={savedIds.has(selected.id)}
+            showPoetry={gate.celestialPoetry}
             onSave={onSave}
             onClose={() => setSelected(null)}
           />

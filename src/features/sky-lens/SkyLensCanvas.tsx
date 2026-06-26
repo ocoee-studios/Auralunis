@@ -104,7 +104,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
       {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
         <G transform={depth(1)} opacity={nebulaOpacity}>
-          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} onSelect={onSelect} />
+          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("grid") && !cinematic && (
@@ -145,7 +145,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {activeLayers.has("stars") && (
         <G transform={depth(0.25)}>
-          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} showLabels={showLabels} extinction={extinction} onSelect={onSelect} />
+          <StarLayer stars={sky.stars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} labelMagLimit={starLabelMag} showLabels={showLabels} extinction={extinction} bloom={vg.starBloom} onSelect={onSelect} />
         </G>
       )}
       {/* Rare shooting stars streak across the field (~one every 8-12 min) — above

@@ -7,6 +7,7 @@ type Props = {
   object: SelectedObject | null;
   nightMode: boolean;
   saved: boolean;
+  showPoetry?: boolean; // premium: the evocative description / myth. free: facts only.
   onSave: (object: SelectedObject) => void;
   onClose: () => void;
 };
@@ -14,7 +15,7 @@ type Props = {
 // Slides up from the bottom when the user taps a star, planet, the Moon, or a
 // constellation. Save to Vault is the only action (no dead buttons): Share Card
 // arrives with the Phase-2 SkyShareService.
-export function SkyLensInfoCard({ object, nightMode, saved, onSave, onClose }: Props) {
+export function SkyLensInfoCard({ object, nightMode, saved, showPoetry = true, onSave, onClose }: Props) {
   if (!object) return null;
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
@@ -42,7 +43,7 @@ export function SkyLensInfoCard({ object, nightMode, saved, onSave, onClose }: P
           </View>
         )}
 
-        {object.description ? <Text style={styles.desc}>{object.description}</Text> : null}
+        {showPoetry && object.description ? <Text style={styles.desc}>{object.description}</Text> : null}
 
         <TouchableOpacity
           style={[styles.saveBtn, { borderColor: accent }, saved && { backgroundColor: accent }]}
