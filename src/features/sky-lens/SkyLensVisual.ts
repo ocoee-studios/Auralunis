@@ -126,9 +126,16 @@ export function constellationColor(id: string): string {
 // 4 vertical stops (zenith → mid → 30°alt → horizon) chosen by the Sun's altitude
 // from the ephemeris, per VISUAL_QUALITY_SPEC: navy overhead → indigo → violet/gold
 // near the horizon, brightening through twilight into golden hour and daytime blue.
-// Slight color variety for the dense background field (mostly white-blue, a
-// sprinkle of warm) so the starfield reads richer than a uniform wash.
-const DOME_TINTS = ["#EAF0FF", "#EAF0FF", "#EAF0FF", "#DCE6FF", "#FFEDD2", "#FFD9A8", "#CFE0FF", "#FFC9A0"];
+// Subtle SPECTRAL distribution for the dense background field (was mostly blue-white).
+// Roughly the real naked-eye mix: 40% blue-white, 30% yellow-white, 20% orange, 10%
+// red — 10 entries (4/3/2/1) so the hash lands on that ratio. Kept gentle: these are
+// faint background dots, a whisper of colour, not saturated gems.
+const DOME_TINTS = [
+  "#DCE6FF", "#E6EEFF", "#CFE0FF", "#D8E2FF", // blue-white (40%)
+  "#FFF4D8", "#FBEAC4", "#FFF0CC",            // yellow-white (30%)
+  "#FFD9A8", "#FFCE9C",                        // orange (20%)
+  "#FFC2A4",                                   // red (10%)
+];
 export function domeColor(id: string): string {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
