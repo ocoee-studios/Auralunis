@@ -63,9 +63,9 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
 
             {/* Header */}
             <Text style={styles.eyebrow}>AURALUNIS PREMIUM</Text>
-            <Text style={styles.headline}>Unlock the Full Cosmos</Text>
+            <Text style={styles.headline}>Unlock the Living Universe</Text>
             <Text style={styles.sub}>
-              Live satellite tracking · Cosmic Drift galaxy · All 9 modes
+              You're not paying to unlock the sky. You're paying to see it in a way you've never seen before.
             </Text>
 
             {/* Plan selector — Annual first (default) */}
@@ -86,16 +86,19 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
               onPress={() => handleSelect(lifetime)}
             />
 
-            {/* CTA */}
+            {/* CTA — wording follows the selected tier: trial → "Start Free Trial",
+                lifetime → "Unlock Forever", monthly → "Subscribe". */}
             <TouchableOpacity style={styles.cta} onPress={handlePurchase}>
               <Text style={styles.ctaText}>
-                {selectedPlan.trial
-                  ? `Start ${selectedPlan.trial ? "7-Day Free Trial" : "Now"}`
-                  : `Get ${selectedPlan.name}`}
+                {selectedPlan.interval === "lifetime"
+                  ? "Unlock Forever"
+                  : selectedPlan.trial
+                  ? "Start Free Trial"
+                  : "Subscribe"}
               </Text>
               <Text style={styles.ctaSub}>
                 {selectedPlan.trial
-                  ? `Then ${selectedPlan.displayPrice} · Cancel anytime`
+                  ? `7-day free trial, then ${selectedPlan.displayPrice} · Cancel anytime`
                   : selectedPlan.subtitle}
               </Text>
             </TouchableOpacity>
