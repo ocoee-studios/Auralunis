@@ -9,7 +9,10 @@
       "extends": "development",
       "ios": { "simulator": true }
     },
-    "preview": { "distribution": "internal" },
+    "preview": {
+      "distribution": "internal",
+      "env": { "EXPO_PUBLIC_FORCE_PREMIUM": "1" }
+    },
     "production": { "autoIncrement": true }
   },
   "submit": { "production": {} }

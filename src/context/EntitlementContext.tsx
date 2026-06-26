@@ -26,6 +26,14 @@ try {
 const ALLOW_DEV_PREMIUM = true;
 const devPremium = (): boolean => __DEV__ && ALLOW_DEV_PREMIUM;
 
+// TEMPORARY preview override. The EAS "preview" build profile sets
+// EXPO_PUBLIC_FORCE_PREMIUM=1 (see eas.json) so an internal/standalone preview build
+// shows the premium sky WITHOUT a sandbox purchase. The "production" profile does NOT
+// set this env, so the App Store build's bundle has it undefined → stays correctly
+// gated. EXPO_PUBLIC_* is inlined at build time. Remove this const + the eas.json env
+// when the preview demo is no longer needed.
+const FORCE_PREMIUM = process.env.EXPO_PUBLIC_FORCE_PREMIUM === "1";
+
 async function fetchIsPremium(): Promise<boolean> {
   // DEV BYPASS: in a dev build, unlock premium unconditionally so every gated feature
   // is visible/testable on device without a purchase. Short-circuits BEFORE RevenueCat
@@ -33,7 +41,7 @@ async function fetchIsPremium(): Promise<boolean> {
   // dev build getCustomerInfo() succeeded, returned false, and the app stayed locked.
   // Double-guarded (__DEV__ compiles to false in release), so it can never ship the
   // App Store app unlocked. Flip ALLOW_DEV_PREMIUM to false to exercise the paywall.
-  if (devPremium()) return true;
+  if (devPremium() || FORCE_PREMIUM) return true; // dev build, or internal preview demo
   if (!Purchases) return false; // RevenueCat unavailable in a release build
   try {
     const info = await Purchases.getCustomerInfo();
