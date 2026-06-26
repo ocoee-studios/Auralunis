@@ -7,6 +7,10 @@ import { computePlanetaryTargets } from "@/utils/planetaryEphemeris";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import { moonPhaseName } from "@/services/MoonPhase";
 
+// AsyncStorage key for the user's saved birthday (ISO 8601), set during onboarding so
+// BirthSkyScreen can reveal the birth sky later without re-asking.
+export const BIRTHDAY_STORAGE_KEY = "auralunis.birthday";
+
 export interface BirthSkyProfile {
   birthDate: string;       // ISO 8601
   location: ObserverLocation;

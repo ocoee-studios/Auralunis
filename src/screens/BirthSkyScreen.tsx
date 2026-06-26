@@ -3,13 +3,14 @@
 // feature in AuraLunis. Enter a birthday (+ optional time), generate the birth-sky
 // profile from BirthSkyService, and share the poetic cosmic signature.
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Pressable, Share, StyleSheet, Text, TextInput, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScreenShell } from "@/components/ScreenShell";
 import { Starfield } from "@/components/Starfield";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
-import { computeBirthSky, type BirthSkyProfile } from "@/services/BirthSkyService";
+import { computeBirthSky, BIRTHDAY_STORAGE_KEY, type BirthSkyProfile } from "@/services/BirthSkyService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 
 interface Props {
@@ -24,6 +25,28 @@ export function BirthSkyScreen({ onClose }: Props) {
   const [time, setTime] = useState(""); // HH:MM (optional)
   const [profile, setProfile] = useState<BirthSkyProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Preload the birthday saved during onboarding so the birth sky reveals immediately
+  // without re-asking. Runs once on mount; location falls back to DEFAULT_OBSERVER.
+  useEffect(() => {
+    let active = true;
+    AsyncStorage.getItem(BIRTHDAY_STORAGE_KEY)
+      .then((iso) => {
+        if (!active || !iso) return;
+        setDate(iso.slice(0, 10));
+        setTime(iso.slice(11, 16));
+        try {
+          setProfile(computeBirthSky(iso, location, locationName));
+        } catch {
+          /* ignore — the user can regenerate manually */
+        }
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function generate() {
     tapLight();
