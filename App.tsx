@@ -155,12 +155,7 @@ export default function App() {
     }
   }
 
-  function handleJoinSovereignWaitlist() {
-    Alert.alert(
-      "Sovereign Waitlist",
-      "Sovereign is saved as an annual-only collector tier. Keep it waitlist-only until Desk Obelisk, Stellar Portal, Sovereign Sigil, and physical fulfillment are ready."
-    );
-  }
+  // Sovereign tier removed — killed feature (Desk Obelisk, Stellar Portal, etc.)
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

@@ -212,8 +212,8 @@ export function SettingsScreen() {
 
       <SettingsSection title="Privacy + Data">
         <SettingRow title="Local-First Vault" description="Keep Notes, LifeSky moments, lessons, and saved objects local by default." value={settings.localFirstVaultEnabled} onValueChange={(value) => updateSetting("localFirstVaultEnabled", value)} />
-        <SettingRow title="Cloud Sync" description="Optional future device sync. Off by default." value={settings.cloudSyncEnabled} onValueChange={(value) => updateSetting("cloudSyncEnabled", value)} />
-        <SettingRow title="AI Oracle Opt-In" description="Enable personalized Oracle briefings only when you choose." value={settings.aiOracleOptIn} onValueChange={(value) => updateSetting("aiOracleOptIn", value)} />
+        {/* Cloud Sync and AI Oracle removed — features not built. 
+            Re-add when actual implementations exist. */}
         <Text style={styles.localCount}>{items.length} local prototype Vault items</Text>
         <Pressable style={styles.secondaryButton} onPress={() => Linking.openSettings()}>
           <Text style={styles.secondaryButtonText}>Review App Permissions in Settings</Text>
