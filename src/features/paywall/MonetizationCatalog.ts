@@ -120,7 +120,7 @@ export const premiumFeatures = [
   "📸 Sky Lens Pro — Night Vision, Cinematic Mode, Time Travel",
   "🛰️ Live satellite tracking — ISS, Starlink trains, space debris",
   "📅 Never miss a meteor shower, eclipse, or conjunction again",
-  "⌚ Apple Watch companion with Star Compass and haptic alerts",
+  "⌚ Apple Watch companion — Star Compass & haptic alerts · Coming soon",
 ];
 
 export const lifetimeFeatures = [
