@@ -160,6 +160,22 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const [skyMode, setSkyMode] = useState<"ar" | "immersive" | "planetarium">("ar");
   const planetarium = skyMode === "planetarium";
   const immersive = skyMode === "immersive";
+  // Cinematic "Immersive Sky" (Week 4) — the no-UI mode for screenshots & wonder. All
+  // chrome and labels vanish; only the sky remains, darkened to ~85%. Enter via a
+  // triple-tap or a long-press on the mode button; a single tap anywhere restores the UI.
+  const [cinematic, setCinematic] = useState(false);
+  const cinematicHint = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    if (!cinematic) return;
+    cinematicHint.setValue(0);
+    const anim = Animated.sequence([
+      Animated.timing(cinematicHint, { toValue: 1, duration: 350, useNativeDriver: true }),
+      Animated.delay(1800),
+      Animated.timing(cinematicHint, { toValue: 0, duration: 700, useNativeDriver: true }),
+    ]);
+    anim.start();
+    return () => anim.stop();
+  }, [cinematic, cinematicHint]);
   const [selected, setSelected] = useState<SelectedObject | null>(null);
   const [savedIds, setSavedIds] = useState<Set<string>>(() => new Set());
 
@@ -176,6 +192,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         .onUpdate((e) => setZoom(Math.max(1, Math.min(12, zoomStart.current * e.scale)))),
     []
   );
+  // Triple-tap anywhere enters cinematic Immersive Sky. Runs alongside pinch so zoom
+  // still works; single taps fall through to the object hit-targets as before.
+  const cinematicTap = useMemo(
+    () => Gesture.Tap().numberOfTaps(3).runOnJS(true).onEnd(() => setCinematic(true)),
+    []
+  );
+  const sceneGesture = useMemo(() => Gesture.Simultaneous(pinch, cinematicTap), [pinch, cinematicTap]);
   const fov = useMemo(
     () => ({
       horizontalDegrees: DEFAULT_FOV.horizontalDegrees / zoom,
@@ -186,7 +209,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
   // Milky Way brightens as the camera fades out: faint over a live feed, bold over
   // black. AR (1.4) → Immersive (1.9) → Planetarium (2.4).
-  const milkyWayBoost = planetarium ? 2.4 : immersive ? 1.9 : 1.4;
+  const milkyWayBoost = planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4;
   const cycleSkyMode = useCallback(() => {
     // Half-moon button cycles AR → Immersive → Planetarium → AR. Entering Planetarium
     // turns the Milky Way layer on. Both state updates stay at the TOP LEVEL of the
@@ -410,16 +433,27 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     return { x: focusProj.x, y: focusProj.y, r: Math.min(box.width, box.height) * 0.34 };
   }, [focusProj, box]);
 
-  // Auto showcase region: when Orion's heart (M42) is in view, light up the whole
-  // region — no tap needed. Layers boost nebula intensity (~3×), local star density,
-  // and showcase-star glow inside this zone, so Orion (M42 + Flame + Horsehead +
-  // Rosette + Betelgeuse + Rigel) becomes the most dramatic patch of sky on screen.
+  // Permanent HERO REGIONS — focal zones where everything reinforces, so the sky isn't
+  // uniformly bright. When a hero's anchor is in view, the whole region lights up (no
+  // tap): layers boost nebula intensity (~3×), local star density, and showcase-star
+  // glow inside the zone. Sagittarius is THE showpiece (largest zone) — Lagoon + Trifid
+  // + Swan + Eagle + the galactic core all overlap → "Whoa." Then Orion (winter), then
+  // Carina (southern). First anchor that's on-screen wins; Sagittarius is checked first.
+  const HERO_REGIONS: ReadonlyArray<{ id: string; r: number }> = [
+    { id: "m8", r: 0.66 },     // Sagittarius core — showpiece, widest zone
+    { id: "m42", r: 0.55 },    // Orion
+    { id: "ngc3372", r: 0.5 }, // Carina
+  ];
   const showcaseZone = useMemo<FocusZone>(() => {
-    const m42 = sky.nebulae.find((n) => n.id === "m42");
-    if (!m42 || !m42.aboveHorizon) return null;
-    const sp = projectTarget(pointing, m42.azimuthDegrees, m42.altitudeDegrees, fov, box);
-    if (sp.behind || !sp.onScreen) return null;
-    return { x: sp.x, y: sp.y, r: Math.min(box.width, box.height) * 0.55 };
+    for (const hero of HERO_REGIONS) {
+      const n = sky.nebulae.find((x) => x.id === hero.id);
+      if (!n || !n.aboveHorizon) continue;
+      const sp = projectTarget(pointing, n.azimuthDegrees, n.altitudeDegrees, fov, box);
+      if (sp.behind || !sp.onScreen) continue;
+      return { x: sp.x, y: sp.y, r: Math.min(box.width, box.height) * hero.r };
+    }
+    return null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [sky.nebulae, pointing, fov, box]);
 
   // Below-horizon bleed guard: the screen-fixed decorative overlays (FX layers,
@@ -460,7 +494,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   return (
     <View style={styles.root} onLayout={onLayout}>
-      <GestureDetector gesture={pinch}>
+      <GestureDetector gesture={sceneGesture}>
         <View ref={sceneRef} collapsable={false} style={StyleSheet.absoluteFill}>
           {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
@@ -470,6 +504,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             style={[StyleSheet.absoluteFillObject, {
               backgroundColor: planetarium
                 ? "rgba(3,8,22,0.95)"
+                : cinematic
+                ? "rgba(3,8,22,0.85)"
                 : immersive
                 ? "rgba(3,8,22,0.75)"
                 : "rgba(3,8,22,0.45)",
@@ -511,8 +547,16 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             milkyWayVisible={active.has("milkyway")}
             intensity={(planetarium ? 0.9 : 0.55) * horizonFade}
           />
-          {/* AstralBreathingLayer disabled — PremiumSkyBloomLayer covers atmosphere.
-              Re-enable when performance budget allows. */}
+          {/* AstralBreathingLayer — re-enabled at LOW intensity (Path-to-10 §6): a
+              barely-perceptible 22s breathing swell so the sky feels alive, not static.
+              Crash-safe (single Animated.View + useAnimatedStyle over a static Svg).
+              Faded out below the horizon with the other screen-fixed FX. */}
+          <AstralBreathingLayer
+            width={box.width}
+            height={box.height}
+            nightVision={nightMode}
+            intensity={(planetarium ? 0.55 : 0.4) * horizonFade}
+          />
           {/* LuxuryStarfieldFXLayer disabled — 110 particles + shimmer animation
               is expensive. Re-enable when performance budget allows. */}
           {moonProj && (
@@ -563,6 +607,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               showcase={showcaseZone}
               parallax={parallax}
               satellites={satellites}
+              cinematic={cinematic}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>
@@ -596,6 +641,20 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         </View>
       </GestureDetector>
 
+      {/* Cinematic Immersive Sky — a single tap anywhere restores the UI. Mounted only
+          in cinematic, above the scene, so the sky stays pristine and the exit gesture
+          is captured cleanly. A brief auto-fading hint makes it discoverable. */}
+      {cinematic && (
+        <Pressable style={StyleSheet.absoluteFill} onPress={() => setCinematic(false)}>
+          <Animated.View
+            style={[styles.cinematicHint, { bottom: insets.bottom + 44, opacity: cinematicHint }]}
+            pointerEvents="none"
+          >
+            <Text style={styles.cinematicHintText}>✦  Tap anywhere to show controls</Text>
+          </Animated.View>
+        </Pressable>
+      )}
+
       {/* Capture flash — white pulse over the scene (View opacity, crash-safe) */}
       <Animated.View
         style={[StyleSheet.absoluteFillObject, { backgroundColor: "#FFFFFF", opacity: flash }]}
@@ -603,7 +662,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       />
 
       {/* Zoom indicator — pinch to zoom, tap to reset */}
-      {zoom > 1.05 && (
+      {!cinematic && zoom > 1.05 && (
         <TouchableOpacity
           style={[styles.zoomChip, { top: insets.top + 58 }]}
           onPress={() => setZoom(1)}
@@ -613,7 +672,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         </TouchableOpacity>
       )}
 
-      {/* Top HUD */}
+      {/* Top HUD (hidden in cinematic Immersive Sky) */}
+      {!cinematic && (
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
         <TouchableOpacity style={styles.iconBtn} onPress={onClose} activeOpacity={0.8}>
           <Text style={styles.iconBtnText}>✕</Text>
@@ -645,6 +705,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           <TouchableOpacity
             style={[styles.iconBtn, skyMode !== "ar" && { backgroundColor: "rgba(217,168,78,0.32)" }]}
             onPress={cycleSkyMode}
+            onLongPress={() => setCinematic(true)}
+            delayLongPress={400}
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>{planetarium ? "🔭" : immersive ? "🌌" : "📷"}</Text>
@@ -658,22 +720,23 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           </TouchableOpacity>
         </View>
       </View>
+      )}
 
       {/* Find-Mode target banner (from a Learn lesson) takes priority */}
-      {!selected && targetFinder && (
+      {!cinematic && !selected && targetFinder && (
         <View style={[styles.finder, { bottom: insets.bottom + 82 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{targetFinder}</Text>
         </View>
       )}
       {/* Moon finder banner (hidden while an info card is open or a target is set) */}
-      {!selected && !targetFinder && moonFinder && (
+      {!cinematic && !selected && !targetFinder && moonFinder && (
         <View style={[styles.finder, { bottom: insets.bottom + 82 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{moonFinder}</Text>
         </View>
       )}
 
       {/* Photo shutter — capture the sky + overlay, baked with watermark, to share */}
-      {!selected && (
+      {!cinematic && !selected && (
         <TouchableOpacity
           style={[styles.shutterBtn, { bottom: insets.bottom + 168, borderColor: accent }]}
           onPress={captureSky}
@@ -684,7 +747,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         </TouchableOpacity>
       )}
 
-      {/* Bottom controls */}
+      {/* Bottom controls (hidden in cinematic Immersive Sky) */}
+      {!cinematic && (
       <View style={[styles.bottom, { paddingBottom: insets.bottom + 6 }]} pointerEvents="box-none">
         {/* Time Scrub — drag to fast-forward / rewind the whole sky */}
         {scrubVisible && !selected && (
@@ -710,6 +774,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           />
         )}
       </View>
+      )}
 
       {/* THE CONVERSION MOMENT — after a 2s preview of the premium beauty, the scene
           gently fades and the unlock prompt rises. Tap anywhere on it → the paywall. */}
@@ -815,6 +880,18 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "600",
     marginTop: 6,
+  },
+  cinematicHint: { position: "absolute", left: 0, right: 0, alignItems: "center" },
+  cinematicHintText: {
+    color: "rgba(244,227,184,0.92)",
+    backgroundColor: "rgba(7,18,37,0.55)",
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.4,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 16,
+    overflow: "hidden",
   },
   hudText: { fontSize: 13, fontWeight: "900", fontVariant: ["tabular-nums"] },
   hudSub: { color: AuraLunisColors.muted, fontSize: 10, marginTop: 1 },

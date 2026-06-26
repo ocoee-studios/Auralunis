@@ -11,26 +11,28 @@ type Props = {
   palette: SkyPalette;
   nightMode: boolean;
   placeLabel?: LabelPlacer;
+  showLabels?: boolean; // false in cinematic Immersive Sky mode → bodies only, no names
   onSelect: (object: SelectedObject) => void;
 };
 
 const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 
 // Per-planet "personality": disc radius + glow size. Brighter planets read bigger.
-// Body radii sized so the planet itself reads BEFORE its halo: Jupiter ≈20px and
-// Saturn ≈17px across (disc = radius), Mars/Venus bumped ~30% to match.
+// Bodies bumped ~30% (Path-to-10) so each planet reads instantly from across the
+// screen WITHOUT its label: Jupiter ≈26px and Saturn ≈22px across (disc = radius),
+// Mars/Venus/Mercury scaled to match. Glows held tight so the body, not fog, leads.
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  venus: { disc: 8, glow: 22 },
-  jupiter: { disc: 10, glow: 16 },
-  saturn: { disc: 8.5, glow: 13 },
-  mars: { disc: 6, glow: 16 },
-  mercury: { disc: 4.5, glow: 8 },
+  venus: { disc: 10.5, glow: 22 },
+  jupiter: { disc: 13, glow: 17 },
+  saturn: { disc: 11, glow: 14 },
+  mars: { disc: 7.8, glow: 16 },
+  mercury: { disc: 5.9, glow: 8 },
 };
 
 // Galilean moons — small offsets along the ring plane, scattered like the real set.
 const JUPITER_MOONS = [9, 14, -11, -17];
 
-export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, onSelect }: Props) {
+export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, onSelect }: Props) {
   return (
     <G>
       {bodies.map((body) => {
@@ -129,7 +131,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, o
             {/* generous transparent tap target on top (≈15px beyond the disc) */}
             <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />
 
-            {(() => {
+            {showLabels && (() => {
               const lx = x + st.glow * 0.6 + 4;
               const lp = placeLabel ? placeLabel(lx, y + 4, body.name, 14) : { x: lx, y: y + 4 };
               return (

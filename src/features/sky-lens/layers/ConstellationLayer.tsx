@@ -14,10 +14,11 @@ type Props = {
   palette: SkyPalette;
   nightMode: boolean;
   placeLabel?: LabelPlacer;
+  showLabels?: boolean; // false in cinematic Immersive Sky mode → gold threads only
   onSelect: (object: SelectedObject) => void;
 };
 
-export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, onSelect }: Props) {
+export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, showLabels = true, onSelect }: Props) {
   return (
     <G>
       {constellations.map((c) => {
@@ -55,6 +56,7 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
 
         const centroid = project(c.centroid.azimuthDegrees, c.centroid.altitudeDegrees);
         const labelVisible =
+          showLabels &&
           !centroid.behind &&
           centroid.x > -40 &&
           centroid.x < box.width + 40 &&
