@@ -11,6 +11,7 @@ const GestureHandlerRootView = RNGestureHandlerRootView as unknown as React.Comp
 }>;
 import { NavigationContainer } from "@react-navigation/native";
 import { RootTabs } from "@/navigation/RootTabs";
+import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ThreeTierPaywallModal } from "@/features/paywall/ThreeTierPaywallModal";
 import { AuraLunisSettingsProvider } from "@/state/AuraLunisSettingsContext";
 import { AuraLunisVaultProvider } from "@/state/AuraLunisVaultContext";
@@ -159,6 +160,7 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <ErrorBoundary>
       <EntitlementProvider>
       <PaywallNavigationProvider>
         <AuraLunisSettingsProvider>
@@ -184,6 +186,7 @@ export default function App() {
         </AuraLunisSettingsProvider>
       </PaywallNavigationProvider>
       </EntitlementProvider>
+      </ErrorBoundary>
     </GestureHandlerRootView>
   );
 }
