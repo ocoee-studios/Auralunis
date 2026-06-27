@@ -64,11 +64,11 @@ export function SettingsScreen() {
       Alert.alert(
         "Restore Purchases",
         result.status === "not_configured"
-          ? "The restore handler is wired. Add the public RevenueCat SDK key before sandbox restore testing."
-          : "AuraLunis refreshed the membership status for this App Store account."
+          ? "Purchases will be available once AuraLunis is live on the App Store."
+          : "AuraLunis refreshed your membership status for this Apple ID."
       );
     } catch {
-      Alert.alert("Restore Purchases", "Restore could not be completed. Confirm the StoreKit sandbox account and try again.");
+      Alert.alert("Restore Purchases", "Restore could not be completed. Please try again from a signed-in Apple ID.");
     }
   }
 
@@ -79,10 +79,10 @@ export function SettingsScreen() {
       if (result.status === "opened") return;
 
       Alert.alert(
-        "Subscription management",
+        "Manage Subscription",
         result.status === "not_configured"
-          ? "RevenueCat management is wired. Add the public RevenueCat SDK key before testing the App Store management link."
-          : "No active App Store subscription-management URL is available for this account yet."
+          ? "Subscriptions are managed through your Apple ID and will be available once AuraLunis is live on the App Store."
+          : "You don't have an active AuraLunis subscription on this Apple ID yet."
       );
     } catch {
       Alert.alert(
