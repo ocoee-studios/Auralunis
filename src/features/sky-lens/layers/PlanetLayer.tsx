@@ -78,13 +78,20 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
             {/* SCATTERING — ultra-faint outermost halo (~3× the disc) so the planet's
                 light feels like it scatters into space around it, not a hard cutout. */}
             <Circle cx={x} cy={y} r={d * 3} fill={color} opacity={0.02} />
-            {/* base glow / BLOOM — solid stacked discs for most planets. Venus is
-                excluded here; it uses the smooth venusBloom gradient (below) so its
-                halo doesn't band into concentric rings. */}
+            {/* base glow / BLOOM — a single SMOOTH per-planet radial gradient (color-
+                matched, fading to transparent) instead of stacked solid discs, so no
+                planet bands into concentric rings. Same fix Venus got, now applied to
+                Mercury/Mars/Jupiter/Saturn. (Venus keeps its tuned venusBloom below.) */}
             {body.id !== "venus" && (
               <>
-                <Circle cx={x} cy={y} r={st.glow} fill={color} opacity={0.12} />
-                <Circle cx={x} cy={y} r={st.glow * 0.6} fill={color} opacity={0.26} />
+                <Defs>
+                  <RadialGradient id={`pBloom-${body.id}`} cx="50%" cy="50%" r="50%">
+                    <Stop offset="0%" stopColor={color} stopOpacity={0.32} />
+                    <Stop offset="45%" stopColor={color} stopOpacity={0.12} />
+                    <Stop offset="100%" stopColor={color} stopOpacity={0} />
+                  </RadialGradient>
+                </Defs>
+                <Circle cx={x} cy={y} r={st.glow * 1.05} fill={`url(#pBloom-${body.id})`} />
               </>
             )}
 
