@@ -1,7 +1,7 @@
 # AuraLunis Privacy Policy
 
-**Last updated:** June 2, 2026
-**Developer:** Ocoee Studios (com.ocoee.auralunis)
+**Last updated:** June 26, 2026
+**Developer:** Ocoee Studios LLC (com.ocoeestudios.auralunis)
 
 ## What AuraLunis collects and why
 
@@ -26,10 +26,10 @@ overlay with the direction your phone is pointing. Sensor data is processed
 on-device in real time and is not stored or transmitted.
 
 ### Weather (Tonight Score)
-If you provide an OpenWeatherMap API key, AuraLunis sends your approximate
-coordinates to the OpenWeatherMap service to retrieve current cloud cover for the
-Tonight Score. No other personal data is included in this request. Without an API
-key, AuraLunis uses a default weather estimate.
+AuraLunis sends your approximate coordinates to Open-Meteo to retrieve current
+cloud cover for the Tonight Score forecast. No account or API key is required, and
+no other personal data, device ID, or identity is included in the request. If
+weather data is unavailable, AuraLunis uses a default estimate.
 
 ### Vault (notes and captures)
 Your Cosmic Notes, sky captures, and Vault items are stored locally on your
@@ -65,4 +65,4 @@ the top indicates the most recent revision.
 
 ## Contact
 
-manager@ocoeestudios.com
+admin@ocoeestudios.com

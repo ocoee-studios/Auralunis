@@ -27,12 +27,12 @@ Privacy section.
 
 | Field | Value |
 |---|---|
-| **Data type** | Coarse Location |
+| **Data type** | Precise Location |
 | **Collection** | Yes |
 | **Linked to identity** | No |
 | **Used for tracking** | No |
 | **Purpose** | App Functionality |
-| **Details** | Used to compute ephemeris (planet/star positions), Tonight Score, sunrise/sunset times, and Dark Sky Finder. Location is processed on-device. Not sent to any server except OpenWeatherMap (city-level, for weather data only). |
+| **Details** | Device GPS is used to compute ephemeris (planet/star positions), Tonight Score, sunrise/sunset times, and Dark Sky Finder. Location is processed on-device. Approximate coordinates only are sent to Open-Meteo for the weather forecast (no account, no identity). This matches the `NSPrivacyCollectedDataTypePreciseLocation` declaration in the app's privacy manifest (app.json). |
 
 ### 3. Identifiers
 
@@ -83,7 +83,8 @@ Check "No" for all of these in App Store Connect:
 | User Content (photos, videos, audio) | **No** |
 | Browsing History | **No** |
 | Search History | **No** |
-| Precise Location | **No** (coarse only) |
+| Coarse Location | **No** (Precise Location is collected — see §2 above) |
+| User Content / Text (AI queries) | **No** (no AI feature ships) |
 | Other Data | **No** |
 
 ---
@@ -127,7 +128,7 @@ RevenueCat's privacy policy: https://www.revenuecat.com/privacy
 3. Answer **"Yes, we collect data"**
 4. Add these data types:
    - **Purchases** → Purchase History → App Functionality → Linked to Identity: Yes
-   - **Location** → Coarse Location → App Functionality → Linked to Identity: No
+   - **Location** → Precise Location → App Functionality → Linked to Identity: No
    - **Identifiers** → Device ID → App Functionality → Linked to Identity: No
    - **Usage Data** → Product Interaction → Analytics → Linked to Identity: No
 5. For each: **Used for Tracking → No**
@@ -135,33 +136,24 @@ RevenueCat's privacy policy: https://www.revenuecat.com/privacy
 
 ---
 
-## AI Sky Companion (if enabled)
+## No AI / LLM Feature
 
-If the user enables the AI Sky Companion (Claude API):
-
-| Field | Value |
-|---|---|
-| **Data type** | User Content (text queries) |
-| **Collection** | Yes (only when feature is used) |
-| **Linked to identity** | No |
-| **Used for tracking** | No |
-| **Purpose** | App Functionality |
-| **Details** | The user's sky question + current sky context (planet positions, moon phase) is sent to Anthropic's API. No name, email, or account info is sent. Queries are not stored by AuraLunis after the response is received. See Anthropic's API privacy policy. |
-
-If AI Sky Companion is included at launch, add:
-- **User Content** → Other User Content → App Functionality → Linked to Identity: No
+AuraLunis ships **without** any AI/chat/LLM feature. No "AI Sky Companion," no
+Anthropic API, no user text queries are sent anywhere. Do **not** declare User
+Content or any AI-related data type in App Store Connect. (Earlier internal drafts
+described an AI Sky Companion — that feature was removed before launch.)
 
 ---
 
-## OpenWeatherMap
+## Open-Meteo (Weather)
 
 | Field | Value |
 |---|---|
-| **Data type** | Coarse Location |
-| **Sent to** | OpenWeatherMap API |
-| **Details** | Latitude/longitude sent to fetch current weather (cloud cover, humidity, temperature) for Tonight Score calculation. No user identity is sent. |
+| **Data type** | Precise Location (approximate coordinates) |
+| **Sent to** | Open-Meteo API |
+| **Details** | Latitude/longitude is sent to fetch current cloud cover for the Tonight Score forecast. No account, API key, device ID, or user identity is sent. Open-Meteo is a free, keyless service. |
 
-OpenWeatherMap privacy policy: https://openweather.co.uk/privacy-policy
+Open-Meteo terms: https://open-meteo.com/en/terms
 
 ---
 
@@ -182,9 +174,8 @@ This data:
 | Data Type | Collected | Linked | Tracking | Purpose |
 |---|---|---|---|---|
 | Purchase History | Yes | Yes | No | App Functionality |
-| Coarse Location | Yes | No | No | App Functionality |
+| Precise Location | Yes | No | No | App Functionality |
 | Device ID | Yes | No | No | App Functionality |
 | Product Interaction | Yes | No | No | Analytics |
-| User Content (AI) | Yes* | No | No | App Functionality |
 
-*Only if AI Sky Companion is enabled at launch.
+Nothing is used for tracking; there is no AI feature and no User Content is collected.
