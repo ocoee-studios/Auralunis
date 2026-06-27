@@ -9,17 +9,25 @@ import { LearnScreen } from "@/screens/LearnScreen";
 import { SettingsScreen } from "@/screens/SettingsScreen";
 
 // Blur component for tab bar background (Liquid Glass)
-let BlurTab: React.ComponentType<{ style?: object; children?: React.ReactNode }> | null = null;
+let BlurTab: React.ComponentType<{ intensity?: number; tint?: string; style?: object; children?: React.ReactNode }> | null = null;
 try {
   const ExpoBlur = require("expo-blur") as { BlurView: typeof BlurTab };
   if (Platform.OS === "ios") BlurTab = ExpoBlur.BlurView;
 } catch { /* fallback */ }
 
+// A dark tint UNDER the blur so bright scroll content (e.g. the gold "Golden Dusk"
+// banner) can't bleed through the tab labels — the blur alone is too weak in Expo Go.
 function TabBarBackground() {
+  const fill = { position: "absolute" as const, left: 0, right: 0, top: 0, bottom: 0 };
   if (BlurTab) {
-    return <BlurTab style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0 }} />;
+    return (
+      <View style={[fill, { overflow: "hidden" }]}>
+        <BlurTab intensity={36} tint="dark" style={fill} />
+        <View style={[fill, { backgroundColor: "rgba(7,10,19,0.82)" }]} />
+      </View>
+    );
   }
-  return <View style={{ position: "absolute", left: 0, right: 0, top: 0, bottom: 0, backgroundColor: "rgba(7,10,19,0.96)" }} />;
+  return <View style={[fill, { backgroundColor: "rgba(7,10,19,0.96)" }]} />;
 }
 
 export type RootTabParamList = {

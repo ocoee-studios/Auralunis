@@ -70,10 +70,16 @@ export async function configureRevenueCat(): Promise<ConfigureResult> {
 
   const publicApiKey = apiKey as string;
   if (!Purchases) return { status: "unsupported_platform" };
-  Purchases.configure({ apiKey: publicApiKey });
-  configured = true;
-
-  return { status: "configured" };
+  try {
+    Purchases.configure({ apiKey: publicApiKey });
+    configured = true;
+    return { status: "configured" };
+  } catch {
+    // Invalid key / Expo Go where the SDK can't validate against the App Store:
+    // never let it throw an unhandled error (that's the red LogBox banner on every
+    // screen). Treat as not-configured; the app stays fully usable and gated correctly.
+    return { status: "missing_api_key" };
+  }
 }
 
 export async function getCurrentPackages(): Promise<PurchasesPackage[]> {
@@ -82,8 +88,14 @@ export async function getCurrentPackages(): Promise<PurchasesPackage[]> {
   if (configuration.status !== "configured") return [];
   if (!Purchases) return [];
 
-  const offerings = await Purchases.getOfferings();
-  return offerings.current?.availablePackages ?? [];
+  try {
+    const offerings = await Purchases.getOfferings();
+    return offerings.current?.availablePackages ?? [];
+  } catch {
+    // No live App Store offering yet (e.g. before launch, or Expo Go) — return empty
+    // instead of throwing an unhandled "Invalid API Key / fetching offerings" error.
+    return [];
+  }
 }
 
 export async function purchaseAuraLunisTier(

@@ -112,7 +112,13 @@ function generateSignature(profile: Partial<BirthSkyProfile>): string {
   if (vis.length === 1) {
     return `Born under ${moonDesc} with ${vis[0]} watching from above, ${profile.dominantConstellation} spanning the sky.`;
   }
-  return `Born under ${moonDesc} with ${vis.join(" and ")} visible, ${profile.dominantConstellation} overhead — a ${profile.seasonalSky} sky.`;
+  const planetList =
+    vis.length === 2
+      ? `${vis[0]} and ${vis[1]}`
+      : `${vis.slice(0, -1).join(", ")}, and ${vis[vis.length - 1]}`;
+  const season = profile.seasonalSky ?? "";
+  const article = /^[aeiou]/i.test(season) ? "an" : "a";
+  return `Born under ${moonDesc} with ${planetList} visible, ${profile.dominantConstellation} overhead — ${article} ${season} sky.`;
 }
 
 /**
