@@ -78,7 +78,7 @@ export function LockShareCard({ data, onClose }: LockShareCardProps) {
       `${data.alignmentScore}% alignment · az ${data.azimuth}° · el ${data.elevation}°`,
       `${data.locationLabel} · ${formatTimestamp(data.timestamp)}`,
       "",
-      "ocoeestudios.com/auralunis",
+      "Made with AuraLunis",
     ].join("\n");
 
     try {
@@ -131,7 +131,7 @@ export function LockShareCard({ data, onClose }: LockShareCardProps) {
         </View>
 
         {/* Footer */}
-        <Text style={styles.footer}>ocoeestudios.com/auralunis</Text>
+        <Text style={styles.footer}>Made with AuraLunis</Text>
       </View>
 
       {/* Action buttons */}
