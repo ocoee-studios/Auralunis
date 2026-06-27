@@ -24,8 +24,8 @@ type Props = {
 export function HorizonGlowLayer({ project, centerAzimuth, box, nightMode, boost = 1 }: Props) {
   if (nightMode) return null; // preserve dark adaptation — no warm light at night
 
-  const o = (v: number) => Math.min(0.5, v * boost);
-  const warmR = Math.max(120, box.height * 0.34);
+  const o = (v: number) => Math.min(0.2, v * boost);
+  const warmR = Math.max(84, box.height * 0.24); // ~30% tighter — keep it hugging the horizon
   const coolR = Math.max(90, box.height * 0.24);
 
   // Sample the band of azimuths around the look direction at the glow's centre
@@ -45,16 +45,17 @@ export function HorizonGlowLayer({ project, centerAzimuth, box, nightMode, boost
   return (
     <G>
       <Defs>
-        {/* warm light-pollution / airglow dome — amber melting to gold, fading out */}
+        {/* warm airglow dome — muted OCHRE (not city orange), fading out fast. Tuned
+            down from the first device pass: it was flooding the lower sky as smog. */}
         <RadialGradient id="hzWarm" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E8A24E" stopOpacity={o(0.2)} />
-          <Stop offset="42%" stopColor="#C9772E" stopOpacity={o(0.09)} />
-          <Stop offset="100%" stopColor="#C9772E" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#C9A878" stopOpacity={o(0.16)} />
+          <Stop offset="42%" stopColor="#9C7E54" stopOpacity={o(0.06)} />
+          <Stop offset="100%" stopColor="#9C7E54" stopOpacity={0} />
         </RadialGradient>
         {/* faint cool transition — desaturated teal so the warmth doesn't stop abruptly */}
         <RadialGradient id="hzCool" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#5E8C9E" stopOpacity={o(0.05)} />
-          <Stop offset="60%" stopColor="#3E6478" stopOpacity={o(0.02)} />
+          <Stop offset="0%" stopColor="#5E8C9E" stopOpacity={o(0.04)} />
+          <Stop offset="60%" stopColor="#3E6478" stopOpacity={o(0.016)} />
           <Stop offset="100%" stopColor="#3E6478" stopOpacity={0} />
         </RadialGradient>
       </Defs>
