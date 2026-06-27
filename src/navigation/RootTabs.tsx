@@ -6,6 +6,7 @@ import { AuraLunisColors } from "@/theme/tokens";
 import { HomeScreen } from "@/screens/HomeScreen";
 import { SkyScreen } from "@/screens/SkyScreen";
 import { LearnScreen } from "@/screens/LearnScreen";
+import { VaultScreen } from "@/screens/VaultScreen";
 import { SettingsScreen } from "@/screens/SettingsScreen";
 
 // Blur component for tab bar background (Liquid Glass)
@@ -34,6 +35,7 @@ export type RootTabParamList = {
   Home: undefined;
   Sky: undefined;
   Learn: undefined;
+  Vault: undefined;
   Settings: undefined;
 };
 
@@ -54,6 +56,7 @@ const icons: Record<keyof RootTabParamList, keyof typeof Ionicons.glyphMap> = {
   Home: "home-outline",
   Sky: "moon-outline",
   Learn: "book-outline",
+  Vault: "bookmark-outline",
   Settings: "settings-outline"
 };
 
@@ -75,6 +78,7 @@ export function RootTabs() {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Sky" component={SkyScreen} />
       <Tab.Screen name="Learn" component={LearnScreen} />
+      <Tab.Screen name="Vault" component={VaultScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
     </Tab.Navigator>
   );
