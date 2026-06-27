@@ -1,6 +1,15 @@
-import { Linking, Platform } from "react-native";
+import { Linking, LogBox, Platform } from "react-native";
 import Constants from "expo-constants";
 import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
+
+// RevenueCat's SDK logs "Invalid API Key" / offerings errors to the console in Expo Go
+// (it can't validate against StoreKit in dev). Even though we already swallow the thrown
+// error, that internal console log still surfaces as a red LogBox banner on every screen,
+// which ruins dev/testing/screenshots. Hide ONLY those RC messages in dev — every other
+// error stays visible, and LogBox doesn't run in production builds at all.
+if (__DEV__) {
+  LogBox.ignoreLogs([/Invalid API Key/i, /configuring Purchases/i, /fetching offerings/i, /RevenueCat/i, /Purchases instance/i]);
+}
 
 // Dynamic require — react-native-purchases is not available in Expo Go
 type CustomerInfo = { entitlements: { active: Record<string, unknown> }; managementURL?: string | null };

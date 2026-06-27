@@ -1,5 +1,5 @@
 import React from "react";
-import { Circle, Ellipse, G, Line, Text as SvgText } from "react-native-svg";
+import { Circle, Defs, Ellipse, G, Line, RadialGradient, Stop, Text as SvgText } from "react-native-svg";
 import type { SkyBody } from "../ephemeris/SkyEphemerisService";
 import { PLANET_COLORS, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
 import type { LabelPlacer } from "../labelLayout";
@@ -39,6 +39,16 @@ const JUPITER_MOONS = [1.45, 2.05, -1.55, -2.2];
 export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, useIllustrations = true, fullSphere = false, onSelect }: Props) {
   return (
     <G>
+      <Defs>
+        {/* Venus pearl bloom — ONE smooth radial falloff (no hard ring boundaries) so
+            it reads as atmospheric scatter, not concentric orbital contours. */}
+        <RadialGradient id="venusBloom" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor="#FFF6E6" stopOpacity={0.3} />
+          <Stop offset="38%" stopColor="#FBF3DC" stopOpacity={0.12} />
+          <Stop offset="72%" stopColor="#FBF3DC" stopOpacity={0.03} />
+          <Stop offset="100%" stopColor="#FBF3DC" stopOpacity={0} />
+        </RadialGradient>
+      </Defs>
       {bodies.map((body) => {
         if (!PLANET_IDS.has(body.id)) return null;
         const belowHorizon = !body.aboveHorizon;
@@ -68,9 +78,15 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
             {/* SCATTERING — ultra-faint outermost halo (~3× the disc) so the planet's
                 light feels like it scatters into space around it, not a hard cutout. */}
             <Circle cx={x} cy={y} r={d * 3} fill={color} opacity={0.02} />
-            {/* base glow / BLOOM */}
-            <Circle cx={x} cy={y} r={st.glow} fill={color} opacity={0.12} />
-            <Circle cx={x} cy={y} r={st.glow * 0.6} fill={color} opacity={0.26} />
+            {/* base glow / BLOOM — solid stacked discs for most planets. Venus is
+                excluded here; it uses the smooth venusBloom gradient (below) so its
+                halo doesn't band into concentric rings. */}
+            {body.id !== "venus" && (
+              <>
+                <Circle cx={x} cy={y} r={st.glow} fill={color} opacity={0.12} />
+                <Circle cx={x} cy={y} r={st.glow * 0.6} fill={color} opacity={0.26} />
+              </>
+            )}
 
             {/* Mars — deep red atmospheric aura (recognition: the red planet) */}
             {useIllustrations && body.id === "mars" && !nightMode && (
@@ -96,8 +112,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
             {/* Venus — tighter pearl halo + diffraction glints (crisper per feedback) */}
             {useIllustrations && body.id === "venus" && !nightMode && (
               <>
-                <Circle cx={x} cy={y} r={st.glow * 1.9} fill="#FBF3DC" opacity={0.06} />
-                <Circle cx={x} cy={y} r={st.glow * 1.2} fill="#FFFFFF" opacity={0.12} />
+                <Circle cx={x} cy={y} r={st.glow * 1.95} fill="url(#venusBloom)" />
                 <Line x1={x - d * 1.05} y1={y} x2={x + d * 1.05} y2={y} stroke="#FFF6D6" strokeWidth={Math.max(0.8, d * 0.035)} strokeOpacity={0.55} strokeLinecap="round" />
                 <Line x1={x} y1={y - d * 1.05} x2={x} y2={y + d * 1.05} stroke="#FFF6D6" strokeWidth={Math.max(0.8, d * 0.035)} strokeOpacity={0.55} strokeLinecap="round" />
               </>
