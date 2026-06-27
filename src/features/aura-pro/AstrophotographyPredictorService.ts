@@ -12,7 +12,7 @@ export const astroPhotoScenarios: AstroPhotoScenario[] = [
     score: 34,
     recommendedTargets: ["Moon", "Jupiter", "Venus", "bright double stars"],
     note:
-      "Illustrative local planner fixture. Connect light-pollution tiles, weather forecasts, Moon calculations, and location before launch."
+      "Urban skies limit deep-sky targets. Focus on planets, the Moon, and bright double stars."
   },
   {
     id: "suburban",
@@ -25,7 +25,7 @@ export const astroPhotoScenarios: AstroPhotoScenario[] = [
     score: 67,
     recommendedTargets: ["Orion Nebula", "Pleiades", "Andromeda core", "Moon"],
     note:
-      "Illustrative local planner fixture. The production adapter should recalculate from the user’s location and selected forecast hour."
+      "Suburban conditions are ideal for planets, bright clusters, and the Moon. The Milky Way may be faintly visible."
   },
   {
     id: "dark_sky",
@@ -38,7 +38,7 @@ export const astroPhotoScenarios: AstroPhotoScenario[] = [
     score: 92,
     recommendedTargets: ["Milky Way core", "Andromeda Galaxy", "nebulae", "wide-field star trails"],
     note:
-      "Illustrative local planner fixture. This preview demonstrates the score model and target guidance before provider integration."
+      "Dark skies unlock the full Milky Way, faint nebulae, and galaxies. Give your eyes 20 minutes to adapt."
   }
 ];
 

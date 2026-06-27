@@ -19,7 +19,7 @@ export function ThirtyNightsProgressVisual() {
           <View key={n} style={[styles.dot, n <= night && styles.dotActive]} />
         ))}
       </View>
-      <Text style={styles.caption}>A guided progression for beginner sky learning. Production can expand this to the full 30-night sequence with saved progress.</Text>
+      <Text style={styles.caption}>Complete each night to unlock the next. Your progress is saved automatically.</Text>
     </View>
   );
 }

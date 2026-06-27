@@ -44,7 +44,7 @@ export function SatelliteThermalOverlayPanel() {
     } catch {
       Alert.alert(
         "Orbital overlay unavailable",
-        "AuraLunis could not refresh the satellite overlay. The safe fixture view remains available."
+        "AuraLunis could not refresh the satellite overlay. The saved offline view remains available."
       );
     } finally {
       setLoading(false);

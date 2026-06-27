@@ -263,7 +263,7 @@ export function SkyScreen() {
           actionLabel="Save + Find"
           onPress={() => {
             addItem({ type: "archive", title: object.name, detail: object.summary });
-            Alert.alert(object.name, "Saved to the local prototype Vault. Find Mode boundary prepared.");
+            Alert.alert(object.name, "Saved to your Cosmic Vault.");
           }}
           status={object.type.replace("_", " ")}
         />

@@ -245,8 +245,10 @@ export function HomeScreen() {
         <Text style={styles.sectionLabel}>VISIBLE TONIGHT</Text>
         {visibleBodies.map((body) => (
           <View key={body.id} style={styles.bodyRow}>
-            <View style={[styles.bodyDot, { backgroundColor: bodyColor(body.id) }]} />
-            <Text style={styles.bodyName}>{body.name}</Text>
+            <View style={styles.bodyLeft}>
+              <View style={[styles.bodyDot, { backgroundColor: bodyColor(body.id) }]} />
+              <Text style={styles.bodyName}>{body.name}</Text>
+            </View>
             <Text style={styles.bodyData}>
               az {Math.round(body.azimuthDegrees)}° · {Math.round(body.altitudeDegrees)}°
             </Text>
@@ -254,8 +256,10 @@ export function HomeScreen() {
         ))}
         {belowBodies.filter(b => b.id !== "moon").map((body) => (
           <View key={body.id} style={styles.bodyRow}>
-            <View style={[styles.bodyDot, { backgroundColor: bodyColor(body.id), opacity: 0.3 }]} />
-            <Text style={[styles.bodyName, { color: AuraLunisColors.faint }]}>{body.name}</Text>
+            <View style={styles.bodyLeft}>
+              <View style={[styles.bodyDot, { backgroundColor: bodyColor(body.id), opacity: 0.3 }]} />
+              <Text style={[styles.bodyName, { color: AuraLunisColors.faint }]}>{body.name}</Text>
+            </View>
             <Text style={[styles.bodyData, { color: AuraLunisColors.faint }]}>below horizon</Text>
           </View>
         ))}
@@ -331,7 +335,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     gap: 6,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   timeValue: {
     fontSize: 16,
@@ -355,7 +359,7 @@ const styles = StyleSheet.create({
     borderColor: "rgba(239,159,39,0.25)",
     borderRadius: 14,
     padding: 10,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   goldenIcon: {
     width: 32,
@@ -386,7 +390,7 @@ const styles = StyleSheet.create({
     marginTop: 1,
   },
   insightCard: {
-    marginBottom: 14,
+    marginBottom: 12,
     padding: 16,
   },
   insightRow: {
@@ -448,7 +452,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   bodiesCard: {
-    marginBottom: 10,
+    marginBottom: 12,
   },
   sectionLabel: {
     fontSize: 8,
@@ -460,30 +464,39 @@ const styles = StyleSheet.create({
   bodyRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 8,
-    paddingVertical: 5,
+    justifyContent: "space-between",
+    paddingVertical: 6,
     borderTopWidth: 1,
     borderTopColor: AuraLunisColors.borderFaint,
   },
+  bodyLeft: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 9,
+    flex: 1,
+  },
   bodyDot: {
-    width: 7,
-    height: 7,
+    width: 8,
+    height: 8,
     borderRadius: 4,
   },
   bodyName: {
     fontSize: 12,
     fontWeight: "700",
     color: AuraLunisColors.silver,
-    flex: 1,
+    flexShrink: 1,
   },
   bodyData: {
     fontSize: 10,
     color: AuraLunisColors.gold,
+    textAlign: "right",
+    fontVariant: ["tabular-nums"],
+    marginLeft: 8,
   },
   modeRow: {
     flexDirection: "row",
     gap: 8,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   modeCard: {
     flex: 1,

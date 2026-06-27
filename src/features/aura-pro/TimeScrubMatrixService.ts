@@ -93,6 +93,6 @@ export function buildTimeScrubSnapshot(offsetDays: number): TimeScrubSnapshot {
     planets: buildPlanets(offsetDays),
     nearbyRetrogradeWindows,
     note:
-      "Interactive adapter fixture only. Connect the production astronomy ephemeris before presenting retrograde dates or planet positions as calculated results."
+      "Orbital positions shown are a simplified visualization for learning, not a precise ephemeris."
   };
 }

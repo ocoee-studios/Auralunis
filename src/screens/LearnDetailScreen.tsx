@@ -37,13 +37,16 @@ export function LearnDetailScreen({
   const { openPaywall } = usePaywallNavigation();
   return (
     <ScreenShell title={topic.title} subtitle={categoryTitle} background={<Starfield />}>
-      {/* Back + free-lesson badges */}
+      {/* Top nav — large, high-contrast back control (>=44pt tap target) */}
       <Pressable
-        style={styles.backBtn}
+        style={({ pressed }) => [styles.backBtn, pressed && styles.backBtnPressed]}
         onPress={() => { tapLight(); onBack(); }}
-        hitSlop={12}
+        hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel="Back to Learn"
       >
-        <Text style={styles.backText}>‹ Learn</Text>
+        <Text style={styles.backArrow}>←</Text>
+        <Text style={styles.backText}>Back</Text>
       </Pressable>
 
       <View style={styles.badgeRow}>
@@ -106,8 +109,17 @@ export function LearnDetailScreen({
 }
 
 const styles = StyleSheet.create({
-  backBtn: { marginBottom: 10 },
-  backText: { color: AuraLunisColors.gold, fontSize: 14, fontWeight: "700" },
+  backBtn: {
+    flexDirection: "row", alignItems: "center", gap: 3,
+    alignSelf: "flex-start",
+    minHeight: 44, paddingVertical: 9, paddingLeft: 12, paddingRight: 16,
+    marginBottom: 14, borderRadius: 22,
+    backgroundColor: "rgba(217,168,78,0.14)",
+    borderWidth: 1, borderColor: "rgba(217,168,78,0.45)",
+  },
+  backBtnPressed: { backgroundColor: "rgba(217,168,78,0.26)" },
+  backArrow: { color: AuraLunisColors.gold, fontSize: 19, fontWeight: "900", marginTop: -1 },
+  backText: { color: AuraLunisColors.gold, fontSize: 16, fontWeight: "800", letterSpacing: 0.3 },
   badgeRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 14 },
   freeTag: {
     fontSize: 9, fontWeight: "900", letterSpacing: 1.5, color: AuraLunisColors.cosmicBlack,

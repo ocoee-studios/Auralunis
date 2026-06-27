@@ -349,11 +349,11 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       if (!isPremium) {
         // Conversion moment: preview the beauty, then prompt — never a bare lock icon.
         if (def.available) { startPreview(def); return; }
-        Alert.alert(`${def.label} · Coming Soon`, `The ${def.label} layer arrives in the next Sky Lens update.`);
+        Alert.alert(`${def.label} · Coming Soon`, `${def.label} is coming in a future update. Stay tuned!`);
         return;
       }
       // Premium user, layer simply not shipped yet → informational.
-      Alert.alert(`${def.label} · Coming Soon`, `The ${def.label} layer arrives in the next Sky Lens update.`);
+      Alert.alert(`${def.label} · Coming Soon`, `${def.label} is coming in a future update. Stay tuned!`);
     },
     [isPremium, startPreview]
   );

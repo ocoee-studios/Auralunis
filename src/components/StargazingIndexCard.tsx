@@ -47,9 +47,10 @@ export function StargazingIndexCard({ index }: Props) {
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: 20,
-    marginTop: 14,
-    padding: 18,
+    marginBottom: 12,
+    paddingHorizontal: 18,
+    paddingTop: 18,
+    paddingBottom: 20,
     borderRadius: 22,
     backgroundColor: "rgba(12,16,28,0.6)",
     borderWidth: 1,
@@ -65,5 +66,5 @@ const styles = StyleSheet.create({
   summary: { color: "rgba(233,236,245,0.85)", fontSize: 13.5, lineHeight: 19, marginTop: 12 },
   chipRow: { flexDirection: "row", flexWrap: "wrap", gap: 10, marginTop: 12 },
   chip: { color: "rgba(233,236,245,0.8)", fontSize: 12.5, fontWeight: "600" },
-  window: { color: "rgba(217,168,78,0.9)", fontSize: 12, fontWeight: "700", marginTop: 12, letterSpacing: 0.3 },
+  window: { color: "rgba(217,168,78,0.9)", fontSize: 12, lineHeight: 16, fontWeight: "700", marginTop: 12, letterSpacing: 0.3 },
 });

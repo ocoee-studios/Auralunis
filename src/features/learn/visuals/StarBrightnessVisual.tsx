@@ -21,7 +21,7 @@ export function StarBrightnessVisual() {
         <View style={[styles.star, { opacity: opacityB, backgroundColor: "#9EDCFF", width: 22, height: 22, borderRadius: 11 }]} />
         <View style={[styles.star, { opacity: 0.8, backgroundColor: "#FFD3A8", width: 16, height: 16, borderRadius: 8 }]} />
       </View>
-      <Text style={styles.caption}>Compare how stars vary by brightness and color. Production can link this to magnitude and temperature examples like Sirius, Vega, Betelgeuse, and Rigel.</Text>
+      <Text style={styles.caption}>Stars vary in brightness (magnitude) and color (temperature). Blue stars are hottest, red stars are coolest.</Text>
     </View>
   );
 }

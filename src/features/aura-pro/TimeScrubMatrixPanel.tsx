@@ -23,8 +23,8 @@ export function TimeScrubMatrixPanel() {
       <Text style={styles.eyebrow}>AURA PRO · KINETIC TIME</Text>
       <Text style={styles.title}>Time-Scrub Matrix</Text>
       <Text style={styles.copy}>
-        Scrub forward or backward through an interactive orbital fixture and
-        inspect the retrograde adapter boundary.
+        Scrub forward or backward through time to explore how the planets move and
+        when retrograde periods occur.
       </Text>
 
       <View style={styles.dateCard}>
@@ -73,7 +73,7 @@ export function TimeScrubMatrixPanel() {
         <Text style={styles.resetText}>Return to Today</Text>
       </Pressable>
 
-      <Text style={styles.retrogradeTitle}>Retrograde adapter fixture</Text>
+      <Text style={styles.retrogradeTitle}>Retrograde Periods</Text>
       {snapshot.nearbyRetrogradeWindows.length ? (
         snapshot.nearbyRetrogradeWindows.map((window) => (
           <Text key={window.id} style={styles.retrogradeRow}>
@@ -82,7 +82,7 @@ export function TimeScrubMatrixPanel() {
         ))
       ) : (
         <Text style={styles.retrogradeRow}>
-          No nearby fixture windows at this scrub position.
+          No retrograde periods near this date.
         </Text>
       )}
 

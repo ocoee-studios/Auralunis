@@ -19,7 +19,7 @@ export function MilkyWayBandVisual() {
         <Text style={styles.coreText}>Galactic Center</Text>
         <Text style={styles.rift}>Great Rift</Text>
       </View>
-      <Text style={styles.caption}>A living band view for the Milky Way, core, and dust lanes. Production can connect this to visibility windows and low-light guidance.</Text>
+      <Text style={styles.caption}>The Milky Way band — our galaxy's disk seen edge-on. Best viewed from dark skies on moonless nights.</Text>
     </View>
   );
 }

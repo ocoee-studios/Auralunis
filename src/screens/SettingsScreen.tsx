@@ -214,12 +214,12 @@ export function SettingsScreen() {
         <SettingRow title="Local-First Vault" description="Keep Notes, LifeSky moments, lessons, and saved objects local by default." value={settings.localFirstVaultEnabled} onValueChange={(value) => updateSetting("localFirstVaultEnabled", value)} />
         {/* Cloud Sync and AI Oracle removed — features not built. 
             Re-add when actual implementations exist. */}
-        <Text style={styles.localCount}>{items.length} local prototype Vault items</Text>
+        <Text style={styles.localCount}>{items.length} Vault items</Text>
         <Pressable style={styles.secondaryButton} onPress={() => Linking.openSettings()}>
           <Text style={styles.secondaryButtonText}>Review App Permissions in Settings</Text>
         </Pressable>
-        <Pressable style={styles.dangerButton} onPress={() => clearPrototypeVault().then(() => Alert.alert("Prototype Vault", "Local prototype Vault items cleared."))}>
-          <Text style={styles.dangerButtonText}>Clear Prototype Vault</Text>
+        <Pressable style={styles.dangerButton} onPress={() => clearPrototypeVault().then(() => Alert.alert("Cosmic Vault", "Vault items cleared."))}>
+          <Text style={styles.dangerButtonText}>Clear Vault Data</Text>
         </Pressable>
       </SettingsSection>
 
@@ -228,7 +228,7 @@ export function SettingsScreen() {
       </SettingsSection>
 
       <SettingsSection title="Learning">
-        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Learning Preferences", "Lesson difficulty and content preferences are coming in a future update.\n\nCurrently all Learn content is free and accessible to everyone — no settings needed.")}>
+        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Learning Preferences", "All lessons are currently free and accessible. More customization options coming soon.")}>
           <Text style={styles.secondaryButtonText}>Learning Preferences</Text>
         </Pressable>
       </SettingsSection>

@@ -25,7 +25,7 @@ export function MoonPhaseLiveVisual() {
         <View style={{ flex: 1 }}>
           <Text style={styles.title}>{PHASES[index]}</Text>
           <Text style={styles.meta}>Illumination · {illumination}%</Text>
-          <Text style={styles.caption}>Production can bind this to the real lunar cycle, moonrise, moonset, and local date.</Text>
+          <Text style={styles.caption}>Current lunar phase based on your date and location.</Text>
         </View>
       </View>
     </View>

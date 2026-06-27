@@ -28,7 +28,7 @@ export function SolarSystemLiveVisual() {
         <View style={[styles.planet, { top: P + Math.sin(step / 12 + 2.1) * 86, left: P + Math.cos(step / 12 + 2.1) * 86, backgroundColor: "#62CFFF" }]} />
         <View style={[styles.planet, { top: P + Math.sin(step / 14 + 2.8) * 112, left: P + Math.cos(step / 14 + 2.8) * 112, backgroundColor: "#FFB07A" }]} />
       </View>
-      <Text style={styles.caption}>A living mini-orrery for the Sun and planetary motion. Production can wire this to real orbital time scrubbing.</Text>
+      <Text style={styles.caption}>The planets orbit the Sun at different speeds. Inner planets move fastest, outer planets take years to complete one orbit.</Text>
     </View>
   );
 }
