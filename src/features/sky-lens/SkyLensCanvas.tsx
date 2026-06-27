@@ -150,7 +150,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Cardinal compass labels — always on (independent of the grid toggle) so the
           user always has N/E/S/W orientation on the horizon. */}
-      {!cinematic && <CardinalLayer project={project} nightMode={nightMode} />}
+      {!cinematic && <CardinalLayer project={project} box={box} nightMode={nightMode} />}
       {activeLayers.has("ecliptic") && !cinematic && (
         <EclipticLayer points={sky.ecliptic} project={project} palette={palette} nightMode={nightMode} />
       )}
