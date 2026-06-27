@@ -102,14 +102,23 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
                 </G>
               );
             })()}
-            {/* softer, smaller glow rings on the magnitude-0 stars (feathered, not geometric) */}
+            {/* Feathered glow on the bright stars — a smooth multi-step opacity ramp
+                (no hard ring). Brightest get the widest, faintest outer halo so the
+                falloff reads as soft light, not concentric discs. */}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.035} />}
             {brightest && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.06} />}
             {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.1} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 2} fill={color} opacity={0.22} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.16} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 1.2} fill={color} opacity={0.24} />}
             {glint && (
               <>
-                <Line x1={p.x - spike} y1={p.y} x2={p.x + spike} y2={p.y} stroke={color} strokeWidth={0.9} strokeOpacity={0.5} strokeLinecap="round" />
-                <Line x1={p.x} y1={p.y - spike} x2={p.x} y2={p.y + spike} stroke={color} strokeWidth={0.9} strokeOpacity={0.5} strokeLinecap="round" />
+                {/* tapered 4-point diffraction — a faint wide underlay glow + a crisp
+                    narrow core, so the spikes shimmer softly instead of reading as hard
+                    cross-hairs (premium 'jewel' look on Sirius/Vega/etc.) */}
+                <Line x1={p.x - spike * 1.18} y1={p.y} x2={p.x + spike * 1.18} y2={p.y} stroke={color} strokeWidth={2.4} strokeOpacity={0.1} strokeLinecap="round" />
+                <Line x1={p.x} y1={p.y - spike * 1.18} x2={p.x} y2={p.y + spike * 1.18} stroke={color} strokeWidth={2.4} strokeOpacity={0.1} strokeLinecap="round" />
+                <Line x1={p.x - spike} y1={p.y} x2={p.x + spike} y2={p.y} stroke={color} strokeWidth={0.8} strokeOpacity={0.42} strokeLinecap="round" />
+                <Line x1={p.x} y1={p.y - spike} x2={p.x} y2={p.y + spike} stroke={color} strokeWidth={0.8} strokeOpacity={0.42} strokeLinecap="round" />
               </>
             )}
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
