@@ -48,6 +48,13 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
           <Stop offset="72%" stopColor="#FBF3DC" stopOpacity={0.03} />
           <Stop offset="100%" stopColor="#FBF3DC" stopOpacity={0} />
         </RadialGradient>
+        {/* Terminator shadow — a SOFT-edged dark blob (no hard circle edge) so the
+            far hemisphere shades smoothly instead of drawing a dark contour ring. */}
+        <RadialGradient id="planetShadow" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor="#01030A" stopOpacity={0.3} />
+          <Stop offset="55%" stopColor="#01030A" stopOpacity={0.13} />
+          <Stop offset="100%" stopColor="#01030A" stopOpacity={0} />
+        </RadialGradient>
       </Defs>
       {bodies.map((body) => {
         if (!PLANET_IDS.has(body.id)) return null;
@@ -166,15 +173,16 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
                 Both stay within the disc; !nightMode only (keep one consistent light). */}
             {!nightMode && (
               <>
-                <Circle cx={x + d * 0.42} cy={y + d * 0.42} r={d * 0.58} fill="#01030A" opacity={0.18} />
+                {/* soft terminator shadow (gradient, no hard edge → no dark contour ring) */}
+                <Circle cx={x + d * 0.42} cy={y + d * 0.42} r={d * 0.72} fill="url(#planetShadow)" />
                 <Circle cx={x - d * 0.34} cy={y - d * 0.34} r={Math.max(1.4, d * 0.15)} fill="#FFFFFF" opacity={0.4} />
               </>
             )}
 
-            {/* ATMOSPHERE — a thin color-matched limb ring hugging the disc, the
-                terminator-glow that makes the body read as a lit sphere in space
-                rather than a flat dot. Above the illustration so it rims the planet. */}
-            {!nightMode && <Circle cx={x} cy={y} r={d + 1} fill="none" stroke={color} strokeWidth={2} strokeOpacity={0.3} />}
+            {/* ATMOSPHERE — a thin color-matched limb ring hugging the disc. Skipped on
+                Venus: it's a featureless brilliant point, so a rim stroke just reads as
+                a hard ring there. Mars/Jupiter/Saturn keep it (it complements their detail). */}
+            {!nightMode && body.id !== "venus" && <Circle cx={x} cy={y} r={d + 1} fill="none" stroke={color} strokeWidth={2} strokeOpacity={0.3} />}
 
             {/* generous transparent tap target on top (≈15px beyond the disc) */}
             <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />

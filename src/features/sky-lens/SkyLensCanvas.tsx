@@ -3,6 +3,7 @@ import Svg, { Circle, Defs, G, RadialGradient, Stop } from "react-native-svg";
 import { StyleSheet } from "react-native";
 import { projectTarget, DEFAULT_FOV, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
 import { GridLayer } from "./layers/GridLayer";
+import { CardinalLayer } from "./layers/CardinalLayer";
 import { ConstellationLayer } from "./layers/ConstellationLayer";
 import { ConstellationArtLayer } from "./layers/ConstellationArtLayer";
 import { StarLayer } from "./layers/StarLayer";
@@ -147,6 +148,9 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {activeLayers.has("grid") && !cinematic && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
       )}
+      {/* Cardinal compass labels — always on (independent of the grid toggle) so the
+          user always has N/E/S/W orientation on the horizon. */}
+      {!cinematic && <CardinalLayer project={project} nightMode={nightMode} />}
       {activeLayers.has("ecliptic") && !cinematic && (
         <EclipticLayer points={sky.ecliptic} project={project} palette={palette} nightMode={nightMode} />
       )}
