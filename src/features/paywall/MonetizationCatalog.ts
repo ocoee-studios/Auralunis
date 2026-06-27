@@ -125,7 +125,7 @@ export const premiumFeatures = [
 export const lifetimeFeatures = [
   "🌙 Founder's Edition — The Living Universe, forever",
   "Every premium feature, every future update, one price",
-  "Limited launch pricing — rises to $129.99 after launch",
+  "Founders pricing — limited availability",
   "Founders badge on Sky Share cards",
   "Priority access to new features before anyone else",
 ];

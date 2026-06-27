@@ -1,9 +1,9 @@
 // StargazingIndexService.ts — combines weather, moon, seeing, and
 // transparency into ONE number: 0-100.
 //
-// 80-100 = GO (green)
-// 50-79  = MAYBE (gold)  
-// 0-49   = STAY IN (red)
+// 70-100 = GO (green)
+// 45-69  = MAYBE (gold)
+// 0-44   = STAY IN (red)
 
 export interface StargazingIndex {
   score: number;           // 0-100
@@ -48,8 +48,8 @@ export function computeStargazingIndex(
 
   // Verdict
   const verdict: StargazingIndex["verdict"] =
-    score >= 80 ? "GO" :
-    score >= 50 ? "MAYBE" :
+    score >= 70 ? "GO" :
+    score >= 45 ? "MAYBE" :
     "STAY_IN";
 
   const color =
