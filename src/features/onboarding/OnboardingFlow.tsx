@@ -6,6 +6,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LogoMark } from "@/components/LogoMark";
+import { BirthSkyChart } from "@/components/BirthSkyChart";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapSuccess } from "@/services/HapticService";
 import { computeBirthSky, BIRTHDAY_STORAGE_KEY, type BirthSkyProfile } from "@/services/BirthSkyService";
@@ -128,9 +129,15 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
           <View style={s.center}>
             <Text style={s.stepEyebrow}>YOUR BIRTH SKY</Text>
             <Text style={s.stepTitle}>The sky remembers.</Text>
-            <Animated.View style={[s.revealRing, ringStyle]}>
-              <Animated.View style={[s.revealCore, coreStyle]} />
-            </Animated.View>
+            {profile ? (
+              <View style={s.revealChart}>
+                <BirthSkyChart profile={profile} size={236} />
+              </View>
+            ) : (
+              <Animated.View style={[s.revealRing, ringStyle]}>
+                <Animated.View style={[s.revealCore, coreStyle]} />
+              </Animated.View>
+            )}
             {profile ? (
               <>
                 <Text style={s.birthSignature}>{profile.cosmicSignature}</Text>
@@ -205,6 +212,7 @@ const s = StyleSheet.create({
   skipText: { color: AuraLunisColors.gold2, fontWeight: "800", fontSize: 13, marginTop: 16 },
   revealRing: { width: 160, height: 160, borderRadius: 80, borderWidth: 2, borderColor: "rgba(199,166,106,0.6)", alignItems: "center", justifyContent: "center", marginTop: 24, marginBottom: 12 },
   revealCore: { width: 48, height: 48, borderRadius: 24, backgroundColor: AuraLunisColors.gold },
+  revealChart: { marginTop: 22, marginBottom: 14, alignItems: "center" },
   birthSignature: { color: AuraLunisColors.gold2, fontSize: 15, lineHeight: 22, textAlign: "center", fontStyle: "italic", marginTop: 14, maxWidth: 320 },
   birthStats: { flexDirection: "row", justifyContent: "center", gap: 22, marginTop: 20 },
   birthStat: { alignItems: "center", maxWidth: 110 },
