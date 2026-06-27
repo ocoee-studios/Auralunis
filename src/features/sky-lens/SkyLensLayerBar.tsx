@@ -30,6 +30,9 @@ export function SkyLensLayerBar({ active, isPremium, nightMode, onToggle, onLock
           <TouchableOpacity
             key={def.key}
             activeOpacity={0.8}
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
+            accessibilityLabel={`${def.label} layer${comingSoon ? ", coming soon" : on ? ", on" : ", off"}`}
             onPress={() => {
               if (comingSoon || locked) onLockedPress(def);
               else onToggle(def.key);

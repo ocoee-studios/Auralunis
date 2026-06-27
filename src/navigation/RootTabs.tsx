@@ -54,6 +54,7 @@ export function RootTabs() {
     <Tab.Navigator
       screenOptions={({ route }: { route: { name: keyof RootTabParamList } }) => ({
         headerShown: false,
+        tabBarAccessibilityLabel: `${route.name} tab`,
         tabBarStyle: TAB_BAR_STYLE,
         tabBarBackground: () => <TabBarBackground />,
         tabBarActiveTintColor: AuraLunisColors.gold2,

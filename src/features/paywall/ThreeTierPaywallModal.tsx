@@ -88,7 +88,18 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
 
             {/* CTA — wording follows the selected tier: trial → "Start Free Trial",
                 lifetime → "Unlock Forever", monthly → "Subscribe". */}
-            <TouchableOpacity style={styles.cta} onPress={handlePurchase}>
+            <TouchableOpacity
+              style={styles.cta}
+              onPress={handlePurchase}
+              accessibilityRole="button"
+              accessibilityLabel={
+                selectedPlan.interval === "lifetime"
+                  ? "Unlock Forever"
+                  : selectedPlan.trial
+                  ? "Start free trial"
+                  : "Subscribe"
+              }
+            >
               <Text style={styles.ctaText}>
                 {selectedPlan.interval === "lifetime"
                   ? "Unlock Forever"

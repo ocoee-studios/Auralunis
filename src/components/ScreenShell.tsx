@@ -23,7 +23,11 @@ export function ScreenShell({ title, subtitle, children, background }: Props) {
   return (
     <LinearGradient colors={palette.gradient as unknown as readonly [string, string, ...string[]]} style={styles.root}>
       {background ?? <StarDust count={12} color={AuraLunisColors.gold} opacity={0.18} />}
-      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}>
+      <ScrollView
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 12 }]}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="on-drag"
+      >
         {/* Brand header matching mockup: [Logo] AURALUNIS */}
         <View style={styles.brandBar}>
           <LogoMark size={32} />
