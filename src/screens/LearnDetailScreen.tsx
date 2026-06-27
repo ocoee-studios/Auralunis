@@ -4,7 +4,7 @@
 // "Try in Sky Lens" jump, and a "Next lesson" button. Reuses ScreenShell + the
 // living Starfield so it reads like a beautiful astronomy textbook.
 
-import React from "react";
+import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { Starfield } from "@/components/Starfield";
@@ -14,6 +14,7 @@ import { tapLight } from "@/services/HapticService";
 import { LearnVisualForCategory } from "@/features/learn/LearnCategoryVisual";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
+import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import type { LearnTopic } from "@/features/learn/LearnTypes";
 
 interface LearnDetailScreenProps {
@@ -34,6 +35,14 @@ export function LearnDetailScreen({
   onOpenSkyLens,
 }: LearnDetailScreenProps) {
   const { isPremium } = useEntitlement();
+  const { addItem } = useAuraLunisVault();
+  const [saved, setSaved] = useState(false);
+
+  const saveToVault = () => {
+    tapLight();
+    addItem({ type: "lesson", title: topic.title, detail: `Observed during "${topic.title}". ${topic.skyLensAction ?? ""}`.trim() });
+    setSaved(true);
+  };
   const { openPaywall } = usePaywallNavigation();
   return (
     <ScreenShell title={topic.title} subtitle={categoryTitle} background={<Starfield />}>
@@ -80,6 +89,17 @@ export function LearnDetailScreen({
       {/* Try in Sky Lens */}
       <Pressable style={styles.skyBtn} onPress={() => { tapLight(); onOpenSkyLens(); }}>
         <Text style={styles.skyBtnText}>{topic.skyLensAction ?? "Try in Sky Lens"} →</Text>
+      </Pressable>
+
+      {/* Save to Vault — logs this observation so it appears in the Vault tab. */}
+      <Pressable
+        style={[styles.vaultBtn, saved && styles.vaultBtnSaved]}
+        onPress={saveToVault}
+        disabled={saved}
+        accessibilityRole="button"
+        accessibilityLabel={saved ? "Saved to Vault" : "Save this lesson to your Vault"}
+      >
+        <Text style={styles.vaultBtnText}>{saved ? "✓  Saved to Vault" : "Save to Vault"}</Text>
       </Pressable>
 
       {/* Next lesson */}
@@ -148,6 +168,13 @@ const styles = StyleSheet.create({
     backgroundColor: AuraLunisColors.gold,
   },
   skyBtnText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14, letterSpacing: 0.3 },
+  vaultBtn: {
+    marginBottom: 14, borderRadius: 14, paddingVertical: 13, alignItems: "center",
+    backgroundColor: "rgba(217,168,78,0.12)",
+    borderWidth: 1, borderColor: "rgba(217,168,78,0.4)",
+  },
+  vaultBtnSaved: { borderColor: "rgba(217,168,78,0.7)", backgroundColor: "rgba(217,168,78,0.2)" },
+  vaultBtnText: { color: AuraLunisColors.gold2, fontWeight: "800", fontSize: 14, letterSpacing: 0.3 },
   nextBtn: {
     marginBottom: 24, borderRadius: 14, padding: 14,
     backgroundColor: "rgba(255,255,255,0.045)", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)",
