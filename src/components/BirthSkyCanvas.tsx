@@ -14,7 +14,12 @@ import type { LayerKey } from "@/features/sky-lens/SkyLensLayerCatalog";
 
 // A clean "what was overhead" set — stars, constellation lines, planets, the Milky Way,
 // and deep-sky glow. No grid/cardinals (cinematic mode already hides labels + overlays).
-const BIRTH_LAYERS = new Set<LayerKey>(["stars", "constellations", "planets", "milkyway", "deepsky"]);
+// Stars (dome field + bright named stars), constellation LINES, and planets only.
+// NO milkyway — even the *SVG* Milky Way band is built to "read like a premium
+// astrophotography exposure", so at this framing it filled the circle and looked like a
+// stock space photo. NO deepsky nebulae for the same reason. The result is an
+// unmistakable star CHART of the birth night, fully procedural, zero image assets.
+const BIRTH_LAYERS = new Set<LayerKey>(["stars", "constellations", "planets"]);
 const noop = () => {};
 
 // Look up toward the southern sky at a high altitude with a wide FOV, so the circular
