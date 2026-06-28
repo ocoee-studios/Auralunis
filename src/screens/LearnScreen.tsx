@@ -14,6 +14,9 @@ export function LearnScreen() {
   const navigation = useNavigation<any>();
   const [selectedCategory, setSelectedCategory] = useState<LearnCategoryId>("solar_system");
   const [openTopicId, setOpenTopicId] = useState<string | null>(null);
+  // Which Deep Sky tab is active (Nebula/Galaxy/Cluster/Remnant) — drives which
+  // deep_sky topic is shown beneath the live visual.
+  const [deepSkyTabIndex, setDeepSkyTabIndex] = useState(0);
 
   // Go full-screen for a lesson: hide the tab bar, restore it on exit (mirrors
   // the Sky Lens immersive pattern).
@@ -21,10 +24,15 @@ export function LearnScreen() {
     navigation.setOptions?.({ tabBarStyle: openTopicId ? { display: "none" } : TAB_BAR_STYLE });
   }, [navigation, openTopicId]);
 
-  const selectedTopics = useMemo(
-    () => learnTopics.filter((topic) => topic.categoryId === selectedCategory),
-    [selectedCategory]
-  );
+  const selectedTopics = useMemo(() => {
+    const inCategory = learnTopics.filter((topic) => topic.categoryId === selectedCategory);
+    // Deep Sky shows one topic at a time, matched to the active tab in the visual.
+    if (selectedCategory === "deep_sky") {
+      const wantId = ["nebulae", "galaxies", "clusters", "remnants"][deepSkyTabIndex];
+      return inCategory.filter((topic) => topic.id === wantId);
+    }
+    return inCategory;
+  }, [selectedCategory, deepSkyTabIndex]);
 
   const selectedMeta = learnCategories.find((category) => category.id === selectedCategory);
 
@@ -86,7 +94,7 @@ export function LearnScreen() {
         <Text style={styles.selectedCopy}>{selectedMeta?.description}</Text>
       </View>
 
-      <LearnVisualForCategory categoryId={selectedCategory} />
+      <LearnVisualForCategory categoryId={selectedCategory} onDeepSkyTabChange={setDeepSkyTabIndex} />
 
       {selectedTopics.map((topic) => (
         <FeatureCard
