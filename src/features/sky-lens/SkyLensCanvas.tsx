@@ -210,6 +210,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           placeLabel={placeLabel}
           showLabels={showLabels}
           useIllustrations={vg.planetIllustrations}
+          zoom={zoomLevel}
           fullSphere={fullSphere}
           onSelect={onSelect}
         />
