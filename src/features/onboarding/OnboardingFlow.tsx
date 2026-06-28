@@ -6,7 +6,7 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 
 import Animated, { useSharedValue, useAnimatedStyle, withSpring, withTiming } from "react-native-reanimated";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LogoMark } from "@/components/LogoMark";
-import { BirthSkyChart } from "@/components/BirthSkyChart";
+import { BirthSkyCanvas } from "@/components/BirthSkyCanvas";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapSuccess } from "@/services/HapticService";
 import { computeBirthSky, BIRTHDAY_STORAGE_KEY, type BirthSkyProfile } from "@/services/BirthSkyService";
@@ -131,7 +131,7 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
             <Text style={s.stepTitle}>The sky remembers.</Text>
             {profile ? (
               <View style={s.revealChart}>
-                <BirthSkyChart profile={profile} size={236} />
+                <BirthSkyCanvas birthDate={new Date(profile.birthDate)} location={location} size={236} />
               </View>
             ) : (
               <Animated.View style={[s.revealRing, ringStyle]}>

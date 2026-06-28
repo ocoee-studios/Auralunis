@@ -57,7 +57,19 @@ export function BirthSkyScreen({ onClose }: Props) {
       setError("Enter your birth date as YYYY-MM-DD (e.g. 1990-06-21).");
       return;
     }
-    const t = /^\d{1,2}:\d{2}$/.test(time.trim()) ? time.trim() : "12:00";
+    // Reject IMPOSSIBLE dates. JS Date silently rolls over (1978-10-55 → Nov 24), so
+    // verify each part survived the round-trip, the year is sane, and it's in the past.
+    const [yy, mm, dd] = trimmed.split("-").map(Number);
+    const probe = new Date(Date.UTC(yy, mm - 1, dd));
+    const validDate =
+      mm >= 1 && mm <= 12 && dd >= 1 && dd <= 31 &&
+      probe.getUTCFullYear() === yy && probe.getUTCMonth() === mm - 1 && probe.getUTCDate() === dd &&
+      yy >= 1900 && probe.getTime() <= Date.now();
+    if (!validDate) {
+      setError("That date isn't valid — check the day and month, and that it's in the past.");
+      return;
+    }
+    const t = /^([01]?\d|2[0-3]):[0-5]\d$/.test(time.trim()) ? time.trim() : "12:00";
     const iso = `${trimmed}T${t.padStart(5, "0")}:00Z`;
     try {
       setProfile(computeBirthSky(iso, location, locationName));
