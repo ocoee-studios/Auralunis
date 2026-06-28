@@ -12,11 +12,11 @@ import { getVisualGate } from "@/features/sky-lens/PremiumVisualGating";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import type { LayerKey } from "@/features/sky-lens/SkyLensLayerCatalog";
 
-// A clean "what was overhead" set — real stars, constellation lines, and planets only.
+// A clean "what was overhead" set — real stars and constellation lines only.
 // Deliberately NO milkyway/deepsky: the painterly Milky Way band reads as an illustration,
 // and the point of this view is the true star field at the birth moment, not a poster.
 // No grid/cardinals either (cinematic mode already hides labels + overlays).
-const BIRTH_LAYERS = new Set<LayerKey>(["stars", "constellations", "planets"]);
+const BIRTH_LAYERS = new Set<LayerKey>(["stars", "constellations"]);
 const noop = () => {};
 
 // Look up toward the southern sky at a high altitude with a wide FOV, so the circular
