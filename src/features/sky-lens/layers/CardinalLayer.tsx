@@ -15,13 +15,16 @@ const DIRECTIONS: { az: number; label: string }[] = [
   { az: 270, label: "W" },
 ];
 
-export function CardinalLayer({ project, nightMode }: { project: ProjectFn; nightMode: boolean }) {
+export function CardinalLayer({ project, box, nightMode }: { project: ProjectFn; box: { width: number; height: number }; nightMode: boolean }) {
   const color = nightMode ? "#7A2E2E" : AuraLunisColors.gold;
   return (
     <G>
       {DIRECTIONS.map((dir) => {
-        const p = project(dir.az, 2.5); // just above the horizon line
-        if (p.behind || !p.onScreen) return null;
+        const p = project(dir.az, 0); // right on the horizon line
+        // Cull only when behind the camera or off the sides — NOT on the strict
+        // onScreen check (which dropped them at the edges). Matches GridLayer so the
+        // labels actually appear whenever the horizon column is in view.
+        if (p.behind || p.x < -12 || p.x > box.width + 12) return null;
         return (
           <SvgText
             key={dir.label}

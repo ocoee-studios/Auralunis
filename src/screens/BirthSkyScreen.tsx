@@ -8,7 +8,7 @@ import { Pressable, Share, StyleSheet, Text, TextInput, View } from "react-nativ
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { ScreenShell } from "@/components/ScreenShell";
 import { Starfield } from "@/components/Starfield";
-import { BirthSkyChart } from "@/components/BirthSkyChart";
+import { BirthSkyCanvas } from "@/components/BirthSkyCanvas";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 import { computeBirthSky, BIRTHDAY_STORAGE_KEY, type BirthSkyProfile } from "@/services/BirthSkyService";
@@ -124,7 +124,8 @@ export function BirthSkyScreen({ onClose }: Props) {
       {profile && (
         <View style={styles.resultCard}>
           <View style={styles.chartWrap}>
-            <BirthSkyChart profile={profile} size={260} />
+            <BirthSkyCanvas birthDate={new Date(profile.birthDate)} location={location} size={272} />
+            <Text style={styles.chartCaption}>The sky over {locationName.toLowerCase()} the night you were born</Text>
           </View>
           <Text style={styles.signature}>“{profile.cosmicSignature}”</Text>
           <View style={styles.divider} />
@@ -182,6 +183,7 @@ const styles = StyleSheet.create({
     borderWidth: 1, borderColor: "rgba(217,168,78,0.22)", marginBottom: 28,
   },
   chartWrap: { alignItems: "center", marginBottom: 16 },
+  chartCaption: { color: AuraLunisColors.faint, fontSize: 11, fontStyle: "italic", marginTop: 10, textAlign: "center" },
   signature: { color: AuraLunisColors.gold2, fontSize: 17, lineHeight: 25, fontWeight: "800", fontStyle: "italic" },
   divider: { height: 1, backgroundColor: "rgba(255,255,255,0.1)", marginVertical: 14 },
   row: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 6, gap: 12 },

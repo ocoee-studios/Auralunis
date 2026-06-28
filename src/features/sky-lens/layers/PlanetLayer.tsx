@@ -43,9 +43,14 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
         {/* Venus pearl bloom — ONE smooth radial falloff (no hard ring boundaries) so
             it reads as atmospheric scatter, not concentric orbital contours. */}
         <RadialGradient id="venusBloom" cx="50%" cy="50%" r="50%">
+          {/* Many closely-spaced stops → the smoothest possible falloff so the device
+              GPU can't quantize it into visible concentric bands (the 'rings'). */}
           <Stop offset="0%" stopColor="#FFF6E6" stopOpacity={0.3} />
-          <Stop offset="38%" stopColor="#FBF3DC" stopOpacity={0.12} />
-          <Stop offset="72%" stopColor="#FBF3DC" stopOpacity={0.03} />
+          <Stop offset="14%" stopColor="#FCF4E0" stopOpacity={0.2} />
+          <Stop offset="28%" stopColor="#FBF3DC" stopOpacity={0.13} />
+          <Stop offset="44%" stopColor="#FBF3DC" stopOpacity={0.075} />
+          <Stop offset="60%" stopColor="#FBF3DC" stopOpacity={0.038} />
+          <Stop offset="78%" stopColor="#FBF3DC" stopOpacity={0.014} />
           <Stop offset="100%" stopColor="#FBF3DC" stopOpacity={0} />
         </RadialGradient>
         {/* Terminator shadow — a SOFT-edged dark blob (no hard circle edge) so the
@@ -83,8 +88,9 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
         return (
           <G key={body.id} opacity={belowHorizon && !fullSphere ? 0.2 : 1}>
             {/* SCATTERING — ultra-faint outermost halo (~3× the disc) so the planet's
-                light feels like it scatters into space around it, not a hard cutout. */}
-            <Circle cx={x} cy={y} r={d * 3} fill={color} opacity={0.02} />
+                light feels like it scatters into space around it, not a hard cutout.
+                Skipped on Venus (one fewer overlapping circle → no concentric look). */}
+            {body.id !== "venus" && <Circle cx={x} cy={y} r={d * 3} fill={color} opacity={0.02} />}
             {/* base glow / BLOOM — a single SMOOTH per-planet radial gradient (color-
                 matched, fading to transparent) instead of stacked solid discs, so no
                 planet bands into concentric rings. Same fix Venus got, now applied to

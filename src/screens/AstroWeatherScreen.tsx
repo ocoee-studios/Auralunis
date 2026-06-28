@@ -68,7 +68,7 @@ export function AstroWeatherScreen({ onClose }: Props) {
             <View style={styles.bestWindow}>
               <Text style={styles.bestLabel}>★ BEST WINDOW</Text>
               <Text style={styles.bestValue}>
-                {hourOf(forecast.bestWindow.start)} – {hourOf(forecast.bestWindow.end)} · score {forecast.bestWindow.score}
+                {forecast.bestWindow.start} – {forecast.bestWindow.end} · score {forecast.bestWindow.score}
               </Text>
             </View>
           )}
@@ -113,9 +113,6 @@ function Metric({ label, value }: { label: string; value: string }) {
   );
 }
 
-function hourOf(iso: string): string {
-  return new Date(iso).toLocaleTimeString("en-US", { hour: "numeric" });
-}
 function scoreColor(s: number): string {
   if (s >= 70) return AuraLunisColors.green;
   if (s >= 45) return AuraLunisColors.gold2;

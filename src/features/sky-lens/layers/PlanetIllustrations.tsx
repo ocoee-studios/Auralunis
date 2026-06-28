@@ -100,7 +100,8 @@ export function VenusIllustration({ cx, cy, r, nightMode }: Props) {
           <Stop offset="100%" stopColor="#C0B898" />
         </RadialGradient>
       </Defs>
-      <Circle cx={cx} cy={cy} r={r * 1.8} fill={`url(#venGlow-${cx})`} />
+      {/* venGlow removed — the single venusBloom gradient (PlanetLayer) is the only
+          halo now, so Venus can't read as two stacked concentric glows. */}
       <Circle cx={cx} cy={cy} r={r} fill={`url(#venBody-${cx})`} />
     </G>
   );
