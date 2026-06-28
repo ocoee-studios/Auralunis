@@ -150,9 +150,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {activeLayers.has("grid") && !cinematic && (
         <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />
       )}
-      {/* Cardinal compass labels — always on (independent of the grid toggle) so the
-          user always has N/E/S/W orientation on the horizon. */}
-      {!cinematic && <CardinalLayer project={project} box={box} nightMode={nightMode} />}
+      {/* Cardinal compass labels — ALWAYS on (every mode, incl. cinematic/Planetarium,
+          independent of the grid toggle) so N/E/S/W orientation is always on the horizon.
+          They self-cull when the horizon isn't in frame (looking up). */}
+      <CardinalLayer project={project} box={box} nightMode={nightMode} />
       {activeLayers.has("ecliptic") && !cinematic && (
         <EclipticLayer points={sky.ecliptic} project={project} palette={palette} nightMode={nightMode} />
       )}
