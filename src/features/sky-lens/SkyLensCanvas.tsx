@@ -44,6 +44,8 @@ type Props = {
   satellites: SkyLensSatellite[];
   cinematic?: boolean; // Immersive Sky mode: hide labels + data overlays, dim con-lines
   gate?: VisualGateConfig; // premium visual gating: spectral stars, gold nodes, hero moon, etc.
+  photographicCore?: boolean; // false → skip the ESO Milky Way PHOTO (keep the SVG band).
+                              // Used by Birth Sky so it stays fully procedural (no image asset).
   fullSphere?: boolean; // Planetarium mode: render the WHOLE sphere — below-horizon objects
                         // at full brightness (point the phone at the floor → the sky below)
   onSelect: (object: SelectedObject) => void;
@@ -53,7 +55,7 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, fullSphere = false, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, photographicCore = true, fullSphere = false, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
   // Premium visual gate — falls back to the isPremium-derived config if a caller
   // doesn't pass one explicitly, so the canvas is never ungated by accident.
@@ -136,7 +138,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {activeLayers.has("milkyway") && (
         <G transform={depth(0.6)}>
           <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} dust={sky.milkyWayDust} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
-          <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />
+          {photographicCore && <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />}
         </G>
       )}
       {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}

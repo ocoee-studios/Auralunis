@@ -62,6 +62,7 @@ export function BirthSkyCanvas({
         satellites={[]}
         cinematic
         gate={gate}
+        photographicCore={false}
         fullSphere={false}
         onSelect={noop}
       />
