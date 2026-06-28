@@ -598,13 +598,17 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={sceneGesture}>
         <View ref={sceneRef} collapsable={false} style={StyleSheet.absoluteFill}>
-          {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
-          {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
+          {/* Camera off in Planetarium AND in Night/Red mode — in night mode the live
+              camera feed bled through the red overlay (you'd see your room). The opaque
+              dark background below fills the gap. */}
+          {!planetarium && !nightMode && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
 
           {/* Cosmic dark overlay */}
           <View
             style={[StyleSheet.absoluteFillObject, {
-              backgroundColor: planetarium
+              backgroundColor: nightMode
+                ? "rgba(3,8,22,0.97)"
+                : planetarium
                 ? "rgba(3,8,22,0.95)"
                 : cinematic
                 ? "rgba(3,8,22,0.85)"

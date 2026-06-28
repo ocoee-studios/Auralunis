@@ -9,16 +9,6 @@ type Props = {
   palette: SkyPalette;
 };
 
-const CARDINALS: { az: number; label: string }[] = [
-  { az: 0, label: "N" },
-  { az: 45, label: "NE" },
-  { az: 90, label: "E" },
-  { az: 135, label: "SE" },
-  { az: 180, label: "S" },
-  { az: 225, label: "SW" },
-  { az: 270, label: "W" },
-  { az: 315, label: "NW" }
-];
 
 // Builds an SVG polyline string for a small-circle of constant altitude, sampled
 // in azimuth around where the device points. Points that fall behind the camera
@@ -96,27 +86,8 @@ export function GridLayer({ project, centerAzimuth, box, palette }: Props) {
         </G>
       )}
 
-      {/* Cardinal + intercardinal markers on the horizon */}
-      {CARDINALS.map(({ az, label }) => {
-        const p = project(az, 0);
-        if (p.behind || p.x < -10 || p.x > box.width + 10) return null;
-        const major = label.length === 1;
-        return (
-          <G key={`card-${label}`}>
-            <Line x1={p.x} y1={p.y - 6} x2={p.x} y2={p.y + 6} stroke={palette.horizon} strokeWidth={1} />
-            <SvgText
-              x={p.x}
-              y={p.y + 20}
-              fill={major ? palette.accent : palette.gridLabel}
-              fontSize={major ? 14 : 10}
-              fontWeight={major ? "900" : "600"}
-              textAnchor="middle"
-            >
-              {label}
-            </SvgText>
-          </G>
-        );
-      })}
+      {/* Cardinal labels (N/E/S/W) now live in the always-on CardinalLayer — drawing
+          them here too produced doubled labels ("W W") when the grid was on. */}
     </G>
   );
 }
