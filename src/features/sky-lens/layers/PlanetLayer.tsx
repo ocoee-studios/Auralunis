@@ -13,6 +13,8 @@ type Props = {
   placeLabel?: LabelPlacer;
   showLabels?: boolean; // false in cinematic Immersive Sky mode → bodies only, no names
   useIllustrations?: boolean; // premium: Jupiter bands, Saturn rings, moons, auras. free: colored dots.
+  zoom?: number; // DEFAULT_FOV/fov — >1 when zoomed in. Hero planets grow with it so the
+                 // rings/bands become admirable instead of staying tiny fixed discs.
   fullSphere?: boolean; // Planetarium: show below-horizon planets at full brightness
   onSelect: (object: SelectedObject) => void;
 };
@@ -36,7 +38,10 @@ const STYLE: Record<string, { disc: number; glow: number }> = {
 // just outside Jupiter's much larger disc, scattered like the real set along the plane.
 const JUPITER_MOONS = [1.45, 2.05, -1.55, -2.2];
 
-export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, useIllustrations = true, fullSphere = false, onSelect }: Props) {
+export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, showLabels = true, useIllustrations = true, zoom = 1, fullSphere = false, onSelect }: Props) {
+  // Hero scaling: planets grow as you zoom in (clamped) so Saturn's rings and Jupiter's
+  // bands become big enough to admire, while at the default 1× view nothing changes.
+  const planetScale = Math.min(2.8, Math.max(1, 1 + (zoom - 1) * 0.45));
   return (
     <G>
       <Defs>
@@ -86,7 +91,15 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
           });
 
         return (
-          <G key={body.id} opacity={belowHorizon && !fullSphere ? 0.2 : 1}>
+          <G
+            key={body.id}
+            opacity={belowHorizon && !fullSphere ? 0.2 : 1}
+            transform={
+              planetScale > 1.001
+                ? `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${planetScale.toFixed(3)}) translate(${(-x).toFixed(1)} ${(-y).toFixed(1)})`
+                : undefined
+            }
+          >
             {/* SCATTERING — ultra-faint outermost halo (~3× the disc) so the planet's
                 light feels like it scatters into space around it, not a hard cutout.
                 Skipped on Venus (one fewer overlapping circle → no concentric look). */}
