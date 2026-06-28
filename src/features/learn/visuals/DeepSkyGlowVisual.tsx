@@ -1,9 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, Path, RadialGradient, Stop } from "react-native-svg";
 import { AuraLunisColors } from "@/theme/tokens";
 
 const LABELS = ["Nebula", "Galaxy", "Cluster", "Remnant"];
+
+// Per-type descriptions shown beneath the illustration — index matches LABELS/active.
+const CAPTIONS = [
+  "Nebulae glow as vast clouds of gas and dust — the stellar nurseries where new stars ignite.",
+  "Galaxies are island cities of billions of stars, often spiralling around a bright central core.",
+  "Star clusters are tight families of stars born together from the same collapsing cloud.",
+  "Supernova remnants are the glowing shells flung outward when a massive star explodes."
+];
 
 // Seeded star dots for the Cluster illustration (center-dense, deterministic).
 const CLUSTER = (() => {
@@ -82,7 +90,7 @@ function DeepSkyShape({ type, cx, cy }: { type: number; cx: number; cy: number }
   );
 }
 
-export function DeepSkyGlowVisual() {
+export function DeepSkyGlowVisual({ onTabChange }: { onTabChange?: (index: number) => void } = {}) {
   const [active, setActive] = useState(0);
   // Auto-cycle until the user taps a pill; tapping selects that type and stops the cycle
   // so the chosen illustration stays put (the pills act as real tabs once touched).
@@ -104,11 +112,12 @@ export function DeepSkyGlowVisual() {
       </View>
       <View style={styles.row}>
         {LABELS.map((label, index) => (
-          <Pressable
+          <TouchableOpacity
             key={label}
             onPress={() => {
               setPaused(true);
               setActive(index);
+              onTabChange?.(index);
             }}
             accessibilityRole="button"
             accessibilityState={{ selected: active === index }}
@@ -116,13 +125,10 @@ export function DeepSkyGlowVisual() {
             hitSlop={6}
           >
             <Text style={[styles.pill, active === index && styles.pillActive]}>{label}</Text>
-          </Pressable>
+          </TouchableOpacity>
         ))}
       </View>
-      <Text style={styles.caption}>
-        Nebulae glow as soft clouds, galaxies spiral, clusters pack tight stars, and supernova
-        remnants expand as shells. Tap a type to hold it.
-      </Text>
+      <Text style={styles.caption}>{CAPTIONS[active]}</Text>
     </View>
   );
 }
@@ -131,7 +137,7 @@ const styles = StyleSheet.create({
   card: { borderRadius: 28, padding: 16, backgroundColor: "rgba(255,255,255,0.055)", borderWidth: 1, borderColor: "rgba(255,255,255,0.08)", marginBottom: 14 },
   label: { color: AuraLunisColors.gold2, fontSize: 11, letterSpacing: 2, fontWeight: "900" },
   canvas: { height: 150, borderRadius: 22, overflow: "hidden", marginTop: 10, backgroundColor: "rgba(3,5,10,0.8)" },
-  row: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  row: { flexDirection: "row", gap: 8, marginTop: 12 },
   pill: { color: AuraLunisColors.silver, fontSize: 11, paddingHorizontal: 9, paddingVertical: 6, borderRadius: 999, borderWidth: 1, borderColor: "rgba(255,255,255,0.08)" },
   pillActive: { color: AuraLunisColors.gold2, borderColor: "rgba(217,168,78,0.28)", backgroundColor: "rgba(217,168,78,0.1)" },
   caption: { color: AuraLunisColors.muted, fontSize: 12, lineHeight: 18, marginTop: 10 }

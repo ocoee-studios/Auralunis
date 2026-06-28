@@ -95,6 +95,54 @@ export const learnTopics: LearnTopic[] = [
     skyTarget: { raHours: 5.588, decDegrees: -5.39, name: "Orion Nebula", subtitle: "Emission Nebula · M42", description: "A glowing stellar nursery in Orion's sword — a rosy cloud of hydrogen birthing new suns, faintly visible to the naked eye." }
   },
   {
+    id: "galaxies",
+    categoryId: "deep_sky",
+    title: "What are Galaxies?",
+    level: "beginner",
+    summary: "Galaxies are vast islands of stars — millions to trillions of them — bound by gravity, often spiralling around a bright core.",
+    body: "A galaxy is an enormous gravitationally bound system of stars, gas, dust, and dark matter. Spiral galaxies like our Milky Way and the Andromeda Galaxy have flat rotating disks with curving arms; elliptical galaxies are smooth, rounded swarms of older stars; irregular galaxies have no clear shape, often disturbed by past collisions.\n\nThey range from dwarf galaxies of a few million stars to giants holding many trillions. Most lie far beyond our own — the nearest large spiral, Andromeda, is about 2.5 million light-years away, yet on a dark night it shows to the naked eye as a faint elongated smudge. Through a telescope, galaxies reveal cores, arms, and dust lanes.",
+    keyFacts: [
+      "The Andromeda Galaxy is the nearest large spiral to us.",
+      "Spiral, elliptical, and irregular are the main shapes.",
+      "Galaxies hold millions to trillions of stars."
+    ],
+    skyLensAction: "Find the Andromeda Galaxy in Sky Lens",
+    archiveAction: "Open Galaxies",
+    skyTarget: { raHours: 0.712, decDegrees: 41.27, name: "Andromeda Galaxy", subtitle: "Spiral Galaxy · M31", description: "The nearest large spiral galaxy, 2.5 million light-years away — a faint elongated glow visible to the naked eye under dark skies." }
+  },
+  {
+    id: "clusters",
+    categoryId: "deep_sky",
+    title: "What are Star Clusters?",
+    level: "beginner",
+    summary: "Star clusters are groups of stars born together from one cloud — loose open clusters of young stars, or dense globular clusters of ancient ones.",
+    body: "Star clusters are families of stars that formed together from a single collapsing cloud of gas, so they share an age and a starting chemistry. Open clusters like the Pleiades are loose, irregular groups of a few hundred young, hot stars scattered along the Milky Way's disk. Globular clusters are tight, spherical swarms of hundreds of thousands of very old stars orbiting in the galaxy's halo.\n\nBecause a cluster's stars are all the same distance and age, astronomers use them to study how stars evolve. The Pleiades, in Taurus, is the most famous open cluster — a small dipper-shaped knot of blue stars easily seen with the naked eye.",
+    keyFacts: [
+      "The Pleiades is a bright open cluster in Taurus.",
+      "Open clusters are young; globular clusters are ancient.",
+      "A cluster's stars share one age and birthplace."
+    ],
+    skyLensAction: "See the Pleiades in Sky Lens",
+    archiveAction: "Open Clusters",
+    skyTarget: { raHours: 3.79, decDegrees: 24.11, name: "Pleiades", subtitle: "Open Cluster · M45", description: "A glittering knot of hot blue stars in Taurus — the most famous open cluster, easily seen with the naked eye." }
+  },
+  {
+    id: "remnants",
+    categoryId: "deep_sky",
+    title: "What are Supernova Remnants?",
+    level: "beginner",
+    summary: "Supernova remnants are the expanding shells of glowing gas left behind when a massive star ends its life in a colossal explosion.",
+    body: "When a massive star runs out of fuel, its core collapses and the star detonates as a supernova, briefly outshining its entire galaxy. The blast hurls the star's outer layers into space at thousands of kilometres per second, sweeping up surrounding gas into a glowing, expanding shell — a supernova remnant.\n\nThese remnants seed the galaxy with the heavy elements forged in the explosion, the raw material for new stars and planets. The Crab Nebula in Taurus is the wreckage of a star seen to explode in the year 1054; at its heart spins a pulsar, the dense neutron-star core left behind.",
+    keyFacts: [
+      "The Crab Nebula is the remnant of a star seen to explode in 1054.",
+      "Remnants enrich space with heavy elements.",
+      "A pulsar can be left spinning at the centre."
+    ],
+    skyLensAction: "Find the Crab Nebula in Sky Lens",
+    archiveAction: "Open Remnants",
+    skyTarget: { raHours: 5.575, decDegrees: 22.01, name: "Crab Nebula", subtitle: "Supernova Remnant · M1", description: "The expanding wreckage of a star seen to explode in 1054, with a pulsar spinning at its heart." }
+  },
+  {
     id: "milky-way-band",
     categoryId: "milky_way",
     title: "The Milky Way Band",

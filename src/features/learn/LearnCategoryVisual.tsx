@@ -10,7 +10,13 @@ import { ThirtyNightsProgressVisual } from "./visuals/ThirtyNightsProgressVisual
 
 // The live visual that pairs with each learning category. Shared by the Learn
 // catalog and the full-screen lesson so they always show the same animation.
-export function LearnVisualForCategory({ categoryId }: { categoryId: LearnCategoryId }) {
+export function LearnVisualForCategory({
+  categoryId,
+  onDeepSkyTabChange
+}: {
+  categoryId: LearnCategoryId;
+  onDeepSkyTabChange?: (index: number) => void;
+}) {
   switch (categoryId) {
     case "solar_system":
     case "planets":
@@ -22,7 +28,7 @@ export function LearnVisualForCategory({ categoryId }: { categoryId: LearnCatego
     case "stars":
       return <StarBrightnessVisual />;
     case "deep_sky":
-      return <DeepSkyGlowVisual />;
+      return <DeepSkyGlowVisual onTabChange={onDeepSkyTabChange} />;
     case "milky_way":
       return <MilkyWayBandVisual />;
     case "beginner_path":
