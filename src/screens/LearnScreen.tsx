@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { ScreenShell } from "@/components/ScreenShell";
@@ -8,6 +8,7 @@ import { TAB_BAR_STYLE } from "@/navigation/RootTabs";
 import { learnCategories, learnTopics } from "@/features/learn/LearnCatalog";
 import type { LearnCategoryId } from "@/features/learn/LearnTypes";
 import { LearnVisualForCategory } from "@/features/learn/LearnCategoryVisual";
+import { useLearnPreferences } from "@/features/learn/learnPreferences";
 import { LearnDetailScreen } from "@/screens/LearnDetailScreen";
 
 export function LearnScreen() {
@@ -17,12 +18,34 @@ export function LearnScreen() {
   // Which Deep Sky tab is active (Nebula/Galaxy/Cluster/Remnant) — drives which
   // deep_sky topic is shown beneath the live visual.
   const [deepSkyTabIndex, setDeepSkyTabIndex] = useState(0);
+  // Learning Preferences (skill level + interests) personalize ordering.
+  const { prefs } = useLearnPreferences();
 
   // Go full-screen for a lesson: hide the tab bar, restore it on exit (mirrors
   // the Sky Lens immersive pattern).
   useEffect(() => {
     navigation.setOptions?.({ tabBarStyle: openTopicId ? { display: "none" } : TAB_BAR_STYLE });
   }, [navigation, openTopicId]);
+
+  // Order categories so the user's interests come first (rest keep catalog order).
+  const orderedCategories = useMemo(() => {
+    if (!prefs.interests.length) return learnCategories;
+    const rank = (id: string) => {
+      const i = prefs.interests.indexOf(id as (typeof prefs.interests)[number]);
+      return i === -1 ? prefs.interests.length + 1 : i;
+    };
+    return [...learnCategories].sort((a, b) => rank(a.id) - rank(b.id));
+  }, [prefs.interests]);
+
+  // On first load, default the selected category to the top interest (once — never
+  // overrides a category the user later taps).
+  const appliedDefault = useRef(false);
+  useEffect(() => {
+    if (!appliedDefault.current && prefs.interests.length > 0) {
+      appliedDefault.current = true;
+      setSelectedCategory(prefs.interests[0] as LearnCategoryId);
+    }
+  }, [prefs.interests]);
 
   const selectedTopics = useMemo(() => {
     const inCategory = learnTopics.filter((topic) => topic.categoryId === selectedCategory);
@@ -31,8 +54,14 @@ export function LearnScreen() {
       const wantId = ["nebulae", "galaxies", "clusters", "remnants"][deepSkyTabIndex];
       return inCategory.filter((topic) => topic.id === wantId);
     }
-    return inCategory;
-  }, [selectedCategory, deepSkyTabIndex]);
+    // Lessons matching the chosen skill level surface first.
+    if (!prefs.level) return inCategory;
+    return [...inCategory].sort((a, b) => {
+      const am = a.level === prefs.level ? 0 : 1;
+      const bm = b.level === prefs.level ? 0 : 1;
+      return am - bm;
+    });
+  }, [selectedCategory, deepSkyTabIndex, prefs.level]);
 
   const selectedMeta = learnCategories.find((category) => category.id === selectedCategory);
 
@@ -73,7 +102,7 @@ export function LearnScreen() {
 
       <Text style={styles.sectionLabel}>Choose a learning path</Text>
       <View style={styles.categoryGrid}>
-        {learnCategories.map((category) => {
+        {orderedCategories.map((category) => {
           const active = selectedCategory === category.id;
           return (
             <Pressable
