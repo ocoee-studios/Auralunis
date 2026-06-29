@@ -8,7 +8,17 @@ import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
 // which ruins dev/testing/screenshots. Hide ONLY those RC messages in dev — every other
 // error stays visible, and LogBox doesn't run in production builds at all.
 if (__DEV__) {
-  LogBox.ignoreLogs([/Invalid API Key/i, /configuring Purchases/i, /fetching offerings/i, /RevenueCat/i, /Purchases instance/i]);
+  LogBox.ignoreLogs([
+    /Invalid API Key/i,
+    /configuring Purchases/i,
+    /fetching offerings/i,
+    /RevenueCat/i,
+    /Purchases instance/i,
+    /native store is not available/i,
+    /running inside Expo Go/i,
+    /rev\.cat/i,
+    /Test Store/i
+  ]);
 }
 
 // Dynamic require — react-native-purchases is not available in Expo Go
