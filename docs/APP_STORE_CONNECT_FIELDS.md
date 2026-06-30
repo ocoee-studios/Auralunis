@@ -160,12 +160,12 @@ Contact: admin@ocoeestudios.com
 |----------------|-----------|------|-------|
 | AuraLunis Monthly | `com.ocoeestudios.auralunis.premium.monthly` | Auto-renewable | $9.99 |
 | AuraLunis Annual | `com.ocoeestudios.auralunis.premium.annual` | Auto-renewable | $49.99 |
-| AuraLunis Lifetime | `com.ocoeestudios.auralunis.lifetime.founders` | Non-consumable | $129.99 |
+| AuraLunis Lifetime | `com.ocoeestudios.auralunis.lifetime` | Non-consumable | $129.99 |
 
 Subscription Group: `AuraLunis Premium`
 Entitlement identifier (RevenueCat): `AuraLunis Premium` (exact — space + capitals)
 Free trial: none (no introductory offer on any plan)
 
-> The Lifetime product ID keeps the historical `...lifetime.founders` suffix
-> because it is already configured in App Store Connect. The user-facing display
-> name must be the neutral **"Lifetime"** (no "Founders" branding).
+> The Lifetime product ID is `com.ocoeestudios.auralunis.lifetime` (the old
+> `...lifetime.founders` product was deleted in ASC and recreated without the
+> suffix). Reference name and display name are both the neutral **"Lifetime"**.

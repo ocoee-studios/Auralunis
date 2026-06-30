@@ -38,7 +38,7 @@ The paywall must clearly state:
 |---|---|---|
 | Premium Monthly | `com.ocoeestudios.auralunis.premium.monthly` | Auto-renewable |
 | Premium Annual | `com.ocoeestudios.auralunis.premium.annual` | Auto-renewable |
-| Lifetime | `com.ocoeestudios.auralunis.lifetime.founders` | Non-consumable |
+| Lifetime | `com.ocoeestudios.auralunis.lifetime` | Non-consumable |
 
 ## Entitlement
 `AuraLunis Premium` — exact identifier (with the space and capitals, NOT a snake_case slug). All three products unlock this single entitlement. A mismatch means purchases succeed but never unlock premium.

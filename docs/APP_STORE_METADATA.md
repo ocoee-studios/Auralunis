@@ -85,7 +85,7 @@ AuraLunis is an astronomy companion app. Key features to test:
 Subscription: AuraLunis Premium (single entitlement)
 - Monthly: $9.99/month (com.ocoeestudios.auralunis.premium.monthly)
 - Annual:  $49.99/year (com.ocoeestudios.auralunis.premium.annual)
-- Lifetime: $129.99 one-time (com.ocoeestudios.auralunis.lifetime.founders)
+- Lifetime: $129.99 one-time (com.ocoeestudios.auralunis.lifetime)
 - No free trial is offered on any plan.
 
 No login required. Location permission is optional but recommended.

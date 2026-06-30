@@ -1,14 +1,18 @@
 // MonetizationCatalog.ts
 // AuraLunis pricing — optimized for launch.
 // Three products: Monthly, Annual, Lifetime (one-time). No free trials on any plan.
-// NOTE: the lifetime RevenueCat/ASC product id is still `...lifetime.founders` (don't
-// change it — it's configured in App Store Connect); only the user-facing copy is neutral.
+// NOTE: the lifetime App Store / RevenueCat *product id* is
+// `com.ocoeestudios.auralunis.lifetime` (the old `...lifetime.founders` product was
+// deleted in ASC and recreated without the suffix). The internal plan id and the
+// RevenueCat *package* identifier below still read `lifetime_founders` — that's a
+// historical internal label, NOT the store product id, and it must match the package
+// identifier configured in the RevenueCat offering. User-facing copy is "Lifetime".
 
 export const RevenueCatIds = {
   products: {
     premiumMonthly:    "com.ocoeestudios.auralunis.premium.monthly",
     premiumAnnual:     "com.ocoeestudios.auralunis.premium.annual",
-    lifetimeFounders:  "com.ocoeestudios.auralunis.lifetime.founders",
+    lifetimeFounders:  "com.ocoeestudios.auralunis.lifetime",
   },
   packages: {
     premiumMonthly:    "premium_monthly",

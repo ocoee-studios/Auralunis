@@ -28,7 +28,7 @@ canonical export of `ThreeTierPaywallModal`:
 - Wired via `PaywallNavigationContext.openPaywall()` from Settings "Upgrade", Sky Lens
   gated layers, PremiumModeGate, Onboarding. Purchase is package-based (all tiers),
   refreshes the shared EntitlementContext app-wide on success.
-- Product IDs `com.ocoeestudios.auralunis.{premium.monthly,premium.annual,lifetime.founders}`
+- Product IDs `com.ocoeestudios.auralunis.{premium.monthly,premium.annual,lifetime}`
   — **MUST match App Store Connect exactly** (owner: confirm).
 
 ## 3. DEAD FOLDER — ✅ DONE

@@ -20,6 +20,6 @@ AuraLunis is an astronomy companion app that computes real-time positions of cel
 
 **Subscription testing:**
 - AuraLunis Premium can be tested using a Sandbox Apple ID. No charge is applied in the Sandbox environment. No free trial is offered on any plan.
-- RevenueCat product IDs: `com.ocoeestudios.auralunis.premium.monthly`, `com.ocoeestudios.auralunis.premium.annual`, and `com.ocoeestudios.auralunis.lifetime.founders` (a one-time "Lifetime" purchase). All three unlock the single "AuraLunis Premium" entitlement.
+- RevenueCat product IDs: `com.ocoeestudios.auralunis.premium.monthly`, `com.ocoeestudios.auralunis.premium.annual`, and `com.ocoeestudios.auralunis.lifetime` (a one-time "Lifetime" purchase). All three unlock the single "AuraLunis Premium" entitlement.
 
 **Demo credentials:** None required — the app does not use email/password sign-in.
