@@ -460,14 +460,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const onLockedPress = useCallback(
     (def: LayerDef) => {
-      if (!isPremium) {
-        // Conversion moment: preview the beauty, then prompt — never a bare lock icon.
-        if (def.available) { startPreview(def); return; }
-        Alert.alert(`${def.label} · Coming Soon`, `${def.label} is coming in a future update. Stay tuned!`);
-        return;
-      }
-      // Premium user, layer simply not shipped yet → informational.
-      Alert.alert(`${def.label} · Coming Soon`, `${def.label} is coming in a future update. Stay tuned!`);
+      // Every shipped layer is `available`; a locked tap is a free user touching a premium
+      // layer → preview its beauty, then prompt the paywall (no "coming soon" placeholders).
+      if (!isPremium && def.available) startPreview(def);
     },
     [isPremium, startPreview]
   );

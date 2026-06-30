@@ -25,7 +25,7 @@ import type { CameraPointing } from "@/features/sky-lens/ar/SkyLensProjection";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 // Mode services
-import { simulateTick, computeFleetState, syncLiveTLEData, type FleetState } from "@/services/AtmosphereExplorerService";
+import { simulateTick, computeFleetState, syncLiveTLEData, isFleetLive, type FleetState } from "@/services/AtmosphereExplorerService";
 import { ATMOSPHERE_CATALOG } from "@/data/AtmosphereCatalog";
 import { SatelliteDataCard } from "@/components/SatelliteDataCard";
 import { SpaceRadarGrid, type RadarBlip } from "@/components/SpaceRadarGrid";
@@ -606,7 +606,8 @@ export function OrbitalAlignmentScreen() {
             </View>
 
             <Text style={styles.tapHint}>
-              {mode === "fleet" ? "Tap a blip to identify the satellite" :
+              {mode === "fleet" ? `Satellites · ${isFleetLive() ? "LIVE TLE" : "Simulation"} · tap a blip to identify` :
+               mode === "train" ? `Starlink train · ${isTrainLive() ? "LIVE TLE" : "Simulation"} · ${getTrainNodeCount()} nodes` :
                mode === "debris" ? `Debris · ${isDebrisLive() ? "LIVE TLE" : "Simulation"} · lock 5s to catalogue` :
                mode === "reentry" ? `Decaying objects · ${isReEntryLive() ? "LIVE TIP" : "Simulation"} · amber = watch · crimson = imminent` :
                mode === "meteor" && activeShowers.length > 0 ? `${activeShowers[0].shower.name} radiant · sonar active` :

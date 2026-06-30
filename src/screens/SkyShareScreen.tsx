@@ -37,12 +37,15 @@ export function SkyShareScreen({ onClose }: Props) {
     const objects = sky.visibleBodies
       .filter((b) => b.id !== "sun" && b.altitudeDegrees > 0)
       .map((b) => b.name);
-    // Assume clear skies for the score snapshot (no async weather fetch on this screen).
+    // Clear-sky potential score (no live weather fetch on this screen) — labelled as such
+    // below so the card never falsely claims the current weather is clear.
     const score = computeTonightScore(
       sky,
-      { cloudPercent: 20, humidity: 50, tempCelsius: 15, description: "clear", source: "unavailable" },
+      { cloudPercent: 0, humidity: 50, tempCelsius: 15, description: "clear", source: "unavailable" },
       settings.skyQuality
     ).score;
+    // Real, honest condition from the actual moon (not a fabricated cloud state).
+    const conditions = sky.moonIlluminationPercent < 35 ? "Dark skies" : "Moonlit skies";
     return {
       id: "tonight",
       timestamp: new Date().toISOString(),
@@ -52,7 +55,7 @@ export function SkyShareScreen({ onClose }: Props) {
       objects,
       moonPhasePercent: sky.moonIlluminationPercent,
       tonightScore: score,
-      conditions: "Clear skies",
+      conditions,
       tags: [],
     };
   }, [location, locationName, note, settings.skyQuality]);
