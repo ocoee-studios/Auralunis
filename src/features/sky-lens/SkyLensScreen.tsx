@@ -30,7 +30,7 @@ import { computeStargazingIndex } from "@/services/StargazingIndexService";
 import { fetchCurrentWeather, type WeatherSnapshot } from "@/services/WeatherService";
 import { useDevicePointing } from "./ar/useDevicePointing";
 import { useParallaxOffset } from "./ar/useParallaxOffset";
-import { getFleet, simulateTick, syncLiveTLEData } from "@/services/AtmosphereExplorerService";
+import { getFleet, simulateTick, syncLiveTLEData, isFleetLive } from "@/services/AtmosphereExplorerService";
 import { onObjectTapped, onObjectCentered } from "@/services/HapticDiscoveryService";
 import { computeAzimuthElevation } from "@/utils/alignmentEngine";
 import type { SkyLensSatellite } from "./layers/SatelliteLayer";
@@ -147,10 +147,14 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // 1 s; the projection uses the live pointing, so satellites track smoothly between
   // updates. Only runs while the layer is on.
   const [satellites, setSatellites] = useState<SkyLensSatellite[]>([]);
+  // Whether the satellites are positioned from live TLE data (vs simulation) — drives the
+  // honest LIVE/Simulated badge so synthetic positions are never shown as real.
+  const [satellitesLive, setSatellitesLive] = useState(false);
   const satellitesActive = active.has("satellites");
   useEffect(() => {
     if (!satellitesActive) {
       setSatellites([]);
+      setSatellitesLive(false);
       return;
     }
     let alive = true;
@@ -158,6 +162,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     const tick = () => {
       simulateTick();
       if (!alive) return;
+      setSatellitesLive(isFleetLive());
       setSatellites(
         getFleet().map((sat) => {
           const { azimuth, elevation } = computeAzimuthElevation(location, {
@@ -924,6 +929,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           ) : status === "fallback" ? (
             <Text style={styles.hudSub}>Default location</Text>
           ) : null}
+          {satellitesActive && (
+            <Text style={styles.hudSub}>◈ Satellites · {satellitesLive ? "LIVE TLE" : "Simulated"}</Text>
+          )}
         </View>
 
         <View style={styles.toggleRow} pointerEvents="box-none">
