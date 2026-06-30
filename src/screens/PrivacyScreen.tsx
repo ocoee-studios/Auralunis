@@ -17,7 +17,7 @@ export function PrivacyScreen() {
         • Observations, notes, and vault entries — stored locally with NaCl encryption{"\n"}
         • Sky Lens camera feed — used live for AR overlay, never recorded or transmitted{"\n"}
         • Device motion and compass data — used to determine which direction your phone points, never stored{"\n"}
-        • Location — used to compute accurate star and planet positions for your sky, never transmitted
+        • Location — used on-device to compute your sky; only approximate coordinates are sent to Open-Meteo for the weather forecast (see Third-Party Services)
       </Text>
 
       <Text style={styles.heading}>Data We Access</Text>
@@ -52,6 +52,11 @@ export function PrivacyScreen() {
       <Text style={styles.subheading}>astronomy-engine</Text>
       <Text style={styles.body}>
         Runs entirely on your device. Makes zero network requests. No data collection of any kind.
+      </Text>
+
+      <Text style={styles.subheading}>Live Astronomy Data (CelesTrak, Space-Track, NOAA SWPC)</Text>
+      <Text style={styles.body}>
+        Satellite tracking and space-weather features fetch public, read-only data from CelesTrak and NOAA's Space Weather Prediction Center (and Space-Track if you supply your own credentials). These requests send no personal data, no location, and no device identifiers — only a request for the public data feed.
       </Text>
 
       <Text style={styles.heading}>What We Do NOT Do</Text>
