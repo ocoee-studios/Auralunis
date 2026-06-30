@@ -24,8 +24,12 @@ import { PhotoPlannerScreen } from "@/screens/PhotoPlannerScreen";
 import { SkyShareScreen } from "@/screens/SkyShareScreen";
 import { CelestialArchiveScreen } from "@/screens/CelestialArchiveScreen";
 import { CelestialCalendarScreen } from "@/screens/CelestialCalendarScreen";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 export function SkyScreen() {
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const [showPermission, setShowPermission] = useState(false);
   const [skyLensOpen, setSkyLensOpen] = useState(false);
   const [manualMapOpen, setManualMapOpen] = useState(false);
@@ -219,7 +223,11 @@ export function SkyScreen() {
         title="Astro Weather"
         description="Tonight's observing verdict — GO / MAYBE / STAY IN — with the best clear window and an hour-by-hour breakdown of cloud, seeing, and transparency."
         actionLabel="Check Tonight's Sky"
-        onPress={() => setAstroWeatherOpen(true)}
+        onPress={() => {
+          // Premium feature (as advertised on the paywall): free users get the paywall.
+          if (!isPremium) { openPaywall(); return; }
+          setAstroWeatherOpen(true);
+        }}
       />
 
       <FeatureCard
