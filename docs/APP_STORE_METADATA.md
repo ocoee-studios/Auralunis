@@ -1,7 +1,10 @@
 # AuraLunis — App Store Metadata
 
 ## App Name
-AuraLunis: Interactive Astral Clock
+AuraLunis
+
+## Subtitle option (in-app descriptor)
+Your Sky. Your Story.
 
 ## Subtitle (30 chars max)
 Your Time, Written in the Stars
@@ -69,7 +72,7 @@ Secondary: Weather
 AuraLunis is an astronomy companion app. Key features to test:
 
 1. HOME: Tap to see Tonight Score (computed from weather + moon).
-   The astral clock (Celestial Dial) shows real planetary positions.
+   The Celestial Dial shows real planetary positions.
 
 2. SKY: Star field with Find Mode and Milky Way / Deep Sky toggles.
    Sky Lens requires camera + motion permissions. A built-in
@@ -93,4 +96,4 @@ Demo credentials: N/A (no account system).
 ```
 
 ## What's New (v1.0)
-Welcome to AuraLunis — your Interactive Astral Clock. This is the first release.
+Welcome to AuraLunis — Your Sky. Your Story. This is the first release.

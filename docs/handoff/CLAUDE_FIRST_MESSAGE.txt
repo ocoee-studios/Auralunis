@@ -25,7 +25,7 @@ Fix dependency and TypeScript issues before continuing.
 
 Preserve:
 - Chronaura
-- The Interactive Astral Clock
+- Your Sky. Your Story.
 - “Your time, written in the stars.”
 - Home · Sky · Watch · Learn · Settings
 - Midnight Gold with selective Liquid Glass

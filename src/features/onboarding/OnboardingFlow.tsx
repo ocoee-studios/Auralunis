@@ -91,7 +91,7 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
             <LogoMark size={80} />
             <Text style={s.welcome}>AURALUNIS</Text>
             <Text style={s.tagline}>Your Time, Written in the Stars</Text>
-            <Text style={s.descriptor}>THE INTERACTIVE ASTRAL CLOCK</Text>
+            <Text style={s.descriptor}>YOUR SKY. YOUR STORY.</Text>
             <Text style={s.bodyText}>
               The universe has been waiting. AuraLunis turns your phone into a
               living astral instrument — real astronomy, not a toy.

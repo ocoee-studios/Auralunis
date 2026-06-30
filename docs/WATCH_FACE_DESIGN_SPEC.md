@@ -13,7 +13,7 @@
 
 ### Brand
 - "AURALUNIS" in display serif (Cinzel)
-- "THE INTERACTIVE ASTRAL CLOCK" subtitle
+- "YOUR SKY. YOUR STORY." subtitle
 
 ### Central Astrolabe
 - Three concentric gold rings (compass dial)

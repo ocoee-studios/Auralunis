@@ -4,7 +4,7 @@
 AuraLunis
 
 ## Subtitle (30 chars max)
-Interactive Astral Clock
+Your Sky. Your Story.
 
 ## Promotional text (170 chars max, can be changed without review)
 Point your phone at the sky and see what's up there. Real astronomy, not a toy —
@@ -12,7 +12,7 @@ Moon phase, planets, constellations, satellites, all computed for your exact spo
 
 ## Description
 
-AuraLunis turns your phone into a living astral clock. Point it at the sky and
+AuraLunis turns your phone into a living celestial instrument. Point it at the sky and
 see the Moon, planets, constellations, and satellites overlaid on your camera
 view — computed in real time for your exact location and time.
 
