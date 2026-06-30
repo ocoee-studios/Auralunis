@@ -437,7 +437,7 @@ At any moment, the sky gradient is interpolated from the current sun altitude.
 - Light pollution simulation based on location (Bortle scale)
 - Urban: warm amber dome on horizon (15% opacity)
 - Suburban: faint amber (8% opacity)
-- Rural/Ducktown: barely visible (3% opacity)
+- Rural dark site: barely visible (3% opacity)
 - Direction-aware: glow stronger toward nearby cities
 
 ### Nebula Haze (Deep Sky layer)

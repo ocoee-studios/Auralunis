@@ -20,7 +20,7 @@
    - No free trial / introductory offer on any plan.
 7. In RevenueCat → Products, import all three products
 8. Create an Entitlement with the EXACT identifier `AuraLunis Premium` (with the space and capitals — not `auralunis_premium`). Attach all three products to it.
-9. Create an Offering: `default` with packages `premium_monthly`, `premium_annual`, and `lifetime_founders`
+9. Create an Offering: `default` with packages `premium_monthly`, `premium_annual`, and `$rc_lifetime`
 
 ## No other API keys are required
 

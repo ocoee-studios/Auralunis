@@ -113,8 +113,9 @@ export function SettingsScreen() {
     <ScreenShell title="Settings" subtitle="Control Center">
       <View style={styles.hero}>
         <LogoMark size={126} showWordmark showDescriptor centered />
+        <Text style={styles.heroTagline}>{AuraLunisBrand.tagline}</Text>
         <Text style={styles.heroCopy}>
-          {AuraLunisBrand.tagline} Manage subscription, appearance, privacy, Sky Lens calibration,
+          Manage subscription, appearance, privacy, Sky Lens calibration,
           notifications, learning preferences, and local data.
         </Text>
         <Text style={styles.syncState}>{hydrated ? "Settings saved locally" : "Loading local settings…"}</Text>
@@ -327,6 +328,7 @@ export function SettingsScreen() {
 
 const styles = StyleSheet.create({
   hero: { borderRadius: 28, padding: 18, backgroundColor: "rgba(217,168,78,0.08)", borderWidth: 1, borderColor: "rgba(217,168,78,0.18)", marginBottom: 16 },
+  heroTagline: { color: AuraLunisColors.gold2, fontSize: 15, fontWeight: "700", marginTop: 12, textAlign: "center" },
   heroCopy: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 21, marginTop: 14, textAlign: "center" },
   syncState: { color: AuraLunisColors.gold2, fontSize: 11, marginTop: 10, textAlign: "center" },
   section: { borderRadius: 24, padding: 14, backgroundColor: "rgba(255,255,255,0.04)", borderWidth: 1, borderColor: "rgba(255,255,255,0.07)", marginBottom: 14 },

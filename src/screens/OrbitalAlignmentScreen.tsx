@@ -77,7 +77,7 @@ const MODE_LABELS: Record<TrackingMode, string> = {
   debris: "Debris", meteor: "Meteor", chain: "Chain", static: "Static", reentry: "Re-Entry",
 };
 
-const SIM_LOCATION: ObserverLocation = { latitudeDegrees: 35.04, longitudeDegrees: -84.38, altitudeMeters: 460 }; // Ducktown, TN
+const SIM_LOCATION: ObserverLocation = { latitudeDegrees: 39.0997, longitudeDegrees: -94.5786, altitudeMeters: 340 }; // Demo Location (Kansas City, MO)
 function buildSimPointing(tick: number): CameraPointing {
   return { azimuthDegrees: (tick * 1.5) % 360, altitudeDegrees: 30 + Math.sin((tick * Math.PI) / 120) * 20, rollDegrees: 0 };
 }
@@ -353,7 +353,7 @@ export function OrbitalAlignmentScreen() {
         altitudeKm: activeAltKm,
         observerLat: location.latitudeDegrees,
         observerLon: location.longitudeDegrees,
-        locationLabel: simMode ? "Ducktown, TN" : "Your Location",
+        locationLabel: simMode ? "Demo Location" : "Your Location",
         timestamp: new Date().toISOString(),
       });
     }
@@ -718,7 +718,7 @@ export function OrbitalAlignmentScreen() {
             <InfoPill label="Device Az" value={`${Math.round(pointing.azimuthDegrees)}°`} />
             <InfoPill label="Pitch" value={`${Math.round(pointing.altitudeDegrees)}°`} />
           </View>
-          {simMode && <Text style={styles.note}>Simulated observer: Ducktown, TN</Text>}
+          {simMode && <Text style={styles.note}>Simulated observer: Demo Location</Text>}
         </View>
 
       </ScrollView>

@@ -34,7 +34,7 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
 
   const annual   = plans.find(p => p.id === "premium_annual")!;
   const monthly  = plans.find(p => p.id === "premium_monthly")!;
-  const lifetime = plans.find(p => p.id === "lifetime_founders")!;
+  const lifetime = plans.find(p => p.id === "lifetime")!;
 
   function handleSelect(plan: PlanOption) {
     tapLight();
@@ -106,7 +106,7 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
 
             {/* Feature list */}
             <Text style={styles.sectionLabel}>What you get</Text>
-            {(selected === "lifetime_founders" ? lifetimeFeatures : premiumFeatures).map(f => (
+            {(selected === "lifetime" ? lifetimeFeatures : premiumFeatures).map(f => (
               <View key={f} style={styles.featureRow}>
                 <Text style={styles.featureCheck}>✦</Text>
                 <Text style={styles.featureText}>{f}</Text>
