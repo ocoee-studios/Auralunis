@@ -326,6 +326,9 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
       {nebulae.map((n, i) => {
         const belowHorizon = !n.aboveHorizon;
         if (belowHorizon && !fullSphere && n.altitudeDegrees < -20) return null;
+        // AR (over the camera): the painterly clouds look out of place, so render them as
+        // faint hints — half size and capped to 0.15 opacity. Planetarium keeps them full.
+        const arMode = !fullSphere;
         const p = project(n.azimuthDegrees, n.altitudeDegrees);
         if (!p.onScreen) return null;
 
@@ -339,7 +342,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         const ff = focusFactor(p.x, p.y, focus);
         const sf = focusFactor(p.x, p.y, showcase);
         const eff = bf ? bf.scale : sig ? sig.scale : scaleFor(n.id);
-        const r = Math.max(isShowcase ? 44 : 22, n.radius * eff) * (1 + ff * 0.8) * (1 + sf * 0.4);
+        const r = Math.max(isShowcase ? 44 : 22, n.radius * eff) * (1 + ff * 0.8) * (1 + sf * 0.4) * (arMode ? 0.5 : 1);
         const opMul = (isShowcase ? 0.82 : 1) * (1 + ff * 0.7) * (1 + sf * 2.0); // showcase clouds: visible but not solid
         const hazeR = r * 3;
         const coreR = r * 1.1;
@@ -374,7 +377,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               }}
             />
 
-            <G opacity={Math.min(1, breathe * opMul)}>
+            <G opacity={Math.min(arMode ? 0.15 : 1, breathe * opMul)}>
               {n.type === "cluster" ? (
                 /* STAR CLUSTER — not a smooth glow but a tight swarm of individual
                    stars. A very faint glow (5%) ties them together; the dots lead. */
