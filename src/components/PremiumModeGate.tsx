@@ -45,7 +45,7 @@ export function PremiumModeGate({ modeName, modeDescription, onUpgrade }: Premiu
 
       {/* Pricing hint */}
       <Text style={styles.pricingHint}>
-        From {AuraLunisPricing.annualMonthly}/mo · {AuraLunisPricing.trial} on annual
+        From {AuraLunisPricing.annualMonthly}, billed annually
       </Text>
 
       {/* CTA */}

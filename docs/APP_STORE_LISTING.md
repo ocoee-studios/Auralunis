@@ -31,11 +31,7 @@ your local conditions, so you know whether it's worth going outside.
 
 LEARN
 Animated lessons on the solar system, moon phases, constellations, star
-brightness, and deep-sky objects. Thirty nights of guided stargazing.
-
-WATCH FACES
-Six curated watch face designs with ten complications — moon phase, tonight
-score, planet visibility, and more.
+brightness, and deep-sky objects, each linked back to the live sky.
 
 SATELLITE TRACKER
 Real orbital elements from CelesTrak, propagated with SGP4. See which
@@ -47,15 +43,16 @@ data stay on your device. Your Vault is encrypted.
 
 ---
 
-Horizon (free): basic Sky Lens, selected lessons, daily highlights.
-Horizon+ ($4.99/mo or $29.99/yr, $24.99 first-year founder offer): full Sky Lens, all 88 constellations,
-celestial alarms, premium themes.
-Aura Pro ($5.99/mo or $49.99/yr): deep sky layers, astrophotography predictor,
-time-scrub, sound bath, advanced watch gallery.
+Free: Celestial Dial, basic Sky Lens, selected lessons, ISS tracking, Zodiac,
+Tonight Score.
+AuraLunis Premium ($9.99/month or $49.99/year): full Sky Lens AR with all layers,
+35 constellation figures with mythology, live satellite tracking, Birth Sky,
+Astro Weather, Astrophotography Planner, Night Vision, Time Travel, and the
+encrypted Vault.
+Lifetime ($129.99 one-time): every Premium feature, plus all future updates.
 
-7-day free trial for eligible new subscribers. Subscriptions auto-renew unless
-cancelled at least 24 hours before the end of the current period. Manage
-subscriptions in Settings > Apple ID > Subscriptions.
+Subscriptions auto-renew unless cancelled at least 24 hours before the end of the
+current period. Manage subscriptions in Settings > Apple ID > Subscriptions.
 
 Privacy Policy: https://ocoeestudios.com/auralunis/privacy
 Terms of Use: https://ocoeestudios.com/auralunis/terms

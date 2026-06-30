@@ -32,7 +32,7 @@ Privacy section.
 | **Linked to identity** | No |
 | **Used for tracking** | No |
 | **Purpose** | App Functionality |
-| **Details** | Device GPS is used to compute ephemeris (planet/star positions), Tonight Score, sunrise/sunset times, and Dark Sky Finder. Location is processed on-device. Approximate coordinates only are sent to Open-Meteo for the weather forecast (no account, no identity). This matches the `NSPrivacyCollectedDataTypePreciseLocation` declaration in the app's privacy manifest (app.json). |
+| **Details** | Device GPS is used to compute ephemeris (planet/star positions), Tonight Score, and sunrise/sunset times. Location is processed on-device. Approximate coordinates only are sent to Open-Meteo for the weather forecast (no account, no identity). This matches the `NSPrivacyCollectedDataTypePreciseLocation` declaration in the app's privacy manifest (app.json). |
 
 ### 3. Identifiers
 
@@ -45,16 +45,13 @@ Privacy section.
 | **Purpose** | App Functionality |
 | **Details** | RevenueCat generates an anonymous `$RCAnonymousID` to manage subscription state. No Apple ID, email, or name is collected by AuraLunis. If the user does not subscribe, no identifier is generated. |
 
-### 4. Usage Data
+### 4. Usage Data — NOT collected
 
 | Field | Value |
 |---|---|
 | **Data type** | Product Interaction |
-| **Collection** | Yes |
-| **Linked to identity** | No |
-| **Used for tracking** | No |
-| **Purpose** | Analytics |
-| **Details** | AuraLunis tracks: paywall impressions, purchase taps, plan toggles (monthly/annual), continue-free taps, and session counts. All analytics are processed locally via AnalyticsService. No data is sent to third-party analytics services at launch. |
+| **Collection** | **No** |
+| **Details** | AuraLunis records paywall impressions, purchase taps, plan toggles, continue-free taps, and session counts **locally only**, via AnalyticsService. This data never leaves the device and is never sent to any first- or third-party analytics service. Under Apple's definition, on-device-only data that is not transmitted is **not "collected,"** so do **not** declare Usage Data / Product Interaction in App Store Connect. (This also matches the in-app Privacy Policy, which states there is no off-device user analytics.) |
 
 ### 5. Diagnostics
 
@@ -130,7 +127,7 @@ RevenueCat's privacy policy: https://www.revenuecat.com/privacy
    - **Purchases** → Purchase History → App Functionality → Linked to Identity: Yes
    - **Location** → Precise Location → App Functionality → Linked to Identity: No
    - **Identifiers** → Device ID → App Functionality → Linked to Identity: No
-   - **Usage Data** → Product Interaction → Analytics → Linked to Identity: No
+   - Do **not** add Usage Data / Product Interaction — analytics is on-device only (see §4).
 5. For each: **Used for Tracking → No**
 6. Publish
 
@@ -176,6 +173,5 @@ This data:
 | Purchase History | Yes | Yes | No | App Functionality |
 | Precise Location | Yes | No | No | App Functionality |
 | Device ID | Yes | No | No | App Functionality |
-| Product Interaction | Yes | No | No | Analytics |
 
-Nothing is used for tracking; there is no AI feature and no User Content is collected.
+Product Interaction (paywall/session analytics) is on-device only and is **not collected**. Nothing is used for tracking; there is no AI feature and no User Content is collected.

@@ -1,7 +1,7 @@
 // The Sky Lens layer catalog. Phase 1 ships the free core (Grid, Stars,
 // Constellations, Planets — Moon is always-on and not a toggle). Phase 2 layers
 // are listed here so the layer bar can show them as locked/Coming Soon, which is
-// what signals the $39.99/yr upgrade without faking an unbuilt feature.
+// what signals the $49.99/yr upgrade without faking an unbuilt feature.
 
 export type LayerKey =
   | "grid"

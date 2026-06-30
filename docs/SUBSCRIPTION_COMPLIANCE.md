@@ -15,8 +15,8 @@
 
 ### Auto-renewable disclosures (required on paywall)
 The paywall must clearly state:
-- [x] Price per billing period ($6.99/month or $39.99/year)
-- [x] Free trial duration (7 days)
+- [x] Price per billing period ($9.99/month or $49.99/year)
+- [x] No free trial is offered on any plan
 - [x] "Payment will be charged to your Apple ID account at the confirmation of purchase"
 - [x] "Subscription automatically renews unless cancelled at least 24 hours before the end of the current period"
 - [x] Links to Terms of Use and Privacy Policy
@@ -36,17 +36,18 @@ The paywall must clearly state:
 
 | Product | ID | Type |
 |---|---|---|
-| Premium Monthly | `com.ocoee.auralunis.premium.monthly` | Auto-renewable |
-| Premium Annual | `com.ocoee.auralunis.premium.annual` | Auto-renewable |
+| Premium Monthly | `com.ocoeestudios.auralunis.premium.monthly` | Auto-renewable |
+| Premium Annual | `com.ocoeestudios.auralunis.premium.annual` | Auto-renewable |
+| Lifetime | `com.ocoeestudios.auralunis.lifetime` | Non-consumable |
 
 ## Entitlement
-`auralunis_premium` — grants access to all premium features.
+`AuraLunis Premium` — exact identifier (with the space and capitals, NOT a snake_case slug). All three products unlock this single entitlement. A mismatch means purchases succeed but never unlock premium.
 
 ## Offering
-`default` — contains both monthly and annual packages.
+`default` — contains packages `premium_monthly`, `premium_annual`, and `lifetime_founders`.
 
 ## Free trial
-Both products include a 7-day introductory free trial.
+None. No introductory free trial is offered on any plan.
 Configure in App Store Connect → In-App Purchases → each product → Introductory Offer.
 
 ## Sandbox testing

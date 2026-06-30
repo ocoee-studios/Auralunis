@@ -1,15 +1,18 @@
 // MonetizationCatalog.ts
 // AuraLunis pricing — optimized for launch.
-// Three products: Monthly (no trial), Annual (7-day trial), Lifetime (one-time).
-// NOTE: the lifetime RevenueCat/ASC product id is still `...lifetime.founders` (don't
-// change it — it's configured in App Store Connect); only the user-facing copy is neutral.
-// Trial is ANNUAL ONLY — prevents weekend trial-and-cancel on monthly.
+// Three products: Monthly, Annual, Lifetime (one-time). No free trials on any plan.
+// NOTE: the lifetime App Store / RevenueCat *product id* is
+// `com.ocoeestudios.auralunis.lifetime` (the old `...lifetime.founders` product was
+// deleted in ASC and recreated without the suffix). The internal plan id and the
+// RevenueCat *package* identifier below still read `lifetime_founders` — that's a
+// historical internal label, NOT the store product id, and it must match the package
+// identifier configured in the RevenueCat offering. User-facing copy is "Lifetime".
 
 export const RevenueCatIds = {
   products: {
     premiumMonthly:    "com.ocoeestudios.auralunis.premium.monthly",
     premiumAnnual:     "com.ocoeestudios.auralunis.premium.annual",
-    lifetimeFounders:  "com.ocoeestudios.auralunis.lifetime.founders",
+    lifetimeFounders:  "com.ocoeestudios.auralunis.lifetime",
   },
   packages: {
     premiumMonthly:    "premium_monthly",
@@ -29,16 +32,14 @@ export interface PlanOption {
   productId: string;
   name: string;
   interval: "monthly" | "annual" | "lifetime";
-  /** Primary price display — e.g. "$39.99/year" */
+  /** Primary price display — e.g. "$49.99/year" */
   displayPrice: string;
   /** Secondary line — monthly equivalent or subtitle */
   subtitle: string;
   revenueCatPackageId: string;
   badge?: string;
-  /** Effective monthly price for an annual plan — e.g. "$3.33/mo" */
+  /** Effective monthly price for an annual plan — e.g. "$4.17/mo" */
   effectiveMonthly?: string;
-  /** Trial only on annual */
-  trial: boolean;
   /** Anchor price shown as strikethrough on lifetime card */
   anchorPrice?: string;
 }
@@ -49,34 +50,31 @@ export const plans: PlanOption[] = [
     productId: RevenueCatIds.products.premiumAnnual,
     name: "AuraLunis Premium",
     interval: "annual",
-    displayPrice: "$39.99/year",
-    subtitle: "$3.33/month, billed annually",
+    displayPrice: "$49.99/year",
+    subtitle: "$4.17/month, billed annually",
     revenueCatPackageId: RevenueCatIds.packages.premiumAnnual,
     badge: "Most Popular",
-    effectiveMonthly: "$3.33/mo",
-    trial: true,   // 7-day free trial on annual only
+    effectiveMonthly: "$4.17/mo",
   },
   {
     id: "premium_monthly",
     productId: RevenueCatIds.products.premiumMonthly,
     name: "AuraLunis Premium",
     interval: "monthly",
-    displayPrice: "$6.99/month",
+    displayPrice: "$9.99/month",
     subtitle: "Billed monthly · Cancel anytime",
     revenueCatPackageId: RevenueCatIds.packages.premiumMonthly,
-    trial: false,  // No trial on monthly — direct charge
   },
   {
     id: "lifetime_founders",
     productId: RevenueCatIds.products.lifetimeFounders,
     name: "Lifetime",
     interval: "lifetime",
-    displayPrice: "$99.99",
+    displayPrice: "$129.99",
     subtitle: "Pay once. Own the sky forever.",
     revenueCatPackageId: RevenueCatIds.packages.lifetimeFounders,
     badge: "Best value",
-    trial: false,
-    anchorPrice: "$167.76", // 24 months of monthly billing ($6.99 × 24) — anchor comparison
+    anchorPrice: "$239.76", // 24 months of monthly billing ($9.99 × 24) — anchor comparison
   },
 ];
 
