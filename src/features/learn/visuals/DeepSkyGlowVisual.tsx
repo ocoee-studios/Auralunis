@@ -93,8 +93,6 @@ function DeepSkyShape({ type, cx, cy }: { type: number; cx: number; cy: number }
 export function DeepSkyGlowVisual({ onTabChange }: { onTabChange?: (index: number) => void } = {}) {
   const [active, setActive] = useState(0);
   // No auto-cycle: the widget starts on Nebula and only changes when the user taps a tab.
-  // `paused` starts true (kept so the tap handler's setPaused call stays valid).
-  const [paused, setPaused] = useState(true);
 
   return (
     <View style={styles.card}>
@@ -109,7 +107,6 @@ export function DeepSkyGlowVisual({ onTabChange }: { onTabChange?: (index: numbe
           <TouchableOpacity
             key={label}
             onPress={() => {
-              setPaused(true);
               setActive(index);
               onTabChange?.(index);
             }}

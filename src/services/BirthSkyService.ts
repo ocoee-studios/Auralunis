@@ -70,16 +70,26 @@ const CONSTELLATIONS_BY_MONTH: Record<number, string[]> = {
   12: ["Orion", "Taurus", "Cassiopeia"],
 };
 
-/** Compute sun sign from date */
-function getSunSign(month: number, day: number): string {
-  for (const z of ZODIAC_SIGNS) {
-    const [sm, sd] = z.start;
-    const [em, ed] = z.end;
-    if (month === sm && day >= sd && month === em && day <= ed) return z.name;
-    if (month === sm && day >= sd && sm !== em) return z.name;
-    if (month === em && day <= ed && sm !== em) return z.name;
-  }
-  return "Capricorn";
+// Tropical zodiac order from ecliptic longitude 0° (Aries) onward.
+const TROPICAL_SIGNS = [
+  "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
+];
+
+/**
+ * Sun sign from the Sun's apparent ecliptic longitude (0° = Aries), which is the true
+ * astronomical definition. More accurate than fixed calendar-date ranges, whose cusp
+ * dates drift ±1 day year to year and break for births near midnight in non-UTC zones.
+ * Low-precision Sun formula (~0.01°) — far better than the band needs.
+ */
+function getSunSign(birthDate: Date): string {
+  const jd = 2440587.5 + birthDate.getTime() / 86400000;
+  const n = jd - 2451545.0;
+  const L = (280.46 + 0.9856474 * n) % 360;
+  const g = (((357.528 + 0.9856003 * n) % 360) * Math.PI) / 180;
+  let lambda = L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g);
+  lambda = ((lambda % 360) + 360) % 360;
+  return TROPICAL_SIGNS[Math.floor(lambda / 30) % 12];
 }
 
 /** Simplified moon phase from JD */
@@ -138,7 +148,7 @@ export function computeBirthSky(
   // Julian Date
   const jd = 2440587.5 + (birthDate.getTime() / 86400000);
 
-  const sunSign = getSunSign(month, day);
+  const sunSign = getSunSign(birthDate);
   const { name: moonPhase, illumination: moonIllumination } = getMoonPhase(jd);
   const risingSign = getRisingConstellation(month, hourUTC);
   const dominantConstellation = (CONSTELLATIONS_BY_MONTH[month] ?? ["Orion"])[0];

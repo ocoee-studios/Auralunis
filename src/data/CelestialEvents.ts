@@ -264,7 +264,9 @@ export function getThisWeekEvents(): CelestialEvent[] {
   const weekEnd = new Date(now.getTime() + 7 * 86400000);
   const start = now.toISOString().slice(0, 10);
   const end = weekEnd.toISOString().slice(0, 10);
-  return CELESTIAL_EVENTS.filter(e => e.date >= start && e.date <= end);
+  // Overlaps the window: starts on/before week-end AND ends on/after today (so a
+  // multi-day shower already in progress isn't dropped).
+  return CELESTIAL_EVENTS.filter(e => e.date <= end && (e.endDate ?? e.date) >= start);
 }
 
 // Helper: get high-rated upcoming events

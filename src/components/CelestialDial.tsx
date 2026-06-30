@@ -13,10 +13,7 @@ import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Svg, {
   Circle, Line, G, Text as SvgText, Defs, RadialGradient, Stop, Path,
 } from "react-native-svg";
-import Animated, {
-  useSharedValue, useAnimatedProps, withRepeat, withTiming,
-  Easing, runOnJS,
-} from "react-native-reanimated";
+import { useSharedValue, runOnJS } from "react-native-reanimated";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 import type { TonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
