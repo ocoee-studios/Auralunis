@@ -1,7 +1,7 @@
 // ThreeTierPaywallModal.tsx
-// Optimized three-tier paywall: Annual (default, 7-day trial), Monthly, Lifetime Founders.
+// Optimized three-tier paywall: Annual (default, 7-day trial), Monthly, Lifetime.
 // Annual is selected by default and displayed prominently — monthly is secondary.
-// Lifetime Founders acts as anchor price ($99.99) making annual feel like a steal.
+// Lifetime acts as anchor price ($99.99) making annual feel like a steal.
 // Trial is ANNUAL ONLY — no trial on monthly (prevents weekend trial-and-cancel).
 
 import React, { useState } from "react";
@@ -175,7 +175,6 @@ function PlanCard({
         <View>
           <Text style={[styles.planName, selected && { color: AuraLunisColors.gold2 }]}>
             {plan.name}
-            {plan.interval === "lifetime" ? " — Founders" : ""}
           </Text>
           <Text style={styles.planSubtitle}>{plan.subtitle}</Text>
           {plan.trial && (

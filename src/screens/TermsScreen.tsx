@@ -20,8 +20,8 @@ export function TermsScreen() {
       <Text style={styles.heading}>Subscriptions</Text>
       <Text style={styles.body}>
         Free: Celestial Dial, basic sky view, 10 constellations, ISS tracking, Learn section.{"\n\n"}
-        Premium ($6.99/month or $39.99/year): Full Sky Lens AR, 88 constellations, all satellites, Birth Sky, Astro Weather, Astrophotography Planner, Cultural Sky Stories, Night Vision, Dark Sky Finder, encrypted vault.{"\n\n"}
-        Founders Lifetime ($99.99 one-time): All Premium features permanently. Limited availability. Price increases after launch period.
+        Premium ($6.99/month or $39.99/year): Full Sky Lens AR, 35 major constellations with mythology, live satellite tracking, Birth Sky, Astro Weather, Astrophotography Planner, Night Vision, sky-quality presets, encrypted vault.{"\n\n"}
+        Lifetime ($99.99 one-time): all Premium features permanently, including future updates. No subscription.
       </Text>
 
       <Text style={styles.heading}>Billing</Text>
