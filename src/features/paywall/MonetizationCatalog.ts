@@ -117,7 +117,7 @@ export const premiumFeatures = [
   "🌕 A cinematic Moon with craters, earthshine, and atmospheric god rays",
   "🌙 Birth Sky — the exact sky the moment you were born",
   "☁️ Astro Weather — know instantly if tonight is worth going outside",
-  "📸 Sky Lens Pro — Night Vision, Cinematic Mode, Immersive Mode",
+  "📸 Sky Lens Pro — Night Vision, Cinematic Mode, Time Travel",
   "🛰️ Live satellite tracking — ISS, Starlink trains, space debris",
   "📅 Never miss a meteor shower, eclipse, or conjunction again",
 ];

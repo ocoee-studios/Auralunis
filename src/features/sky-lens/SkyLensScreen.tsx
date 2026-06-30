@@ -947,6 +947,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           <TouchableOpacity
             style={[styles.iconBtn, scrubVisible && { backgroundColor: "rgba(217,168,78,0.32)" }]}
             onPress={() => {
+              // Time Travel (scrubbing the sky through time) is premium — free users get
+              // the paywall instead of the scrub bar.
+              if (!isPremium) { openPaywall(); return; }
               // Hiding the bar snaps back to the live sky so we never leave it frozen.
               if (scrubVisible && timeOffsetMin !== 0) setTimeOffsetMin(0);
               setScrubVisible((v) => !v);
