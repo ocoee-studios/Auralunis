@@ -20,18 +20,21 @@ interface Props {
   onClose: () => void;
 }
 
-export function LearnPreferencesModal({ visible, onClose }: Props) {
-  const [level, setLevel] = useState<LearnLevel | null>(null);
-  const [interests, setInterests] = useState<LearnInterest[]>([]);
+const ALL_INTERESTS: LearnInterest[] = LEARN_INTERESTS.map((i) => i.key);
 
-  // Load current prefs each time the modal opens.
+export function LearnPreferencesModal({ visible, onClose }: Props) {
+  // Defaults: Beginner + all interests selected, until the user saves something else.
+  const [level, setLevel] = useState<LearnLevel>("beginner");
+  const [interests, setInterests] = useState<LearnInterest[]>(ALL_INTERESTS);
+
+  // Load saved prefs each time the modal opens, falling back to the defaults.
   useEffect(() => {
     if (!visible) return;
     let active = true;
     loadLearnPreferences().then((p) => {
       if (!active) return;
-      setLevel(p.level);
-      setInterests(p.interests);
+      setLevel(p.level ?? "beginner");
+      setInterests(p.interests.length ? p.interests : ALL_INTERESTS);
     });
     return () => {
       active = false;
@@ -41,16 +44,19 @@ export function LearnPreferencesModal({ visible, onClose }: Props) {
   function chooseLevel(next: LearnLevel) {
     tapLight();
     setLevel(next);
-    saveLearnLevel(next);
   }
 
   function toggleInterest(next: LearnInterest) {
     tapLight();
-    setInterests((prev) => {
-      const updated = prev.includes(next) ? prev.filter((i) => i !== next) : [...prev, next];
-      saveLearnInterests(updated);
-      return updated;
-    });
+    setInterests((prev) => (prev.includes(next) ? prev.filter((i) => i !== next) : [...prev, next]));
+  }
+
+  // Persist the current selection and close (the explicit Save action).
+  function handleSave() {
+    tapLight();
+    saveLearnLevel(level);
+    saveLearnInterests(interests);
+    onClose();
   }
 
   return (
@@ -59,7 +65,7 @@ export function LearnPreferencesModal({ visible, onClose }: Props) {
         <View style={styles.header}>
           <Text style={styles.title}>Learning Preferences</Text>
           <Pressable onPress={() => { tapLight(); onClose(); }} hitSlop={12}>
-            <Text style={styles.done}>Done</Text>
+            <Text style={styles.done}>Cancel</Text>
           </Pressable>
         </View>
 
@@ -105,7 +111,11 @@ export function LearnPreferencesModal({ visible, onClose }: Props) {
             );
           })}
 
-          <Text style={styles.note}>Saved automatically. Open the Learn tab to see your personalized order.</Text>
+          <Text style={styles.note}>Open the Learn tab to see your personalized order.</Text>
+
+          <Pressable style={styles.saveBtn} onPress={handleSave} accessibilityRole="button">
+            <Text style={styles.saveText}>Save</Text>
+          </Pressable>
         </ScrollView>
       </View>
     </Modal>
@@ -140,5 +150,10 @@ const styles = StyleSheet.create({
   checkboxOn: { borderColor: AuraLunisColors.gold, backgroundColor: "rgba(217,168,78,0.18)" },
   checkMark: { color: AuraLunisColors.gold, fontSize: 14, fontWeight: "900" },
   checkLabel: { color: "#FFF", fontSize: 15, fontWeight: "600" },
-  note: { color: AuraLunisColors.faint, fontSize: 12, lineHeight: 18, marginTop: 26 }
+  note: { color: AuraLunisColors.faint, fontSize: 12, lineHeight: 18, marginTop: 26 },
+  saveBtn: {
+    marginTop: 22, borderRadius: 14, paddingVertical: 15, alignItems: "center",
+    backgroundColor: AuraLunisColors.gold
+  },
+  saveText: { color: AuraLunisColors.cosmicBlack ?? "#03060F", fontWeight: "900", fontSize: 15 }
 });
