@@ -1,5 +1,8 @@
 {
-  "cli": { "version": ">= 12.0.0" },
+  "cli": {
+    "version": ">= 12.0.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "development": {
       "developmentClient": true,
@@ -7,13 +10,21 @@
     },
     "development-simulator": {
       "extends": "development",
-      "ios": { "simulator": true }
+      "ios": {
+        "simulator": true
+      }
     },
     "preview": {
       "distribution": "internal",
-      "env": { "EXPO_PUBLIC_FORCE_PREMIUM": "1" }
+      "env": {
+        "EXPO_PUBLIC_FORCE_PREMIUM": "1"
+      }
     },
-    "production": { "autoIncrement": true }
+    "production": {
+      "autoIncrement": true
+    }
   },
-  "submit": { "production": {} }
+  "submit": {
+    "production": {}
+  }
 }
