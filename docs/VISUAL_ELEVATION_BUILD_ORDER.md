@@ -67,7 +67,7 @@ Still needed:
       If it returns random warm tints, replace with proper temperature mapping.
 
 - [ ] **Brighter bloom on Vega, Deneb, Altair, Arcturus** specifically
-      These are the 4 brightest overhead in summer from Ducktown.
+      These are the 4 brightest overhead in summer from mid-northern latitudes.
       They should have VISIBLE glow rings, not just subtle halos.
       Check STAR_FEATURES in SkyLensVisual.ts — add entries for
       any mag < 1 star that's missing a feature override.

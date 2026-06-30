@@ -21,7 +21,7 @@ export interface SkyObservation {
 export interface ShareCard {
   observation: SkyObservation;
   headline: string;         // "I saw Mars tonight"
-  subheadline: string;      // "Ducktown, TN · June 20, 2026 · 10:19 PM"
+  subheadline: string;      // "Your Location · June 20, 2026 · 10:19 PM"
   bodyText: string;         // The user's note
   skyData: string[];        // ["Moon 40% · az 292°", "Mars · az 327° · alt 41°"]
   scoreLabel: string;       // "Tonight Score: 68 (Good)"

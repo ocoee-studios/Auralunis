@@ -44,7 +44,7 @@ The paywall must clearly state:
 `AuraLunis Premium` — exact identifier (with the space and capitals, NOT a snake_case slug). All three products unlock this single entitlement. A mismatch means purchases succeed but never unlock premium.
 
 ## Offering
-`default` — contains packages `premium_monthly`, `premium_annual`, and `lifetime_founders`.
+`default` — contains packages `premium_monthly`, `premium_annual`, and `$rc_lifetime`.
 
 ## Free trial
 None. No introductory free trial is offered on any plan.

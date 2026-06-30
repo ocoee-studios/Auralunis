@@ -2,22 +2,20 @@
 // AuraLunis pricing — optimized for launch.
 // Three products: Monthly, Annual, Lifetime (one-time). No free trials on any plan.
 // NOTE: the lifetime App Store / RevenueCat *product id* is
-// `com.ocoeestudios.auralunis.lifetime` (the old `...lifetime.founders` product was
-// deleted in ASC and recreated without the suffix). The internal plan id and the
-// RevenueCat *package* identifier below still read `lifetime_founders` — that's a
-// historical internal label, NOT the store product id, and it must match the package
-// identifier configured in the RevenueCat offering. User-facing copy is "Lifetime".
+// `com.ocoeestudios.auralunis.lifetime`. Its RevenueCat *package* identifier is the
+// dashboard default `$rc_lifetime` — that's what the offering uses, so the code must
+// match it exactly or the lifetime package won't resolve. User-facing copy is "Lifetime".
 
 export const RevenueCatIds = {
   products: {
     premiumMonthly:    "com.ocoeestudios.auralunis.premium.monthly",
     premiumAnnual:     "com.ocoeestudios.auralunis.premium.annual",
-    lifetimeFounders:  "com.ocoeestudios.auralunis.lifetime",
+    lifetime:          "com.ocoeestudios.auralunis.lifetime",
   },
   packages: {
     premiumMonthly:    "premium_monthly",
     premiumAnnual:     "premium_annual",
-    lifetimeFounders:  "lifetime_founders",
+    lifetime:          "$rc_lifetime",
   },
   // All three products unlock this single entitlement. This MUST match the
   // entitlement IDENTIFIER in the RevenueCat dashboard EXACTLY — it is literally
@@ -66,13 +64,13 @@ export const plans: PlanOption[] = [
     revenueCatPackageId: RevenueCatIds.packages.premiumMonthly,
   },
   {
-    id: "lifetime_founders",
-    productId: RevenueCatIds.products.lifetimeFounders,
+    id: "lifetime",
+    productId: RevenueCatIds.products.lifetime,
     name: "Lifetime",
     interval: "lifetime",
     displayPrice: "$129.99",
     subtitle: "Pay once. Own the sky forever.",
-    revenueCatPackageId: RevenueCatIds.packages.lifetimeFounders,
+    revenueCatPackageId: RevenueCatIds.packages.lifetime,
     badge: "Best value",
     anchorPrice: "$239.76", // 24 months of monthly billing ($9.99 × 24) — anchor comparison
   },

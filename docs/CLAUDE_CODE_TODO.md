@@ -36,7 +36,7 @@ canonical export of `ThreeTierPaywallModal`:
 
 ## 4. SIM_LOCATION — ✅ DONE
 No NYC. Real device location via `useObserverLocation` is used in normal mode;
-`SIM_LOCATION` is only the indoor-sim fallback (Ducktown TN 35.04,-84.38).
+`SIM_LOCATION` is only the indoor-sim fallback (Demo Location: Kansas City, MO 39.0997,-94.5786).
 
 ## 5. ONBOARDING — ✅ DONE
 `App.tsx` checks `ONBOARDING_SEEN_KEY` on first launch, shows `OnboardingFlow`, sets the
