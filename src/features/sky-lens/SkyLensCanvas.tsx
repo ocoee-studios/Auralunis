@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import Svg, { Circle, Defs, G, RadialGradient, Stop } from "react-native-svg";
 import { StyleSheet } from "react-native";
 import { projectTarget, DEFAULT_FOV, type CameraPointing, type CameraFov } from "./ar/SkyLensProjection";
@@ -65,9 +65,16 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
   // multiplier keeps the brightest fraction — exactly what light pollution leaves
   // to the naked eye (a prefix slice would drop random stars, since the field is
   // generated in random-magnitude order, not sorted).
-  const domeStars = domeStarMultiplier < 1
-    ? sky.domeStars.filter((s) => s.magnitude <= 3.2 + 2.8 * domeStarMultiplier)
-    : sky.domeStars;
+  // Memoized so it doesn't re-filter 2000 stars on every device-motion frame. In AR /
+  // Immersive (camera live, heavy motion) the faintest filler dome stars (mag > 4.5 —
+  // barely-visible 1.4px dots) are dropped, roughly halving the star render tree for a
+  // smoother frame rate. Planetarium (fullSphere, camera off) keeps the full field.
+  const domeStars = useMemo(() => {
+    const base = domeStarMultiplier < 1
+      ? sky.domeStars.filter((s) => s.magnitude <= 3.2 + 2.8 * domeStarMultiplier)
+      : sky.domeStars;
+    return fullSphere ? base : base.filter((s) => s.magnitude <= 4.5);
+  }, [sky.domeStars, domeStarMultiplier, fullSphere]);
   // Cinematic Immersive Sky: no text labels, no data overlays (grid/ecliptic/zodiac/
   // satellites) — only the beauty set. Constellation lines drop to ~62%.
   const showLabels = !cinematic;

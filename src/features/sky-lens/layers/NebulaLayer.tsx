@@ -279,7 +279,9 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
   const [internalTime, setInternalTime] = useState(() => Date.now());
   useEffect(() => {
     if (timeProp !== undefined || nightMode) return;
-    const id = setInterval(() => setInternalTime(Date.now()), 120);
+    // The breathe cycle is ~4s, so a 350ms sample is visually identical to 120ms but
+    // re-renders the (heavy) nebula tree ~3× less often.
+    const id = setInterval(() => setInternalTime(Date.now()), 350);
     return () => clearInterval(id);
   }, [timeProp, nightMode]);
 
