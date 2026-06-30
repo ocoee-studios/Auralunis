@@ -17,6 +17,7 @@ import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { CameraView } from "expo-camera";
 import { LinearGradient } from "expo-linear-gradient";
+import Slider from "@react-native-community/slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { AuraLunisColors } from "@/theme/tokens";
 import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
@@ -194,6 +195,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // chrome and labels vanish; only the sky remains, darkened to ~85%. Enter via a
   // triple-tap or a long-press on the mode button; a single tap anywhere restores the UI.
   const [cinematic, setCinematic] = useState(false);
+  // Sky brightness — an Animated.Value so dragging the slider animates ONLY the native
+  // scrim opacity (no React re-render of the whole scene per frame). Range 0 → 0.7.
+  // Starts at a slight tint (thumb mid). Dragging toward ☾ Dark raises it, ☀ Clear → 0.
+  const scrimOpacity = useRef(new Animated.Value(0.35)).current;
   const cinematicHint = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (!cinematic) return;
@@ -216,6 +221,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     () =>
       Gesture.Pinch()
         .runOnJS(true)
+        // Don't swallow single touches — let react-native-svg onPress (object hit-targets) fire.
+        .cancelsTouchesInView(false)
         .onStart(() => {
           zoomStart.current = zoomRef.current;
         })
@@ -231,10 +238,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Triple-tap anywhere enters cinematic Immersive Sky. Runs alongside pinch so zoom
   // still works; single taps fall through to the object hit-targets as before.
   const cinematicTap = useMemo(
-    () => Gesture.Tap().numberOfTaps(3).runOnJS(true).onEnd(() => enterCinematic()),
+    () => Gesture.Tap().numberOfTaps(3).runOnJS(true).cancelsTouchesInView(false).onEnd(() => enterCinematic()),
     [enterCinematic]
   );
-  const sceneGesture = useMemo(() => Gesture.Simultaneous(pinch, cinematicTap), [pinch, cinematicTap]);
+  // sceneGesture is composed AFTER `fov` is declared (objectTap hit-tests with it).
   const fov = useMemo(
     () => ({
       horizontalDegrees: DEFAULT_FOV.horizontalDegrees / zoom,
@@ -243,6 +250,88 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     [zoom]
   );
   const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
+
+  // Tap-to-select. SVG onPress does NOT fire inside an RNGH GestureDetector on iOS, so we
+  // hit-test the tap point against projected object positions ourselves and open the info
+  // card for the nearest hit. Uses the SAME projectTarget the canvas renders with, so the
+  // screen positions line up exactly. (Declared here so it can read `fov`.)
+  const objectTap = useMemo(
+    () =>
+      Gesture.Tap()
+        .runOnJS(true)
+        .maxDuration(300)
+        .onEnd((e) => {
+          const PLANET_DESCRIPTIONS: Record<string, string> = {
+            mercury: "The smallest planet, closest to the Sun.",
+            venus: "The brightest planet, often called the evening or morning star.",
+            mars: "The red planet, named for the god of war.",
+            jupiter: "The largest planet in our solar system.",
+            saturn: "The ringed giant, a jewel of the night sky.",
+            moon: "Earth's only natural satellite, ruler of the tides."
+          };
+          const PLANET_HIT = 80; // planets are the main targets — generous finger radius
+          const STAR_HIT = 50;
+          let closest: { dist: number; obj: SelectedObject } | null = null;
+
+          // Planets + Moon first (bigger, brighter targets). Check ALL above-horizon
+          // bodies except the Sun — never miss one that's actually up.
+          for (const body of sky.bodies) {
+            if (!body.aboveHorizon || body.id === "sun") continue;
+            const p = projectTarget(pointing, body.azimuthDegrees, body.altitudeDegrees, fov, box);
+            if (!p.onScreen) continue;
+            const dist = Math.hypot(p.x - e.x, p.y - e.y);
+            if (dist < PLANET_HIT && (!closest || dist < closest.dist)) {
+              closest = {
+                dist,
+                obj: {
+                  kind: body.id === "moon" ? "moon" : "planet",
+                  id: body.id,
+                  name: body.name,
+                  subtitle: body.id === "moon" ? "Earth's Moon" : "Planet",
+                  description: PLANET_DESCRIPTIONS[body.id],
+                  facts: [
+                    ...(body.magnitude !== undefined ? [{ label: "Magnitude", value: body.magnitude.toFixed(1) }] : []),
+                    { label: "Altitude", value: `${Math.round(body.altitudeDegrees)}°` },
+                    { label: "Azimuth", value: `${Math.round(body.azimuthDegrees)}°` }
+                  ]
+                }
+              };
+            }
+          }
+
+          // If we already landed squarely on a planet, skip the star scan entirely.
+          const planetLocked = closest !== null && closest.dist < 40;
+          // Then the ~20–30 brightest stars only (mag < 2) — scanning every star is slow.
+          if (!planetLocked) for (const star of sky.stars) {
+            if (!star.aboveHorizon || star.magnitude >= 2.0) continue;
+            const p = projectTarget(pointing, star.azimuthDegrees, star.altitudeDegrees, fov, box);
+            if (!p.onScreen) continue;
+            const dist = Math.hypot(p.x - e.x, p.y - e.y);
+            if (dist < STAR_HIT && (!closest || dist < closest.dist)) {
+              closest = {
+                dist,
+                obj: {
+                  kind: "star",
+                  id: star.id,
+                  name: star.name || star.id,
+                  subtitle: `Magnitude ${star.magnitude.toFixed(1)}`,
+                  facts: [
+                    { label: "Magnitude", value: star.magnitude.toFixed(1) },
+                    { label: "Altitude", value: `${Math.round(star.altitudeDegrees)}°` },
+                    { label: "Azimuth", value: `${Math.round(star.azimuthDegrees)}°` }
+                  ]
+                }
+              };
+            }
+          }
+
+          if (closest) {
+            setSelected(closest.obj);
+          }
+        }),
+    [sky, pointing, fov, box]
+  );
+  const sceneGesture = useMemo(() => Gesture.Simultaneous(pinch, cinematicTap, objectTap), [pinch, cinematicTap, objectTap]);
   // Milky Way brightens as the camera fades out: faint over a live feed, bold over
   // black. AR (1.4) → Immersive (1.9) → Planetarium (2.4).
   // ── Sky Quality (Bortle) + live conditions drive the entire visual ─────────
@@ -614,6 +703,12 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             }]}
             pointerEvents="none"
           />
+          {/* Sky-darkness scrim — sits between the camera and the star canvas; the
+              brightness slider drives its opacity (0 → 0.6) to darken the whole sky. */}
+          <Animated.View
+            style={[StyleSheet.absoluteFillObject, { backgroundColor: "#030816", opacity: scrimOpacity }]}
+            pointerEvents="none"
+          />
           {planetarium && !nightMode && (
             <LinearGradient
               colors={skyColors}
@@ -848,13 +943,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
       {/* Find-Mode target banner (from a Learn lesson) takes priority */}
       {!cinematic && !selected && targetFinder && (
-        <View style={[styles.finder, { bottom: insets.bottom + 82 }]} pointerEvents="none">
+        <View style={[styles.finder, { bottom: insets.bottom + 175 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{targetFinder}</Text>
         </View>
       )}
       {/* Moon finder banner (hidden while an info card is open or a target is set) */}
       {!cinematic && !selected && !targetFinder && moonFinder && (
-        <View style={[styles.finder, { bottom: insets.bottom + 82 }]} pointerEvents="none">
+        <View style={[styles.finder, { bottom: insets.bottom + 175 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{moonFinder}</Text>
         </View>
       )}
@@ -875,6 +970,24 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       {/* Bottom controls (hidden in cinematic Immersive Sky) */}
       {!cinematic && (
       <View style={[styles.bottom, { paddingBottom: insets.bottom + 6 }]} pointerEvents="box-none">
+        {/* Sky brightness — slide to lighten/darken the backdrop. Hidden while an info
+            card is open so they don't overlap. */}
+        {!selected && (
+          <View style={styles.skySliderWrap}>
+            <Text style={styles.skySliderLabel}>☾ Dark</Text>
+            <Slider
+              style={styles.skySlider}
+              minimumValue={0}
+              maximumValue={1}
+              value={0.5}
+              onValueChange={(v) => scrimOpacity.setValue((1 - v) * 0.7)}
+              thumbTintColor={AuraLunisColors.gold}
+              minimumTrackTintColor={AuraLunisColors.gold}
+              maximumTrackTintColor="rgba(192,198,212,0.18)"
+            />
+            <Text style={styles.skySliderLabel}>☀ Clear</Text>
+          </View>
+        )}
         {/* Time Scrub — drag to fast-forward / rewind the whole sky */}
         {scrubVisible && !selected && (
           <View style={{ marginBottom: 10 }}>
@@ -1021,5 +1134,20 @@ const styles = StyleSheet.create({
   },
   hudText: { fontSize: 13, fontWeight: "900", fontVariant: ["tabular-nums"] },
   hudSub: { color: AuraLunisColors.muted, fontSize: 10, marginTop: 1 },
-  bottom: { position: "absolute", left: 0, right: 0, bottom: 0 }
+  bottom: { position: "absolute", left: 0, right: 0, bottom: 0 },
+  skySliderWrap: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginHorizontal: 16,
+    marginBottom: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 14,
+    backgroundColor: "rgba(3,8,22,0.85)",
+    borderWidth: 1,
+    borderColor: AuraLunisColors.borderSubtle
+  },
+  skySliderLabel: { color: AuraLunisColors.muted, fontSize: 10, fontWeight: "700" },
+  skySlider: { flex: 1, height: 36 }
 });

@@ -75,9 +75,15 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
         const color = nightMode ? palette.accent : PLANET_COLORS[body.id] ?? palette.accent;
         const st = STYLE[body.id] ?? { disc: 5, glow: 12 };
         const { x, y } = p;
-        const d = st.disc;
+        // AR (fullSphere === false): cap the disc so planets read as ~30–50px spheres,
+        // not screen-filling "gas clouds" — KEEP the illustrated SVG planets, just smaller.
+        // Per-planet AR radii (≈ targets: Jupiter/Venus 50px, Saturn 40px, Mars/Mercury 30px),
+        // each ≤ the 55px-diameter cap. Planetarium (fullSphere) keeps the full hero sizes.
+        const AR_DISC: Record<string, number> = { jupiter: 25, venus: 25, saturn: 20, mars: 15, mercury: 15 };
+        const d = fullSphere ? st.disc : Math.min(st.disc, AR_DISC[body.id] ?? 27);
+        const glow = fullSphere ? st.glow : d * 1.2;
 
-        const onPress = () =>
+        const onPress = () => {
           onSelect({
             kind: "planet",
             id: body.id,
@@ -89,6 +95,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
               { label: "Altitude", value: `${Math.round(body.altitudeDegrees)}°` }
             ]
           });
+        };
 
         return (
           <G
@@ -117,21 +124,21 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
                     <Stop offset="100%" stopColor={color} stopOpacity={0} />
                   </RadialGradient>
                 </Defs>
-                <Circle cx={x} cy={y} r={st.glow * 1.05} fill={`url(#pBloom-${body.id})`} />
+                <Circle cx={x} cy={y} r={glow * 1.05} fill={`url(#pBloom-${body.id})`} />
               </>
             )}
 
             {/* Mars — deep red atmospheric aura (recognition: the red planet) */}
             {useIllustrations && body.id === "mars" && !nightMode && (
               <>
-                <Circle cx={x} cy={y} r={st.glow * 2.0} fill="#C8341A" opacity={0.08} />
-                <Circle cx={x} cy={y} r={st.glow * 1.25} fill="#FF5A33" opacity={0.16} />
+                <Circle cx={x} cy={y} r={glow * 2.0} fill="#C8341A" opacity={0.08} />
+                <Circle cx={x} cy={y} r={glow * 1.25} fill="#FF5A33" opacity={0.16} />
               </>
             )}
 
             {/* Jupiter — tighter golden glow (crisper per feedback) */}
             {useIllustrations && body.id === "jupiter" && !nightMode && (
-              <Circle cx={x} cy={y} r={st.glow * 1.3} fill="#EBB44E" opacity={0.11} />
+              <Circle cx={x} cy={y} r={glow * 1.3} fill="#EBB44E" opacity={0.11} />
             )}
 
             {/* Jupiter — the four GALILEAN MOONS strung along the equatorial plane (a
@@ -145,7 +152,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
             {/* Venus — tighter pearl halo + diffraction glints (crisper per feedback) */}
             {useIllustrations && body.id === "venus" && !nightMode && (
               <>
-                <Circle cx={x} cy={y} r={st.glow * 1.95} fill="url(#venusBloom)" />
+                <Circle cx={x} cy={y} r={glow * 1.95} fill="url(#venusBloom)" />
                 <Line x1={x - d * 1.05} y1={y} x2={x + d * 1.05} y2={y} stroke="#FFF6D6" strokeWidth={Math.max(0.8, d * 0.035)} strokeOpacity={0.55} strokeLinecap="round" />
                 <Line x1={x} y1={y - d * 1.05} x2={x} y2={y + d * 1.05} stroke="#FFF6D6" strokeWidth={Math.max(0.8, d * 0.035)} strokeOpacity={0.55} strokeLinecap="round" />
               </>
@@ -207,7 +214,7 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
             <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />
 
             {showLabels && (() => {
-              const lx = x + st.glow * 0.6 + 4;
+              const lx = x + glow * 0.6 + 4;
               const lp = placeLabel ? placeLabel(lx, y + 4, body.name, 14) : { x: lx, y: y + 4 };
               return (
                 <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={14} fontWeight="800" opacity={1}>

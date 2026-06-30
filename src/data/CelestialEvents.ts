@@ -1,6 +1,8 @@
-// Celestial events for 2026-2027 — eclipses, meteor showers,
-// conjunctions, oppositions, supermoons, comets.
-// Source: IAU, NASA, timeanddate.com
+// Celestial events — algorithmically generated for a rolling 10-year window (2026–2035).
+// Equinoxes/solstices (Meeus Ch.27 mean formulae), supermoons + meteor-shower moon
+// interference (synodic month), planet oppositions (synodic periods), plus a hand-curated
+// set of rare events (eclipses, notable conjunctions) that can't be cheaply computed.
+// Sources: Meeus "Astronomical Algorithms", IAU, NASA eclipse canon.
 
 export type EventType = "meteor" | "eclipse" | "conjunction" | "opposition" | "supermoon" | "comet" | "equinox" | "solstice" | "transit" | "occultation";
 
@@ -18,77 +20,234 @@ export interface CelestialEvent {
   premium?: boolean;
 }
 
-export const CELESTIAL_EVENTS: CelestialEvent[] = [
-  // ═══ 2026 ═══
+type Rating = CelestialEvent["rating"];
 
-  // July
-  { id: "earth-aphelion-2026", name: "Earth at Aphelion", date: "2026-07-06", type: "opposition",
-    description: "Earth is at its farthest point from the Sun — 152.1 million km.", bestTime: "All day", rating: 1 },
-  { id: "delta-aquariids-2026", name: "Delta Aquariid Meteor Shower", date: "2026-07-28", endDate: "2026-07-29", type: "meteor",
-    description: "Up to 20 meteors per hour radiating from Aquarius. Best after midnight.", bestTime: "After midnight", direction: "Look south toward Aquarius", moonInterference: "moderate", rating: 3 },
+// ── Date ⇆ Julian Day helpers ──────────────────────────────────────────────
+const JD_UNIX_EPOCH = 2440587.5; // JD at 1970-01-01T00:00:00Z
 
-  // August
-  { id: "perseids-2026", name: "Perseid Meteor Shower", date: "2026-08-12", endDate: "2026-08-13", type: "meteor",
-    description: "The king of meteor showers — up to 100 bright meteors per hour. Fast, bright, often with persistent trains.", bestTime: "After midnight until dawn", direction: "Radiant in Perseus, but look anywhere", moonInterference: "low", rating: 5 },
-  { id: "saturn-opposition-2026", name: "Saturn at Opposition", date: "2026-09-11", type: "opposition",
-    description: "Saturn at its closest and brightest for the year. Rings tilted beautifully. Visible all night.", bestTime: "All night — rises at sunset, sets at sunrise", direction: "Rises in the east", rating: 4 },
+function jdeToISO(jde: number): string {
+  return new Date(Math.round((jde - JD_UNIX_EPOCH) * 86400000)).toISOString().slice(0, 10);
+}
+function isoToJDE(iso: string): number {
+  return Date.parse(`${iso}T00:00:00Z`) / 86400000 + JD_UNIX_EPOCH;
+}
+const pad = (n: number) => String(n).padStart(2, "0");
 
-  // September
-  { id: "total-lunar-eclipse-2026", name: "Total Lunar Eclipse", date: "2026-09-07", type: "eclipse",
-    description: "The Moon passes through Earth's shadow, turning deep red — a 'Blood Moon.' Visible from the Americas, Europe, and Africa.", bestTime: "Evening through early morning", direction: "Look east as the Moon rises", rating: 5 },
-  { id: "autumnal-equinox-2026", name: "Autumnal Equinox", date: "2026-09-22", type: "equinox",
-    description: "Day and night are nearly equal. The Sun crosses the celestial equator heading south.", bestTime: "All day", rating: 2 },
+// ── Moon model (synodic phase + supermoon test) ────────────────────────────
+const SYNODIC = 29.530588853;       // mean synodic month (days)
+const NEW_MOON_EPOCH = 2451550.1;   // 2000-01-06 18:14 UTC — a known new moon (JDE)
 
-  // October
-  { id: "draconids-2026", name: "Draconid Meteor Shower", date: "2026-10-08", type: "meteor",
-    description: "A modest shower from Comet Giacobini-Zinner. Usually 10-20 per hour but occasionally bursts to hundreds.", bestTime: "Early evening — unusual for a meteor shower", direction: "Radiant near Draco's head", moonInterference: "low", rating: 2 },
-  { id: "orionids-2026", name: "Orionid Meteor Shower", date: "2026-10-21", endDate: "2026-10-22", type: "meteor",
-    description: "Debris from Halley's Comet — 20-25 fast meteors per hour with persistent trains.", bestTime: "After midnight", direction: "Radiant near Orion's club", moonInterference: "moderate", rating: 3 },
-  { id: "jupiter-opposition-2026", name: "Jupiter at Opposition", date: "2026-10-10", type: "opposition",
-    description: "Jupiter at its closest and brightest. Cloud bands and Great Red Spot visible through small telescopes. All four Galilean moons visible.", bestTime: "All night", direction: "Rises in the east at sunset", rating: 4 },
+// Illuminated fraction (%) at a given JDE: 0 = new, 100 = full.
+function moonIllumPercent(jde: number): number {
+  let phase = ((jde - NEW_MOON_EPOCH) / SYNODIC) % 1;
+  if (phase < 0) phase += 1;
+  return ((1 - Math.cos(2 * Math.PI * phase)) / 2) * 100;
+}
 
-  // November
-  { id: "leonids-2026", name: "Leonid Meteor Shower", date: "2026-11-17", endDate: "2026-11-18", type: "meteor",
-    description: "Debris from Comet Tempel-Tuttle. 15-20 fast, bright meteors per hour. Historically produces spectacular storms.", bestTime: "After midnight", direction: "Radiant in Leo's mane", moonInterference: "low", rating: 3 },
+// Moon's mean anomaly (deg). 0° ≈ perigee — used to approximate supermoons.
+function moonMeanAnomalyDeg(jde: number): number {
+  const T = (jde - 2451545) / 36525;
+  let M = 134.9633964 + 477198.8675055 * T + 0.0087414 * T * T;
+  M = ((M % 360) + 360) % 360;
+  return M;
+}
 
-  // December
-  { id: "geminids-2026", name: "Geminid Meteor Shower", date: "2026-12-14", endDate: "2026-12-15", type: "meteor",
-    description: "The best meteor shower of the year — up to 150 multicolored meteors per hour. Bright, slow, and spectacular.", bestTime: "9 PM to dawn", direction: "Radiant near Castor in Gemini", moonInterference: "low", rating: 5 },
-  { id: "winter-solstice-2026", name: "Winter Solstice", date: "2026-12-21", type: "solstice",
-    description: "The shortest day and longest night of the year. The Sun is at its lowest point in the sky.", bestTime: "All night — maximum darkness", rating: 2 },
-  { id: "ursids-2026", name: "Ursid Meteor Shower", date: "2026-12-22", type: "meteor",
-    description: "A gentle shower of 5-10 meteors per hour from near the Big Dipper.", bestTime: "After midnight", direction: "Radiant near Ursa Minor", moonInterference: "moderate", rating: 2 },
+// ── Equinoxes & Solstices (Meeus 27.B mean instants, years 1000–3000) ──────
+function computeEquinoxSolstice(startYear: number, endYear: number): CelestialEvent[] {
+  const out: CelestialEvent[] = [];
+  const seasons = [
+    { key: "vernal-equinox", name: "Vernal Equinox", type: "equinox" as EventType,
+      desc: "Spring begins. Day and night are nearly equal as the Sun crosses the celestial equator heading north.",
+      c: [2451623.80984, 365242.37404, 0.05169, -0.00411, -0.00057] },
+    { key: "summer-solstice", name: "Summer Solstice", type: "solstice" as EventType,
+      desc: "The longest day and shortest night. The Sun reaches its highest point in the sky.",
+      c: [2451716.56767, 365241.62603, 0.00325, 0.00888, -0.00030] },
+    { key: "autumnal-equinox", name: "Autumnal Equinox", type: "equinox" as EventType,
+      desc: "Day and night are nearly equal. The Sun crosses the celestial equator heading south.",
+      c: [2451810.21715, 365242.01767, -0.11575, 0.00337, 0.00078] },
+    { key: "winter-solstice", name: "Winter Solstice", type: "solstice" as EventType,
+      desc: "The shortest day and longest night of the year. The Sun is at its lowest point in the sky.",
+      c: [2451900.05952, 365242.74049, -0.06223, -0.00823, 0.00032] }
+  ];
+  for (let year = startYear; year <= endYear; year++) {
+    const Y = (year - 2000) / 1000;
+    for (const s of seasons) {
+      const jde = s.c[0] + s.c[1] * Y + s.c[2] * Y * Y + s.c[3] * Y ** 3 + s.c[4] * Y ** 4;
+      out.push({
+        id: `${s.key}-${year}`,
+        name: s.name,
+        date: jdeToISO(jde),
+        type: s.type,
+        description: s.desc,
+        bestTime: "All day",
+        rating: 2
+      });
+    }
+  }
+  return out;
+}
 
-  // ═══ 2027 ═══
+// ── Supermoons (full moons near perigee) ───────────────────────────────────
+function computeSynodicEvents(startYear: number, endYear: number): CelestialEvent[] {
+  const out: CelestialEvent[] = [];
+  const startJDE = isoToJDE(`${startYear}-01-01`);
+  const endJDE = isoToJDE(`${endYear}-12-31`);
+  // Walk full moons (new moon + half a synodic month) across the window.
+  let k = Math.floor((startJDE - NEW_MOON_EPOCH) / SYNODIC) - 1;
+  for (;;) {
+    const fullJDE = NEW_MOON_EPOCH + SYNODIC * k + SYNODIC / 2;
+    k++;
+    if (fullJDE > endJDE) break;
+    if (fullJDE < startJDE) continue;
+    const anomaly = moonMeanAnomalyDeg(fullJDE);
+    const fromPerigee = Math.min(anomaly, 360 - anomaly); // 0° = perigee
+    if (fromPerigee >= 42) continue; // not close enough to perigee → ordinary full moon
+    const iso = jdeToISO(fullJDE);
+    out.push({
+      id: `supermoon-${iso}`,
+      name: "Supermoon",
+      date: iso,
+      type: "supermoon",
+      description: "A full Moon near perigee — the largest, brightest full Moon of its season, appearing up to 14% bigger and 30% brighter than an average full Moon.",
+      bestTime: "All night — rises at sunset, highest near midnight",
+      direction: "Rises in the east at sunset",
+      rating: fromPerigee < 20 ? 4 : 3
+    });
+  }
+  return out;
+}
 
-  // January
-  { id: "quadrantids-2027", name: "Quadrantid Meteor Shower", date: "2027-01-03", endDate: "2027-01-04", type: "meteor",
-    description: "A brief but intense shower — up to 120 meteors per hour in a narrow 6-hour window.", bestTime: "Pre-dawn hours", direction: "Radiant between Boötes and Draco", moonInterference: "moderate", rating: 4 },
-
-  // February
-  { id: "annular-solar-eclipse-2027", name: "Annular Solar Eclipse", date: "2027-02-06", type: "eclipse",
-    description: "A 'Ring of Fire' eclipse visible from South America and parts of Africa. Partial eclipse from broader regions.", bestTime: "Midday (location dependent)", rating: 5 },
-
-  // March
-  { id: "vernal-equinox-2027", name: "Vernal Equinox", date: "2027-03-20", type: "equinox",
-    description: "Spring begins. Day and night nearly equal. The Sun crosses the celestial equator heading north.", bestTime: "All day", rating: 2 },
-
-  // April
-  { id: "lyrids-2027", name: "Lyrid Meteor Shower", date: "2027-04-22", endDate: "2027-04-23", type: "meteor",
-    description: "One of the oldest known meteor showers — 18 per hour with occasional fireballs.", bestTime: "After midnight", direction: "Radiant near Vega in Lyra", moonInterference: "low", rating: 3 },
-
-  // May
-  { id: "eta-aquariids-2027", name: "Eta Aquariid Meteor Shower", date: "2027-05-06", type: "meteor",
-    description: "Another gift from Halley's Comet — up to 50 fast meteors per hour at southern latitudes.", bestTime: "Pre-dawn", direction: "Radiant in Aquarius", moonInterference: "high", rating: 3 },
-
-  // June
-  { id: "summer-solstice-2027", name: "Summer Solstice", date: "2027-06-21", type: "solstice",
-    description: "The longest day and shortest night. The Sun reaches its highest point in the sky.", bestTime: "All day", rating: 2 },
-
-  // July
-  { id: "total-solar-eclipse-2027", name: "Total Solar Eclipse", date: "2027-08-02", type: "eclipse",
-    description: "Totality visible from Spain, Morocco, Algeria, Tunisia, Libya, Egypt. A once-in-a-lifetime event for those in the path.", bestTime: "Midday (location dependent)", rating: 5 },
+// ── Annual meteor showers ──────────────────────────────────────────────────
+interface ShowerDef {
+  id: string; name: string; month: number; day: number; endDay: number;
+  rate: number; rating: Rating; direction: string; bestTime: string;
+}
+const SHOWERS: ShowerDef[] = [
+  { id: "quadrantids", name: "Quadrantid Meteor Shower", month: 1, day: 3, endDay: 4, rate: 120, rating: 4, direction: "NE near Boötes", bestTime: "Pre-dawn hours" },
+  { id: "lyrids", name: "Lyrid Meteor Shower", month: 4, day: 22, endDay: 23, rate: 20, rating: 3, direction: "Near Vega in Lyra", bestTime: "After midnight" },
+  { id: "eta-aquariids", name: "Eta Aquariid Meteor Shower", month: 5, day: 5, endDay: 6, rate: 50, rating: 3, direction: "East near Aquarius", bestTime: "Pre-dawn" },
+  { id: "delta-aquariids", name: "Delta Aquariid Meteor Shower", month: 7, day: 28, endDay: 29, rate: 20, rating: 3, direction: "South toward Aquarius", bestTime: "After midnight" },
+  { id: "perseids", name: "Perseid Meteor Shower", month: 8, day: 12, endDay: 13, rate: 100, rating: 5, direction: "Radiant in Perseus — look anywhere", bestTime: "After midnight until dawn" },
+  { id: "draconids", name: "Draconid Meteor Shower", month: 10, day: 8, endDay: 9, rate: 10, rating: 2, direction: "Near Draco in the north", bestTime: "Early evening" },
+  { id: "orionids", name: "Orionid Meteor Shower", month: 10, day: 21, endDay: 22, rate: 20, rating: 3, direction: "Near Orion", bestTime: "After midnight" },
+  { id: "leonids", name: "Leonid Meteor Shower", month: 11, day: 17, endDay: 18, rate: 15, rating: 3, direction: "East near Leo", bestTime: "After midnight" },
+  { id: "geminids", name: "Geminid Meteor Shower", month: 12, day: 13, endDay: 14, rate: 120, rating: 5, direction: "Near Gemini — look anywhere", bestTime: "9 PM to dawn" },
+  { id: "ursids", name: "Ursid Meteor Shower", month: 12, day: 22, endDay: 23, rate: 10, rating: 2, direction: "Near Ursa Minor", bestTime: "After midnight" }
 ];
+
+function computeMeteorShowers(startYear: number, endYear: number): CelestialEvent[] {
+  const out: CelestialEvent[] = [];
+  for (let year = startYear; year <= endYear; year++) {
+    for (const s of SHOWERS) {
+      const date = `${year}-${pad(s.month)}-${pad(s.day)}`;
+      const endDate = `${year}-${pad(s.month)}-${pad(s.endDay)}`;
+      const illum = moonIllumPercent(isoToJDE(date));
+      const moonInterference = illum < 25 ? "none" : illum < 50 ? "low" : illum < 75 ? "moderate" : "high";
+      const note =
+        moonInterference === "none" ? " Excellent dark skies — ideal viewing."
+        : moonInterference === "high" ? " A bright Moon may wash out fainter meteors."
+        : "";
+      out.push({
+        id: `${s.id}-${year}`,
+        name: s.name,
+        date,
+        endDate,
+        type: "meteor",
+        description: `Up to ${s.rate} meteors per hour at peak, radiating from the ${s.direction}.${note}`,
+        bestTime: s.bestTime,
+        direction: `Look toward ${s.direction}`,
+        moonInterference,
+        rating: s.rating
+      });
+    }
+  }
+  return out;
+}
+
+// ── Planet oppositions (stepped by synodic period from a known opposition) ──
+function computeOppositions(startYear: number, endYear: number): CelestialEvent[] {
+  const out: CelestialEvent[] = [];
+  const planets: { id: string; name: string; synodic: number; ref: string; rating: Rating; desc: string }[] = [
+    { id: "jupiter", name: "Jupiter at Opposition", synodic: 398.88, ref: "2026-11-21", rating: 4,
+      desc: "Jupiter at its closest and brightest — cloud bands and the Great Red Spot show in small telescopes, and all four Galilean moons are visible." },
+    { id: "saturn", name: "Saturn at Opposition", synodic: 378.09, ref: "2026-09-11", rating: 4,
+      desc: "Saturn at its closest and brightest for the year, its rings beautifully tilted. Visible all night." },
+    { id: "mars", name: "Mars at Opposition", synodic: 779.94, ref: "2027-02-19", rating: 4,
+      desc: "Mars at its biggest and brightest, blazing orange-red and visible all night — the best time to observe the red planet." }
+  ];
+  const startJDE = isoToJDE(`${startYear}-01-01`);
+  const endJDE = isoToJDE(`${endYear}-12-31`);
+  for (const pl of planets) {
+    for (let jde = isoToJDE(pl.ref); jde <= endJDE; jde += pl.synodic) {
+      if (jde < startJDE) continue;
+      const iso = jdeToISO(jde);
+      out.push({
+        id: `${pl.id}-opposition-${iso}`,
+        name: pl.name,
+        date: iso,
+        type: "opposition",
+        description: pl.desc,
+        bestTime: "All night — rises at sunset, sets at sunrise",
+        direction: "Rises in the east at sunset",
+        rating: pl.rating
+      });
+    }
+  }
+  return out;
+}
+
+// ── Rare, hand-curated events (eclipses + notable conjunctions) ─────────────
+// No guaranteed naked-eye comets are predicted through 2035; none are listed.
+const RARE_EVENTS: CelestialEvent[] = [
+  // Eclipses
+  { id: "total-lunar-eclipse-2026-09", name: "Total Lunar Eclipse", date: "2026-09-07", type: "eclipse",
+    description: "The Moon passes through Earth's shadow, turning deep red — a 'Blood Moon.' Visible from the Americas, Europe, and Africa.", bestTime: "Evening through early morning", direction: "Look east as the Moon rises", rating: 5 },
+  { id: "annular-solar-eclipse-2027-02", name: "Annular Solar Eclipse", date: "2027-02-06", type: "eclipse",
+    description: "A 'Ring of Fire' eclipse visible from South America and parts of Africa; partial from broader regions.", bestTime: "Midday (location dependent)", rating: 4 },
+  { id: "total-solar-eclipse-2027-08", name: "Total Solar Eclipse", date: "2027-08-02", type: "eclipse",
+    description: "One of the longest totalities of the century, crossing North Africa, the Middle East, and Asia. A once-in-a-lifetime event in the path.", bestTime: "Midday (location dependent)", rating: 5 },
+  { id: "partial-lunar-eclipse-2028-01", name: "Partial Lunar Eclipse", date: "2028-01-12", type: "eclipse",
+    description: "Part of the Moon dips into Earth's umbra, darkening one edge.", bestTime: "Overnight (location dependent)", rating: 2 },
+  { id: "total-solar-eclipse-2028-07", name: "Total Solar Eclipse", date: "2028-07-22", type: "eclipse",
+    description: "Totality crosses Australia and New Zealand, passing directly over Sydney.", bestTime: "Midday (location dependent)", rating: 5 },
+  { id: "total-lunar-eclipse-2028-12", name: "Total Lunar Eclipse", date: "2028-12-31", type: "eclipse",
+    description: "A New Year's Eve Blood Moon visible from Europe, Africa, and Asia.", bestTime: "Overnight (location dependent)", direction: "Look toward the Moon", rating: 5 },
+  { id: "partial-lunar-eclipse-2029-06", name: "Partial Lunar Eclipse", date: "2029-06-12", type: "eclipse",
+    description: "A modest partial eclipse shading the Moon's edge.", bestTime: "Overnight (location dependent)", rating: 2 },
+  { id: "total-lunar-eclipse-2029-12", name: "Total Lunar Eclipse", date: "2029-12-05", type: "eclipse",
+    description: "A deep total lunar eclipse well placed for the Americas.", bestTime: "Overnight (location dependent)", direction: "Look toward the Moon", rating: 5 },
+  { id: "annular-solar-eclipse-2030-06", name: "Annular Solar Eclipse", date: "2030-06-01", type: "eclipse",
+    description: "A 'Ring of Fire' annular eclipse across North Africa and Asia.", bestTime: "Midday (location dependent)", rating: 4 },
+  { id: "total-solar-eclipse-2030-11", name: "Total Solar Eclipse", date: "2030-11-25", type: "eclipse",
+    description: "Totality sweeps across southern Africa and Australia.", bestTime: "Midday (location dependent)", rating: 5 },
+
+  // Notable conjunctions
+  { id: "venus-jupiter-conjunction-2026-08", name: "Venus–Jupiter Conjunction", date: "2026-08-27", type: "conjunction",
+    description: "The two brightest planets draw close in the sky — a dazzling pairing visible to the naked eye.", bestTime: "Just before dawn or after dusk (location dependent)", direction: "Low near the horizon", rating: 4 },
+  { id: "mars-saturn-conjunction-2027-03", name: "Mars–Saturn Conjunction", date: "2027-03-22", type: "conjunction",
+    description: "Red Mars and golden Saturn meet closely, a fine sight in binoculars.", bestTime: "Pre-dawn (location dependent)", direction: "Toward the eastern sky", rating: 3 },
+  { id: "venus-jupiter-conjunction-2028-05", name: "Venus–Jupiter Conjunction", date: "2028-05-13", type: "conjunction",
+    description: "Venus and Jupiter pair up again — the two brightest planets side by side.", bestTime: "After dusk or before dawn (location dependent)", direction: "Low near the horizon", rating: 4 },
+  { id: "jupiter-saturn-conjunction-2029-11", name: "Jupiter–Saturn Near Conjunction", date: "2029-11-18", type: "conjunction",
+    description: "The two giants approach in the sky, echoing their rare 'Great Conjunction.'", bestTime: "Evening (location dependent)", direction: "Toward the southern sky", rating: 4 },
+  { id: "venus-mars-conjunction-2030-06", name: "Venus–Mars Conjunction", date: "2030-06-15", type: "conjunction",
+    description: "Brilliant Venus passes close to ruddy Mars — a striking color contrast.", bestTime: "After dusk (location dependent)", direction: "Low in the west", rating: 3 }
+];
+
+export function generateEvents(startYear: number, endYear: number): CelestialEvent[] {
+  return [
+    ...computeEquinoxSolstice(startYear, endYear),
+    ...computeSynodicEvents(startYear, endYear), // supermoons
+    ...computeMeteorShowers(startYear, endYear),
+    ...computeOppositions(startYear, endYear),
+    ...RARE_EVENTS.filter((e) => {
+      const y = parseInt(e.date.slice(0, 4), 10);
+      return y >= startYear && y <= endYear;
+    })
+  ].sort((a, b) => a.date.localeCompare(b.date));
+}
+
+export const CELESTIAL_EVENTS: CelestialEvent[] = generateEvents(2026, 2035);
 
 // Helper: get upcoming events from today
 export function getUpcomingEvents(limit = 10): CelestialEvent[] {

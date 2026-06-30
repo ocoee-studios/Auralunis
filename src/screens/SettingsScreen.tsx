@@ -14,6 +14,7 @@ import type { AuraLunisThemeMode } from "@/features/settings/SettingsTypes";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
 import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { DeviceDiagnosticsPanel } from "@/features/device-qa/DeviceDiagnosticsPanel";
+import { LearnPreferencesModal } from "@/features/learn/LearnPreferencesModal";
 import { openAuraLunisSubscriptionManagement, restoreAuraLunisPurchases } from "@/services/RevenueCatService";
 
 type SettingRowProps = {
@@ -56,6 +57,7 @@ export function SettingsScreen() {
   const { items, clearPrototypeVault } = useAuraLunisVault();
   const [deviceDiagnosticsOpen, setDeviceDiagnosticsOpen] = useState(false);
   const [legalModal, setLegalModal] = useState<"terms" | "privacy" | null>(null);
+  const [learnPrefsOpen, setLearnPrefsOpen] = useState(false);
 
 
   async function handleRestorePurchases() {
@@ -228,10 +230,12 @@ export function SettingsScreen() {
       </SettingsSection>
 
       <SettingsSection title="Learning">
-        <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("Learning Preferences", "All lessons are currently free and accessible. More customization options coming soon.")}>
+        <Pressable style={styles.secondaryButton} onPress={() => setLearnPrefsOpen(true)}>
           <Text style={styles.secondaryButtonText}>Learning Preferences</Text>
         </Pressable>
       </SettingsSection>
+
+      <LearnPreferencesModal visible={learnPrefsOpen} onClose={() => setLearnPrefsOpen(false)} />
 
 
       <SettingsSection title="Native Device QA">
