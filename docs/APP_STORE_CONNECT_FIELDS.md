@@ -5,7 +5,7 @@
 | Field | Value | Notes |
 |-------|-------|-------|
 | **Name** | `AuraLunis` | 9 characters |
-| **Subtitle** | `The Interactive Astral Clock` | 29 characters (max 30) |
+| **Subtitle** | `Your Sky. Your Story.` | 21 characters (max 30) |
 | **Privacy Policy URL** | `https://ocoeestudios.com/auralunis/privacy` | Must be hosted BEFORE submission |
 | **Bundle ID** | `com.ocoeestudios.auralunis` | Set in app.json, cannot change after first upload |
 | **SKU** | `OCOEE-AURALUNIS-001` | Internal tracking only, not visible to users |
@@ -35,7 +35,7 @@
 
 ## Subtitle Options (pick one)
 
-1. `The Interactive Astral Clock` — 29 chars ← recommended (unique, matches tagline)
+1. `Your Sky. Your Story.` — 21 chars ← recommended (matches the in-app descriptor)
 2. `Live Sky Map & Star Tracker` — 27 chars (SEO-friendly, more searchable)
 3. `AR Sky, Stars & Satellites` — 27 chars (highlights AR + satellites)
 4. `Astronomy & Celestial Guide` — 28 chars (broad, professional)
@@ -58,7 +58,7 @@ Recommendation: Option 1 for brand identity, or Option 2 if ASO (App Store Optim
 ## App Description (4000 char max)
 
 ```
-AuraLunis — The Interactive Astral Clock
+AuraLunis — Your Sky. Your Story.
 
 Your time, written in the stars.
 
@@ -71,7 +71,7 @@ ZODIAC IN THE REAL SKY
 Find your zodiac sign in the actual sky. Twelve zodiac constellations with symbols, mythology cards, and current sun position. See which sign the Sun is transiting right now.
 
 CELESTIAL DIAL
-A living astral clock. Planets orbit on golden rings. Real-time moon phase. Tonight Score tells you if the sky is worth going outside for. Poetic sky descriptions: not just data — atmosphere.
+A living Celestial Dial. Planets orbit on golden rings. Real-time moon phase. Tonight Score tells you if the sky is worth going outside for. Poetic sky descriptions: not just data — atmosphere.
 
 BIRTH SKY
 Enter your birthday. See the exact sky the moment you were born. Your moon phase, sun sign, rising constellation, visible planets, and a personal cosmic signature.

@@ -34,7 +34,7 @@ Preserve the exact design language shown in the approved board:
 - small orbital accents
 - refined serif AuraLunis wordmark
 - slogan: `YOUR TIME, WRITTEN IN THE STARS.`
-- descriptor: `THE INTERACTIVE ASTRAL CLOCK`
+- descriptor: `YOUR SKY. YOUR STORY.`
 - gold sparkle field and restrained cosmic texture
 
 ## In-app use

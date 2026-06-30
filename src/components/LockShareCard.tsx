@@ -94,7 +94,7 @@ export function LockShareCard({ data, onClose }: LockShareCardProps) {
         {/* Top brand bar */}
         <View style={styles.brandRow}>
           <Text style={styles.brandName}>AURALUNIS</Text>
-          <Text style={styles.brandTag}>THE INTERACTIVE ASTRAL CLOCK</Text>
+          <Text style={styles.brandTag}>YOUR SKY. YOUR STORY.</Text>
         </View>
 
         {/* Lock type badge */}

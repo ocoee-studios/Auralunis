@@ -15,7 +15,7 @@ The AuraLunis logo is a gold crescent "C" within an astrolabe compass:
 - **Gold spheres** at compass points = celestial bodies
 
 ### Logo variations
-1. Full wordmark: logo + "AURALUNIS" + "THE INTERACTIVE ASTRAL CLOCK"
+1. Full wordmark: logo + "AURALUNIS" + "YOUR SKY. YOUR STORY."
 2. Compact: logo + "AURALUNIS" (no subtitle)
 3. Monochrome: white/silver version for dark backgrounds
 4. Icon only: the crescent C compass (used as app icon)
