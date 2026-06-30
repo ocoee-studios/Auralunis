@@ -117,10 +117,10 @@ export function SettingsScreen() {
         <GlassPanel accent>
           <Text style={styles.infoTitle}>AuraLunis Memberships</Text>
           <Text style={styles.infoCopy}>
-            AuraLunis Premium: {AuraLunisPricing.monthly} or {AuraLunisPricing.annual}. Includes {AuraLunisPricing.trial}.
+            AuraLunis Premium: {AuraLunisPricing.monthly} or {AuraLunisPricing.annual}. Lifetime {AuraLunisPricing.lifetime} one-time.
           </Text>
           <Text style={styles.infoCopy}>
-            Start with a free trial, upgrade when you're ready. Cancel anytime.
+            Subscribe when you're ready. Cancel anytime.
           </Text>
           {!isPremium && (
             <Pressable style={styles.actionButton} onPress={openPaywall}>

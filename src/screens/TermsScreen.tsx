@@ -20,8 +20,8 @@ export function TermsScreen() {
       <Text style={styles.heading}>Subscriptions</Text>
       <Text style={styles.body}>
         Free: Celestial Dial, basic sky view, 10 constellations, ISS tracking, Learn section.{"\n\n"}
-        Premium ($6.99/month or $39.99/year): Full Sky Lens AR, 35 major constellations with mythology, live satellite tracking, Birth Sky, Astro Weather, Astrophotography Planner, Night Vision, sky-quality presets, encrypted vault.{"\n\n"}
-        Lifetime ($99.99 one-time): all Premium features permanently, including future updates. No subscription.
+        Premium ($9.99/month or $49.99/year): Full Sky Lens AR, 35 major constellations with mythology, live satellite tracking, Birth Sky, Astro Weather, Astrophotography Planner, Night Vision, sky-quality presets, encrypted vault.{"\n\n"}
+        Lifetime ($129.99 one-time): all Premium features permanently, including future updates. No subscription.
       </Text>
 
       <Text style={styles.heading}>Billing</Text>
@@ -31,11 +31,6 @@ export function TermsScreen() {
         • Your account will be charged for renewal within 24 hours prior to the end of the current period at the same price{"\n"}
         • You can manage and cancel subscriptions in your Apple ID Account Settings{"\n"}
         • No refunds for partial subscription periods
-      </Text>
-
-      <Text style={styles.heading}>Free Trial</Text>
-      <Text style={styles.body}>
-        If a free trial is offered, the unused portion of the trial is forfeited when you purchase a subscription.
       </Text>
 
       <Text style={styles.heading}>Accuracy & Safety</Text>

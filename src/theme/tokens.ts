@@ -89,19 +89,18 @@ export const AuraLunisThemes: Record<string, AuraLunisThemePalette> = {
 };
 
 export const AuraLunisPricing = {
-  // Monthly — no trial (direct charge nudges users toward annual)
-  monthly: "$6.99/month",
+  // Monthly — direct charge nudges users toward annual. No free trial.
+  monthly: "$9.99/month",
   monthlySubtitle: "Billed monthly · Cancel anytime",
 
-  // Annual — 7-day trial only on this plan
-  annual: "$39.99/year",
-  annualMonthly: "$3.33/month",
-  annualSavings: "Save 52%",
-  annualSubtitle: "$3.33/month, billed annually",
-  trial: "7-day free trial",
+  // Annual — best recurring value. No free trial.
+  annual: "$49.99/year",
+  annualMonthly: "$4.17/month",
+  annualSavings: "Save 58%",
+  annualSubtitle: "$4.17/month, billed annually",
 
   // Lifetime — anchor price, one-time purchase
-  lifetime: "$99.99",
+  lifetime: "$129.99",
   lifetimeSubtitle: "One-time purchase · Forever",
   lifetimeBadge: "BEST VALUE",
 

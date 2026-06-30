@@ -31,8 +31,8 @@ Sky positions are computed using astronomy-engine and publicly available NORAD T
 
 Premium features are offered via auto-renewable subscriptions processed through Apple In-App Purchases:
 
-- **AuraLunis Premium:** $6.99/month, or $39.99/year with a 7-day free trial (the free trial applies to the annual plan only).
-- **Lifetime:** $99.99 one-time purchase (non-renewing) that unlocks all Premium features permanently.
+- **AuraLunis Premium:** $9.99/month or $49.99/year. No free trial.
+- **Lifetime:** $129.99 one-time purchase (non-renewing) that unlocks all Premium features permanently.
 
 Payment is charged to your Apple ID at confirmation of purchase. Subscriptions auto-renew unless cancelled at least 24 hours before the end of the current billing period. Manage or cancel subscriptions in **iOS Settings → Apple ID → Subscriptions**.
 

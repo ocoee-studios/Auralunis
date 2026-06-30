@@ -28,7 +28,7 @@ WHAT MAKES IT DIFFERENT
 
 • Eclipse & Events Calendar — algorithmically generated eclipses, meteor showers, supermoons, and conjunctions for the years ahead.
 
-PREMIUM FEATURES (7-day free trial on the annual plan)
+PREMIUM FEATURES
 
 • Full Sky Lens AR with all layers (deep sky, Milky Way, nebulae)
 • Live satellite tracking — ISS, Starlink trains, debris, re-entry, chain and static modes
@@ -83,10 +83,10 @@ AuraLunis is an astronomy companion app. Key features to test:
    Restore Purchases button is on the Membership screen.
 
 Subscription: AuraLunis Premium (single entitlement)
-- Monthly: $6.99/month (com.ocoeestudios.auralunis.premium.monthly) — no trial
-- Annual:  $39.99/year (com.ocoeestudios.auralunis.premium.annual) — 7-day free trial
-- Lifetime: $99.99 one-time (com.ocoeestudios.auralunis.lifetime.founders)
-- The 7-day free trial applies to the ANNUAL plan only.
+- Monthly: $9.99/month (com.ocoeestudios.auralunis.premium.monthly)
+- Annual:  $49.99/year (com.ocoeestudios.auralunis.premium.annual)
+- Lifetime: $129.99 one-time (com.ocoeestudios.auralunis.lifetime.founders)
+- No free trial is offered on any plan.
 
 No login required. Location permission is optional but recommended.
 Demo credentials: N/A (no account system).

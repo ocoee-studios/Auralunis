@@ -1,8 +1,8 @@
 // ThreeTierPaywallModal.tsx
-// Optimized three-tier paywall: Annual (default, 7-day trial), Monthly, Lifetime.
+// Optimized three-tier paywall: Annual (default), Monthly, Lifetime.
 // Annual is selected by default and displayed prominently — monthly is secondary.
-// Lifetime acts as anchor price ($99.99) making annual feel like a steal.
-// Trial is ANNUAL ONLY — no trial on monthly (prevents weekend trial-and-cancel).
+// Lifetime acts as anchor price ($129.99) making annual feel like a steal.
+// No free trials on any plan — direct subscribe.
 
 import React, { useState } from "react";
 import {
@@ -86,31 +86,21 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
               onPress={() => handleSelect(lifetime)}
             />
 
-            {/* CTA — wording follows the selected tier: trial → "Start Free Trial",
-                lifetime → "Unlock Forever", monthly → "Subscribe". */}
+            {/* CTA — wording follows the selected tier:
+                lifetime → "Unlock Forever", subscription → "Subscribe". */}
             <TouchableOpacity
               style={styles.cta}
               onPress={handlePurchase}
               accessibilityRole="button"
               accessibilityLabel={
-                selectedPlan.interval === "lifetime"
-                  ? "Unlock Forever"
-                  : selectedPlan.trial
-                  ? "Start free trial"
-                  : "Subscribe"
+                selectedPlan.interval === "lifetime" ? "Unlock Forever" : "Subscribe"
               }
             >
               <Text style={styles.ctaText}>
-                {selectedPlan.interval === "lifetime"
-                  ? "Unlock Forever"
-                  : selectedPlan.trial
-                  ? "Start Free Trial"
-                  : "Subscribe"}
+                {selectedPlan.interval === "lifetime" ? "Unlock Forever" : "Subscribe"}
               </Text>
               <Text style={styles.ctaSub}>
-                {selectedPlan.trial
-                  ? `7-day free trial, then ${selectedPlan.displayPrice} · Cancel anytime`
-                  : selectedPlan.subtitle}
+                {selectedPlan.subtitle}
               </Text>
             </TouchableOpacity>
 
@@ -177,9 +167,6 @@ function PlanCard({
             {plan.name}
           </Text>
           <Text style={styles.planSubtitle}>{plan.subtitle}</Text>
-          {plan.trial && (
-            <Text style={styles.trialBadge}>7-day free trial included</Text>
-          )}
         </View>
       </View>
       <View style={styles.planRight}>
@@ -221,7 +208,6 @@ const styles = StyleSheet.create({
   radioSelected: { borderColor: AuraLunisColors.gold, backgroundColor: AuraLunisColors.gold },
   planName: { fontFamily: DISPLAY, color: AuraLunisColors.silver, fontSize: 14, fontWeight: "700" },
   planSubtitle: { fontFamily: BODY, color: AuraLunisColors.faint, fontSize: 11, marginTop: 2 },
-  trialBadge: { fontFamily: BODY, color: AuraLunisColors.green, fontSize: 10, fontWeight: "700", marginTop: 4 },
   planRight: { alignItems: "flex-end", gap: 4 },
   anchorPrice: { fontFamily: BODY, color: AuraLunisColors.faint, fontSize: 11, textDecorationLine: "line-through" },
   planPrice: { fontFamily: DISPLAY, color: AuraLunisColors.silver, fontSize: 15, fontWeight: "800" },

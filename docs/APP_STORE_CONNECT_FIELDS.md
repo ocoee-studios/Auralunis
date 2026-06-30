@@ -98,7 +98,7 @@ PREMIUM
 Free: Celestial Dial, basic sky view, ISS tracking, Learn, Zodiac.
 Premium: Full Sky Lens AR, 35 constellation figures, all satellites, Birth Sky, Astro Weather, Photo Planner, Night Vision, Time Travel, encrypted vault, and everything we build next.
 
-$6.99/month · $39.99/year with 7-day free trial (annual only) · $99.99 Lifetime
+$9.99/month · $49.99/year · $129.99 Lifetime
 
 Ocoee Studios · ocoeestudios.com
 ```
@@ -147,9 +147,9 @@ motion sensors (to determine which direction the phone is pointing).
 No account creation is required. No user data is transmitted to our
 servers. Subscription management is handled by RevenueCat/Apple.
 
-Premium features can be tested with a Sandbox Apple ID. The 7-day free
-trial applies to the annual plan only. Sky Lens includes a Simulation
-Mode for testing without live sensors (see public review notes).
+Premium features can be tested with a Sandbox Apple ID. No free trial
+is offered on any plan. Sky Lens includes a Simulation Mode for testing
+without live sensors (see public review notes).
 
 Contact: admin@ocoeestudios.com
 ```
@@ -158,13 +158,13 @@ Contact: admin@ocoeestudios.com
 
 | Reference Name | Product ID | Type | Price |
 |----------------|-----------|------|-------|
-| AuraLunis Monthly | `com.ocoeestudios.auralunis.premium.monthly` | Auto-renewable | $6.99 |
-| AuraLunis Annual | `com.ocoeestudios.auralunis.premium.annual` | Auto-renewable | $39.99 |
-| AuraLunis Lifetime | `com.ocoeestudios.auralunis.lifetime.founders` | Non-consumable | $99.99 |
+| AuraLunis Monthly | `com.ocoeestudios.auralunis.premium.monthly` | Auto-renewable | $9.99 |
+| AuraLunis Annual | `com.ocoeestudios.auralunis.premium.annual` | Auto-renewable | $49.99 |
+| AuraLunis Lifetime | `com.ocoeestudios.auralunis.lifetime.founders` | Non-consumable | $129.99 |
 
 Subscription Group: `AuraLunis Premium`
 Entitlement identifier (RevenueCat): `AuraLunis Premium` (exact — space + capitals)
-Free trial: 7 days on Annual only
+Free trial: none (no introductory offer on any plan)
 
 > The Lifetime product ID keeps the historical `...lifetime.founders` suffix
 > because it is already configured in App Store Connect. The user-facing display
