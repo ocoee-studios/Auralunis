@@ -3,6 +3,7 @@
 // Premium feature: generates a personal star chart with planets, moon phase,
 // and a "cosmic signature" summary.
 
+import { SiderealTime } from "astronomy-engine";
 import { computePlanetaryTargets } from "@/utils/planetaryEphemeris";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import { moonPhaseName } from "@/services/MoonPhase";
@@ -18,7 +19,7 @@ export interface BirthSkyProfile {
   moonPhase: string;       // "Waxing Crescent", "Full Moon", etc.
   moonIllumination: number;
   sunSign: string;         // Zodiac sign the sun was in
-  risingSign: string;      // Constellation on the eastern horizon
+  risingSign: string;      // Zodiac sign rising in the east (ascendant)
   planets: BirthPlanet[];
   visibleCount: number;    // How many planets were above horizon
   cosmicSignature: string; // e.g. "Born under a waning gibbous with Venus and Jupiter flanking the zenith"
@@ -70,16 +71,26 @@ const CONSTELLATIONS_BY_MONTH: Record<number, string[]> = {
   12: ["Orion", "Taurus", "Cassiopeia"],
 };
 
-/** Compute sun sign from date */
-function getSunSign(month: number, day: number): string {
-  for (const z of ZODIAC_SIGNS) {
-    const [sm, sd] = z.start;
-    const [em, ed] = z.end;
-    if (month === sm && day >= sd && month === em && day <= ed) return z.name;
-    if (month === sm && day >= sd && sm !== em) return z.name;
-    if (month === em && day <= ed && sm !== em) return z.name;
-  }
-  return "Capricorn";
+// Tropical zodiac order from ecliptic longitude 0° (Aries) onward.
+const TROPICAL_SIGNS = [
+  "Aries", "Taurus", "Gemini", "Cancer", "Leo", "Virgo",
+  "Libra", "Scorpio", "Sagittarius", "Capricorn", "Aquarius", "Pisces",
+];
+
+/**
+ * Sun sign from the Sun's apparent ecliptic longitude (0° = Aries), which is the true
+ * astronomical definition. More accurate than fixed calendar-date ranges, whose cusp
+ * dates drift ±1 day year to year and break for births near midnight in non-UTC zones.
+ * Low-precision Sun formula (~0.01°) — far better than the band needs.
+ */
+function getSunSign(birthDate: Date): string {
+  const jd = 2440587.5 + birthDate.getTime() / 86400000;
+  const n = jd - 2451545.0;
+  const L = (280.46 + 0.9856474 * n) % 360;
+  const g = (((357.528 + 0.9856003 * n) % 360) * Math.PI) / 180;
+  let lambda = L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g);
+  lambda = ((lambda % 360) + 360) % 360;
+  return TROPICAL_SIGNS[Math.floor(lambda / 30) % 12];
 }
 
 /** Simplified moon phase from JD */
@@ -93,12 +104,24 @@ function getMoonPhase(jd: number): { name: string; illumination: number } {
   return { name: moonPhaseName(illumination, isWaxing), illumination };
 }
 
-/** Rising constellation (on the eastern horizon at birth moment) */
-function getRisingConstellation(month: number, hourUTC: number): string {
-  // Simplified: shifts by ~2 constellations per 4 hours
-  const consts = CONSTELLATIONS_BY_MONTH[month] ?? ["Orion"];
-  const idx = Math.floor((hourUTC / 24) * consts.length) % consts.length;
-  return consts[idx];
+/**
+ * Rising sign (ascendant) — the zodiac sign on the eastern horizon at the birth moment.
+ * Uses the true ascendant from local sidereal time, latitude, and obliquity:
+ *   λ_asc = atan2( cos θ, -(sin θ·cos ε + tan φ·sin ε) )
+ * where θ = local sidereal time (RAMC). Verified against the ephemeris: the resulting
+ * ecliptic point sits on the horizon (alt ≈ 0) in the east. This correctly depends on
+ * BOTH longitude and latitude, unlike the old month/UTC-hour approximation.
+ */
+function getRisingSign(birthDate: Date, location: ObserverLocation): string {
+  const D2R = Math.PI / 180;
+  const eps = 23.4393 * D2R; // mean obliquity of the ecliptic
+  const gstHours = SiderealTime(birthDate); // Greenwich apparent sidereal time, hours
+  const lstDeg = (((gstHours * 15 + location.longitudeDegrees) % 360) + 360) % 360;
+  const th = lstDeg * D2R;
+  const phi = location.latitudeDegrees * D2R;
+  let lambda = Math.atan2(Math.cos(th), -(Math.sin(th) * Math.cos(eps) + Math.tan(phi) * Math.sin(eps))) / D2R;
+  lambda = ((lambda % 360) + 360) % 360;
+  return TROPICAL_SIGNS[Math.floor(lambda / 30) % 12];
 }
 
 /** Generate a poetic cosmic signature */
@@ -132,15 +155,13 @@ export function computeBirthSky(
 ): BirthSkyProfile {
   const birthDate = new Date(birthDateISO);
   const month = birthDate.getUTCMonth() + 1;
-  const day = birthDate.getUTCDate();
-  const hourUTC = birthDate.getUTCHours() + birthDate.getUTCMinutes() / 60;
 
   // Julian Date
   const jd = 2440587.5 + (birthDate.getTime() / 86400000);
 
-  const sunSign = getSunSign(month, day);
+  const sunSign = getSunSign(birthDate);
   const { name: moonPhase, illumination: moonIllumination } = getMoonPhase(jd);
-  const risingSign = getRisingConstellation(month, hourUTC);
+  const risingSign = getRisingSign(birthDate, location);
   const dominantConstellation = (CONSTELLATIONS_BY_MONTH[month] ?? ["Orion"])[0];
 
   // Compute planet positions AT THE BIRTH MOMENT (not now) — the date arg is required,

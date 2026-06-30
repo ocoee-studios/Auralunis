@@ -488,9 +488,9 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                   <Circle cx={p.x} cy={p.y} r={coreR} fill={coreId} />
                 </>
               )}
-              {/* hot heart — the central star / cluster (rings stay hollow; Big Five
-                  supply their own embedded stars) */}
-              {n.type !== "cluster" && (!customShapes || (!sig?.ring && !bf)) && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
+              {/* hot heart — the central star / cluster (rings & filament shells stay
+                  hollow; Big Five supply their own embedded stars) */}
+              {n.type !== "cluster" && !sig?.filaments && (!customShapes || (!sig?.ring && !bf)) && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
             </G>
 
             {/* label */}

@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { decryptVault, encryptVault, isEncrypted } from "@/services/VaultEncryption";
 
@@ -54,6 +54,10 @@ function sanitizeVaultItems(value: unknown): VaultItem[] {
 export function AuraLunisVaultProvider({ children }: { children: React.ReactNode }) {
   const [items, setItems] = useState<VaultItem[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  // True when stored data existed but couldn't be decrypted/parsed. While this is set
+  // AND the in-memory Vault is empty, we must NOT auto-persist — encrypting [] would
+  // clobber the (possibly recoverable) ciphertext on disk. A real user add clears it.
+  const loadFailedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
@@ -73,10 +77,15 @@ export function AuraLunisVaultProvider({ children }: { children: React.ReactNode
               const encrypted = await encryptVault(JSON.stringify(parsed));
               await AsyncStorage.setItem(VAULT_STORAGE_KEY, encrypted);
             }
+          } else {
+            // Stored data exists but decrypt/parse failed — protect it from being
+            // overwritten by the empty in-memory Vault.
+            loadFailedRef.current = true;
           }
         }
       } catch {
-        // Keep a blank local prototype Vault if storage is corrupt or unavailable.
+        // Corrupt/unavailable storage — keep a blank local Vault but guard existing data.
+        loadFailedRef.current = true;
       } finally {
         if (active) setHydrated(true);
       }
@@ -91,6 +100,8 @@ export function AuraLunisVaultProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     if (!hydrated) return;
+    // Never persist an empty Vault over data we failed to load (silent data loss).
+    if (loadFailedRef.current && items.length === 0) return;
 
     encryptVault(JSON.stringify(items))
       .then((encrypted) => AsyncStorage.setItem(VAULT_STORAGE_KEY, encrypted))

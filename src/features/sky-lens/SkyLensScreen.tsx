@@ -112,6 +112,11 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       return;
     }
     setCapturing(true);
+    // Quick white shutter flash so the capture feels tactile.
+    Animated.sequence([
+      Animated.timing(flash, { toValue: 0.85, duration: 70, useNativeDriver: true }),
+      Animated.timing(flash, { toValue: 0, duration: 220, useNativeDriver: true })
+    ]).start();
     try {
       const uri = await ViewShot.captureScreen({ format: "jpg", quality: 0.85, result: "tmpfile" });
       setCapturing(false);
@@ -186,6 +191,12 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Night Vision is premium — free users always start in normal (day) palette even
   // if a stale saved flag says otherwise.
   const [nightMode, setNightMode] = useState(gate.nightVision && settings.nightVision);
+  // Reconcile night mode once settings hydrate / entitlement resolves (the initial
+  // useState can run before settings load → a saved preference would be ignored). The
+  // manual toggle also writes settings.nightVision, so this stays consistent after toggles.
+  useEffect(() => {
+    setNightMode(gate.nightVision && settings.nightVision);
+  }, [gate.nightVision, settings.nightVision]);
   // Three sky modes cycled by the half-moon button: AR (camera, 45% dim) → Immersive
   // (camera, 75% dim — screenshot mode) → Planetarium (camera off, 95% dim) → AR.
   const [skyMode, setSkyMode] = useState<"ar" | "immersive" | "planetarium">("ar");
@@ -199,6 +210,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // scrim opacity (no React re-render of the whole scene per frame). Range 0 → 0.7.
   // Starts at a slight tint (thumb mid). Dragging toward ☾ Dark raises it, ☀ Clear → 0.
   const scrimOpacity = useRef(new Animated.Value(0.35)).current;
+  // Remembers the thumb position so it doesn't snap back to center when the slider
+  // re-mounts (it's hidden while an info card is open).
+  const sliderValueRef = useRef(0.5);
   const cinematicHint = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     if (!cinematic) return;
@@ -255,12 +269,23 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // hit-test the tap point against projected object positions ourselves and open the info
   // card for the nearest hit. Uses the SAME projectTarget the canvas renders with, so the
   // screen positions line up exactly. (Declared here so it can read `fov`.)
+  // Refs mirror the live values so the gesture reads the LATEST sky/pointing/fov/box at
+  // tap time WITHOUT being rebuilt every motion frame (which churned RNGH wiring and could
+  // drop a tap if a re-composition landed mid-touch).
+  const skyRef = useRef(sky); skyRef.current = sky;
+  const pointingRef = useRef(pointing); pointingRef.current = pointing;
+  const fovRef = useRef(fov); fovRef.current = fov;
+  const boxRef = useRef(box); boxRef.current = box;
   const objectTap = useMemo(
     () =>
       Gesture.Tap()
         .runOnJS(true)
         .maxDuration(300)
         .onEnd((e) => {
+          const sky = skyRef.current;
+          const pointing = pointingRef.current;
+          const fov = fovRef.current;
+          const box = boxRef.current;
           const PLANET_DESCRIPTIONS: Record<string, string> = {
             mercury: "The smallest planet, closest to the Sun.",
             venus: "The brightest planet, often called the evening or morning star.",
@@ -329,7 +354,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             setSelected(closest.obj);
           }
         }),
-    [sky, pointing, fov, box]
+    [] // stable — reads live values through refs (see above)
   );
   const sceneGesture = useMemo(() => Gesture.Simultaneous(pinch, cinematicTap, objectTap), [pinch, cinematicTap, objectTap]);
   // Milky Way brightens as the camera fades out: faint over a live feed, bold over
@@ -979,8 +1004,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               style={styles.skySlider}
               minimumValue={0}
               maximumValue={1}
-              value={0.5}
-              onValueChange={(v) => scrimOpacity.setValue((1 - v) * 0.7)}
+              value={sliderValueRef.current}
+              onValueChange={(v) => { sliderValueRef.current = v; scrimOpacity.setValue((1 - v) * 0.7); }}
               thumbTintColor={AuraLunisColors.gold}
               minimumTrackTintColor={AuraLunisColors.gold}
               maximumTrackTintColor="rgba(192,198,212,0.18)"

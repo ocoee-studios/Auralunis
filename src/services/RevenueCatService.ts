@@ -195,6 +195,7 @@ export async function purchaseAuraLunisPackage(
 export async function restoreAuraLunisPurchases(): Promise<{
   status: "restored" | "not_configured";
   customerInfo?: CustomerInfo;
+  entitled?: boolean;
 }> {
   const configuration = await configureRevenueCat();
 
@@ -203,8 +204,16 @@ export async function restoreAuraLunisPurchases(): Promise<{
   }
   if (!Purchases) return { status: "not_configured" };
 
-  const customerInfo = await Purchases.restorePurchases();
-  return { status: "restored", customerInfo };
+  try {
+    const customerInfo = await Purchases.restorePurchases();
+    // Report whether the restore actually granted the entitlement — callers should gate
+    // on `entitled`, not the bare "restored" status (which only means the call succeeded).
+    const entitled = hasAuraLunisEntitlement(customerInfo, RevenueCatIds.entitlement);
+    return { status: "restored", customerInfo, entitled };
+  } catch {
+    // Network / StoreKit / Expo Go error — never let it become an unhandled rejection.
+    return { status: "not_configured" };
+  }
 }
 
 export async function openAuraLunisSubscriptionManagement(): Promise<{
@@ -217,13 +226,18 @@ export async function openAuraLunisSubscriptionManagement(): Promise<{
   }
   if (!Purchases) return { status: "not_configured" };
 
-  const customerInfo = await Purchases.getCustomerInfo();
-  const managementURL = customerInfo.managementURL;
+  try {
+    const customerInfo = await Purchases.getCustomerInfo();
+    const managementURL = customerInfo.managementURL;
 
-  if (!managementURL) return { status: "missing_url" };
+    if (!managementURL) return { status: "missing_url" };
 
-  await Linking.openURL(managementURL);
-  return { status: "opened" };
+    await Linking.openURL(managementURL);
+    return { status: "opened" };
+  } catch {
+    // RC error or Linking.openURL rejection — fail gracefully instead of throwing.
+    return { status: "not_configured" };
+  }
 }
 
 export function hasAuraLunisEntitlement(
