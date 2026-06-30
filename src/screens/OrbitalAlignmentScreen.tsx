@@ -295,7 +295,7 @@ export function OrbitalAlignmentScreen() {
   // Audio engine — sync with alignment state
   useEffect(() => {
     if (mode !== "static") {
-      destroyIonosphericEngine();
+      destroyIonosphericEngine().catch(() => {});
       return;
     }
     getIonosphericEngine().setMuted(audioMuted);

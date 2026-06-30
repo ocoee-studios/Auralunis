@@ -52,7 +52,7 @@ function SettingsSection({ title, children }: { title: string; children: React.R
 
 export function SettingsScreen() {
   const { settings, hydrated, updateSetting, resetSettings } = useAuraLunisSettings();
-  const { isPremium } = useEntitlement();
+  const { isPremium, refresh } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
   const { items, clearPrototypeVault } = useAuraLunisVault();
   const [deviceDiagnosticsOpen, setDeviceDiagnosticsOpen] = useState(false);
@@ -63,11 +63,18 @@ export function SettingsScreen() {
   async function handleRestorePurchases() {
     try {
       const result = await restoreAuraLunisPurchases();
+      if (result.status === "not_configured") {
+        Alert.alert("Restore Purchases", "Purchases will be available once AuraLunis is live on the App Store.");
+        return;
+      }
+      // Re-fetch entitlement so the UI reflects the restore immediately (not just on
+      // next foreground), and tell the user the truth about what was found.
+      await refresh();
       Alert.alert(
         "Restore Purchases",
-        result.status === "not_configured"
-          ? "Purchases will be available once AuraLunis is live on the App Store."
-          : "AuraLunis refreshed your membership status for this Apple ID."
+        result.entitled
+          ? "Your AuraLunis Premium membership has been restored."
+          : "No active AuraLunis purchase was found on this Apple ID."
       );
     } catch {
       Alert.alert("Restore Purchases", "Restore could not be completed. Please try again from a signed-in Apple ID.");
@@ -108,7 +115,7 @@ export function SettingsScreen() {
         <LogoMark size={126} showWordmark showDescriptor centered />
         <Text style={styles.heroCopy}>
           {AuraLunisBrand.tagline} Manage subscription, appearance, privacy, Sky Lens calibration,
-          notifications, Watch, widgets, learning preferences, and local data.
+          notifications, learning preferences, and local data.
         </Text>
         <Text style={styles.syncState}>{hydrated ? "Settings saved locally" : "Loading local settings…"}</Text>
       </View>
@@ -225,9 +232,9 @@ export function SettingsScreen() {
         </Pressable>
       </SettingsSection>
 
-      <SettingsSection title="Widgets">
-        <SettingRow title="Portal Stack Widgets" description="Moon, Tonight Score, Note, Event, Alarm, and mini astrolabe widgets." value={settings.widgetsEnabled} onValueChange={(value) => updateSetting("widgetsEnabled", value)} />
-      </SettingsSection>
+      {/* Widgets section removed for v1 — the WidgetKit extension is not bundled in
+          this build, so the toggle controlled nothing and advertised widgets that
+          don't ship. Re-add when the widget extension is wired into the app. */}
 
       <SettingsSection title="Learning">
         <Pressable style={styles.secondaryButton} onPress={() => setLearnPrefsOpen(true)}>

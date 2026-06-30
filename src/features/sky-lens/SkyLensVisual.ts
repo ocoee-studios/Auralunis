@@ -63,7 +63,10 @@ export function magnitudeToRadius(magnitude: number): number {
   // WIDE brightness hierarchy (device-feedback pass): Sirius (mag -1.46) should read
   // dramatically bigger than an average mag-4 star — ~8-10×, not 2-3×. Steeper slope
   // + lower floor: mag -1.5 ≈ 11px, mag 0 ≈ 8.5px, mag 2 ≈ 4.9px, mag 4 ≈ 1.3px.
-  const r = 8.5 - 1.8 * magnitude;
+  // Guard against a non-finite magnitude: Math.max/min pass NaN through, and a NaN
+  // radius reaching a native SVG <Circle> can crash the view. Fall back to a mid value.
+  const m = Number.isFinite(magnitude) ? magnitude : 4;
+  const r = 8.5 - 1.8 * m;
   return Math.max(0.8, Math.min(11, r));
 }
 
