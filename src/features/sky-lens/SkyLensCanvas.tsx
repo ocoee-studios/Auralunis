@@ -148,9 +148,12 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           {photographicCore && <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />}
         </G>
       )}
-      {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
+      {/* Deep-sky nebulae — toggleable via the Deep Sky layer button. nebulaOpacity
+          is the on/off gate (0 in a city sky hides them); it is NOT applied as a group
+          opacity here, because NebulaLayer already governs its own opacity (incl. the
+          AR-mode cap). Multiplying both compounded to ~1-2% on screen — invisible. */}
       {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
-        <G transform={depth(1)} opacity={nebulaOpacity}>
+        <G transform={depth(1)}>
           <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} fullSphere={fullSphere} onSelect={onSelect} />
         </G>
       )}

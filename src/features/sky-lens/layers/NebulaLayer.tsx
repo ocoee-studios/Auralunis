@@ -328,8 +328,9 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
       {nebulae.map((n, i) => {
         const belowHorizon = !n.aboveHorizon;
         if (belowHorizon && !fullSphere && n.altitudeDegrees < -20) return null;
-        // AR (over the camera): the painterly clouds look out of place, so render them as
-        // faint hints — half size and capped to 0.15 opacity. Planetarium keeps them full.
+        // AR (over the camera): the painterly clouds look out of place at full strength,
+        // so render them at half size and cap opacity to 0.5 (was 0.15, which combined
+        // with the canvas dimming left them invisible). Planetarium keeps them full.
         const arMode = !fullSphere;
         const p = project(n.azimuthDegrees, n.altitudeDegrees);
         if (!p.onScreen) return null;
@@ -379,7 +380,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               }}
             />
 
-            <G opacity={Math.min(arMode ? 0.15 : 1, breathe * opMul)}>
+            <G opacity={Math.min(arMode ? 0.5 : 1, breathe * opMul)}>
               {n.type === "cluster" ? (
                 /* STAR CLUSTER — not a smooth glow but a tight swarm of individual
                    stars. A very faint glow (5%) ties them together; the dots lead. */
