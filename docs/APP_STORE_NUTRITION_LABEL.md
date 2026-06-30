@@ -1,5 +1,9 @@
 # App Store Privacy Nutrition Label — AuraLunis
 
+> **Authoritative source:** `docs/APP_STORE_PRIVACY_NUTRITION_LABEL.md` is the
+> canonical, detailed version used to fill in App Store Connect. This file is a
+> short summary kept in sync with it. If the two ever disagree, the detailed doc wins.
+
 Use this when filling out App Store Connect → App Privacy.
 
 ## Data Types Collected
@@ -8,7 +12,13 @@ Use this when filling out App Store Connect → App Privacy.
 - **Purpose:** App Functionality
 - **Linked to identity:** No
 - **Used for tracking:** No
-- **Notes:** On-device only. Computes sky positions. Never transmitted.
+- **Notes:** Used on-device to compute sky positions. Approximate coordinates only are sent to Open-Meteo for the weather forecast (no account, no identity).
+
+### 1b. Device ID (RevenueCat anonymous ID)
+- **Purpose:** App Functionality
+- **Linked to identity:** No
+- **Used for tracking:** No
+- **Notes:** RevenueCat generates an anonymous `$RCAnonymousID` to manage subscription state. No Apple ID, email, or name is collected. No IDFA / advertising identifier is ever used.
 
 ### 2. Purchases
 - **Purpose:** App Functionality
@@ -25,8 +35,8 @@ Use this when filling out App Store Connect → App Privacy.
 
 ## Data NOT Collected
 - ❌ Contact Info (name, email, phone) — never collected
-- ❌ Identifiers (device ID, advertising ID) — never collected
-- ❌ Usage Data (beyond standard Apple analytics) — not collected
+- ❌ Advertising identifier (IDFA) — never used (the only identifier collected is RevenueCat's anonymous ID — see §1b)
+- ❌ Usage Data — paywall/session analytics are processed on-device only and never transmitted, so they are not "collected" per Apple's definition
 - ❌ Browsing History — not applicable
 - ❌ Search History — not collected
 - ❌ Contacts — not accessed

@@ -7,7 +7,7 @@
 | **Name** | `AuraLunis` | 9 characters |
 | **Subtitle** | `The Interactive Astral Clock` | 29 characters (max 30) |
 | **Privacy Policy URL** | `https://ocoeestudios.com/auralunis/privacy` | Must be hosted BEFORE submission |
-| **Bundle ID** | `com.ocoee.auralunis` | Set in app.json, cannot change after first upload |
+| **Bundle ID** | `com.ocoeestudios.auralunis` | Set in app.json, cannot change after first upload |
 | **SKU** | `OCOEE-AURALUNIS-001` | Internal tracking only, not visible to users |
 | **Primary Language** | English (U.S.) | |
 | **Primary Category** | Reference | Astronomy reference app |
@@ -26,7 +26,7 @@
 - Being in the same category means showing up in "Similar Apps"
 
 **Secondary: Education**
-- The Learn tab, Sky in 30 Nights course, cultural stories justify this
+- The Learn tab and guided lessons justify this
 - Broadens discovery beyond astronomy-specific searches
 
 **Alternate option if Reference feels wrong:**
@@ -65,7 +65,7 @@ Your time, written in the stars.
 Point your phone at the sky. Watch gold constellation lines trace ancient patterns across your camera. See planets glow with color. Discover nebulae hiding in the Milky Way. Track the International Space Station as it streaks overhead. AuraLunis turns your iPhone into a living celestial instrument.
 
 SKY LENS — AR CAMERA OVERLAY
-40+ toggleable layers on your live camera. Stars with real spectral colors and magnitude sizing. Gold constellation lines that feel like luxury watch engravings. Glowing nebulae in pink, teal, and gold. The Milky Way rendered as a warm golden river. Night Vision mode for real stargazing. Every object tappable — discover names, distances, mythology, and science.
+Toggleable layers on your live camera. Stars with real spectral colors and magnitude sizing. Gold constellation lines that feel like luxury watch engravings. Glowing nebulae in pink, teal, and gold. The Milky Way rendered as a warm golden river. Night Vision mode for real stargazing. Every object tappable — discover names, distances, mythology, and science.
 
 ZODIAC IN THE REAL SKY
 Find your zodiac sign in the actual sky. Twelve zodiac constellations with symbols, mythology cards, and current sun position. See which sign the Sun is transiting right now.
@@ -88,20 +88,17 @@ Nine tracking modes. ISS, Hubble, Starlink trains, space debris, and re-entry al
 LEARN
 Free astronomy lessons with live visuals. Solar system, moon phases, star life cycles, constellations, deep sky objects. Each lesson links directly to Sky Lens — read about Orion, then see it in your sky.
 
-38 DEEP SKY OBJECTS
+DEEP SKY OBJECTS
 Orion Nebula, Andromeda Galaxy, Pleiades, Lagoon Nebula, Ring Nebula, and more. Each rendered as a glowing cloud of color — not a dot on a map.
-
-APPLE WATCH COMPANION
-Star Compass — point your wrist and feel the stars through haptic feedback. Seven complications. Tonight Score widget. Observation log that syncs to your vault.
 
 PRIVACY FIRST
 No account required. No ads. No tracking. Your observations stay on your device in an encrypted vault. We don't sell data. We don't even collect it.
 
 PREMIUM
 Free: Celestial Dial, basic sky view, ISS tracking, Learn, Zodiac.
-Premium: Full Sky Lens AR, 88 constellations, all satellites, Birth Sky, Astro Weather, Photo Planner, Night Vision, encrypted vault, Watch app, and everything we build next.
+Premium: Full Sky Lens AR, 35 constellation figures, all satellites, Birth Sky, Astro Weather, Photo Planner, Night Vision, Time Travel, encrypted vault, and everything we build next.
 
-$6.99/month · $39.99/year with 7-day free trial · $99.99 Founders Lifetime
+$6.99/month · $39.99/year with 7-day free trial (annual only) · $99.99 Lifetime
 
 Ocoee Studios · ocoeestudios.com
 ```
@@ -137,6 +134,11 @@ Each screenshot should have:
 
 ## App Review Notes
 
+Paste the canonical block from **`public/APP_STORE_REVIEW_NOTES.md`** into the
+App Review Information → Notes field. It covers Simulation Mode for testing the
+sensor-dependent Sky Lens, the sandbox subscription product IDs, and the
+no-account-required flow. Summary:
+
 ```
 AuraLunis is an astronomy app that uses the device camera (Sky Lens),
 location (to compute star/planet positions for the observer), and
@@ -145,7 +147,9 @@ motion sensors (to determine which direction the phone is pointing).
 No account creation is required. No user data is transmitted to our
 servers. Subscription management is handled by RevenueCat/Apple.
 
-For testing premium features: [provide sandbox Apple ID or promo code]
+Premium features can be tested with a Sandbox Apple ID. The 7-day free
+trial applies to the annual plan only. Sky Lens includes a Simulation
+Mode for testing without live sensors (see public review notes).
 
 Contact: admin@ocoeestudios.com
 ```
@@ -154,9 +158,14 @@ Contact: admin@ocoeestudios.com
 
 | Reference Name | Product ID | Type | Price |
 |----------------|-----------|------|-------|
-| AuraLunis Monthly | `auralunis_monthly` | Auto-renewable | $6.99 |
-| AuraLunis Annual | `auralunis_annual` | Auto-renewable | $39.99 |
-| AuraLunis Founders Lifetime | `auralunis_lifetime_founders` | Non-consumable | $99.99 |
+| AuraLunis Monthly | `com.ocoeestudios.auralunis.premium.monthly` | Auto-renewable | $6.99 |
+| AuraLunis Annual | `com.ocoeestudios.auralunis.premium.annual` | Auto-renewable | $39.99 |
+| AuraLunis Lifetime | `com.ocoeestudios.auralunis.lifetime.founders` | Non-consumable | $99.99 |
 
 Subscription Group: `AuraLunis Premium`
+Entitlement identifier (RevenueCat): `AuraLunis Premium` (exact — space + capitals)
 Free trial: 7 days on Annual only
+
+> The Lifetime product ID keeps the historical `...lifetime.founders` suffix
+> because it is already configured in App Store Connect. The user-facing display
+> name must be the neutral **"Lifetime"** (no "Founders" branding).

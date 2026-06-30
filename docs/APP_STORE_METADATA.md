@@ -7,47 +7,41 @@ AuraLunis: Interactive Astral Clock
 Your Time, Written in the Stars
 
 ## Promotional Text (170 chars, can change without review)
-Explore tonight's sky with real astronomy, AI companion, and encrypted personal vault. 88 constellations. Eclipse predictions. Birth sky profiles. NASA sonification.
+Explore tonight's sky with real on-device astronomy. Tonight Score, Birth Sky, satellite tracking, eclipse calendar, and an encrypted personal vault.
 
 ## Description
 AuraLunis is a premium astronomy companion that turns the night sky into a personal experience.
 
-Unlike basic stargazing apps, AuraLunis computes real planetary positions using astronomical algorithms — not generic sky maps. It tells you what's actually above you right now, scores tonight's viewing conditions, and guides you through meaningful stargazing rituals.
+Unlike basic stargazing apps, AuraLunis computes real planetary positions using astronomical algorithms — not generic sky maps. It tells you what's actually above you right now, scores tonight's viewing conditions, and guides you through meaningful stargazing.
 
 WHAT MAKES IT DIFFERENT
 
 • Tonight Score — a single number (0-100) telling you how good tonight's sky is, computed from weather, moon phase, and visible planets.
 
-• AI Sky Companion — ask "What's that bright star near the Moon?" and get a real answer based on your exact sky. Powered by Claude.
+• Sky Lens AR — point your camera at the sky and AuraLunis labels the planets, the Moon, constellation lines, and satellites in real time, aligned to your compass and location. Runs on-device — no internet needed.
 
-• Birth Sky Profile — see the exact sky the night you were born. Compare birth skies with friends.
+• Birth Sky Profile — see the exact sky the moment you were born: your moon phase, sun sign, rising constellation, and visible planets.
 
-• Cosmic Vault — encrypted journal for observations, reflections, and LifeSky moments. NaCl encryption, key in your Keychain. We can't read it.
+• Cosmic Vault — encrypted journal for observations and reflections. NaCl encryption, key in your Keychain. We can't read it.
 
-• 88 Constellations — every constellation with mythology from 12 cultures: Greek, Egyptian, Aboriginal Australian, Inca, Polynesian, Chinese, Hindu, Japanese, Māori, Norse, Cherokee, Aztec.
+• 35 Constellation Figures — constellation lines drawn across the real sky with Greek mythology cards, plus the twelve zodiac constellations and the Sun's current sign.
 
-• Sky Passport — collect gold-foil stamps for every eclipse, meteor shower, and conjunction you witness.
+• Eclipse & Events Calendar — algorithmically generated eclipses, meteor showers, supermoons, and conjunctions for the years ahead.
 
-• Teaching Mode — hand your phone to a child. Guided "Find the Moon!" challenges with celebration animations.
+PREMIUM FEATURES (7-day free trial on the annual plan)
 
-PREMIUM FEATURES (7-day free trial)
-
-• Full astronomy encyclopedia (planets, nebulae, galaxies, exoplanets)
-• Constellation Challenge — trace star patterns, earn accuracy scores
-• Eclipse & celestial events calendar through 2028
-• Dark Sky Finder with Bortle scale ratings
+• Full Sky Lens AR with all layers (deep sky, Milky Way, nebulae)
+• Live satellite tracking — ISS, Starlink trains, debris, re-entry, chain and static modes
+• Astro Weather — hour-by-hour observing forecast (cloud, seeing, transparency)
+• Astrophotography Planner — 500 Rule & NPF Rule exposure calculator, Milky Way core timing
 • Night Vision Mode (red-on-black for real stargazing)
-• Sky Timelapse — watch tonight's sky hour by hour
-• Celestial Meditation — breathing synced to light-travel distances
-• NASA Sound Observatory — hear Jupiter, Saturn's rings, a black hole
-• Annual Sky Recap — your year in stargazing
-• Apple Watch companion with astrolabe face
-• iOS widgets (Tonight Score, Moon Phase, Next Event)
-• Cosmic Compatibility — compare birth skies with anyone
+• Time Travel — scrub the sky forward and back in time
+• Birth Sky cosmic certificate
+• Encrypted Cosmic Vault
 
 PRIVACY-FIRST
 
-Your data stays on your device. Vault entries are encrypted. No account required. No ads. No tracking.
+Your data stays on your device. Vault entries are encrypted. No account required. No ads. No tracking. Only approximate coordinates are sent to Open-Meteo for the weather forecast.
 
 Made by Ocoee Studios. Your Time, Written in the Stars
 
@@ -74,22 +68,25 @@ Secondary: Weather
 ```
 AuraLunis is an astronomy companion app. Key features to test:
 
-1. HOME: Tap to see Tonight Score (computed from weather + moon). 
-   The astrolabe shows real planetary positions.
+1. HOME: Tap to see Tonight Score (computed from weather + moon).
+   The astral clock (Celestial Dial) shows real planetary positions.
 
-2. SKY: Star field with Find Mode. Tap "Milky Way" / "Deep Sky" toggle.
-   Sky Lens requires camera + motion permissions.
+2. SKY: Star field with Find Mode and Milky Way / Deep Sky toggles.
+   Sky Lens requires camera + motion permissions. A built-in
+   Simulation Mode lets you test the AR alignment without sensors
+   (see the public review-notes block in public/APP_STORE_REVIEW_NOTES.md).
 
-3. LEARN: Browse Planets, Constellations (88 entries), Nebulae, Galaxies.
+3. LEARN: Browse Planets, Constellations, Nebulae, and Galaxies lessons.
 
 4. SETTINGS: "Manage Plan" shows the subscription paywall.
-   RevenueCat sandbox: test with sandbox Apple ID.
+   RevenueCat sandbox: test with a sandbox Apple ID.
    Restore Purchases button is on the Membership screen.
 
-Subscription: AuraLunis Premium
-- Monthly: $6.99/month (com.ocoee.auralunis.premium.monthly)
-- Annual: $39.99/year (com.ocoee.auralunis.premium.annual)
-- Both include 7-day free trial.
+Subscription: AuraLunis Premium (single entitlement)
+- Monthly: $6.99/month (com.ocoeestudios.auralunis.premium.monthly) — no trial
+- Annual:  $39.99/year (com.ocoeestudios.auralunis.premium.annual) — 7-day free trial
+- Lifetime: $99.99 one-time (com.ocoeestudios.auralunis.lifetime.founders)
+- The 7-day free trial applies to the ANNUAL plan only.
 
 No login required. Location permission is optional but recommended.
 Demo credentials: N/A (no account system).

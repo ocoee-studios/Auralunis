@@ -36,17 +36,18 @@ The paywall must clearly state:
 
 | Product | ID | Type |
 |---|---|---|
-| Premium Monthly | `com.ocoee.auralunis.premium.monthly` | Auto-renewable |
-| Premium Annual | `com.ocoee.auralunis.premium.annual` | Auto-renewable |
+| Premium Monthly | `com.ocoeestudios.auralunis.premium.monthly` | Auto-renewable |
+| Premium Annual | `com.ocoeestudios.auralunis.premium.annual` | Auto-renewable |
+| Lifetime | `com.ocoeestudios.auralunis.lifetime.founders` | Non-consumable |
 
 ## Entitlement
-`auralunis_premium` — grants access to all premium features.
+`AuraLunis Premium` — exact identifier (with the space and capitals, NOT a snake_case slug). All three products unlock this single entitlement. A mismatch means purchases succeed but never unlock premium.
 
 ## Offering
-`default` — contains both monthly and annual packages.
+`default` — contains packages `premium_monthly`, `premium_annual`, and `lifetime_founders`.
 
 ## Free trial
-Both products include a 7-day introductory free trial.
+7-day introductory free trial on the **annual** plan only. The monthly plan has no trial.
 Configure in App Store Connect → In-App Purchases → each product → Introductory Offer.
 
 ## Sandbox testing

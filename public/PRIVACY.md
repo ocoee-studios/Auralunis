@@ -2,7 +2,7 @@
 
 **Last updated:** June 2026  
 **Developer:** Ocoee Studios · manager@ocoeestudios.com  
-**Bundle ID:** com.ocoee.auralunis
+**Bundle ID:** com.ocoeestudios.auralunis
 
 ---
 
@@ -11,7 +11,7 @@ AuraLunis is designed to keep your data local. The app does not sell, trade, or 
 ## Information we collect and why
 
 ### Precise Location
-Your device location is used to calculate the real-time positions of the Sun, Moon, planets, satellites, and overhead orbital objects above your specific sky. Location data is processed entirely on-device. It is not transmitted to any external server. If you decline location access, AuraLunis uses a neutral default location and all features remain available with reduced accuracy.
+Your device location is used to calculate the real-time positions of the Sun, Moon, planets, satellites, and overhead orbital objects above your specific sky. Location is processed on-device for these astronomical calculations and is never sent to Ocoee Studios servers. The only exception is the Tonight Score weather lookup: approximate coordinates are sent to Open-Meteo (see "Weather" below). If you decline location access, AuraLunis uses a neutral default location and all features remain available with reduced accuracy.
 
 ### Motion Sensors (Accelerometer & Magnetometer)
 Rotational vector data — pitch, roll, and azimuth — is processed in real time to align the Sky Lens camera overlay and the Orbital Alignment radar with the direction your phone is pointing. Sensor data is ephemeral: it is never stored to disk or transmitted anywhere.
@@ -20,7 +20,7 @@ Rotational vector data — pitch, roll, and azimuth — is processed in real tim
 The camera is used only while Sky Lens is open. No camera frames are stored, analyzed, or transmitted unless you explicitly choose to save a capture to your Vault.
 
 ### Weather (Tonight Score)
-If you configure an OpenWeatherMap API key, AuraLunis sends your approximate coordinates to OpenWeatherMap to retrieve cloud cover data for the Tonight Score. No other personal data is included. Without a key, AuraLunis uses a default estimate.
+AuraLunis sends your approximate coordinates to Open-Meteo to retrieve current cloud cover, humidity, and temperature for the Tonight Score and Astro Weather forecast. Open-Meteo is a free, keyless service — no account, API key, or device identifier is sent, only approximate latitude and longitude. No other personal data is included.
 
 ### Vault (notes and captures)
 Your Cosmic Notes, sky captures, and Vault items are stored locally on your device, encrypted with a key held in your device's Keychain. Ocoee Studios cannot access your Vault data remotely.
@@ -31,17 +31,18 @@ Subscription purchases are processed through Apple's App Store via RevenueCat. A
 ### Notifications
 AuraLunis schedules local alerts for sky events (sunset, moonrise, satellite passes) computed entirely on-device. No notification data is sent to a remote server.
 
-### Crash and usage analytics
-Anonymized, non-personally-identifiable crash logs and feature interaction events may be collected to improve sensor tolerance and battery performance. This data is not linked to your identity.
+### Usage analytics
+AuraLunis records basic feature-interaction events (such as paywall views and session counts) on your device only, to understand how the app is used. This data is processed locally, is never linked to your identity, and is never transmitted off your device or to any third-party analytics service.
 
 ## App Store Privacy Nutrition Label Summary
 
 | Data Category | Collected | Tracking | Linked to User | Purpose |
 |---|---|---|---|---|
-| Precise Location | Yes | No | Yes | Sky computation, orbital alignment |
-| Motion / Fitness | Yes | No | No | Sensor-based AR alignment |
-| Contact Info (email) | Only if signed in | No | Yes | Subscription account management |
-| Usage Data | Yes (anonymized) | No | No | Crash logs, sensor optimization |
+| Purchase History | Yes | No | Yes (via Apple ID / RevenueCat) | Subscription management |
+| Precise Location | Yes | No | No | Sky computation, weather forecast |
+| Device ID (RevenueCat anonymous ID) | Yes | No | No | Subscription management |
+
+Motion/sensor data and on-device usage analytics are processed locally and never transmitted, so they are not "collected" under Apple's definition. No advertising identifier (IDFA) is used.
 
 ## Data retention
 
