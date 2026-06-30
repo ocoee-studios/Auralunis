@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Svg, { Circle, Defs, Ellipse, G, Path, RadialGradient, Stop } from "react-native-svg";
 import { AuraLunisColors } from "@/theme/tokens";
@@ -92,15 +92,9 @@ function DeepSkyShape({ type, cx, cy }: { type: number; cx: number; cy: number }
 
 export function DeepSkyGlowVisual({ onTabChange }: { onTabChange?: (index: number) => void } = {}) {
   const [active, setActive] = useState(0);
-  // Auto-cycle until the user taps a pill; tapping selects that type and stops the cycle
-  // so the chosen illustration stays put (the pills act as real tabs once touched).
-  const [paused, setPaused] = useState(false);
-
-  useEffect(() => {
-    if (paused) return;
-    const id = setInterval(() => setActive((value) => (value + 1) % 4), 1400);
-    return () => clearInterval(id);
-  }, [paused]);
+  // No auto-cycle: the widget starts on Nebula and only changes when the user taps a tab.
+  // `paused` starts true (kept so the tap handler's setPaused call stays valid).
+  const [paused, setPaused] = useState(true);
 
   return (
     <View style={styles.card}>
