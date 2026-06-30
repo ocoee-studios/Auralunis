@@ -288,6 +288,17 @@ export function SettingsScreen() {
         </Pressable>
       </SettingsSection>
 
+      {/* Dev-only: force-open the paywall for App Store review screenshots,
+          regardless of premium status. __DEV__ compiles to false in release
+          builds, so this can never ship to the App Store. */}
+      {__DEV__ && (
+        <SettingsSection title="Developer (debug only)">
+          <Pressable style={styles.secondaryButton} onPress={openPaywall}>
+            <Text style={styles.secondaryButtonText}>Show Paywall (Debug)</Text>
+          </Pressable>
+        </SettingsSection>
+      )}
+
       {/* Brand footer with app icon */}
       <View style={styles.brandFooter}>
         <Image
