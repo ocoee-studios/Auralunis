@@ -76,7 +76,7 @@ export const plans: PlanOption[] = [
     revenueCatPackageId: RevenueCatIds.packages.lifetimeFounders,
     badge: "Best value",
     trial: false,
-    anchorPrice: "$167.88", // what 24 months of annual would cost — anchor comparison
+    anchorPrice: "$167.76", // 24 months of monthly billing ($6.99 × 24) — anchor comparison
   },
 ];
 

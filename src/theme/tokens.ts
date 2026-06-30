@@ -103,7 +103,7 @@ export const AuraLunisPricing = {
   // Lifetime — anchor price, one-time purchase
   lifetime: "$99.99",
   lifetimeSubtitle: "One-time purchase · Forever",
-  lifetimeBadge: "FOUNDERS",
+  lifetimeBadge: "BEST VALUE",
 
   // Free tier Cosmic Drift cap
   freeDriftEventLimit: 5,
