@@ -117,7 +117,7 @@ export const premiumFeatures = [
   "🌕 A cinematic Moon with craters, earthshine, and atmospheric god rays",
   "🌙 Birth Sky — the exact sky the moment you were born",
   "☁️ Astro Weather — know instantly if tonight is worth going outside",
-  "📸 Sky Lens Pro — Night Vision, Cinematic Mode, Time Travel",
+  "📸 Sky Lens Pro — Night Vision, Cinematic Mode, Immersive Mode",
   "🛰️ Live satellite tracking — ISS, Starlink trains, space debris",
   "📅 Never miss a meteor shower, eclipse, or conjunction again",
 ];
@@ -126,6 +126,5 @@ export const lifetimeFeatures = [
   "🌙 Founder's Edition — The Living Universe, forever",
   "Every premium feature, every future update, one price",
   "Founders pricing — limited availability",
-  "Founders badge on Sky Share cards",
   "Priority access to new features before anyone else",
 ];

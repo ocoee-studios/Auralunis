@@ -280,7 +280,7 @@ export function SettingsScreen() {
         <Pressable style={styles.secondaryButton} onPress={() => setLegalModal("terms")}>
           <Text style={styles.secondaryButtonText}>Terms of Use</Text>
         </Pressable>
-        <Pressable style={styles.secondaryButton} onPress={() => Linking.openURL("mailto:support@ocoeestudios.com")}>
+        <Pressable style={styles.secondaryButton} onPress={() => Linking.openURL("mailto:admin@ocoeestudios.com")}>
           <Text style={styles.secondaryButtonText}>Contact Support</Text>
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => resetSettings().then(() => Alert.alert("Settings", "Local settings reset to safe defaults."))}>

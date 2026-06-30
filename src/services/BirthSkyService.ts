@@ -3,7 +3,7 @@
 // Premium feature: generates a personal star chart with planets, moon phase,
 // and a "cosmic signature" summary.
 
-import { SiderealTime } from "astronomy-engine";
+import { SiderealTime, Illumination, MoonPhase, Body } from "astronomy-engine";
 import { computePlanetaryTargets } from "@/utils/planetaryEphemeris";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import { moonPhaseName } from "@/services/MoonPhase";
@@ -93,14 +93,14 @@ function getSunSign(birthDate: Date): string {
   return TROPICAL_SIGNS[Math.floor(lambda / 30) % 12];
 }
 
-/** Simplified moon phase from JD */
-function getMoonPhase(jd: number): { name: string; illumination: number } {
-  const synodicMonth = 29.53059;
-  const knownNewMoon = 2451550.1; // Jan 6, 2000 new moon
-  const daysSince = jd - knownNewMoon;
-  const phase = ((daysSince % synodicMonth) + synodicMonth) % synodicMonth;
-  const illumination = Math.round((1 - Math.cos((phase / synodicMonth) * 2 * Math.PI)) / 2 * 100);
-  const isWaxing = phase < synodicMonth / 2; // first half of the cycle = waxing
+/**
+ * Moon phase from the same astronomy-engine source the live Sky Lens / Home screens use,
+ * so the illumination % and phase name match everywhere (the old synodic-cosine model
+ * drifted up to ~8 points from the engine near the quarters).
+ */
+function getMoonPhase(when: Date): { name: string; illumination: number } {
+  const illumination = Math.round(Illumination(Body.Moon, when).phase_fraction * 100);
+  const isWaxing = MoonPhase(when) < 180; // elongation: 0° = new, 180° = full
   return { name: moonPhaseName(illumination, isWaxing), illumination };
 }
 
@@ -155,12 +155,8 @@ export function computeBirthSky(
 ): BirthSkyProfile {
   const birthDate = new Date(birthDateISO);
   const month = birthDate.getUTCMonth() + 1;
-
-  // Julian Date
-  const jd = 2440587.5 + (birthDate.getTime() / 86400000);
-
   const sunSign = getSunSign(birthDate);
-  const { name: moonPhase, illumination: moonIllumination } = getMoonPhase(jd);
+  const { name: moonPhase, illumination: moonIllumination } = getMoonPhase(birthDate);
   const risingSign = getRisingSign(birthDate, location);
   const dominantConstellation = (CONSTELLATIONS_BY_MONTH[month] ?? ["Orion"])[0];
 

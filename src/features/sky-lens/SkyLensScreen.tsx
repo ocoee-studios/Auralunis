@@ -141,6 +141,15 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const [box, setBox] = useState({ width: 360, height: 720 });
   const [active, setActive] = useState<Set<LayerKey>>(() => new Set(DEFAULT_ACTIVE_LAYERS));
+  // Deep Sky is premium and starts OFF (so free users never get the paywalled nebulae for
+  // free). Once entitlement resolves to premium, turn it on by default — what they paid for.
+  const deepSkyApplied = useRef(false);
+  useEffect(() => {
+    if (isPremium && !deepSkyApplied.current) {
+      deepSkyApplied.current = true;
+      setActive((prev) => (prev.has("deepsky") ? prev : new Set(prev).add("deepsky")));
+    }
+  }, [isPremium]);
 
   // Live satellite tracking for the AR "Satellites" layer — reuses the Orbital fleet
   // service (live-TLE-backed positions → absolute observer az/alt). Refreshed every

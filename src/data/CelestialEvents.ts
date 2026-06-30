@@ -101,7 +101,7 @@ function computeSynodicEvents(startYear: number, endYear: number): CelestialEven
     if (fullJDE < startJDE) continue;
     const anomaly = moonMeanAnomalyDeg(fullJDE);
     const fromPerigee = Math.min(anomaly, 360 - anomaly); // 0° = perigee
-    if (fromPerigee >= 42) continue; // not close enough to perigee → ordinary full moon
+    if (fromPerigee >= 46) continue; // not close enough to perigee → ordinary full moon (≈3–4/yr)
     const iso = jdeToISO(fullJDE);
     out.push({
       id: `supermoon-${iso}`,
@@ -200,8 +200,8 @@ function computeOppositions(startYear: number, endYear: number): CelestialEvent[
 // No guaranteed naked-eye comets are predicted through 2035; none are listed.
 const RARE_EVENTS: CelestialEvent[] = [
   // Eclipses
-  { id: "total-lunar-eclipse-2026-09", name: "Total Lunar Eclipse", date: "2026-09-07", type: "eclipse",
-    description: "The Moon passes through Earth's shadow, turning deep red — a 'Blood Moon.' Visible from the Americas, Europe, and Africa.", bestTime: "Evening through early morning", direction: "Look east as the Moon rises", rating: 5 },
+  { id: "total-lunar-eclipse-2026-03", name: "Total Lunar Eclipse", date: "2026-03-03", type: "eclipse",
+    description: "The Moon passes through Earth's shadow, turning deep red — a 'Blood Moon.' Visible from the Pacific, the Americas, eastern Asia, and Australia.", bestTime: "Overnight (location dependent)", direction: "Look toward the Moon", rating: 5 },
   { id: "annular-solar-eclipse-2027-02", name: "Annular Solar Eclipse", date: "2027-02-06", type: "eclipse",
     description: "A 'Ring of Fire' eclipse visible from South America and parts of Africa; partial from broader regions.", bestTime: "Midday (location dependent)", rating: 4 },
   { id: "total-solar-eclipse-2027-08", name: "Total Solar Eclipse", date: "2027-08-02", type: "eclipse",
