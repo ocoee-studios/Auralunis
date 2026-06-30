@@ -22,7 +22,10 @@ function parseBirthdayToISO(input: string): string | null {
   if (m < 1 || m > 12 || day < 1 || day > 31 || y < 1900 || y > 2100) return null;
   const pad = (n: number) => String(n).padStart(2, "0");
   const date = new Date(`${y}-${pad(m)}-${pad(day)}T12:00:00Z`);
-  return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  // Reject impossible dates (e.g. Feb 30) — JS Date silently rolls them over instead of
+  // returning NaN, which would save a wrong birth sky. Verify the round-trip matches.
+  if (Number.isNaN(date.getTime()) || date.getUTCMonth() + 1 !== m || date.getUTCDate() !== day) return null;
+  return date.toISOString();
 }
 
 type Props = {

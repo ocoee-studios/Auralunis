@@ -43,6 +43,12 @@ const DRIFT_RATES: Record<string, { lonRate: number; latAmp: number; latFreq: nu
 // Mutable working copy — mutated by simulateTick each interval
 let fleet: AtmosphericSatellite[] = ATMOSPHERE_CATALOG.map((s) => ({ ...s }));
 let _liveSyncActive = false;
+let _fleetLive = false; // true once real Celestrak TLE positions have been applied
+
+// Whether the fleet was seeded from live TLE data this session (vs pure simulation).
+export function isFleetLive(): boolean {
+  return _fleetLive;
+}
 
 /**
  * Attempt to update fleet positions from live Celestrak TLE data.
@@ -71,8 +77,10 @@ export async function syncLiveTLEData(): Promise<boolean> {
       return sat;
     });
 
+    _fleetLive = true;
     return true;
   } catch {
+    _fleetLive = false;
     return false;
   } finally {
     _liveSyncActive = false;

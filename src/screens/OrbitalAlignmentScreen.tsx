@@ -25,7 +25,7 @@ import type { CameraPointing } from "@/features/sky-lens/ar/SkyLensProjection";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 // Mode services
-import { simulateTick, computeFleetState, syncLiveTLEData, type FleetState } from "@/services/AtmosphereExplorerService";
+import { simulateTick, computeFleetState, syncLiveTLEData, isFleetLive, type FleetState } from "@/services/AtmosphereExplorerService";
 import { ATMOSPHERE_CATALOG } from "@/data/AtmosphereCatalog";
 import { SatelliteDataCard } from "@/components/SatelliteDataCard";
 import { SpaceRadarGrid, type RadarBlip } from "@/components/SpaceRadarGrid";
@@ -320,6 +320,14 @@ export function OrbitalAlignmentScreen() {
       if (trainHapticRef.current) clearInterval(trainHapticRef.current);
       if (interval) trainHapticRef.current = setInterval(() => tapLight(), interval);
     }
+    // Stop the haptic pulse when leaving train/meteor mode (or on unmount) — otherwise
+    // the last setInterval keeps firing tapLight() forever (battery drain).
+    return () => {
+      if (trainHapticRef.current) {
+        clearInterval(trainHapticRef.current);
+        trainHapticRef.current = null;
+      }
+    };
   }, [activeScore, isLocked, mode, trainBlips, activeShowers]);
 
   // Cosmic Drift lock recording + chain advance. Merged into ONE effect so the
@@ -345,7 +353,7 @@ export function OrbitalAlignmentScreen() {
         altitudeKm: activeAltKm,
         observerLat: location.latitudeDegrees,
         observerLon: location.longitudeDegrees,
-        locationLabel: simMode ? "New York City" : "Your Location",
+        locationLabel: simMode ? "Ducktown, TN" : "Your Location",
         timestamp: new Date().toISOString(),
       });
     }
@@ -598,7 +606,8 @@ export function OrbitalAlignmentScreen() {
             </View>
 
             <Text style={styles.tapHint}>
-              {mode === "fleet" ? "Tap a blip to identify the satellite" :
+              {mode === "fleet" ? `Satellites · ${isFleetLive() ? "LIVE TLE" : "Simulation"} · tap a blip to identify` :
+               mode === "train" ? `Starlink train · ${isTrainLive() ? "LIVE TLE" : "Simulation"} · ${getTrainNodeCount()} nodes` :
                mode === "debris" ? `Debris · ${isDebrisLive() ? "LIVE TLE" : "Simulation"} · lock 5s to catalogue` :
                mode === "reentry" ? `Decaying objects · ${isReEntryLive() ? "LIVE TIP" : "Simulation"} · amber = watch · crimson = imminent` :
                mode === "meteor" && activeShowers.length > 0 ? `${activeShowers[0].shower.name} radiant · sonar active` :
@@ -709,7 +718,7 @@ export function OrbitalAlignmentScreen() {
             <InfoPill label="Device Az" value={`${Math.round(pointing.azimuthDegrees)}°`} />
             <InfoPill label="Pitch" value={`${Math.round(pointing.altitudeDegrees)}°`} />
           </View>
-          {simMode && <Text style={styles.note}>Simulated observer: New York City</Text>}
+          {simMode && <Text style={styles.note}>Simulated observer: Ducktown, TN</Text>}
         </View>
 
       </ScrollView>
