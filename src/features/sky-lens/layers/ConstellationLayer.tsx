@@ -34,13 +34,20 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
         // the ground for stars that have already set.
         const usedPts = new Set<number>();
         const segments = c.lines
-          .filter(
-            ([i, j]) =>
-              projected[i] &&
-              projected[j] &&
-              !projected[i].behind &&
-              !projected[j].behind
-          )
+          .filter(([i, j]) => {
+            const a = projected[i];
+            const b = projected[j];
+            if (!a || !b || a.behind || b.behind) return false;
+            // Projection-distortion guard: near zenith (alt > ~75°) the flat-screen
+            // projection stretches lines into "rubber bands". Drop segments whose
+            // endpoints fall far off-screen, or that span an absurd length — they're
+            // artifacts of the projection, not real constellation figures.
+            const M = 100;
+            if (a.x < -M || a.x > box.width + M || a.y < -M || a.y > box.height + M) return false;
+            if (b.x < -M || b.x > box.width + M || b.y < -M || b.y > box.height + M) return false;
+            if (Math.hypot(b.x - a.x, b.y - a.y) > 300) return false;
+            return true;
+          })
           .map(([i, j], idx) => {
             usedPts.add(i);
             usedPts.add(j);
