@@ -43,7 +43,10 @@ export function LearnScreen() {
   useEffect(() => {
     if (!appliedDefault.current && prefs.interests.length > 0) {
       appliedDefault.current = true;
-      setSelectedCategory(prefs.interests[0] as LearnCategoryId);
+      const top = prefs.interests[0];
+      // Only default to it if it's a real category (guards against a future interest key
+      // that doesn't map to a LearnCategoryId → blank screen).
+      if (learnCategories.some((c) => c.id === top)) setSelectedCategory(top as LearnCategoryId);
     }
   }, [prefs.interests]);
 
