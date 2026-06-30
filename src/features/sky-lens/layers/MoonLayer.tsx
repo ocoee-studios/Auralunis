@@ -72,6 +72,12 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
           <Stop offset="55%" stopColor={palette.moon} stopOpacity="0.18" />
           <Stop offset="100%" stopColor={palette.moon} stopOpacity="0" />
         </RadialGradient>
+        {/* soft maria — feathered dark seas that fade at the edge (not hard solid dots) */}
+        <RadialGradient id="skylens-moon-mare" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor={mare} stopOpacity="1" />
+          <Stop offset="55%" stopColor={mare} stopOpacity="0.8" />
+          <Stop offset="100%" stopColor={mare} stopOpacity="0" />
+        </RadialGradient>
         {/* SOFT TERMINATOR — the day/night boundary feathered over ~30% of the radius
             instead of a hard circle edge. Centred on the phase shadow circle (userSpace),
             opaque earthshine in the core, fading to transparent at the rim so the lit
@@ -116,11 +122,11 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
       <G clipPath="url(#skylens-moon-clip)">
         {heroMode && (
           <>
-            {/* maria (dark seas) */}
-            <Circle cx={cx - R * 0.34} cy={cy - R * 0.24} r={R * 0.34} fill={mare} />
-            <Circle cx={cx + R * 0.16} cy={cy + R * 0.32} r={R * 0.26} fill={mare} />
-            <Circle cx={cx + R * 0.42} cy={cy - R * 0.36} r={R * 0.17} fill={mare} />
-            <Circle cx={cx - R * 0.06} cy={cy + R * 0.08} r={R * 0.2} fill={mare} />
+            {/* maria (dark seas) — soft feathered patches, not hard dots */}
+            <Circle cx={cx - R * 0.34} cy={cy - R * 0.24} r={R * 0.4} fill="url(#skylens-moon-mare)" />
+            <Circle cx={cx + R * 0.16} cy={cy + R * 0.32} r={R * 0.31} fill="url(#skylens-moon-mare)" />
+            <Circle cx={cx + R * 0.42} cy={cy - R * 0.36} r={R * 0.2} fill="url(#skylens-moon-mare)" />
+            <Circle cx={cx - R * 0.06} cy={cy + R * 0.08} r={R * 0.24} fill="url(#skylens-moon-mare)" />
             {/* craters: shaded pit + bright rim */}
             <Circle cx={cx + R * 0.5} cy={cy + R * 0.46} r={R * 0.1} fill={craterShade} />
             <Circle cx={cx + R * 0.5} cy={cy + R * 0.44} r={R * 0.1} fill="none" stroke={craterRim} strokeWidth={0.5} />
