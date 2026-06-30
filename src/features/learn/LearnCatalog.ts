@@ -179,7 +179,7 @@ export const learnCategories = [
   { id: "solar_system", title: "Solar System", icon: "☉", description: "Sun, planets, moons, orbits, asteroids, and comets." },
   { id: "moon", title: "Moon", icon: "☾", description: "Phases, moonrise, moonset, brightness, and lunar observations." },
   { id: "planets", title: "Planets", icon: "♃", description: "Mercury through Neptune with science, mythology, and visibility." },
-  { id: "constellations", title: "Constellations", icon: "✦", description: "All 88 official constellations, stories, seasons, and sky tracing." },
+  { id: "constellations", title: "Constellations", icon: "✦", description: "Constellation stories, seasons, mythology, and how to trace the sky." },
   { id: "stars", title: "Stars", icon: "★", description: "Bright stars, magnitude, color, distance, and star life cycles." },
   { id: "deep_sky", title: "Deep Sky", icon: "☄", description: "Nebulae, galaxies, star clusters, and supernova remnants." },
   { id: "milky_way", title: "Milky Way", icon: "◎", description: "Galaxy Mode, Milky Way band, core, dust lanes, and viewing conditions." },

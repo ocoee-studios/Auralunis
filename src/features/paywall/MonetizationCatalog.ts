@@ -1,6 +1,8 @@
 // MonetizationCatalog.ts
 // AuraLunis pricing — optimized for launch.
-// Three products: Monthly (no trial), Annual (7-day trial), Lifetime Founders (one-time).
+// Three products: Monthly (no trial), Annual (7-day trial), Lifetime (one-time).
+// NOTE: the lifetime RevenueCat/ASC product id is still `...lifetime.founders` (don't
+// change it — it's configured in App Store Connect); only the user-facing copy is neutral.
 // Trial is ANNUAL ONLY — prevents weekend trial-and-cancel on monthly.
 
 export const RevenueCatIds = {
@@ -67,12 +69,12 @@ export const plans: PlanOption[] = [
   {
     id: "lifetime_founders",
     productId: RevenueCatIds.products.lifetimeFounders,
-    name: "Founders Lifetime",
+    name: "Lifetime",
     interval: "lifetime",
     displayPrice: "$99.99",
     subtitle: "Pay once. Own the sky forever.",
     revenueCatPackageId: RevenueCatIds.packages.lifetimeFounders,
-    badge: "Limited time",
+    badge: "Best value",
     trial: false,
     anchorPrice: "$167.88", // what 24 months of annual would cost — anchor comparison
   },
@@ -123,8 +125,7 @@ export const premiumFeatures = [
 ];
 
 export const lifetimeFeatures = [
-  "🌙 Founder's Edition — The Living Universe, forever",
-  "Every premium feature, every future update, one price",
-  "Founders pricing — limited availability",
-  "Priority access to new features before anyone else",
+  "🌙 Lifetime — the entire living universe, forever",
+  "Every premium feature, plus all future updates, for one price",
+  "No subscription — pay once, own it for good",
 ];

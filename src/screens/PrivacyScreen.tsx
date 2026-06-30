@@ -46,7 +46,7 @@ export function PrivacyScreen() {
 
       <Text style={styles.subheading}>Open-Meteo</Text>
       <Text style={styles.body}>
-        Provides weather data for the Astro Weather forecast feature. Receives approximate latitude/longitude coordinates. No account required, no API key, no device ID transmitted. Privacy policy: open-meteo.com/en/terms
+        Provides weather data for the Astro Weather forecast and the Tonight score. Receives approximate latitude/longitude coordinates only. No account required, no API key, no device ID transmitted. Privacy policy: open-meteo.com/en/terms
       </Text>
 
       <Text style={styles.subheading}>astronomy-engine</Text>

@@ -117,7 +117,7 @@ export function LearnDetailScreen({
           <Text style={styles.nudgeTitle}>✦  Go deeper with Premium</Text>
           <Text style={styles.nudgeBody}>
             Every lesson is free. Premium adds Sky Lens AR over your live sky, your Birth
-            Sky chart, 88 constellations with cultural stories, and the full deep-sky catalogue.
+            Sky chart, the major constellations with mythology, and the full deep-sky catalogue.
           </Text>
           <Pressable style={styles.nudgeBtn} onPress={() => { tapLight(); openPaywall(); }}>
             <Text style={styles.nudgeBtnText}>Unlock Premium</Text>

@@ -100,7 +100,7 @@ export const AuraLunisPricing = {
   annualSubtitle: "$3.33/month, billed annually",
   trial: "7-day free trial",
 
-  // Founders Lifetime — anchor price, one-time purchase
+  // Lifetime — anchor price, one-time purchase
   lifetime: "$99.99",
   lifetimeSubtitle: "One-time purchase · Forever",
   lifetimeBadge: "FOUNDERS",

@@ -1,4 +1,3 @@
-import Constants from "expo-constants";
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 
 export interface WeatherSnapshot {
@@ -17,40 +16,41 @@ const FALLBACK: WeatherSnapshot = {
   source: "unavailable"
 };
 
-function getApiKey(): string | undefined {
-  return (Constants.expoConfig?.extra as Record<string, unknown> | undefined)
-    ?.openWeatherMapApiKey as string | undefined;
+// Open-Meteo gives no text summary for "current", so derive one from cloud cover.
+function describeClouds(cloudPercent: number): string {
+  if (cloudPercent < 10) return "clear sky";
+  if (cloudPercent < 40) return "partly cloudy";
+  if (cloudPercent < 70) return "mostly cloudy";
+  return "overcast";
 }
 
-function isPlaceholder(key?: string): boolean {
-  return !key || key.startsWith("REPLACE_WITH_");
-}
-
+// Current conditions for the Tonight score. Uses Open-Meteo — the same keyless,
+// account-free provider already disclosed in the privacy policy — so the only data sent
+// is approximate latitude/longitude. (Replaces the old OpenWeatherMap path, which would
+// have transmitted coordinates to an undisclosed third party.)
 export async function fetchCurrentWeather(
   location: ObserverLocation
 ): Promise<WeatherSnapshot> {
-  const apiKey = getApiKey();
-  if (isPlaceholder(apiKey)) return FALLBACK;
-
   try {
     const url =
-      `https://api.openweathermap.org/data/2.5/weather?` +
-      `lat=${location.latitudeDegrees}&lon=${location.longitudeDegrees}` +
-      `&units=metric&appid=${apiKey}`;
+      `https://api.open-meteo.com/v1/forecast?` +
+      `latitude=${location.latitudeDegrees}&longitude=${location.longitudeDegrees}` +
+      `&current=temperature_2m,relative_humidity_2m,cloud_cover`;
     const response = await fetch(url);
     if (!response.ok) throw new Error(`Weather ${response.status}`);
 
     const data = (await response.json()) as {
-      clouds?: { all?: number };
-      main?: { humidity?: number; temp?: number };
-      weather?: Array<{ description?: string }>;
+      current?: { temperature_2m?: number; relative_humidity_2m?: number; cloud_cover?: number };
     };
+    const c = data.current;
+    if (!c) return FALLBACK;
 
+    const cloudPercent = c.cloud_cover ?? 30;
     return {
-      cloudPercent: data.clouds?.all ?? 30,
-      humidity: data.main?.humidity ?? 50,
-      tempCelsius: data.main?.temp ?? 20,
-      description: data.weather?.[0]?.description ?? "clear",
+      cloudPercent,
+      humidity: c.relative_humidity_2m ?? 50,
+      tempCelsius: c.temperature_2m ?? 20,
+      description: describeClouds(cloudPercent),
       source: "live"
     };
   } catch {
