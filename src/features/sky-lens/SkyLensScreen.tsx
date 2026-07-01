@@ -568,13 +568,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const sunAltitude = sky.bodies.find((b) => b.id === "sun")?.altitudeDegrees ?? -90;
   const skyColors = skyGradient(sunAltitude);
 
-  // The 20 brightest on-screen stars projected for the twinkle overlay (View-based,
+  // The brightest ~24 on-screen stars projected for the twinkle overlay (View-based,
   // crash-safe). Sorted by magnitude so it's genuinely the brightest, not the first
-  // 20 found in catalog order.
+  // found in catalog order. Stage-2: widened from 10 → 24 so the sky feels alive.
   const twinkleStars = useMemo<TwinkleTarget[]>(() => {
     const out: TwinkleTarget[] = [];
     for (const s of sky.stars) {
-      if (!s.aboveHorizon || s.magnitude > 3.0) continue;
+      if (!s.aboveHorizon || s.magnitude > 3.4) continue;
       const p = projectTarget(pointing, s.azimuthDegrees, s.altitudeDegrees, fov, box);
       if (!p.onScreen) continue;
       out.push({
@@ -587,7 +587,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         magnitude: s.magnitude
       });
     }
-    return out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 10);
+    return out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 24);
   }, [sky.stars, pointing, fov, box]);
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;

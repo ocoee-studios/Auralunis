@@ -149,15 +149,16 @@ export function constellationColor(id: string): string {
 // 4 vertical stops (zenith → mid → 30°alt → horizon) chosen by the Sun's altitude
 // from the ephemeris, per VISUAL_QUALITY_SPEC: navy overhead → indigo → violet/gold
 // near the horizon, brightening through twilight into golden hour and daytime blue.
-// Subtle SPECTRAL distribution for the dense background field (was mostly blue-white).
-// Roughly the real naked-eye mix: 40% blue-white, 30% yellow-white, 20% orange, 10%
-// red — 10 entries (4/3/2/1) so the hash lands on that ratio. Kept gentle: these are
-// faint background dots, a whisper of colour, not saturated gems.
+// SPECTRAL distribution for the dense background field. Roughly the real naked-eye
+// mix: 40% blue-white, 30% yellow-white, 20% orange, 10% red — 10 entries (4/3/2/1)
+// so the hash lands on that ratio. Stage-2 sky-renderer: a touch more chroma and a
+// wider spread (icy cyan-blue, deeper blue, richer amber/red) so the field reads
+// with real colour variety instead of a uniform pale wash — still tasteful, not neon.
 const DOME_TINTS = [
-  "#DCE6FF", "#E6EEFF", "#CFE0FF", "#D8E2FF", // blue-white (40%)
-  "#FFF4D8", "#FBEAC4", "#FFF0CC",            // yellow-white (30%)
-  "#FFD9A8", "#FFCE9C",                        // orange (20%)
-  "#FFC2A4",                                   // red (10%)
+  "#C6D8FF", "#AEC6FF", "#9FD6F2", "#BCCEFF", // blue-white → icy cyan-blue + deep blue (40%)
+  "#FBEDC2", "#F4E2B0", "#FFECC0",            // yellow-white (30%)
+  "#FFCE92", "#FFC486",                        // orange (20%)
+  "#FFAE86",                                   // warm red (10%)
 ];
 export function domeColor(id: string): string {
   let h = 0;

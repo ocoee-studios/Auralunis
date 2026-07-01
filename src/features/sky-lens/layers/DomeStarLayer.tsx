@@ -43,7 +43,19 @@ export function DomeStarLayer({ stars, project, palette, nightMode, focus = null
         // Free tier: every dome star renders the same warm white (no spectral tints).
         const baseColor = nightMode ? palette.star : useSpectralColors ? domeColor(s.id) : "#FFF6D6";
         const color = extinction && !nightMode ? warmShift(baseColor, getExtinctionWarmth(s.altitudeDegrees)) : baseColor;
-        return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={opacity * (belowHorizon && !fullSphere ? 0.25 : 1)} />;
+        const groupOpacity = opacity * (belowHorizon && !fullSphere ? 0.25 : 1);
+        // Stage-2: the brighter background stars get a subtle soft glow (one faint
+        // halo) so the field reads with depth, not as flat pinprick discs. Faint dome
+        // stars stay a single cheap circle so the dense field stays performant.
+        if (!nightMode && s.magnitude < 3.8) {
+          return (
+            <G key={s.id} opacity={groupOpacity}>
+              <Circle cx={p.x} cy={p.y} r={r * 2.2} fill={color} opacity={0.12} />
+              <Circle cx={p.x} cy={p.y} r={r} fill={color} />
+            </G>
+          );
+        }
+        return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={groupOpacity} />;
       })}
     </G>
   );
