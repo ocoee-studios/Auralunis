@@ -294,21 +294,21 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         {nebulae.map((n) => (
           <React.Fragment key={`def-${n.id}`}>
             <RadialGradient id={`neb-haze-${n.id}`} cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.6" />
-              <Stop offset="30%" stopColor={n.hazeColor} stopOpacity="0.35" />
-              <Stop offset="65%" stopColor={n.hazeColor} stopOpacity="0.15" />
+              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.42" />
+              <Stop offset="35%" stopColor={n.hazeColor} stopOpacity="0.2" />
+              <Stop offset="70%" stopColor={n.hazeColor} stopOpacity="0.08" />
               <Stop offset="100%" stopColor={n.hazeColor} stopOpacity="0" />
             </RadialGradient>
             <RadialGradient id={`neb-core-${n.id}`} cx="50%" cy="50%" r="50%">
-              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.85" />
-              <Stop offset="40%" stopColor={n.coreColor} stopOpacity="0.45" />
+              <Stop offset="0%" stopColor={n.coreColor} stopOpacity="0.58" />
+              <Stop offset="45%" stopColor={n.coreColor} stopOpacity="0.28" />
               <Stop offset="100%" stopColor={n.coreColor} stopOpacity="0" />
             </RadialGradient>
             {BIG_FIVE[n.id] && (
               /* cool blue reflection nebulosity — the second colour zone */
               <RadialGradient id={`neb-cool-${n.id}`} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor={BIG_FIVE[n.id].coolColor} stopOpacity="0.55" />
-                <Stop offset="40%" stopColor={BIG_FIVE[n.id].coolColor} stopOpacity="0.3" />
+                <Stop offset="0%" stopColor={BIG_FIVE[n.id].coolColor} stopOpacity="0.4" />
+                <Stop offset="45%" stopColor={BIG_FIVE[n.id].coolColor} stopOpacity="0.2" />
                 <Stop offset="100%" stopColor={BIG_FIVE[n.id].coolColor} stopOpacity="0" />
               </RadialGradient>
             )}
@@ -319,9 +319,9 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
             glow (no hard outline, no opaque "stamp"). Darkness is then scaled right
             down at render so peak opacity lands ~15–22%. */}
         <RadialGradient id="nebLaneSoft" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#04020A" stopOpacity="0.85" />
-          <Stop offset="50%" stopColor="#04020A" stopOpacity="0.42" />
-          <Stop offset="100%" stopColor="#04020A" stopOpacity="0" />
+          <Stop offset="0%" stopColor="#0A0820" stopOpacity="0.5" />
+          <Stop offset="55%" stopColor="#0A0820" stopOpacity="0.22" />
+          <Stop offset="100%" stopColor="#0A0820" stopOpacity="0" />
         </RadialGradient>
       </Defs>
 
@@ -329,8 +329,8 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         const belowHorizon = !n.aboveHorizon;
         if (belowHorizon && !fullSphere && n.altitudeDegrees < -20) return null;
         // AR (over the camera): the painterly clouds look out of place at full strength,
-        // so render them at half size and cap opacity to 0.5 (was 0.15, which combined
-        // with the canvas dimming left them invisible). Planetarium keeps them full.
+        // so render them at half size and cap opacity to ~0.28 — a subtle luminous
+        // watercolor wash that enhances the sky, not a solid smudge. Planetarium full.
         const arMode = !fullSphere;
         const p = project(n.azimuthDegrees, n.altitudeDegrees);
         if (!p.onScreen) return null;
@@ -347,7 +347,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
         const eff = bf ? bf.scale : sig ? sig.scale : scaleFor(n.id);
         const r = Math.max(isShowcase ? 44 : 22, n.radius * eff) * (1 + ff * 0.8) * (1 + sf * 0.4) * (arMode ? 0.5 : 1);
         const opMul = (isShowcase ? 0.82 : 1) * (1 + ff * 0.7) * (1 + sf * 2.0); // showcase clouds: visible but not solid
-        const hazeR = r * 3;
+        const hazeR = r * 3.5; // larger, softer feather — edges bleed into the sky
         const coreR = r * 1.1;
         const volR = r * 4.4; // volumetric outer edge
         const hazeId = `url(#neb-haze-${n.id})`;
@@ -380,7 +380,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               }}
             />
 
-            <G opacity={Math.min(arMode ? 0.5 : 1, breathe * opMul)}>
+            <G opacity={Math.min(arMode ? 0.28 : 1, breathe * opMul)}>
               {n.type === "cluster" ? (
                 /* STAR CLUSTER — not a smooth glow but a tight swarm of individual
                    stars. A very faint glow (5%) ties them together; the dots lead. */
@@ -437,7 +437,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                         rx={r * ln.rx * 1.9}
                         ry={r * ln.ry}
                         fill="url(#nebLaneSoft)"
-                        opacity={Math.min(0.26, (ln.op ?? 0.8) * 0.3)}
+                        opacity={Math.min(0.12, (ln.op ?? 0.8) * 0.14)}
                       />
                     </G>
                   ))}
