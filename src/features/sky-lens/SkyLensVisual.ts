@@ -74,13 +74,13 @@ export function magnitudeToRadius(magnitude: number): number {
 // so the sky reads colorful rather than uniform white. Default is a soft
 // blue-white that cools slightly with magnitude.
 const STAR_COLORS: Record<string, string> = {
-  // blue / blue-white (O/B/A) — OBVIOUSLY icy blue
-  rigel: "#4F94FF", bellatrix: "#6EA6FF", alnilam: "#4F94FF", alnitak: "#4F94FF",
-  mintaka: "#4F94FF", saiph: "#6EA6FF", spica: "#3F88FF", achernar: "#5C9CFF",
-  hadar: "#4F94FF", acrux: "#4F94FF", mimosa: "#4F94FF", regulus: "#7FB2FF",
-  algol: "#7FB2FF", vega: "#8FBEFF", sirius: "#9FCCFF", deneb: "#A6CCFF",
-  castor: "#8FBEFF", adhara: "#4F94FF", alkaid: "#6EA6FF", elnath: "#8AB8FF",
-  peacock: "#6EA6FF", mirzam: "#6EA6FF",
+  // blue / blue-white (O/B/A) — blue-WHITE, never cyan/aqua (~#B0C4FF range)
+  rigel: "#A4BCFF", bellatrix: "#B2C8FF", alnilam: "#A4BCFF", alnitak: "#A4BCFF",
+  mintaka: "#A4BCFF", saiph: "#B2C8FF", spica: "#9CB6FF", achernar: "#AAC2FF",
+  hadar: "#A4BCFF", acrux: "#A4BCFF", mimosa: "#A4BCFF", regulus: "#BED0FF",
+  algol: "#BED0FF", vega: "#BCCEFF", sirius: "#C4D6FF", deneb: "#C0D2FF",
+  castor: "#BACCFF", adhara: "#A4BCFF", alkaid: "#B2C8FF", elnath: "#B8CAFF",
+  peacock: "#B2C8FF", mirzam: "#B2C8FF",
   // white (A/F)
   altair: "#CFE2FF", canopus: "#FCF2D0", procyon: "#DCE8FF", fomalhaut: "#C2D8FF",
   caph: "#FFE7B0", polaris: "#F0EACE",
@@ -95,10 +95,28 @@ const STAR_COLORS: Record<string, string> = {
   mirach: "#FF7042",
 };
 
+// Linear blend between two #RRGGBB colours. t=0 → a, t=1 → b. Defensive (bad input → a).
+export function mixHex(a: string, b: string, t: number): string {
+  if (typeof a !== "string" || a.length !== 7 || typeof b !== "string" || b.length !== 7) return a;
+  const na = parseInt(a.slice(1), 16), nb = parseInt(b.slice(1), 16);
+  if (Number.isNaN(na) || Number.isNaN(nb)) return a;
+  const k = Math.max(0, Math.min(1, t));
+  const to2 = (v: number) => Math.round(v).toString(16).padStart(2, "0");
+  const m = (sa: number, sb: number) => sa + (sb - sa) * k;
+  return `#${to2(m((na >> 16) & 255, (nb >> 16) & 255))}${to2(m((na >> 8) & 255, (nb >> 8) & 255))}${to2(m(na & 255, nb & 255))}`;
+}
+
+// Colour INTENSITY scales with brightness so the faint field reads calm, not like
+// confetti: mag ≤ 2 keeps full colour, mag ~4 is subtle, mag ≥ 5 is near-neutral
+// warm white. Stars fade toward NEUTRAL_WARM as they dim.
+const NEUTRAL_WARM = "#EFE9DB";
+export function magnitudeSaturation(magnitude: number): number {
+  return Math.max(0.05, Math.min(1, (4.7 - magnitude) / 2.7));
+}
+
 export function starColor(id: string, magnitude: number): string {
-  // Unnamed stars: a clearly-blue ramp that cools with brightness (real O/B/A tint),
-  // saturated enough to read as blue, not near-white.
-  return STAR_COLORS[id] ?? (magnitude < 2 ? "#CFE2FF" : magnitude < 3.2 ? "#AECCFF" : "#93BEFF");
+  const base = STAR_COLORS[id] ?? (magnitude < 2 ? "#BCD0FF" : magnitude < 3.2 ? "#C6D6FF" : "#CFDCEF");
+  return mixHex(NEUTRAL_WARM, base, magnitudeSaturation(magnitude));
 }
 
 // Atmospheric extinction tint: lerp a #RRGGBB star color toward a warm horizon
@@ -161,15 +179,17 @@ export function constellationColor(id: string): string {
 // wider spread (icy cyan-blue, deeper blue, richer amber/red) so the field reads
 // with real colour variety instead of a uniform pale wash — still tasteful, not neon.
 const DOME_TINTS = [
-  "#9FC0FF", "#84AEFF", "#7FCEF0", "#96B8FF", // blue / icy cyan / deep blue (40%)
+  "#B0C4FF", "#A4BCFF", "#BCD0FF", "#AEC2FF", // blue-white (40%) — never cyan/aqua
   "#FBE39C", "#F2D680", "#FFE199",            // yellow-gold (30%)
   "#FFBC66", "#FFAE50",                        // orange (20%)
   "#FF9060",                                   // warm red (10%)
 ];
-export function domeColor(id: string): string {
+export function domeColor(id: string, magnitude: number): string {
   let h = 0;
   for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
-  return DOME_TINTS[h % DOME_TINTS.length];
+  const tint = DOME_TINTS[h % DOME_TINTS.length];
+  // Dim dome stars fade toward neutral warm white so the faint field isn't confetti.
+  return mixHex(NEUTRAL_WARM, tint, magnitudeSaturation(magnitude));
 }
 
 export function skyGradient(sunAltitudeDegrees: number): readonly [string, string, string, string] {

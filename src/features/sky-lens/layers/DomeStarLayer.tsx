@@ -41,7 +41,7 @@ export function DomeStarLayer({ stars, project, palette, nightMode, focus = null
           opacity = Math.min(1, opacity * (1 + ff * 0.7) * (1 + sf * 0.6));
         }
         // Free tier: every dome star renders the same warm white (no spectral tints).
-        const baseColor = nightMode ? palette.star : useSpectralColors ? domeColor(s.id) : "#FFF6D6";
+        const baseColor = nightMode ? palette.star : useSpectralColors ? domeColor(s.id, s.magnitude) : "#FFF6D6";
         const color = extinction && !nightMode ? warmShift(baseColor, getExtinctionWarmth(s.altitudeDegrees)) : baseColor;
         const groupOpacity = opacity * (belowHorizon && !fullSphere ? 0.25 : 1);
         // Stage-2: the brighter background stars get a subtle soft glow (one faint
