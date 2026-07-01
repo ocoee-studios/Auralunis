@@ -49,9 +49,14 @@ export function MilkyWayTilesLayer({ band, project, fov, box, nightMode, fullSph
         const c = project(pt.azimuthDegrees, pt.altitudeDegrees);
         if (c.behind) return null;
 
-        // local band tangent from the neighbouring samples (for rotation)
-        const a = project(band.center[(idx - 1 + n) % n].azimuthDegrees, band.center[(idx - 1 + n) % n].altitudeDegrees);
-        const b = project(band.center[(idx + 1) % n].azimuthDegrees, band.center[(idx + 1) % n].altitudeDegrees);
+        // Local band tangent, from points ±7° of galactic longitude around the tile
+        // centre (via idxAt — NOT adjacent array indices: the band's l=0 and l=360
+        // samples are the SAME sky point, so a centred difference went degenerate
+        // exactly at the Sagittarius core and rotated that tile wrong).
+        const pa = band.center[idxAt(t.lon - 7)];
+        const pb = band.center[idxAt(t.lon + 7)];
+        const a = project(pa.azimuthDegrees, pa.altitudeDegrees);
+        const b = project(pb.azimuthDegrees, pb.altitudeDegrees);
         let deg = 0;
         if (!a.behind && !b.behind) deg = (Math.atan2(b.y - a.y, b.x - a.x) * 180) / Math.PI;
 
