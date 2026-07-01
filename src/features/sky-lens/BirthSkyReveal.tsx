@@ -47,8 +47,9 @@ const STEP = {
   SETTLED: 8,
 } as const;
 
-// ms from mount at which each beat fires. Total ~10s, and skippable.
-const BEAT_AT: number[] = [200, 1400, 2600, 3800, 4900, 6000, 7200, 8600, 10200];
+// ms from mount at which each beat fires. Each beat holds ~2s so the eye can take it
+// in and read its caption. Total ~16s, and skippable.
+const BEAT_AT: number[] = [300, 2200, 4200, 6200, 8200, 10200, 12200, 14400, 16200];
 
 function formatBirthLine(iso: string): string {
   const d = new Date(iso);
@@ -67,6 +68,7 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
   const gate = useMemo(() => getVisualGate(isPremium), [isPremium]);
 
   const [step, setStep] = useState<number>(STEP.DATE);
+  const [caption, setCaption] = useState(""); // narration line for the current beat
 
   // Aim a fixed cinematic camera at the dominant constellation if it's comfortably up,
   // so it lands centre-frame for the gold crowning; otherwise a pleasant south-up view.
@@ -109,9 +111,17 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
   const crownOpacity = useRef(new Animated.Value(0)).current; // gold crown glow
   const sigOpacity = useRef(new Animated.Value(0)).current;   // Sky Signature text
   const ctaOpacity = useRef(new Animated.Value(0)).current;   // settled buttons
+  const capOpacity = useRef(new Animated.Value(0)).current;   // beat narration line
 
   const fade = (v: Animated.Value, to: number, ms: number, delay = 0) =>
     Animated.timing(v, { toValue: to, duration: ms, delay, useNativeDriver: true }).start();
+
+  // Narrate a beat: set the line, then fade it in fresh.
+  const narrate = (text: string) => { setCaption(text); capOpacity.setValue(0); fade(capOpacity, 1, 800); };
+
+  const planetsLine = profile.visibleCount > 0
+    ? `${profile.visibleCount} planet${profile.visibleCount > 1 ? "s" : ""} above the horizon`
+    : "The planets rested below the horizon";
 
   // Drive the sequence. One effect owns all timers; skip() short-circuits to SETTLED.
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -121,6 +131,7 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
     setStep(STEP.SETTLED);
     canvasFade.setValue(1);
     fade(dateOpacity, 0, 300);
+    fade(capOpacity, 0, 300);
     fade(crownOpacity, 1, 900);
     fade(sigOpacity, 1, 900, 200);
     fade(ctaOpacity, 1, 700, 900);
@@ -140,14 +151,15 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
 
     at(STEP.DATE, () => { setStep(STEP.DATE); fade(dateOpacity, 1, 900); tapLight(); });
     at(STEP.HORIZON, () => { setStep(STEP.HORIZON); fade(canvasFade, 1, 1600); });
-    at(STEP.STARS, () => { setStep(STEP.STARS); tapLight(); });
-    at(STEP.MOON, () => { setStep(STEP.MOON); tapLight(); });
-    at(STEP.PLANETS, () => { setStep(STEP.PLANETS); tapLight(); });
-    at(STEP.CONSTELLATIONS, () => { setStep(STEP.CONSTELLATIONS); tapLight(); });
-    at(STEP.MILKYWAY, () => { setStep(STEP.MILKYWAY); tapLight(); });
+    at(STEP.STARS, () => { setStep(STEP.STARS); narrate("Your stars, exactly as they stood"); tapLight(); });
+    at(STEP.MOON, () => { setStep(STEP.MOON); narrate(`The Moon — ${profile.moonPhase.toLowerCase()}, ${profile.moonIllumination}% lit`); tapLight(); });
+    at(STEP.PLANETS, () => { setStep(STEP.PLANETS); narrate(planetsLine); tapLight(); });
+    at(STEP.CONSTELLATIONS, () => { setStep(STEP.CONSTELLATIONS); narrate(`${profile.dominantConstellation} overhead`); tapLight(); });
+    at(STEP.MILKYWAY, () => { setStep(STEP.MILKYWAY); narrate("The Milky Way, drawn across your sky"); tapLight(); });
     at(STEP.SIGNATURE, () => {
       setStep(STEP.SIGNATURE);
       fade(dateOpacity, 0, 500);
+      fade(capOpacity, 0, 500);
       fade(crownOpacity, 1, 1200);
       fade(sigOpacity, 1, 1100, 300);
       tapLight();
@@ -206,11 +218,25 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
         <Text style={styles.dateLoc}>{profile.locationName}</Text>
       </Animated.View>
 
+      {/* Beat narration — one line naming what just appeared, with the real data. */}
+      <Animated.View pointerEvents="none" style={[styles.capWrap, { opacity: capOpacity }]}>
+        <Text style={styles.capText}>{caption}</Text>
+      </Animated.View>
+
       {/* Sky Signature — the payoff. Fades in as the sky settles. */}
       <Animated.View pointerEvents="box-none" style={[styles.sigWrap, { opacity: sigOpacity }]}>
         <Text style={styles.thisWasYourSky}>This was your sky.</Text>
         <Text style={styles.sigTitle}>{profile.skySignatureTitle}</Text>
         <Text style={styles.sigSubtitle}>{profile.skySignatureSubtitle}</Text>
+
+        {/* Fact strip — the key numbers at a glance. */}
+        <View style={styles.facts}>
+          <Fact label="MOON" value={`${profile.moonIllumination}%`} sub={profile.moonPhase} />
+          <View style={styles.factDivider} />
+          <Fact label="BRIGHTEST" value={profile.brightestPlanet ?? "—"} sub={profile.brightestPlanet ? "planet" : "none up"} />
+          <View style={styles.factDivider} />
+          <Fact label="PLANETS UP" value={String(profile.visibleCount)} sub={profile.dominantConstellation} />
+        </View>
 
         <Animated.View style={{ opacity: ctaOpacity, width: "100%", alignItems: "center" }}>
           <Pressable style={styles.cta} onPress={() => { tapLight(); onDone(); }} hitSlop={10}>
@@ -229,6 +255,16 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
   );
 }
 
+function Fact({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <View style={styles.fact}>
+      <Text style={styles.factLabel}>{label}</Text>
+      <Text style={styles.factValue} numberOfLines={1}>{value}</Text>
+      <Text style={styles.factSub} numberOfLines={1}>{sub}</Text>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFillObject, backgroundColor: "#03040A" },
   base: { ...StyleSheet.absoluteFillObject, backgroundColor: "#03040A" },
@@ -241,7 +277,15 @@ const styles = StyleSheet.create({
   dateEyebrow: { color: AuraLunisColors.gold, fontSize: 10, letterSpacing: 3, fontWeight: "800", marginBottom: 10 },
   dateLine: { color: "#FFFFFF", fontSize: 26, fontWeight: "300", letterSpacing: 0.5 },
   dateLoc: { color: AuraLunisColors.silver, fontSize: 13, marginTop: 8 },
-  sigWrap: { position: "absolute", bottom: 0, left: 0, right: 0, paddingHorizontal: 28, paddingBottom: 56, alignItems: "center" },
+  capWrap: { position: "absolute", bottom: 96, left: 0, right: 0, alignItems: "center", paddingHorizontal: 28 },
+  capText: { color: "#EDE6D6", fontSize: 16, fontWeight: "500", letterSpacing: 0.4, textAlign: "center" },
+  facts: { flexDirection: "row", alignItems: "flex-start", justifyContent: "center", marginTop: 4, marginBottom: 24 },
+  factDivider: { width: 1, height: 34, backgroundColor: "rgba(255,255,255,0.14)", marginHorizontal: 12, marginTop: 4 },
+  fact: { alignItems: "center", maxWidth: 108 },
+  factLabel: { color: AuraLunisColors.gold, fontSize: 8, letterSpacing: 1.5, fontWeight: "800" },
+  factValue: { color: "#FFFFFF", fontSize: 17, fontWeight: "800", marginTop: 5 },
+  factSub: { color: AuraLunisColors.silver, fontSize: 10, marginTop: 2 },
+  sigWrap: { position: "absolute", bottom: 0, left: 0, right: 0, paddingHorizontal: 28, paddingBottom: 48, alignItems: "center" },
   thisWasYourSky: { color: AuraLunisColors.silver, fontSize: 15, fontStyle: "italic", marginBottom: 16, letterSpacing: 0.5 },
   sigTitle: { color: AuraLunisColors.gold2, fontSize: 30, fontWeight: "800", textAlign: "center", letterSpacing: 0.3 },
   sigSubtitle: { color: "#EDE6D6", fontSize: 15, lineHeight: 22, textAlign: "center", marginTop: 12, marginBottom: 26, maxWidth: 340 },
