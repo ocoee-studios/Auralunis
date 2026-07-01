@@ -21,7 +21,7 @@ import { SkyLensCanvas } from "./SkyLensCanvas";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { getVisualGate } from "./PremiumVisualGating";
 import type { LayerKey } from "./SkyLensLayerCatalog";
-import type { CameraFov, CameraPointing } from "./ar/SkyLensProjection";
+import { projectTarget, type CameraFov, type CameraPointing } from "./ar/SkyLensProjection";
 import type { ObserverLocation } from "./accuracy/SkyLensAccuracyTypes";
 import type { BirthSkyProfile } from "@/services/BirthSkyService";
 import { AuraLunisColors } from "@/theme/tokens";
@@ -105,12 +105,25 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
 
   const milkyWayBoost = step >= STEP.MILKYWAY ? 2.2 : 0.7;
 
+  // Screen positions of the dominant constellation's stars — the gold shimmer hugs its
+  // actual shape (this replaced the flat crown disc). Same projection the canvas uses.
+  const dominantStars = useMemo(() => {
+    const con = sky.constellations.find((k) => k.name === profile.dominantConstellation);
+    if (!con) return [] as { x: number; y: number }[];
+    return con.points
+      .map((pt) => projectTarget(pointing, pt.azimuthDegrees, pt.altitudeDegrees, fov, box))
+      .filter((p) => p.onScreen)
+      .map((p) => ({ x: p.x, y: p.y }));
+  }, [sky.constellations, profile.dominantConstellation, pointing, fov, box]);
+
   // ---- Animated overlays (opacity only — Animated.View, native driver) ----
   const canvasFade = useRef(new Animated.Value(0)).current;   // black → sky
   const dateOpacity = useRef(new Animated.Value(0)).current;  // birth date card
   const sigOpacity = useRef(new Animated.Value(0)).current;   // Sky Signature text
   const ctaOpacity = useRef(new Animated.Value(0)).current;   // settled buttons
   const capOpacity = useRef(new Animated.Value(0)).current;   // beat narration line
+  const shimmerFade = useRef(new Animated.Value(0)).current;  // gold constellation shimmer fade-in
+  const shimmerPulse = useRef(new Animated.Value(0)).current; // its breathing loop
 
   const fade = (v: Animated.Value, to: number, ms: number, delay = 0) =>
     Animated.timing(v, { toValue: to, duration: ms, delay, useNativeDriver: true }).start();
@@ -131,9 +144,20 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
     canvasFade.setValue(1);
     fade(dateOpacity, 0, 300);
     fade(capOpacity, 0, 300);
+    fade(shimmerFade, 1, 900);
     fade(sigOpacity, 1, 900, 200);
     fade(ctaOpacity, 1, 700, 900);
   };
+
+  // Gentle breathing loop for the constellation shimmer (native-driver opacity).
+  useEffect(() => {
+    const loop = Animated.loop(Animated.sequence([
+      Animated.timing(shimmerPulse, { toValue: 1, duration: 1500, useNativeDriver: true }),
+      Animated.timing(shimmerPulse, { toValue: 0, duration: 1500, useNativeDriver: true }),
+    ]));
+    loop.start();
+    return () => loop.stop();
+  }, [shimmerPulse]);
 
   const skip = () => {
     if (finished.current) return;
@@ -152,7 +176,7 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
     at(STEP.STARS, () => { setStep(STEP.STARS); narrate("Your stars, exactly as they stood"); tapLight(); });
     at(STEP.MOON, () => { setStep(STEP.MOON); narrate(`The Moon — ${profile.moonPhase.toLowerCase()}, ${profile.moonIllumination}% lit`); tapLight(); });
     at(STEP.PLANETS, () => { setStep(STEP.PLANETS); narrate(planetsLine); tapLight(); });
-    at(STEP.CONSTELLATIONS, () => { setStep(STEP.CONSTELLATIONS); narrate(`${profile.dominantConstellation} overhead`); tapLight(); });
+    at(STEP.CONSTELLATIONS, () => { setStep(STEP.CONSTELLATIONS); narrate(`${profile.dominantConstellation} overhead`); fade(shimmerFade, 1, 1300); tapLight(); });
     at(STEP.MILKYWAY, () => { setStep(STEP.MILKYWAY); narrate("The Milky Way, drawn across your sky"); tapLight(); });
     at(STEP.SIGNATURE, () => {
       setStep(STEP.SIGNATURE);
@@ -203,6 +227,20 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
           photographicCore={false}
           onSelect={() => {}}
         />
+      </Animated.View>
+
+      {/* Gold shimmer hugging the dominant constellation's own stars (crash-safe: native
+          Animated.View opacity, never SVG props). Fades in as the lines draw. */}
+      <Animated.View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { opacity: shimmerFade }]}>
+        {dominantStars.map((s, i) => (
+          <Animated.View
+            key={i}
+            style={[
+              styles.shimmer,
+              { left: s.x - 7, top: s.y - 7, opacity: shimmerPulse.interpolate({ inputRange: [0, 1], outputRange: [0.35, 0.95] }) },
+            ]}
+          />
+        ))}
       </Animated.View>
 
       {/* Birth date card — the first thing that appears, dissolves before the Signature. */}
@@ -262,6 +300,11 @@ function Fact({ label, value, sub }: { label: string; value: string; sub: string
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFillObject, backgroundColor: "#03040A" },
   base: { ...StyleSheet.absoluteFillObject, backgroundColor: "#03040A" },
+  shimmer: {
+    position: "absolute", width: 14, height: 14, borderRadius: 7,
+    backgroundColor: "rgba(255,238,196,0.85)",
+    shadowColor: AuraLunisColors.gold, shadowOpacity: 0.95, shadowRadius: 9, shadowOffset: { width: 0, height: 0 },
+  },
   dateWrap: { position: "absolute", top: "40%", left: 0, right: 0, alignItems: "center" },
   dateEyebrow: { color: AuraLunisColors.gold, fontSize: 10, letterSpacing: 3, fontWeight: "800", marginBottom: 10 },
   dateLine: { color: "#FFFFFF", fontSize: 26, fontWeight: "300", letterSpacing: 0.5 },
