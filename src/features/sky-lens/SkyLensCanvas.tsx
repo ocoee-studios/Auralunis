@@ -13,7 +13,7 @@ import { MoonLayer } from "./layers/MoonLayer";
 import { CosmicDustLayer } from "./layers/CosmicDustLayer";
 import { HorizonGlowLayer } from "./layers/HorizonGlowLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
-import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
+import { MilkyWayTilesLayer } from "./layers/MilkyWayTilesLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
 import { NebulaTextureLayer } from "./layers/NebulaTextureLayer";
 import { ShootingStarLayer } from "./layers/ShootingStarLayer";
@@ -147,7 +147,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {activeLayers.has("milkyway") && (
         <G transform={depth(0.6)}>
           <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} dust={sky.milkyWayDust} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
-          {photographicCore && <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />}
+          {photographicCore && <MilkyWayTilesLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} fullSphere={fullSphere} reveal={nebulaReveal} />}
         </G>
       )}
       {/* Deep-sky nebulae — Deep Sky toggle AND premium. PNG-texture nebulae (soft glow
