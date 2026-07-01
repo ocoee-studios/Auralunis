@@ -107,38 +107,27 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
                 : undefined
             }
           >
-            {/* SCATTERING — ultra-faint outermost halo (~3× the disc) so the planet's
-                light feels like it scatters into space around it, not a hard cutout.
-                Skipped on Venus (one fewer overlapping circle → no concentric look). */}
-            {body.id !== "venus" && <Circle cx={x} cy={y} r={d * 3} fill={color} opacity={0.02} />}
-            {/* base glow / BLOOM — a single SMOOTH per-planet radial gradient (color-
-                matched, fading to transparent) instead of stacked solid discs, so no
-                planet bands into concentric rings. Same fix Venus got, now applied to
-                Mercury/Mars/Jupiter/Saturn. (Venus keeps its tuned venusBloom below.) */}
+            {/* SOFT ATMOSPHERIC SCATTER — one smooth, wide, many-stop radial falloff in
+                the planet's own colour: like the planet illuminating nearby dust. A
+                SINGLE gradient circle (no stacked solid discs, no limb-ring outline) so
+                it physically diffuses into space instead of quantising into the
+                concentric "sticker" rings. Venus keeps its own tuned pearl bloom below. */}
             {body.id !== "venus" && (
               <>
                 <Defs>
-                  <RadialGradient id={`pBloom-${body.id}`} cx="50%" cy="50%" r="50%">
-                    <Stop offset="0%" stopColor={color} stopOpacity={0.32} />
-                    <Stop offset="45%" stopColor={color} stopOpacity={0.12} />
+                  <RadialGradient id={`pAtmos-${body.id}`} cx="50%" cy="50%" r="50%">
+                    <Stop offset="0%" stopColor={color} stopOpacity={0.3} />
+                    <Stop offset="12%" stopColor={color} stopOpacity={0.22} />
+                    <Stop offset="24%" stopColor={color} stopOpacity={0.15} />
+                    <Stop offset="38%" stopColor={color} stopOpacity={0.09} />
+                    <Stop offset="54%" stopColor={color} stopOpacity={0.05} />
+                    <Stop offset="72%" stopColor={color} stopOpacity={0.024} />
+                    <Stop offset="88%" stopColor={color} stopOpacity={0.008} />
                     <Stop offset="100%" stopColor={color} stopOpacity={0} />
                   </RadialGradient>
                 </Defs>
-                <Circle cx={x} cy={y} r={glow * 1.05} fill={`url(#pBloom-${body.id})`} />
+                <Circle cx={x} cy={y} r={d * 3} fill={`url(#pAtmos-${body.id})`} />
               </>
-            )}
-
-            {/* Mars — deep red atmospheric aura (recognition: the red planet) */}
-            {useIllustrations && body.id === "mars" && !nightMode && (
-              <>
-                <Circle cx={x} cy={y} r={glow * 2.0} fill="#C8341A" opacity={0.08} />
-                <Circle cx={x} cy={y} r={glow * 1.25} fill="#FF5A33" opacity={0.16} />
-              </>
-            )}
-
-            {/* Jupiter — tighter golden glow (crisper per feedback) */}
-            {useIllustrations && body.id === "jupiter" && !nightMode && (
-              <Circle cx={x} cy={y} r={glow * 1.3} fill="#EBB44E" opacity={0.11} />
             )}
 
             {/* Jupiter — the four GALILEAN MOONS strung along the equatorial plane (a
@@ -205,10 +194,9 @@ export function PlanetLayer({ bodies, project, palette, nightMode, placeLabel, s
               </>
             )}
 
-            {/* ATMOSPHERE — a thin color-matched limb ring hugging the disc. Skipped on
-                Venus: it's a featureless brilliant point, so a rim stroke just reads as
-                a hard ring there. Mars/Jupiter/Saturn keep it (it complements their detail). */}
-            {!nightMode && body.id !== "venus" && <Circle cx={x} cy={y} r={d + 1} fill="none" stroke={color} strokeWidth={2} strokeOpacity={0.3} />}
+            {/* (removed the hard color-matched limb-ring stroke — a crisp outline is the
+                worst of the "sticker" look; the soft atmospheric bloom above now hugs the
+                disc edge and reads as a lit atmosphere, no hard contour.) */}
 
             {/* generous transparent tap target on top (≈15px beyond the disc) */}
             <Circle cx={x} cy={y} r={Math.max(d + 18, 28)} fill="transparent" onPress={onPress} />
