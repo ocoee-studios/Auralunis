@@ -74,29 +74,31 @@ export function magnitudeToRadius(magnitude: number): number {
 // so the sky reads colorful rather than uniform white. Default is a soft
 // blue-white that cools slightly with magnitude.
 const STAR_COLORS: Record<string, string> = {
-  // blue / blue-white (O/B/A) — vivid icy blue
-  rigel: "#7FB0FF", bellatrix: "#93BCFF", alnilam: "#7FB0FF", alnitak: "#7FB0FF",
-  mintaka: "#7FB0FF", saiph: "#93BCFF", spica: "#79A8FF", achernar: "#8AB6FF",
-  hadar: "#7FB0FF", acrux: "#7FB0FF", mimosa: "#7FB0FF", regulus: "#A6C8FF",
-  algol: "#A6C8FF", vega: "#C4D8FF", sirius: "#BFE0FF", deneb: "#C7E2FF",
-  castor: "#AFCFFF", adhara: "#7FB0FF", alkaid: "#93BCFF", elnath: "#B6D2FF",
-  peacock: "#93BCFF", mirzam: "#93BCFF",
+  // blue / blue-white (O/B/A) — OBVIOUSLY icy blue
+  rigel: "#4F94FF", bellatrix: "#6EA6FF", alnilam: "#4F94FF", alnitak: "#4F94FF",
+  mintaka: "#4F94FF", saiph: "#6EA6FF", spica: "#3F88FF", achernar: "#5C9CFF",
+  hadar: "#4F94FF", acrux: "#4F94FF", mimosa: "#4F94FF", regulus: "#7FB2FF",
+  algol: "#7FB2FF", vega: "#8FBEFF", sirius: "#9FCCFF", deneb: "#A6CCFF",
+  castor: "#8FBEFF", adhara: "#4F94FF", alkaid: "#6EA6FF", elnath: "#8AB8FF",
+  peacock: "#6EA6FF", mirzam: "#6EA6FF",
   // white (A/F)
-  altair: "#EAF2FF", canopus: "#FBFAE8", procyon: "#F0F4FF", fomalhaut: "#DCE8FF",
-  caph: "#FFF0CC", polaris: "#F6F1DC",
+  altair: "#CFE2FF", canopus: "#FCF2D0", procyon: "#DCE8FF", fomalhaut: "#C2D8FF",
+  caph: "#FFE7B0", polaris: "#F0EACE",
   // yellow (G) — warm gold
-  capella: "#FFDD7A", "rigil-kent": "#FFE9B0",
+  capella: "#FFCC44", "rigil-kent": "#FFDA80",
   // orange (K) — rich amber
-  arcturus: "#FFB24A", aldebaran: "#FFB84A", pollux: "#FFB866", dubhe: "#FFC97E",
-  alphard: "#FFB866", hamal: "#FFBE74", kochab: "#FFBC70", suhail: "#FFB24A",
-  menkent: "#FFBC70", enif: "#FFB866",
-  // red (M) — fiery coral-red
-  betelgeuse: "#FF7A44", antares: "#FF5A33", gacrux: "#FF7E4A", scheat: "#FF9166",
-  mirach: "#FF9166",
+  arcturus: "#FF941E", aldebaran: "#FFA028", pollux: "#FF9E42", dubhe: "#FFB456",
+  alphard: "#FF9E42", hamal: "#FFA648", kochab: "#FFA444", suhail: "#FF941E",
+  menkent: "#FFA648", enif: "#FF9E42",
+  // red (M) — fiery red-orange
+  betelgeuse: "#FF5C28", antares: "#FF3D1E", gacrux: "#FF5C30", scheat: "#FF7042",
+  mirach: "#FF7042",
 };
 
 export function starColor(id: string, magnitude: number): string {
-  return STAR_COLORS[id] ?? (magnitude < 2 ? "#EAF2FF" : magnitude < 3.2 ? "#D2E0FF" : "#BFD2FF");
+  // Unnamed stars: a clearly-blue ramp that cools with brightness (real O/B/A tint),
+  // saturated enough to read as blue, not near-white.
+  return STAR_COLORS[id] ?? (magnitude < 2 ? "#CFE2FF" : magnitude < 3.2 ? "#AECCFF" : "#93BEFF");
 }
 
 // Atmospheric extinction tint: lerp a #RRGGBB star color toward a warm horizon
@@ -159,10 +161,10 @@ export function constellationColor(id: string): string {
 // wider spread (icy cyan-blue, deeper blue, richer amber/red) so the field reads
 // with real colour variety instead of a uniform pale wash — still tasteful, not neon.
 const DOME_TINTS = [
-  "#C6D8FF", "#AEC6FF", "#9FD6F2", "#BCCEFF", // blue-white → icy cyan-blue + deep blue (40%)
-  "#FBEDC2", "#F4E2B0", "#FFECC0",            // yellow-white (30%)
-  "#FFCE92", "#FFC486",                        // orange (20%)
-  "#FFAE86",                                   // warm red (10%)
+  "#9FC0FF", "#84AEFF", "#7FCEF0", "#96B8FF", // blue / icy cyan / deep blue (40%)
+  "#FBE39C", "#F2D680", "#FFE199",            // yellow-gold (30%)
+  "#FFBC66", "#FFAE50",                        // orange (20%)
+  "#FF9060",                                   // warm red (10%)
 ];
 export function domeColor(id: string): string {
   let h = 0;

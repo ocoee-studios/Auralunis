@@ -726,16 +726,18 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
           {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
 
-          {/* Cosmic dark overlay */}
+          {/* Cosmic dark overlay. AR is a solid dark sky canvas (0.92) — the camera
+              is only a faint texture beneath it, not a see-through window (real-world
+              trees/buildings must not bleed through the sky). */}
           <View
             style={[StyleSheet.absoluteFillObject, {
               backgroundColor: planetarium
                 ? "rgba(3,8,22,0.95)"
                 : cinematic
-                ? "rgba(3,8,22,0.85)"
+                ? "rgba(3,8,22,0.9)"
                 : immersive
-                ? "rgba(3,8,22,0.75)"
-                : "rgba(3,8,22,0.45)",
+                ? "rgba(3,8,22,0.88)"
+                : "rgba(3,8,22,0.92)",
             }]}
             pointerEvents="none"
           />

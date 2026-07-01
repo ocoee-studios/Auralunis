@@ -55,11 +55,14 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         // Atmospheric extinction: stars low on the horizon redden (more air in the
         // line of sight). Skipped in Night Mode (monochrome red for dark adaptation).
         const color = extinction && !nightMode ? warmShift(baseColor, getExtinctionWarmth(star.altitudeDegrees)) : baseColor;
-        // Bloom (glow rings + diffraction spikes + white-hot core) is premium. Free
-        // keeps the spectral disc + interactive lit-region aura, just no bloom.
-        const brightest = bloom && !nightMode && star.magnitude < 1.5; // Vega, Deneb, Sirius… — the showpieces
-        const bright = bloom && !nightMode && star.magnitude < 2.0;
-        const glint = bloom && !nightMode && star.magnitude < 1.2; // diffraction spike on the showpiece stars
+        // Bloom is premium. EVERY star mag 2.0 or brighter gets a soft luminous bloom
+        // in its spectral colour — so the bright stars are the heroes, not just the
+        // hand-listed showpieces. Free keeps the spectral disc, no bloom.
+        const bloomOn = bloom && !nightMode && star.magnitude <= 2.0;
+        const glint = bloom && !nightMode && star.magnitude < 1.3; // diffraction spikes on the very brightest
+        // Bloom radius: hand-tuned for the showpieces, else derived from magnitude
+        // (brighter = wider glow). mag0 ≈ 17px, mag1 ≈ 12.5px, mag2 ≈ 8px.
+        const glowR = (feature ? feature.glowRadius : Math.max(8, 17 - star.magnitude * 4.5)) * (1 + sf * 0.8);
         const spike = r + 9;
         const labeled = showLabels && star.name !== undefined && star.magnitude <= labelMagLimit;
 
@@ -87,33 +90,22 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             />
             {/* focus/showcase aura: any star in a lit region gets a soft halo */}
             {lit > 0 && <Circle cx={p.x} cy={p.y} r={(r + 9) * (1 + lit)} fill={color} opacity={0.16 * lit} />}
-            {/* SHOWPIECE BLOOM — a soft FEATHERED falloff (faint wide halo → brighter
-                core) instead of one hard-edged disc, with a tiny per-star centre offset
-                so each bloom is a slightly different organic shape, not a sharp circle. */}
-            {bloom && feature && (() => {
-              const gr = feature.glowRadius * 0.95 * (1 + sf * 1.0);
+            {/* STAR BLOOM — every bright star (mag ≤ 2) gets a soft, feathered luminous
+                glow in its spectral colour: a wide faint aura (depth) melting into a
+                brighter inner glow, with a tiny per-star offset so each is organic. Soft
+                light, never a lens flare. This is what makes the bright stars the heroes. */}
+            {bloomOn && (() => {
               const h = hashStar(star.id);
-              const ox = ((h % 7) - 3) * 0.1, oy = (((h >> 3) % 7) - 3) * 0.1; // ±0.3·gr
+              const ox = ((h % 7) - 3) * 0.07, oy = (((h >> 3) % 7) - 3) * 0.07;
               return (
                 <G>
-                  {/* wide soft volumetric aura — the depth/atmosphere layer that makes
-                      the hero read as luminous light, not a bright disc (never a flare) */}
-                  <Circle cx={p.x + gr * ox} cy={p.y + gr * oy} r={gr * 1.35} fill={color} opacity={0.025} />
-                  <Circle cx={p.x + gr * ox} cy={p.y + gr * oy} r={gr} fill={color} opacity={0.055} />
-                  <Circle cx={p.x} cy={p.y} r={gr * 0.68} fill={color} opacity={0.1} />
-                  <Circle cx={p.x - gr * ox * 0.5} cy={p.y - gr * oy * 0.5} r={gr * 0.42} fill={color} opacity={0.2} />
+                  <Circle cx={p.x + glowR * ox} cy={p.y + glowR * oy} r={glowR * 1.4} fill={color} opacity={0.04} />
+                  <Circle cx={p.x} cy={p.y} r={glowR} fill={color} opacity={0.09} />
+                  <Circle cx={p.x} cy={p.y} r={glowR * 0.62} fill={color} opacity={0.17} />
+                  <Circle cx={p.x} cy={p.y} r={glowR * 0.36} fill={color} opacity={0.28} />
                 </G>
               );
             })()}
-            {/* Feathered glow on the bright stars — a smooth multi-step opacity ramp
-                (no hard ring). Brightest get the widest, faintest outer halo so the
-                falloff reads as soft light, not concentric discs. */}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 15} fill={color} opacity={0.02} />}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 9} fill={color} opacity={0.04} />}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.07} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.12} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.18} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 1.2} fill={color} opacity={0.26} />}
             {glint && (
               <>
                 {/* tapered 4-point diffraction — a faint wide underlay glow + a crisp
@@ -129,8 +121,8 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             {/* luminous white-hot core — the "tiny diamond" centre. Showpieces get a
                 brighter core; other bright stars a subtle one so they read as light,
                 not a flat colour disc. */}
-            {bright && !glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1.5, 0.8)} fill="#FFFFFF" opacity={0.5} />}
-            {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.85} />}
+            {bloomOn && !glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1.5, 0.9)} fill="#FFFFFF" opacity={0.6} />}
+            {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.9} />}
             {labeled && (() => {
               const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 13) : { x: p.x + r + 3, y: p.y + 3 };
               return (
