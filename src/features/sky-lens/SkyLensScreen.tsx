@@ -437,7 +437,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Stage-1 sky-renderer pass: overall Milky Way (and the shared horizon glow that
   // reads off this same boost) cut ~45% — a delicate band, not a wash over the sky.
   // × (1 + adaptation·0.3): the Milky Way deepens as the eye adapts on dwell.
-  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity * magnificentBoost * gate.milkyWayBoostMultiplier * 0.55 * (1 + adaptation * 0.3);
+  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity * magnificentBoost * gate.milkyWayBoostMultiplier * (1 + adaptation * 0.3);
   // Nebula glow visibility: Bortle nebula opacity × magnificent-night boost (clamped).
   const nebulaOpacity = Math.min(1, skyProfile.nebulaOpacity * magnificentBoost);
   // 2. SEASONAL COLOR — a barely-perceptible warm (summer / MW season) or cool

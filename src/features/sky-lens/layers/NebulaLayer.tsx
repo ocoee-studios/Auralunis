@@ -326,8 +326,6 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
       </Defs>
 
       {nebulae.map((n, i) => {
-        // Textured nebulae are drawn by NebulaTextureLayer (PNG glow) — skip here.
-        if (n.texture) return null;
         const belowHorizon = !n.aboveHorizon;
         if (belowHorizon && !fullSphere && n.altitudeDegrees < -20) return null;
         // AR (over the camera): the painterly clouds look out of place, so render them as

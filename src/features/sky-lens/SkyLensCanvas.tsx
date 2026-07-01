@@ -13,9 +13,8 @@ import { MoonLayer } from "./layers/MoonLayer";
 import { CosmicDustLayer } from "./layers/CosmicDustLayer";
 import { HorizonGlowLayer } from "./layers/HorizonGlowLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
-import { MilkyWayTilesLayer } from "./layers/MilkyWayTilesLayer";
+import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
-import { NebulaTextureLayer } from "./layers/NebulaTextureLayer";
 import { ShootingStarLayer } from "./layers/ShootingStarLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { ZodiacLayer } from "./layers/ZodiacLayer";
@@ -147,19 +146,15 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {activeLayers.has("milkyway") && (
         <G transform={depth(0.6)}>
           <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} dust={sky.milkyWayDust} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
-          {photographicCore && <MilkyWayTilesLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} fullSphere={fullSphere} reveal={nebulaReveal} />}
+          {photographicCore && <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />}
         </G>
       )}
-      {/* Deep-sky nebulae — Deep Sky toggle AND premium. PNG-texture nebulae (soft glow
-          billboards) carry their own opacity + tap + label; NebulaLayer is the fallback
-          render for catalog objects that don't have a texture yet (galaxies as ellipses,
-          globular clusters as dot-swarms, etc.) and skips any nebula that IS textured. */}
-      {activeLayers.has("deepsky") && nebulaOpacity > 0 && isPremium && (
-        <G transform={depth(1)}>
-          <NebulaTextureLayer nebulae={sky.nebulae} project={project} fov={fov} box={box} palette={palette} nightMode={nightMode} showLabels={showLabels} fullSphere={fullSphere} reveal={nebulaReveal} nebulaBortle={nebulaOpacity} placeLabel={placeLabel} onSelect={onSelect} />
-          <G opacity={nebulaOpacity}>
-            <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} fullSphere={fullSphere} onSelect={onSelect} />
-          </G>
+      {/* Deep-sky nebulae — procedural SVG render (PNG-texture experiment reverted: the
+          supplied PNGs had baked checkerboard / no genuine alpha, so they read as dark
+          smudges). Single opacity owner on the group. */}
+      {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
+        <G transform={depth(1)} opacity={nebulaOpacity}>
+          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} fullSphere={fullSphere} onSelect={onSelect} />
         </G>
       )}
       {activeLayers.has("grid") && !cinematic && (
