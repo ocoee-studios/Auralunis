@@ -131,9 +131,9 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
   // Narrate a beat: set the line, then fade it in fresh.
   const narrate = (text: string) => { setCaption(text); capOpacity.setValue(0); fade(capOpacity, 1, 800); };
 
-  const planetsLine = profile.visibleCount > 0
-    ? `${profile.visibleCount} planet${profile.visibleCount > 1 ? "s" : ""} above the horizon`
-    : "The planets rested below the horizon";
+  const planetsLine = profile.brightestPlanet
+    ? `${profile.brightestPlanet} and the wandering planets`
+    : "The planets, tracing the ecliptic";
 
   // Drive the sequence. One effect owns all timers; skip() short-circuits to SETTLED.
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
