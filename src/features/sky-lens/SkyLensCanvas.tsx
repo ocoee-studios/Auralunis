@@ -150,14 +150,13 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           {photographicCore && <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />}
         </G>
       )}
-      {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
-      {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
+      {/* Deep-sky nebulae — Deep Sky toggle AND premium. PNG-texture nebulae (soft glow
+          billboards) carry their own opacity + tap + label; NebulaLayer is the fallback
+          render for catalog objects that don't have a texture yet (galaxies as ellipses,
+          globular clusters as dot-swarms, etc.) and skips any nebula that IS textured. */}
+      {activeLayers.has("deepsky") && nebulaOpacity > 0 && isPremium && (
         <G transform={depth(1)}>
-          {/* PNG-texture nebulae (soft glow billboards). Own opacity logic (base ×
-              reveal × AR cap), so it is NOT wrapped in the Bortle nebulaOpacity dim.
-              Textured nebulae are skipped by NebulaLayer, so the two never overlap. */}
-          <NebulaTextureLayer nebulae={sky.nebulae} project={project} fov={fov} box={box} nightMode={nightMode} fullSphere={fullSphere} reveal={nebulaReveal} />
-          {/* gradient nebulae (fallback for any nebula without a texture) */}
+          <NebulaTextureLayer nebulae={sky.nebulae} project={project} fov={fov} box={box} palette={palette} nightMode={nightMode} showLabels={showLabels} fullSphere={fullSphere} reveal={nebulaReveal} nebulaBortle={nebulaOpacity} placeLabel={placeLabel} onSelect={onSelect} />
           <G opacity={nebulaOpacity}>
             <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} fullSphere={fullSphere} onSelect={onSelect} />
           </G>
