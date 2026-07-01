@@ -32,7 +32,7 @@ export interface Nebula {
   // instead of the SVG gradient shapes in NebulaLayer. The PNG must be glow-on-
   // transparent (soft alpha edges, no box, no black bg), painterly not photographic,
   // authored in a SQUARE canvas. Nebulae without a texture keep the gradient render.
-  texture?: number;           // require("../../../../assets/sky/nebulae/orion.png")
+  texture?: number;           // require("../../../assets/nebulae/orion.png")
   angularSizeArcmin?: number; // real catalog angular size (arcmin); on-screen size scales from this
   textureAngle?: number;      // optional rotation (deg)
 }
@@ -48,21 +48,21 @@ const TEAL_HAZE = "#3AA0B0"; // planetary haze
 
 export const NEBULAE: ReadonlyArray<Nebula> = [
   // ── Emission nebulae — glowing hydrogen ───────────────────────────────────
-  { id: "m42", catalog: "M42", name: "Orion Nebula", raHours: 5.588, decDegrees: -5.39, type: "emission", con: "Ori", constellation: "Orion", coreColor: "#C77AA0", hazeColor: "#7E96D8", radius: 27, texture: require("../../../../assets/sky/nebulae/orion.png"), angularSizeArcmin: 85, distanceLy: "1,344 ly", visibility: "Naked eye",
+  { id: "m42", catalog: "M42", name: "Orion Nebula", raHours: 5.588, decDegrees: -5.39, type: "emission", con: "Ori", constellation: "Orion", coreColor: "#C77AA0", hazeColor: "#7E96D8", radius: 27, texture: require("../../../assets/nebulae/orion.png"), angularSizeArcmin: 85, distanceLy: "1,344 ly", visibility: "Naked eye",
     description: "A vast stellar nursery in Orion's sword, where new suns are igniting inside glowing curtains of hydrogen.", bestMonths: "December–March" },
-  { id: "m8", catalog: "M8", name: "Lagoon Nebula", raHours: 18.06, decDegrees: -24.38, type: "emission", con: "Sgr", constellation: "Sagittarius", coreColor: PINK, hazeColor: ORANGE, radius: 20, texture: require("../../../../assets/sky/nebulae/lagoon.png"), angularSizeArcmin: 90, distanceLy: "4,100 ly", visibility: "Naked eye",
+  { id: "m8", catalog: "M8", name: "Lagoon Nebula", raHours: 18.06, decDegrees: -24.38, type: "emission", con: "Sgr", constellation: "Sagittarius", coreColor: PINK, hazeColor: ORANGE, radius: 20, texture: require("../../../assets/nebulae/lagoon.png"), angularSizeArcmin: 90, distanceLy: "4,100 ly", visibility: "Naked eye",
     description: "A rose-colored cloud split by a dark lagoon of dust, drifting in the heart of the Milky Way.", bestMonths: "June–September" },
-  { id: "m16", catalog: "M16", name: "Eagle Nebula", raHours: 18.313, decDegrees: -13.78, type: "emission", con: "Ser", constellation: "Serpens", coreColor: PINK, hazeColor: ORANGE, radius: 17, texture: require("../../../../assets/sky/nebulae/eagle.png"), angularSizeArcmin: 35, distanceLy: "7,000 ly", visibility: "Binoculars",
+  { id: "m16", catalog: "M16", name: "Eagle Nebula", raHours: 18.313, decDegrees: -13.78, type: "emission", con: "Ser", constellation: "Serpens", coreColor: PINK, hazeColor: ORANGE, radius: 17, texture: require("../../../assets/nebulae/eagle.png"), angularSizeArcmin: 35, distanceLy: "7,000 ly", visibility: "Binoculars",
     description: "Home of the Pillars of Creation — towering columns of gas where stars are being born.", bestMonths: "June–September" },
-  { id: "ngc3372", catalog: "NGC 3372", name: "Carina Nebula", raHours: 10.752, decDegrees: -59.87, type: "emission", con: "Car", constellation: "Carina", coreColor: PINK, hazeColor: ORANGE, radius: 23, texture: require("../../../../assets/sky/nebulae/carina.png"), angularSizeArcmin: 120, distanceLy: "7,500 ly", visibility: "Naked eye",
+  { id: "ngc3372", catalog: "NGC 3372", name: "Carina Nebula", raHours: 10.752, decDegrees: -59.87, type: "emission", con: "Car", constellation: "Carina", coreColor: PINK, hazeColor: ORANGE, radius: 23, texture: require("../../../assets/nebulae/carina.png"), angularSizeArcmin: 120, distanceLy: "7,500 ly", visibility: "Naked eye",
     description: "One of the largest nebulae in the sky, wrapped around the doomed, eruptive star Eta Carinae.", bestMonths: "January–April" },
-  { id: "ngc7000", catalog: "NGC 7000", name: "North America Nebula", raHours: 20.97, decDegrees: 44.5, type: "emission", con: "Cyg", constellation: "Cygnus", coreColor: "#FF6A5A", hazeColor: "#D84444", radius: 23, texture: require("../../../../assets/sky/nebulae/north-america.png"), angularSizeArcmin: 120, distanceLy: "1,600 ly", visibility: "Binoculars",
+  { id: "ngc7000", catalog: "NGC 7000", name: "North America Nebula", raHours: 20.97, decDegrees: 44.5, type: "emission", con: "Cyg", constellation: "Cygnus", coreColor: "#FF6A5A", hazeColor: "#D84444", radius: 23, texture: require("../../../assets/nebulae/north-america.png"), angularSizeArcmin: 120, distanceLy: "1,600 ly", visibility: "Binoculars",
     description: "A glowing cloud shaped uncannily like the continent it's named for, set beside bright Deneb.", bestMonths: "July–October" },
-  { id: "m17", catalog: "M17", name: "Swan Nebula", raHours: 18.346, decDegrees: -16.18, type: "emission", con: "Sgr", constellation: "Sagittarius", coreColor: PINK, hazeColor: ORANGE, radius: 15, texture: require("../../../../assets/sky/nebulae/swan.png"), angularSizeArcmin: 46, distanceLy: "5,000 ly", visibility: "Binoculars",
+  { id: "m17", catalog: "M17", name: "Swan Nebula", raHours: 18.346, decDegrees: -16.18, type: "emission", con: "Sgr", constellation: "Sagittarius", coreColor: PINK, hazeColor: ORANGE, radius: 15, texture: require("../../../assets/nebulae/swan.png"), angularSizeArcmin: 46, distanceLy: "5,000 ly", visibility: "Binoculars",
     description: "Also called the Omega — a luminous swan floating on a river of star-forming gas.", bestMonths: "June–September" },
-  { id: "m20", catalog: "M20", name: "Trifid Nebula", raHours: 18.045, decDegrees: -23.03, type: "emission", con: "Sgr", constellation: "Sagittarius", coreColor: PINK, hazeColor: "#6090FF", radius: 15, texture: require("../../../../assets/sky/nebulae/trifid.png"), angularSizeArcmin: 28, distanceLy: "5,200 ly", visibility: "Binoculars",
+  { id: "m20", catalog: "M20", name: "Trifid Nebula", raHours: 18.045, decDegrees: -23.03, type: "emission", con: "Sgr", constellation: "Sagittarius", coreColor: PINK, hazeColor: "#6090FF", radius: 15, texture: require("../../../assets/nebulae/trifid.png"), angularSizeArcmin: 28, distanceLy: "5,200 ly", visibility: "Binoculars",
     description: "A rare pairing: a pink emission cloud cleft into three, hugged by a cool blue reflection halo.", bestMonths: "June–September" },
-  { id: "ngc2237", catalog: "NGC 2237", name: "Rosette Nebula", raHours: 6.525, decDegrees: 4.95, type: "emission", con: "Mon", constellation: "Monoceros", coreColor: "#CC93A6", hazeColor: "#B0788A", radius: 11, texture: require("../../../../assets/sky/nebulae/rosette.png"), angularSizeArcmin: 80, distanceLy: "5,000 ly", visibility: "Binoculars",
+  { id: "ngc2237", catalog: "NGC 2237", name: "Rosette Nebula", raHours: 6.525, decDegrees: 4.95, type: "emission", con: "Mon", constellation: "Monoceros", coreColor: "#CC93A6", hazeColor: "#B0788A", radius: 11, texture: require("../../../assets/nebulae/rosette.png"), angularSizeArcmin: 80, distanceLy: "5,000 ly", visibility: "Binoculars",
     description: "A deep-red flower of gas with a cluster of hot young stars blooming at its center.", bestMonths: "December–March" },
 
   // ── Reflection nebula — scattered starlight ───────────────────────────────
@@ -84,15 +84,15 @@ export const NEBULAE: ReadonlyArray<Nebula> = [
     description: "One of the brightest globulars in the sky, a gold concentration near the galactic core.", bestMonths: "June–September" },
 
   // ── Planetary nebulae — dying sun-like stars ──────────────────────────────
-  { id: "m27", catalog: "M27", name: "Dumbbell Nebula", raHours: 19.994, decDegrees: 22.72, type: "planetary", con: "Vul", constellation: "Vulpecula", coreColor: TEAL_CORE, hazeColor: TEAL_HAZE, radius: 12, texture: require("../../../../assets/sky/nebulae/dumbbell.png"), angularSizeArcmin: 8, distanceLy: "1,360 ly", visibility: "Binoculars",
+  { id: "m27", catalog: "M27", name: "Dumbbell Nebula", raHours: 19.994, decDegrees: 22.72, type: "planetary", con: "Vul", constellation: "Vulpecula", coreColor: TEAL_CORE, hazeColor: TEAL_HAZE, radius: 12, texture: require("../../../assets/nebulae/dumbbell.png"), angularSizeArcmin: 8, distanceLy: "1,360 ly", visibility: "Binoculars",
     description: "A teal-green shell of gas flung off by a dying star — a glimpse of our own Sun's far future.", bestMonths: "July–October" },
-  { id: "m57", catalog: "M57", name: "Ring Nebula", raHours: 18.893, decDegrees: 33.03, type: "planetary", con: "Lyr", constellation: "Lyra", coreColor: TEAL_CORE, hazeColor: TEAL_HAZE, radius: 8, distanceLy: "2,300 ly", visibility: "Telescope",
+  { id: "m57", catalog: "M57", name: "Ring Nebula", raHours: 18.893, decDegrees: 33.03, type: "planetary", con: "Lyr", constellation: "Lyra", coreColor: TEAL_CORE, hazeColor: TEAL_HAZE, radius: 8, texture: require("../../../assets/nebulae/ring.png"), angularSizeArcmin: 4, distanceLy: "2,300 ly", visibility: "Telescope",
     description: "A perfect smoke ring of glowing gas, exhaled by a star in its final breaths.", bestMonths: "July–October" },
 
   // ── Supernova remnants — stellar wreckage ─────────────────────────────────
-  { id: "m1", catalog: "M1", name: "Crab Nebula", raHours: 5.575, decDegrees: 22.01, type: "supernova", con: "Tau", constellation: "Taurus", coreColor: "#FFC457", hazeColor: "#E08A2E", radius: 10, texture: require("../../../../assets/sky/nebulae/crab.png"), angularSizeArcmin: 7, distanceLy: "6,500 ly", visibility: "Telescope",
+  { id: "m1", catalog: "M1", name: "Crab Nebula", raHours: 5.575, decDegrees: 22.01, type: "supernova", con: "Tau", constellation: "Taurus", coreColor: "#FFC457", hazeColor: "#E08A2E", radius: 10, texture: require("../../../assets/nebulae/crab.png"), angularSizeArcmin: 7, distanceLy: "6,500 ly", visibility: "Telescope",
     description: "The shattered remains of a star that exploded in 1054 AD — recorded by astronomers worldwide.", bestMonths: "December–February" },
-  { id: "ngc6960", catalog: "NGC 6960", name: "Veil Nebula", raHours: 20.76, decDegrees: 30.71, type: "supernova", con: "Cyg", constellation: "Cygnus", coreColor: "#5CC6FF", hazeColor: "#2E7AD8", radius: 20, distanceLy: "2,400 ly", visibility: "Telescope",
+  { id: "ngc6960", catalog: "NGC 6960", name: "Veil Nebula", raHours: 20.76, decDegrees: 30.71, type: "supernova", con: "Cyg", constellation: "Cygnus", coreColor: "#5CC6FF", hazeColor: "#2E7AD8", radius: 20, texture: require("../../../assets/nebulae/veil.png"), angularSizeArcmin: 180, distanceLy: "2,400 ly", visibility: "Telescope",
     description: "Delicate teal filaments — the blast wave of a star that died ten thousand years ago, still expanding.", bestMonths: "July–October" },
 
   // ── Sky gap fillers — every direction should have color ────────────────────
