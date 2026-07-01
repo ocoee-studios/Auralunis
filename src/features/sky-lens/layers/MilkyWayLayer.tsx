@@ -160,9 +160,9 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
             warm gold→pink, NOT white — so we push saturation here to colour the
             (naturally grey) photographic core riding on top. This is the visual anchor. */}
         <RadialGradient id="mwCore" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FBECC8" stopOpacity={o(0.5)} />
-          <Stop offset="24%" stopColor="#EAD0A2" stopOpacity={o(0.36)} />
-          <Stop offset="56%" stopColor="#D08AA8" stopOpacity={o(0.2)} />
+          <Stop offset="0%" stopColor="#FBECC8" stopOpacity={o(0.32)} />
+          <Stop offset="24%" stopColor="#EAD0A2" stopOpacity={o(0.22)} />
+          <Stop offset="56%" stopColor="#D08AA8" stopOpacity={o(0.12)} />
           <Stop offset="100%" stopColor="#9080B0" stopOpacity={0} />
         </RadialGradient>
         {/* LAYER B — bright star cloud: pale gold melting to white at the heart, the

@@ -42,7 +42,7 @@ const TYPE_LABEL: Record<NebulaType, string> = {
 
 // Real nebulae are tiny to the eye; magnify hard so they read as LARGE soft clouds
 // (Lagoon fills a real chunk of screen), keeping the RELATIVE sizes true.
-const MAGNIFY = 22;
+const MAGNIFY = 11;
 const MIN_SIZE = 48; // px — the tiny planetaries (Ring, Crab) sit at this floor as small jewels
 
 export function NebulaTextureLayer({
@@ -55,7 +55,7 @@ export function NebulaTextureLayer({
   // Default base: barely-there ~0.15 → 0.25 at a dark site. Per-nebula `textureOpacity`
   // overrides it (some, like North America, need to sit further back). A small dwell
   // deepening on top so they still emerge with the eye adaptation.
-  const defaultBase = Math.min(0.25, 0.15 + 0.1 * bortle);
+  const defaultBase = Math.min(0.13, 0.07 + 0.06 * bortle);
   const revealMod = 0.9 + 0.1 * reveal;
 
   return (
@@ -79,7 +79,7 @@ export function NebulaTextureLayer({
                   any white halo in the source PNG, and softens it into a cloud) */}
               <RadialGradient id={`nf-${n.id}`} cx={p.x} cy={p.y} r={r} gradientUnits="userSpaceOnUse">
                 <Stop offset="0" stopColor="#fff" stopOpacity="1" />
-                <Stop offset="0.55" stopColor="#fff" stopOpacity="1" />
+                <Stop offset="0.38" stopColor="#fff" stopOpacity="1" />
                 <Stop offset="1" stopColor="#fff" stopOpacity="0" />
               </RadialGradient>
               <Mask id={`nm-${n.id}`} maskUnits="userSpaceOnUse">
