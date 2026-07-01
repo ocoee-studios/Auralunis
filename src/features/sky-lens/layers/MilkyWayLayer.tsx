@@ -79,15 +79,26 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
 
   if (nightMode) return null;
 
-  // band-following points (galactic equator) for the soft glow
-  const glowPts: { x: number; y: number }[] = [];
+  // Band-following points (galactic equator) for the soft glow. To feather the band
+  // into black like watercolor — instead of cutting off abruptly at the horizon — we
+  // (a) keep points down to a few degrees BELOW the horizon and fade them out by
+  // altitude, and (b) taper the first/last visible points so the band dissolves at
+  // every exit edge rather than ending on a full-strength blob.
+  const glowPts: { x: number; y: number; fade: number }[] = [];
   for (let i = 0; i < band.center.length; i++) {
     const pt = band.center[i];
-    if (!pt.aboveHorizon) continue;
+    if (pt.altitudeDegrees < -10) continue; // let it dip a little past the horizon, then vanish
+    if (i % 3 !== 0) continue;
     const p = project(pt.azimuthDegrees, pt.altitudeDegrees);
     if (p.behind) continue;
-    if (i % 3 === 0) glowPts.push({ x: p.x, y: p.y });
+    // horizon fade: full above ~14°, smoothly to 0 by ~-10° (dissolves into the horizon)
+    const horizonFade = Math.max(0, Math.min(1, (pt.altitudeDegrees + 10) / 24));
+    glowPts.push({ x: p.x, y: p.y, fade: horizonFade });
   }
+  // Taper the ends of the visible run so the band fades in/out rather than starting or
+  // stopping on a full-strength blob (first/last ~3 points ramp 0→1).
+  const glowN = glowPts.length;
+  const endTaper = (idx: number) => Math.max(0, Math.min(1, (Math.min(idx, glowN - 1 - idx) + 0.5) / 3.5));
 
   const o = (v: number) => Math.min(0.6, v * boost);
   const glowR = Math.max(90, box.height * 0.42); // huge, soft
@@ -196,7 +207,7 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
           the band's outer envelope frays into ragged edges instead of reading as a row
           of equal circles (reference: organic, not geometric). */}
       {glowPts.map((p, i) => (
-        <Circle key={`g-${i}`} cx={p.x} cy={p.y} r={glowR * (0.78 + ((i * 37) % 100) / 100 * 0.54)} fill="url(#mwGlow)" />
+        <Circle key={`g-${i}`} cx={p.x} cy={p.y} r={glowR * (0.78 + ((i * 37) % 100) / 100 * 0.54)} fill="url(#mwGlow)" opacity={p.fade * endTaper(i)} />
       ))}
 
       {/* LAYER B — bright star clouds: pale-gold swells where the band thickens with
