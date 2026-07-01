@@ -137,29 +137,30 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
   return (
     <G transform={`translate(0 ${driftY.toFixed(2)})`}>
       <Defs>
-        {/* LAYER 3 — warm galactic glow — subtle warmth, not visible circles */}
+        {/* LAYER 3 — the broad band glow. Cool pale silver (was warm gold, which washed
+            the whole sky brown). This is the diffuse binder, so it stays very faint. */}
         <RadialGradient id="mwGlow" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#E8C77E" stopOpacity={o(0.1)} />
-          <Stop offset="50%" stopColor="#C99A52" stopOpacity={o(0.05)} />
-          <Stop offset="100%" stopColor="#C99A52" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#C4CCE0" stopOpacity={o(0.09)} />
+          <Stop offset="50%" stopColor="#9AA6C4" stopOpacity={o(0.045)} />
+          <Stop offset="100%" stopColor="#9AA6C4" stopOpacity={0} />
         </RadialGradient>
         {/* LAYER 4 — galactic core: a SATURATED golden heart melting through amber into
             a rose-pink edge (the Sagittarius drama). The reference photo's core is
             warm gold→pink, NOT white — so we push saturation here to colour the
             (naturally grey) photographic core riding on top. This is the visual anchor. */}
         <RadialGradient id="mwCore" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFE9B0" stopOpacity={o(0.62)} />
-          <Stop offset="24%" stopColor="#E8C77E" stopOpacity={o(0.44)} />
-          <Stop offset="56%" stopColor="#E06888" stopOpacity={o(0.22)} />
+          <Stop offset="0%" stopColor="#FBECC8" stopOpacity={o(0.5)} />
+          <Stop offset="24%" stopColor="#EAD0A2" stopOpacity={o(0.36)} />
+          <Stop offset="56%" stopColor="#D08AA8" stopOpacity={o(0.2)} />
           <Stop offset="100%" stopColor="#9080B0" stopOpacity={0} />
         </RadialGradient>
         {/* LAYER B — bright star cloud: pale gold melting to white at the heart, the
             colour of a dense stellar swell (Scutum/Sagittarius clouds). Low opacity so
             it brightens the band, not bleaches it. */}
         <RadialGradient id="mwStarCloud" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFF6D6" stopOpacity={o(0.17)} />
-          <Stop offset="45%" stopColor="#F2E6C8" stopOpacity={o(0.08)} />
-          <Stop offset="100%" stopColor="#F2E6C8" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#F2F0E6" stopOpacity={o(0.15)} />
+          <Stop offset="45%" stopColor="#E6E4DA" stopOpacity={o(0.07)} />
+          <Stop offset="100%" stopColor="#E6E4DA" stopOpacity={0} />
         </RadialGradient>
         {/* wide rose → lavender → violet-blue halo cradling the core (the gold→pink→
             lavender→deep-blue colour run from the reference). Stronger lavender step. */}
@@ -185,9 +186,9 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
             river torn through the band, not a smooth grey gradient. Near-opaque core,
             wider dark plateau (stop pushed out 48%→54%) so the rift carves harder. */}
         <RadialGradient id="mwDust" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#000003" stopOpacity={Math.min(0.99, 0.99 * boost)} />
-          <Stop offset="54%" stopColor="#010208" stopOpacity={Math.min(0.86, 0.82 * boost)} />
-          <Stop offset="100%" stopColor="#010208" stopOpacity={0} />
+          <Stop offset="0%" stopColor="#030510" stopOpacity={Math.min(0.7, 0.8 * boost)} />
+          <Stop offset="54%" stopColor="#040712" stopOpacity={Math.min(0.55, 0.6 * boost)} />
+          <Stop offset="100%" stopColor="#040712" stopOpacity={0} />
         </RadialGradient>
       </Defs>
 
@@ -242,7 +243,7 @@ export function MilkyWayLayer({ band, stars, dust, project, box, nightMode, boos
         if (!p.onScreen) return null;
         const r = Math.max(0.8, Math.min(2.9, 6.1 - s.magnitude));
         const op = Math.max(0.42, Math.min(1, 1.15 - (s.magnitude - 4.0) / 3.2)) * Math.min(1.3, boost);
-        const color = s.magnitude < 4.6 ? "#FFF1CE" : s.magnitude < 5.8 ? "#F2ECE0" : "#DCE4F2";
+        const color = s.magnitude < 4.6 ? "#F4F1E6" : s.magnitude < 5.8 ? "#ECEEF2" : "#DCE4F2";
         return <Circle key={s.id} cx={p.x} cy={p.y} r={r} fill={color} opacity={op} />;
       })}
 
