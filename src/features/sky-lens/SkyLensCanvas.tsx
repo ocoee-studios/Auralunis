@@ -15,6 +15,7 @@ import { HorizonGlowLayer } from "./layers/HorizonGlowLayer";
 import { MilkyWayLayer } from "./layers/MilkyWayLayer";
 import { MilkyWayCoreLayer } from "./layers/MilkyWayCoreLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
+import { NebulaTextureLayer } from "./layers/NebulaTextureLayer";
 import { ShootingStarLayer } from "./layers/ShootingStarLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { ZodiacLayer } from "./layers/ZodiacLayer";
@@ -36,6 +37,7 @@ type Props = {
   milkyWayBoost: number;
   domeStarMultiplier?: number; // Bortle: fraction of dome stars to show (City 0.15 → Dark 1.0)
   nebulaOpacity?: number; // Bortle × magnificent-night: nebula glow visibility (0 hides them)
+  nebulaReveal?: number; // 0..1 Adaptive Eye Response — textured nebulae emerge on dwell
   extinction?: boolean; // atmospheric extinction: warm low-altitude stars toward orange
   isPremium: boolean;
   focus: FocusZone;
@@ -55,7 +57,7 @@ type Props = {
 // closure from the current device pointing and hands it to every layer, so the
 // expensive ephemeris (in useSkyData) is reused while only the cheap az/alt →
 // screen transform re-runs as the phone moves.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, photographicCore = true, fullSphere = false, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, nebulaReveal = 0, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, photographicCore = true, fullSphere = false, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
   // Premium visual gate — falls back to the isPremium-derived config if a caller
   // doesn't pass one explicitly, so the canvas is never ungated by accident.
@@ -150,8 +152,15 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
       {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
       {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
-        <G transform={depth(1)} opacity={nebulaOpacity}>
-          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} fullSphere={fullSphere} onSelect={onSelect} />
+        <G transform={depth(1)}>
+          {/* PNG-texture nebulae (soft glow billboards). Own opacity logic (base ×
+              reveal × AR cap), so it is NOT wrapped in the Bortle nebulaOpacity dim.
+              Textured nebulae are skipped by NebulaLayer, so the two never overlap. */}
+          <NebulaTextureLayer nebulae={sky.nebulae} project={project} fov={fov} box={box} nightMode={nightMode} fullSphere={fullSphere} reveal={nebulaReveal} />
+          {/* gradient nebulae (fallback for any nebula without a texture) */}
+          <G opacity={nebulaOpacity}>
+            <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} fullSphere={fullSphere} onSelect={onSelect} />
+          </G>
         </G>
       )}
       {activeLayers.has("grid") && !cinematic && (

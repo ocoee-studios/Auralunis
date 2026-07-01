@@ -873,6 +873,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               gate={gate}
               domeStarMultiplier={Math.min(1, skyProfile.domeStarMultiplier + adaptation * 0.5)}
               nebulaOpacity={nebulaOpacity}
+              nebulaReveal={adaptation}
               extinction={!nightMode}
               isPremium={isPremium}
               focus={focusZone}

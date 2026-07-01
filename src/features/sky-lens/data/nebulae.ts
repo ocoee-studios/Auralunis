@@ -27,6 +27,14 @@ export interface Nebula {
   visibility: "Naked eye" | "Binoculars" | "Telescope";
   description: string;
   bestMonths: string;
+  // ── Texture-based rendering (Phase C nebula rebuild) ──────────────────────
+  // When a nebula has a `texture`, NebulaTextureLayer renders it as a soft PNG glow
+  // instead of the SVG gradient shapes in NebulaLayer. The PNG must be glow-on-
+  // transparent (soft alpha edges, no box, no black bg), painterly not photographic,
+  // authored in a SQUARE canvas. Nebulae without a texture keep the gradient render.
+  texture?: number;        // require("../../../assets/sky/nebulae/orion.png")
+  textureSizeDeg?: number; // on-sky display size in degrees (artistic, scales with zoom)
+  textureAngle?: number;   // optional rotation (deg)
 }
 
 const PINK = "#E05080"; // emission core
