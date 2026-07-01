@@ -52,8 +52,11 @@ export function NebulaTextureLayer({
   if (nightMode) return null;
   const pxPerDeg = box.width / fov.horizontalDegrees;
   const bortle = Math.max(0, Math.min(1, nebulaBortle));
-  // Barely-there: ~0.15 at rest → ~0.25 at a dark site / fully adapted. Ghostly, not solid.
-  const layerOpacity = Math.min(0.25, (0.15 + 0.1 * bortle) * (0.85 + 0.15 * reveal));
+  // Default base: barely-there ~0.15 → 0.25 at a dark site. Per-nebula `textureOpacity`
+  // overrides it (some, like North America, need to sit further back). A small dwell
+  // deepening on top so they still emerge with the eye adaptation.
+  const defaultBase = Math.min(0.25, 0.15 + 0.1 * bortle);
+  const revealMod = 0.9 + 0.1 * reveal;
 
   return (
     <G>
@@ -64,7 +67,8 @@ export function NebulaTextureLayer({
         if (!p.onScreen) return null;
 
         const size = Math.max(MIN_SIZE, (n.angularSizeArcmin / 60) * pxPerDeg * MAGNIFY);
-        const op = layerOpacity * (n.aboveHorizon ? 1 : 0.25);
+        const base = n.textureOpacity ?? defaultBase;
+        const op = base * revealMod * (n.aboveHorizon ? 1 : 0.25);
         const r = size / 2;
         const angle = n.textureAngle ?? 0;
 
