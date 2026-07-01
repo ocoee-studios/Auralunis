@@ -10,6 +10,7 @@ import { captureRef } from "react-native-view-shot";
 import { ScreenShell } from "@/components/ScreenShell";
 import { Starfield } from "@/components/Starfield";
 import { BirthSkyCanvas } from "@/components/BirthSkyCanvas";
+import { BirthSkyReveal } from "@/features/sky-lens/BirthSkyReveal";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 import { computeBirthSky, BIRTHDAY_STORAGE_KEY, type BirthSkyProfile } from "@/services/BirthSkyService";
@@ -126,6 +127,7 @@ export function BirthSkyScreen({ onClose }: Props) {
   const [time, setTime] = useState(""); // HH:MM (optional)
   const [profile, setProfile] = useState<BirthSkyProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [revealing, setRevealing] = useState(false); // cinematic hero playing full-screen
   const cardRef = useRef<View>(null);
 
   // Preload the birthday saved during onboarding so the birth sky reveals immediately
@@ -162,6 +164,7 @@ export function BirthSkyScreen({ onClose }: Props) {
     const iso = `${trimmed}T${t.padStart(5, "0")}:00Z`;
     try {
       setProfile(computeBirthSky(iso, location, locationName));
+      setRevealing(true); // play the cinematic hero before showing the reading
     } catch {
       setError("Couldn't read that date. Try YYYY-MM-DD.");
     }
@@ -181,6 +184,19 @@ export function BirthSkyScreen({ onClose }: Props) {
 
   const visiblePlanets = profile ? profile.planets.filter((p) => p.visible) : [];
   const rare = visiblePlanets.length >= 3;
+
+  // Full-screen cinematic hero — takes over completely while it plays, then hands off
+  // to the scrollable reading below.
+  if (revealing && profile) {
+    return (
+      <BirthSkyReveal
+        profile={profile}
+        location={location}
+        isPremium={isPremium}
+        onDone={() => setRevealing(false)}
+      />
+    );
+  }
 
   return (
     <ScreenShell title="Your Birth Sky" subtitle="Birth Sky" background={<Starfield />}>
@@ -222,6 +238,15 @@ export function BirthSkyScreen({ onClose }: Props) {
 
       {profile && (
         <View ref={cardRef} collapsable={false} style={styles.resultCard}>
+          {/* Sky Signature — the named identity leads the reading. */}
+          <View style={styles.sigHeader}>
+            <Text style={styles.sigHeaderTitle}>{profile.skySignatureTitle}</Text>
+            <Text style={styles.sigHeaderSub}>{profile.skySignatureSubtitle}</Text>
+            <Pressable style={styles.replayBtn} onPress={() => { tapLight(); setRevealing(true); }} hitSlop={8}>
+              <Text style={styles.replayText}>✦ Replay reveal</Text>
+            </Pressable>
+          </View>
+
           <View style={styles.chartWrap}>
             <BirthSkyCanvas
               birthDate={new Date(profile.birthDate)}
@@ -254,6 +279,8 @@ export function BirthSkyScreen({ onClose }: Props) {
           <Row label="Rising" value={profile.risingSign} />
           <Row label="Dominant" value={profile.dominantConstellation} />
           <Row label="Seasonal sky" value={profile.seasonalSky} />
+          {profile.brightestPlanet && <Row label="Brightest planet" value={profile.brightestPlanet} />}
+          <Row label="Galaxy overhead" value={profile.galacticRegion} />
           <Row
             label="Planets up"
             value={visiblePlanets.map((p) => p.name).join(", ") || "None above horizon"}
@@ -329,6 +356,14 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(217,168,78,0.07)", borderRadius: 20, padding: 18,
     borderWidth: 1, borderColor: "rgba(217,168,78,0.22)", marginBottom: 28,
   },
+  sigHeader: { alignItems: "center", marginBottom: 18 },
+  sigHeaderTitle: { color: AuraLunisColors.gold2, fontSize: 24, fontWeight: "800", textAlign: "center", letterSpacing: 0.3 },
+  sigHeaderSub: { color: "#EDE6D6", fontSize: 13, lineHeight: 20, textAlign: "center", marginTop: 8 },
+  replayBtn: {
+    marginTop: 14, borderRadius: 20, paddingVertical: 7, paddingHorizontal: 16,
+    borderWidth: 1, borderColor: "rgba(217,168,78,0.35)",
+  },
+  replayText: { color: AuraLunisColors.gold, fontSize: 12, fontWeight: "800", letterSpacing: 0.5 },
   chartWrap: { alignItems: "center", marginBottom: 16 },
   chartCaption: { color: AuraLunisColors.faint, fontSize: 11, fontStyle: "italic", marginTop: 10, textAlign: "center" },
   signature: { color: AuraLunisColors.gold2, fontSize: 17, lineHeight: 25, fontWeight: "800", fontStyle: "italic" },

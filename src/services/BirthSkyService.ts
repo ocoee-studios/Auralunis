@@ -25,6 +25,11 @@ export interface BirthSkyProfile {
   cosmicSignature: string; // e.g. "Born under a waning gibbous with Venus and Jupiter flanking the zenith"
   dominantConstellation: string;
   seasonalSky: string;     // "Summer Triangle dominated" / "Orion season"
+  // Sky Signature — a named, shareable identity distilled from the profile.
+  skySignatureTitle: string;    // "The Dreamer's Sky"
+  skySignatureSubtitle: string; // "Born beneath Pegasus with Jupiter rising and a waxing crescent Moon."
+  brightestPlanet: string | null; // brightest planet above the horizon at birth, if any
+  galacticRegion: string;       // which stretch of the Milky Way was overhead
 }
 
 export interface BirthPlanet {
@@ -124,6 +129,66 @@ function getRisingSign(birthDate: Date, location: ObserverLocation): string {
   return TROPICAL_SIGNS[Math.floor(lambda / 30) % 12];
 }
 
+// Sky Signature — an archetype title keyed to the dominant constellation, so every
+// person gets a named, memorable, shareable identity ("The Dreamer's Sky").
+const CONSTELLATION_ARCHETYPE: Record<string, string> = {
+  Pegasus: "The Dreamer's Sky",
+  Orion: "The Hunter's Sky",
+  Leo: "The Sovereign's Sky",
+  Scorpius: "The Alchemist's Sky",
+  Sagittarius: "The Seeker's Sky",
+  Gemini: "The Twin Sky",
+  Virgo: "The Artisan's Sky",
+  Aquarius: "The Visionary's Sky",
+  Taurus: "The Steadfast Sky",
+  Cancer: "The Tidewatcher's Sky",
+  Libra: "The Balanced Sky",
+  Pisces: "The Mystic's Sky",
+  Aries: "The Pioneer's Sky",
+  Capricornus: "The Summit Sky",
+  "Canis Major": "The Faithful Sky",
+  "Ursa Major": "The Wanderer's Sky",
+  "Ursa Minor": "The Northward Sky",
+  Cassiopeia: "The Regent's Sky",
+  Cygnus: "The Voyager's Sky",
+  Lyra: "The Song Sky",
+  Andromeda: "The Unbound Sky",
+  Perseus: "The Hero's Sky",
+  "Boötes": "The Herdsman's Sky",
+  Hercules: "The Champion's Sky",
+};
+
+// Apparent-brightness order (brightest first) so "brightest planet" is astronomically
+// honest: Venus ≫ Jupiter > Mars > Mercury > Saturn > the ice giants.
+const PLANET_BRIGHTNESS_ORDER = ["Venus", "Jupiter", "Mars", "Mercury", "Saturn", "Uranus", "Neptune"];
+
+function brightestVisiblePlanet(planets: BirthPlanet[]): string | null {
+  const up = new Set(planets.filter((p) => p.visible).map((p) => p.name));
+  for (const name of PLANET_BRIGHTNESS_ORDER) if (up.has(name)) return name;
+  return null;
+}
+
+// Which stretch of the Milky Way rode overhead — evocative, keyed to the season the
+// birth month places the galaxy in the evening sky.
+function galacticRegionFor(month: number): string {
+  if (month >= 6 && month <= 8) return "the luminous galactic core in Sagittarius";
+  if (month >= 9 && month <= 11) return "the quiet outer arm beyond Pegasus";
+  if (month === 12 || month <= 2) return "the Orion Arm — our own corner of the galaxy";
+  return "the still skies above the galactic pole";
+}
+
+function buildSkySignature(
+  dominantConstellation: string,
+  brightestPlanet: string | null,
+  moonPhase: string,
+): { title: string; subtitle: string } {
+  const title = CONSTELLATION_ARCHETYPE[dominantConstellation] ?? "The Starfarer's Sky";
+  const moon = `a ${moonPhase.toLowerCase()} Moon`;
+  const planetClause = brightestPlanet ? `${brightestPlanet} rising` : "the planets hidden below the horizon";
+  const subtitle = `Born beneath ${dominantConstellation} with ${planetClause} and ${moon}.`;
+  return { title, subtitle };
+}
+
 /** Generate a poetic cosmic signature */
 function generateSignature(profile: Partial<BirthSkyProfile>): string {
   const vis = profile.planets?.filter(p => p.visible).map(p => p.name) ?? [];
@@ -179,6 +244,14 @@ export function computeBirthSky(
     month >= 12 || month <= 2 ? "winter Orion" :
     month >= 3 && month <= 5 ? "spring Leo" : "autumn Pegasus";
 
+  const brightestPlanet = brightestVisiblePlanet(planets);
+  const galacticRegion = galacticRegionFor(month);
+  const { title: skySignatureTitle, subtitle: skySignatureSubtitle } = buildSkySignature(
+    dominantConstellation,
+    brightestPlanet,
+    moonPhase,
+  );
+
   const profile: BirthSkyProfile = {
     birthDate: birthDateISO,
     location,
@@ -192,6 +265,10 @@ export function computeBirthSky(
     cosmicSignature: "",
     dominantConstellation,
     seasonalSky,
+    skySignatureTitle,
+    skySignatureSubtitle,
+    brightestPlanet,
+    galacticRegion,
   };
 
   profile.cosmicSignature = generateSignature(profile);
