@@ -255,8 +255,9 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
         <Text style={styles.capText}>{caption}</Text>
       </Animated.View>
 
-      {/* Sky Signature — the payoff. Fades in as the sky settles. */}
-      <Animated.View pointerEvents="box-none" style={[styles.sigWrap, { opacity: sigOpacity }]}>
+      {/* Sky Signature — the payoff. Fades in as the sky settles. Non-interactive until
+          it's actually shown, so the invisible CTA can't swallow taps mid-reveal. */}
+      <Animated.View pointerEvents={step >= STEP.SIGNATURE ? "box-none" : "none"} style={[styles.sigWrap, { opacity: sigOpacity }]}>
         <Text style={styles.thisWasYourSky}>This was your sky.</Text>
         <Text style={styles.sigTitle}>{profile.skySignatureTitle}</Text>
         <Text style={styles.sigSubtitle}>{profile.skySignatureSubtitle}</Text>
