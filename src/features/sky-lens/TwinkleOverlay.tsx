@@ -27,9 +27,10 @@ export type TwinkleTarget = {
 // with its own phase offset so they shimmer out of sync.
 function TwinkleDot({ clock, t }: { clock: SharedValue<number>; t: TwinkleTarget }) {
   const offset = t.offset;
-  // ±12% opacity around a near-full base — a very subtle living shimmer.
+  // Phase-A scintillation: a slow, almost-subconscious breathing — ~0.93↔1.0 (was a
+  // more visible ±12% blink). Per-star phase offset so they shimmer out of sync.
   const style = useAnimatedStyle(() => ({
-    opacity: 0.88 + 0.12 * Math.sin((clock.value + offset) * Math.PI * 2)
+    opacity: 0.965 + 0.035 * Math.sin((clock.value + offset) * Math.PI * 2)
   }));
   return (
     <Animated.View
@@ -54,7 +55,7 @@ function TwinkleDot({ clock, t }: { clock: SharedValue<number>; t: TwinkleTarget
 export function TwinkleOverlay({ targets, nightMode }: { targets: TwinkleTarget[]; nightMode: boolean }) {
   const clock = useSharedValue(0);
   useEffect(() => {
-    clock.value = withRepeat(withTiming(1, { duration: 2600, easing: Easing.linear }), -1, false);
+    clock.value = withRepeat(withTiming(1, { duration: 3600, easing: Easing.linear }), -1, false);
     return () => cancelAnimation(clock);
   }, [clock]);
 

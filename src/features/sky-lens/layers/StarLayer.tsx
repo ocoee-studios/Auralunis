@@ -91,25 +91,29 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
                 core) instead of one hard-edged disc, with a tiny per-star centre offset
                 so each bloom is a slightly different organic shape, not a sharp circle. */}
             {bloom && feature && (() => {
-              const gr = feature.glowRadius * 0.85 * (1 + sf * 1.0);
+              const gr = feature.glowRadius * 0.95 * (1 + sf * 1.0);
               const h = hashStar(star.id);
               const ox = ((h % 7) - 3) * 0.1, oy = (((h >> 3) % 7) - 3) * 0.1; // ±0.3·gr
               return (
                 <G>
-                  <Circle cx={p.x + gr * ox} cy={p.y + gr * oy} r={gr} fill={color} opacity={0.045} />
-                  <Circle cx={p.x} cy={p.y} r={gr * 0.68} fill={color} opacity={0.09} />
-                  <Circle cx={p.x - gr * ox * 0.5} cy={p.y - gr * oy * 0.5} r={gr * 0.42} fill={color} opacity={0.18} />
+                  {/* wide soft volumetric aura — the depth/atmosphere layer that makes
+                      the hero read as luminous light, not a bright disc (never a flare) */}
+                  <Circle cx={p.x + gr * ox} cy={p.y + gr * oy} r={gr * 1.35} fill={color} opacity={0.025} />
+                  <Circle cx={p.x + gr * ox} cy={p.y + gr * oy} r={gr} fill={color} opacity={0.055} />
+                  <Circle cx={p.x} cy={p.y} r={gr * 0.68} fill={color} opacity={0.1} />
+                  <Circle cx={p.x - gr * ox * 0.5} cy={p.y - gr * oy * 0.5} r={gr * 0.42} fill={color} opacity={0.2} />
                 </G>
               );
             })()}
             {/* Feathered glow on the bright stars — a smooth multi-step opacity ramp
                 (no hard ring). Brightest get the widest, faintest outer halo so the
                 falloff reads as soft light, not concentric discs. */}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.035} />}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.06} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.1} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.16} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 1.2} fill={color} opacity={0.24} />}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 15} fill={color} opacity={0.02} />}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 9} fill={color} opacity={0.04} />}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.07} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.12} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.18} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 1.2} fill={color} opacity={0.26} />}
             {glint && (
               <>
                 {/* tapered 4-point diffraction — a faint wide underlay glow + a crisp
@@ -122,7 +126,10 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
               </>
             )}
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
-            {/* white-hot core for the showpiece stars */}
+            {/* luminous white-hot core — the "tiny diamond" centre. Showpieces get a
+                brighter core; other bright stars a subtle one so they read as light,
+                not a flat colour disc. */}
+            {bright && !glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1.5, 0.8)} fill="#FFFFFF" opacity={0.5} />}
             {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.85} />}
             {labeled && (() => {
               const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 13) : { x: p.x + r + 3, y: p.y + 3 };

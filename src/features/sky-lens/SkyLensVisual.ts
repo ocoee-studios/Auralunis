@@ -78,7 +78,7 @@ const STAR_COLORS: Record<string, string> = {
   rigel: "#7FB0FF", bellatrix: "#93BCFF", alnilam: "#7FB0FF", alnitak: "#7FB0FF",
   mintaka: "#7FB0FF", saiph: "#93BCFF", spica: "#79A8FF", achernar: "#8AB6FF",
   hadar: "#7FB0FF", acrux: "#7FB0FF", mimosa: "#7FB0FF", regulus: "#A6C8FF",
-  algol: "#A6C8FF", vega: "#AFCFFF", sirius: "#BFE0FF", deneb: "#C7E2FF",
+  algol: "#A6C8FF", vega: "#C4D8FF", sirius: "#BFE0FF", deneb: "#C7E2FF",
   castor: "#AFCFFF", adhara: "#7FB0FF", alkaid: "#93BCFF", elnath: "#B6D2FF",
   peacock: "#93BCFF", mirzam: "#93BCFF",
   // white (A/F)
@@ -87,11 +87,11 @@ const STAR_COLORS: Record<string, string> = {
   // yellow (G) — warm gold
   capella: "#FFDD7A", "rigil-kent": "#FFE9B0",
   // orange (K) — rich amber
-  arcturus: "#FFB24A", aldebaran: "#FF9E3D", pollux: "#FFB866", dubhe: "#FFC97E",
+  arcturus: "#FFB24A", aldebaran: "#FFB84A", pollux: "#FFB866", dubhe: "#FFC97E",
   alphard: "#FFB866", hamal: "#FFBE74", kochab: "#FFBC70", suhail: "#FFB24A",
   menkent: "#FFBC70", enif: "#FFB866",
   // red (M) — fiery coral-red
-  betelgeuse: "#FF6A3D", antares: "#FF5A33", gacrux: "#FF7E4A", scheat: "#FF9166",
+  betelgeuse: "#FF7A44", antares: "#FF5A33", gacrux: "#FF7E4A", scheat: "#FF9166",
   mirach: "#FF9166",
 };
 
@@ -123,14 +123,18 @@ export interface StarFeature {
   glowColor: string;
 }
 export const STAR_FEATURES: Record<string, StarFeature> = {
-  // Radii bumped to match the new wide brightness curve so the showpieces stay the
-  // biggest stars in the sky (Sirius the clear king), not capped below mag-0 dots.
-  sirius: { radius: 11, glowRadius: 24, glowColor: "rgba(190,224,255,0.30)" }, // brightest star — blue-white bloom + spikes
-  vega: { radius: 9, glowRadius: 18, glowColor: "rgba(170,207,255,0.26)" }, // icy blue-white glow
-  rigel: { radius: 9.5, glowRadius: 19, glowColor: "rgba(150,190,255,0.28)" }, // electric blue shimmer
-  betelgeuse: { radius: 9.5, glowRadius: 20, glowColor: "rgba(255,110,60,0.28)" }, // ember-red aura
-  arcturus: { radius: 8.5, glowRadius: 16, glowColor: "rgba(255,178,74,0.22)" }, // warm amber
-  antares: { radius: 9, glowRadius: 17, glowColor: "rgba(240,100,100,0.25)" }, // red ember, heart of Scorpius
+  // Phase-A sky-renderer: the hero stars are the primary focal points — a touch larger
+  // with a wider, softer glow (depth), each with its own colour temperature. The eye
+  // should land on these before the Milky Way. Soft luminous bloom, never lens flare.
+  sirius: { radius: 12, glowRadius: 28, glowColor: "rgba(190,224,255,0.30)" }, // brightest star — blue-white
+  vega: { radius: 10, glowRadius: 23, glowColor: "rgba(182,214,255,0.28)" }, // white-blue
+  rigel: { radius: 10, glowRadius: 22, glowColor: "rgba(150,190,255,0.28)" }, // icy electric blue
+  altair: { radius: 9, glowRadius: 19, glowColor: "rgba(224,236,255,0.26)" }, // clean white-blue
+  deneb: { radius: 9, glowRadius: 20, glowColor: "rgba(205,226,255,0.24)" }, // distant blue-white, volumetric
+  betelgeuse: { radius: 10, glowRadius: 23, glowColor: "rgba(255,122,62,0.30)" }, // orange ember
+  antares: { radius: 9.5, glowRadius: 21, glowColor: "rgba(255,96,58,0.28)" }, // deep red-orange, heart of Scorpius
+  aldebaran: { radius: 9, glowRadius: 19, glowColor: "rgba(255,184,80,0.26)" }, // gold
+  arcturus: { radius: 9, glowRadius: 18, glowColor: "rgba(255,180,80,0.24)" }, // warm amber-gold
   shaula: { radius: 6, glowRadius: 12, glowColor: "rgba(255,246,214,0.15)" } // warm-white, the stinger
 };
 
