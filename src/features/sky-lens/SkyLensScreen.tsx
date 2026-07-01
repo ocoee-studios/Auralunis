@@ -290,6 +290,38 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const pointingRef = useRef(pointing); pointingRef.current = pointing;
   const fovRef = useRef(fov); fovRef.current = fov;
   const boxRef = useRef(box); boxRef.current = box;
+
+  // ── Adaptive Eye Response ──────────────────────────────────────────────────
+  // Hold the phone still for ~1s and the sky slowly "adapts" like your eyes in the
+  // dark: fainter stars fade in and the Milky Way deepens. The instant you pan
+  // again it gently returns. `adaptation` (0→1) ramps up while still and snaps back
+  // on motion, stepped by a light 150ms interval — cheap, and it only re-renders the
+  // canvas while actually changing (idle = no work). Never runs in Night Mode.
+  const [adaptation, setAdaptation] = useState(0);
+  const adaptationRef = useRef(0);
+  const prevPointRef = useRef({ az: pointing.azimuthDegrees, alt: pointing.altitudeDegrees });
+  const stillTicksRef = useRef(0);
+  useEffect(() => {
+    if (nightMode) { setAdaptation(0); adaptationRef.current = 0; stillTicksRef.current = 0; return; }
+    const id = setInterval(() => {
+      const cur = pointingRef.current;
+      const prev = prevPointRef.current;
+      const dAz = Math.abs(((cur.azimuthDegrees - prev.az + 540) % 360) - 180); // shortest arc
+      const dAlt = Math.abs(cur.altitudeDegrees - prev.alt);
+      prevPointRef.current = { az: cur.azimuthDegrees, alt: cur.altitudeDegrees };
+      const still = dAz + dAlt < 0.6; // moved < ~0.6° in the 150ms window
+      stillTicksRef.current = still ? stillTicksRef.current + 1 : 0;
+      const revealing = stillTicksRef.current >= 6;      // ~0.9s of stillness before it opens
+      const step = revealing ? 0.09 : still ? 0 : -0.4;  // ramp up slow · hold · snap back fast
+      const next = Math.max(0, Math.min(1, adaptationRef.current + step));
+      if (Math.abs(next - adaptationRef.current) > 0.001) {
+        adaptationRef.current = next;
+        setAdaptation(next);
+      }
+    }, 150);
+    return () => clearInterval(id);
+  }, [nightMode]);
+
   const objectTap = useMemo(
     () =>
       Gesture.Tap()
@@ -404,7 +436,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Free tier multiplies the whole thing by 0.4 → a faint smooth band; premium 1.0×.
   // Stage-1 sky-renderer pass: overall Milky Way (and the shared horizon glow that
   // reads off this same boost) cut ~45% — a delicate band, not a wash over the sky.
-  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity * magnificentBoost * gate.milkyWayBoostMultiplier * 0.55;
+  // × (1 + adaptation·0.3): the Milky Way deepens as the eye adapts on dwell.
+  const milkyWayBoost = (planetarium ? 2.4 : cinematic ? 2.1 : immersive ? 1.9 : 1.4) * skyProfile.milkyWayOpacity * magnificentBoost * gate.milkyWayBoostMultiplier * 0.55 * (1 + adaptation * 0.3);
   // Nebula glow visibility: Bortle nebula opacity × magnificent-night boost (clamped).
   const nebulaOpacity = Math.min(1, skyProfile.nebulaOpacity * magnificentBoost);
   // 2. SEASONAL COLOR — a barely-perceptible warm (summer / MW season) or cool
@@ -838,7 +871,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               nightMode={nightMode}
               milkyWayBoost={milkyWayBoost}
               gate={gate}
-              domeStarMultiplier={skyProfile.domeStarMultiplier}
+              domeStarMultiplier={Math.min(1, skyProfile.domeStarMultiplier + adaptation * 0.5)}
               nebulaOpacity={nebulaOpacity}
               extinction={!nightMode}
               isPremium={isPremium}
