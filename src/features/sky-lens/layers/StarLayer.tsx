@@ -59,11 +59,13 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         // in its spectral colour — so the bright stars are the heroes, not just the
         // hand-listed showpieces. Free keeps the spectral disc, no bloom.
         const bloomOn = bloom && !nightMode && star.magnitude <= 2.0;
-        const glint = bloom && !nightMode && star.magnitude < 1.3; // diffraction spikes on the very brightest
         // Bloom radius: hand-tuned for the showpieces, else derived from magnitude
         // (brighter = wider glow). mag0 ≈ 17px, mag1 ≈ 12.5px, mag2 ≈ 8px.
         const glowR = (feature ? feature.glowRadius : Math.max(8, 17 - star.magnitude * 4.5)) * (1 + sf * 0.8);
-        const spike = r + 9;
+        // Every bright star (mag ≤ 2) gets a diffraction SPARKLE, scaled by brightness:
+        // a tiny glint on Polaris/Dubhe/Castor, a prominent 4-point star on Vega/Sirius.
+        // heroT ramps 0 → 1 as magnitude goes 2.0 → 0.
+        const heroT = bloomOn ? Math.max(0, Math.min(1, (2.0 - star.magnitude) / 2.0)) : 0;
         const labeled = showLabels && star.name !== undefined && star.magnitude <= labelMagLimit;
 
         return (
@@ -106,23 +108,28 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
                 </G>
               );
             })()}
-            {glint && (
-              <>
-                {/* tapered 4-point diffraction — a faint wide underlay glow + a crisp
-                    narrow core, so the spikes shimmer softly instead of reading as hard
-                    cross-hairs (premium 'jewel' look on Sirius/Vega/etc.) */}
-                <Line x1={p.x - spike * 1.18} y1={p.y} x2={p.x + spike * 1.18} y2={p.y} stroke={color} strokeWidth={2.4} strokeOpacity={0.1} strokeLinecap="round" />
-                <Line x1={p.x} y1={p.y - spike * 1.18} x2={p.x} y2={p.y + spike * 1.18} stroke={color} strokeWidth={2.4} strokeOpacity={0.1} strokeLinecap="round" />
-                <Line x1={p.x - spike} y1={p.y} x2={p.x + spike} y2={p.y} stroke={color} strokeWidth={0.8} strokeOpacity={0.42} strokeLinecap="round" />
-                <Line x1={p.x} y1={p.y - spike} x2={p.x} y2={p.y + spike} stroke={color} strokeWidth={0.8} strokeOpacity={0.42} strokeLinecap="round" />
-              </>
-            )}
+            {/* DIFFRACTION SPARKLE — a tapered 4-point glint: a faint wide underlay glow
+                + a crisp narrow spike, both scaled by heroT so a dim bright star gets a
+                barely-there sparkle and the brightest get a proper jewel. Soft, never a
+                hard cross-hair. */}
+            {bloomOn && heroT > 0.02 && (() => {
+              const len = r + 3 + heroT * 12;      // tiny on Polaris, long on Vega/Sirius
+              const wide = 0.045 + heroT * 0.09;   // faint coloured underlay
+              const core = 0.2 + heroT * 0.28;     // crisp bright spike
+              const w = 0.7 + heroT * 0.5;
+              return (
+                <G>
+                  <Line x1={p.x - len * 1.18} y1={p.y} x2={p.x + len * 1.18} y2={p.y} stroke={color} strokeWidth={2.2} strokeOpacity={wide} strokeLinecap="round" />
+                  <Line x1={p.x} y1={p.y - len * 1.18} x2={p.x} y2={p.y + len * 1.18} stroke={color} strokeWidth={2.2} strokeOpacity={wide} strokeLinecap="round" />
+                  <Line x1={p.x - len} y1={p.y} x2={p.x + len} y2={p.y} stroke={color} strokeWidth={w} strokeOpacity={core} strokeLinecap="round" />
+                  <Line x1={p.x} y1={p.y - len} x2={p.x} y2={p.y + len} stroke={color} strokeWidth={w} strokeOpacity={core} strokeLinecap="round" />
+                </G>
+              );
+            })()}
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
-            {/* luminous white-hot core — the "tiny diamond" centre. Showpieces get a
-                brighter core; other bright stars a subtle one so they read as light,
-                not a flat colour disc. */}
-            {bloomOn && !glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1.5, 0.9)} fill="#FFFFFF" opacity={0.6} />}
-            {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.9} />}
+            {/* luminous white-hot core — the "tiny diamond" centre, brighter on the
+                brighter stars (scaled by heroT) so they read as points of light. */}
+            {bloomOn && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1.3, 0.9)} fill="#FFFFFF" opacity={0.5 + heroT * 0.4} />}
             {labeled && (() => {
               const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 13) : { x: p.x + r + 3, y: p.y + 3 };
               return (
