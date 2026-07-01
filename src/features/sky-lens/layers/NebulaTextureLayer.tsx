@@ -1,20 +1,20 @@
 import React from "react";
-import { Circle, G, Image as SvgImage, Text as SvgText } from "react-native-svg";
+import { Circle, Defs, G, Image as SvgImage, Mask, RadialGradient, Rect, Stop, Text as SvgText } from "react-native-svg";
 import type { HorizontalNebula } from "../ephemeris/Nebulae";
 import type { NebulaType } from "../data/nebulae";
 import type { ProjectFn, SkyPalette, SelectedObject } from "../SkyLensVisual";
 import type { LabelPlacer } from "../labelLayout";
 import type { CameraFov } from "../ar/SkyLensProjection";
 
-// Texture-based nebulae (Phase C rebuild). Each major nebula is a soft, glow-on-
-// transparent PNG positioned at its real RA/Dec (projected to az/alt → screen), sized
-// from its real catalog angular size and scaling with zoom — the same billboard
-// approach the Milky Way core photo uses (MilkyWayCoreLayer), applied per nebula.
+// Texture-based nebulae (Phase C rebuild). Each major nebula is a soft PNG glow
+// positioned at its real RA/Dec (projected to az/alt → screen), sized from its real
+// catalog angular size and scaling with zoom — the billboard approach the Milky Way
+// core photo uses, applied per nebula.
 //
-// Blending: react-native-svg has no reliable screen/additive blend on iOS, so the
-// "glow into the sky" comes from the PNG itself — colour fading to transparent alpha,
-// alpha-composited over the (now solid-dark) sky. Feathering is the PNG's own alpha.
-// Kept subtle so they feel DISCOVERED; they emerge as the eye adapts (`reveal`).
+// Each image is masked by a RADIAL FEATHER (same as MilkyWayCoreLayer): the outer
+// edge fades to transparent, so (a) the square PNG boundary + any light edge halo from
+// the source art vanish, and (b) it reads as a soft cloud, not a stamp. Kept a barely-
+// there ghostly wash you DISCOVER; it emerges as the eye adapts (`reveal`).
 
 type Props = {
   nebulae: HorizontalNebula[];
@@ -24,9 +24,9 @@ type Props = {
   palette: SkyPalette;
   nightMode: boolean;
   showLabels?: boolean;
-  fullSphere?: boolean;  // Planetarium: show below-horizon nebulae too
+  fullSphere?: boolean;
   reveal?: number;       // 0..1 Adaptive Eye Response — emerge on dwell
-  nebulaBortle?: number; // sky-quality nebula opacity (0 city → 1 dark) — controls base opacity
+  nebulaBortle?: number; // sky-quality nebula opacity (0 city → 1 dark)
   placeLabel?: LabelPlacer;
   onSelect: (object: SelectedObject) => void;
 };
@@ -40,10 +40,10 @@ const TYPE_LABEL: Record<NebulaType, string> = {
   supernova: "Supernova Remnant",
 };
 
-// Real nebulae are tiny to the eye; magnify the catalog angular size so they read on a
-// phone while keeping the RELATIVE sizes true (North America ≫ Crab). Tune on device.
-const MAGNIFY = 5;
-const MIN_SIZE = 44; // px — keep the smallest ones visible + tappable
+// Real nebulae are tiny to the eye; magnify hard so they read as LARGE soft clouds
+// (Lagoon fills a real chunk of screen), keeping the RELATIVE sizes true.
+const MAGNIFY = 22;
+const MIN_SIZE = 60; // px
 
 export function NebulaTextureLayer({
   nebulae, project, fov, box, palette, nightMode, showLabels = true,
@@ -51,10 +51,9 @@ export function NebulaTextureLayer({
 }: Props) {
   if (nightMode) return null;
   const pxPerDeg = box.width / fov.horizontalDegrees;
-  // Opacity 0.4–0.6 by sky quality (Bortle), dimmed a touch at rest and rising as the
-  // eye adapts. The PNG's own alpha sits underneath, so on-screen peak is softer still.
   const bortle = Math.max(0, Math.min(1, nebulaBortle));
-  const layerOpacity = (0.4 + 0.2 * bortle) * (0.75 + 0.25 * reveal);
+  // Barely-there: ~0.15 at rest → ~0.25 at a dark site / fully adapted. Ghostly, not solid.
+  const layerOpacity = Math.min(0.25, (0.15 + 0.1 * bortle) * (0.85 + 0.15 * reveal));
 
   return (
     <G>
@@ -65,34 +64,43 @@ export function NebulaTextureLayer({
         if (!p.onScreen) return null;
 
         const size = Math.max(MIN_SIZE, (n.angularSizeArcmin / 60) * pxPerDeg * MAGNIFY);
-        const op = layerOpacity * (n.aboveHorizon ? 1 : 0.25); // dissolve below the horizon
+        const op = layerOpacity * (n.aboveHorizon ? 1 : 0.25);
+        const r = size / 2;
         const angle = n.textureAngle ?? 0;
-
-        const image = (
-          <SvgImage
-            href={n.texture}
-            x={p.x - size / 2}
-            y={p.y - size / 2}
-            width={size}
-            height={size}
-            preserveAspectRatio="xMidYMid meet"
-            opacity={op}
-          />
-        );
 
         return (
           <G key={n.id}>
-            {angle ? (
-              <G transform={`rotate(${angle} ${p.x.toFixed(1)} ${p.y.toFixed(1)})`}>{image}</G>
-            ) : (
-              image
-            )}
+            <Defs>
+              {/* radial feather → transparent outer edge (kills the square boundary +
+                  any white halo in the source PNG, and softens it into a cloud) */}
+              <RadialGradient id={`nf-${n.id}`} cx={p.x} cy={p.y} r={r} gradientUnits="userSpaceOnUse">
+                <Stop offset="0" stopColor="#fff" stopOpacity="1" />
+                <Stop offset="0.55" stopColor="#fff" stopOpacity="1" />
+                <Stop offset="1" stopColor="#fff" stopOpacity="0" />
+              </RadialGradient>
+              <Mask id={`nm-${n.id}`} maskUnits="userSpaceOnUse">
+                <Rect x={p.x - r} y={p.y - r} width={size} height={size} fill={`url(#nf-${n.id})`} />
+              </Mask>
+            </Defs>
 
-            {/* transparent tap target → info card (labels/interactivity stay) */}
+            <G mask={`url(#nm-${n.id})`} opacity={op}>
+              <G transform={angle ? `rotate(${angle} ${p.x.toFixed(1)} ${p.y.toFixed(1)})` : undefined}>
+                <SvgImage
+                  href={n.texture}
+                  x={p.x - r}
+                  y={p.y - r}
+                  width={size}
+                  height={size}
+                  preserveAspectRatio="xMidYMid slice"
+                />
+              </G>
+            </G>
+
+            {/* transparent tap target → info card (outside the mask, so it stays crisp) */}
             <Circle
               cx={p.x}
               cy={p.y}
-              r={Math.max(size * 0.4, 26)}
+              r={Math.max(r * 0.5, 26)}
               fill="transparent"
               onPress={() =>
                 onSelect({
@@ -113,7 +121,7 @@ export function NebulaTextureLayer({
             />
 
             {showLabels && (() => {
-              const ly = p.y + Math.min(size * 0.42, 70) + 4;
+              const ly = p.y + Math.min(r * 0.55, 70) + 4;
               const lp = placeLabel ? placeLabel(p.x, ly, n.name, 12) : { x: p.x, y: ly };
               return (
                 <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={12} fontWeight="400" textAnchor="middle" opacity={0.7}>
