@@ -108,7 +108,6 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
   // ---- Animated overlays (opacity only — Animated.View, native driver) ----
   const canvasFade = useRef(new Animated.Value(0)).current;   // black → sky
   const dateOpacity = useRef(new Animated.Value(0)).current;  // birth date card
-  const crownOpacity = useRef(new Animated.Value(0)).current; // gold crown glow
   const sigOpacity = useRef(new Animated.Value(0)).current;   // Sky Signature text
   const ctaOpacity = useRef(new Animated.Value(0)).current;   // settled buttons
   const capOpacity = useRef(new Animated.Value(0)).current;   // beat narration line
@@ -132,7 +131,6 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
     canvasFade.setValue(1);
     fade(dateOpacity, 0, 300);
     fade(capOpacity, 0, 300);
-    fade(crownOpacity, 1, 900);
     fade(sigOpacity, 1, 900, 200);
     fade(ctaOpacity, 1, 700, 900);
   };
@@ -160,7 +158,6 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
       setStep(STEP.SIGNATURE);
       fade(dateOpacity, 0, 500);
       fade(capOpacity, 0, 500);
-      fade(crownOpacity, 1, 1200);
       fade(sigOpacity, 1, 1100, 300);
       tapLight();
     });
@@ -207,9 +204,6 @@ export function BirthSkyReveal({ profile, location, isPremium, onDone }: Props) 
           onSelect={() => {}}
         />
       </Animated.View>
-
-      {/* Gold crown — a soft radial bloom behind the centred dominant constellation. */}
-      <Animated.View pointerEvents="none" style={[styles.crown, { opacity: crownOpacity }]} />
 
       {/* Birth date card — the first thing that appears, dissolves before the Signature. */}
       <Animated.View pointerEvents="none" style={[styles.dateWrap, { opacity: dateOpacity }]}>
@@ -268,11 +262,6 @@ function Fact({ label, value, sub }: { label: string; value: string; sub: string
 const styles = StyleSheet.create({
   root: { ...StyleSheet.absoluteFillObject, backgroundColor: "#03040A" },
   base: { ...StyleSheet.absoluteFillObject, backgroundColor: "#03040A" },
-  crown: {
-    position: "absolute", alignSelf: "center", top: "26%",
-    width: 320, height: 320, borderRadius: 160,
-    backgroundColor: "rgba(217,168,78,0.16)",
-  },
   dateWrap: { position: "absolute", top: "40%", left: 0, right: 0, alignItems: "center" },
   dateEyebrow: { color: AuraLunisColors.gold, fontSize: 10, letterSpacing: 3, fontWeight: "800", marginBottom: 10 },
   dateLine: { color: "#FFFFFF", fontSize: 26, fontWeight: "300", letterSpacing: 0.5 },
@@ -285,15 +274,16 @@ const styles = StyleSheet.create({
   factLabel: { color: AuraLunisColors.gold, fontSize: 8, letterSpacing: 1.5, fontWeight: "800" },
   factValue: { color: "#FFFFFF", fontSize: 17, fontWeight: "800", marginTop: 5 },
   factSub: { color: AuraLunisColors.silver, fontSize: 10, marginTop: 2 },
-  sigWrap: { position: "absolute", bottom: 0, left: 0, right: 0, paddingHorizontal: 28, paddingBottom: 48, alignItems: "center" },
+  sigWrap: { position: "absolute", bottom: 0, left: 0, right: 0, paddingHorizontal: 28, paddingBottom: 64, alignItems: "center" },
   thisWasYourSky: { color: AuraLunisColors.silver, fontSize: 15, fontStyle: "italic", marginBottom: 16, letterSpacing: 0.5 },
   sigTitle: { color: AuraLunisColors.gold2, fontSize: 30, fontWeight: "800", textAlign: "center", letterSpacing: 0.3 },
   sigSubtitle: { color: "#EDE6D6", fontSize: 15, lineHeight: 22, textAlign: "center", marginTop: 12, marginBottom: 26, maxWidth: 340 },
   cta: {
-    borderRadius: 16, paddingVertical: 15, paddingHorizontal: 40, alignItems: "center",
+    borderRadius: 18, paddingVertical: 17, alignSelf: "stretch", alignItems: "center",
     backgroundColor: AuraLunisColors.gold,
+    shadowColor: AuraLunisColors.gold, shadowOpacity: 0.5, shadowRadius: 16, shadowOffset: { width: 0, height: 0 }, elevation: 8,
   },
-  ctaText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 15 },
+  ctaText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 16, letterSpacing: 0.4 },
   skip: { position: "absolute", top: 56, right: 22 },
   skipText: { color: AuraLunisColors.silver, fontSize: 14, fontWeight: "700", opacity: 0.8 },
 });
