@@ -87,7 +87,7 @@ export const NEBULAE: ReadonlyArray<Nebula> = [
   // ── Planetary nebulae — dying sun-like stars ──────────────────────────────
   { id: "m27", catalog: "M27", name: "Dumbbell Nebula", raHours: 19.994, decDegrees: 22.72, type: "planetary", con: "Vul", constellation: "Vulpecula", coreColor: TEAL_CORE, hazeColor: TEAL_HAZE, radius: 12, texture: require("../../../assets/nebulae/dumbbell.png"), angularSizeArcmin: 16, textureOpacity: 0.1, distanceLy: "1,360 ly", visibility: "Binoculars",
     description: "A teal-green shell of gas flung off by a dying star — a glimpse of our own Sun's far future.", bestMonths: "July–October" },
-  { id: "m57", catalog: "M57", name: "Ring Nebula", raHours: 18.893, decDegrees: 33.03, type: "planetary", con: "Lyr", constellation: "Lyra", coreColor: TEAL_CORE, hazeColor: TEAL_HAZE, radius: 8, texture: require("../../../assets/nebulae/ring.png"), angularSizeArcmin: 4, distanceLy: "2,300 ly", visibility: "Telescope",
+  { id: "m57", catalog: "M57", name: "Ring Nebula", raHours: 18.893, decDegrees: 33.03, type: "planetary", con: "Lyr", constellation: "Lyra", coreColor: TEAL_CORE, hazeColor: TEAL_HAZE, radius: 8, texture: require("../../../assets/nebulae/ring.png"), angularSizeArcmin: 4, textureOpacity: 0.14, distanceLy: "2,300 ly", visibility: "Telescope",
     description: "A perfect smoke ring of glowing gas, exhaled by a star in its final breaths.", bestMonths: "July–October" },
 
   // ── Supernova remnants — stellar wreckage ─────────────────────────────────

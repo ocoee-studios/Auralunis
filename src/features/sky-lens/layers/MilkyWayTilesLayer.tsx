@@ -18,7 +18,7 @@ const TILES: Tile[] = [
   { id: "sagittarius", tex: require("../../../assets/milkyway/milkyway_sagittarius.png"), lon: 0,   op: 0.30, spanDeg: 82 }, // galactic core — brightest, warmest
   { id: "aquila",      tex: require("../../../assets/milkyway/milkyway_aquila.png"),      lon: 45,  op: 0.20, spanDeg: 75 }, // blue-violet
   { id: "cygnus",      tex: require("../../../assets/milkyway/milkyway_cygnus.png"),      lon: 80,  op: 0.20, spanDeg: 75 }, // cool blue + dark rift
-  { id: "cassiopeia",  tex: require("../../../assets/milkyway/milkyway_cassiopeia.png"),  lon: 120, op: 0.15, spanDeg: 78 }, // silver-blue, thin
+  { id: "cassiopeia",  tex: require("../../../assets/milkyway/milkyway_cassiopeia.png"),  lon: 120, op: 0.13, spanDeg: 78 }, // silver-blue, thin (dialed down — Cas/Cep haze read as smoke)
   { id: "orion",       tex: require("../../../assets/milkyway/milkyway_orion.png"),       lon: 200, op: 0.12, spanDeg: 88 }, // faintest, diffuse blue-grey
   { id: "carina",      tex: require("../../../assets/milkyway/milkyway_carina.png"),      lon: 285, op: 0.24, spanDeg: 82 }, // rich amber/rose
 ];

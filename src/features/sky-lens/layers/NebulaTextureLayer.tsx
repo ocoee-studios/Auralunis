@@ -43,7 +43,7 @@ const TYPE_LABEL: Record<NebulaType, string> = {
 // Real nebulae are tiny to the eye; magnify hard so they read as LARGE soft clouds
 // (Lagoon fills a real chunk of screen), keeping the RELATIVE sizes true.
 const MAGNIFY = 22;
-const MIN_SIZE = 60; // px
+const MIN_SIZE = 48; // px — the tiny planetaries (Ring, Crab) sit at this floor as small jewels
 
 export function NebulaTextureLayer({
   nebulae, project, fov, box, palette, nightMode, showLabels = true,
