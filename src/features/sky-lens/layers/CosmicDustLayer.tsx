@@ -1,29 +1,28 @@
 import React from "react";
 import { Circle, Defs, G, RadialGradient, Rect, Stop } from "react-native-svg";
 
-// AuraLunis stardust: visible enough to feel magical in screenshots, still quiet
-// enough to stay behind the sky data. Deterministic static SVG keeps it cheap and
-// crash-safe; mixed warm/cream specks make the dome feel alive instead of flat.
+// Quiet stardust layer. It should read as fine celestial texture, not a brown
+// filter over the camera feed.
 const SPECKS = (() => {
   let s = 0x9e3779b9 >>> 0;
   const rng = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 0xffffffff);
-  return Array.from({ length: 260 }, (_, i) => ({
+  return Array.from({ length: 190 }, (_, i) => ({
     x: rng(),
     y: rng(),
-    r: 0.45 + rng() * 1.25,
-    o: 0.045 + rng() * 0.045,
-    color: i % 5 === 0 ? "#FFF1C8" : i % 3 === 0 ? "#E8C77E" : "#D9A84E",
+    r: 0.35 + rng() * 0.8,
+    o: 0.022 + rng() * 0.026,
+    color: i % 4 === 0 ? "#FFF1C8" : "#D9A84E",
   }));
 })();
 
 const GLINTS = (() => {
   let s = 0x5f3759df >>> 0;
   const rng = () => ((s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff);
-  return Array.from({ length: 18 }, () => ({
+  return Array.from({ length: 10 }, () => ({
     x: rng(),
     y: rng(),
-    r: 1.0 + rng() * 1.9,
-    o: 0.08 + rng() * 0.08,
+    r: 0.9 + rng() * 1.3,
+    o: 0.035 + rng() * 0.045,
   }));
 })();
 
@@ -33,13 +32,13 @@ export function CosmicDustLayer({ box, nightMode }: { box: { width: number; heig
     <G pointerEvents="none">
       <Defs>
         <RadialGradient id="cosmicWarmth" cx="50%" cy="46%" r="74%">
-          <Stop offset="0%" stopColor="#0A0806" stopOpacity="0.62" />
-          <Stop offset="58%" stopColor="#0A0806" stopOpacity="0.28" />
+          <Stop offset="0%" stopColor="#0A0806" stopOpacity="0.22" />
+          <Stop offset="58%" stopColor="#0A0806" stopOpacity="0.09" />
           <Stop offset="100%" stopColor="#0A0806" stopOpacity="0" />
         </RadialGradient>
         <RadialGradient id="stardustGlint" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFF4D0" stopOpacity="0.26" />
-          <Stop offset="42%" stopColor="#E8C77E" stopOpacity="0.1" />
+          <Stop offset="0%" stopColor="#FFF4D0" stopOpacity="0.14" />
+          <Stop offset="44%" stopColor="#E8C77E" stopOpacity="0.055" />
           <Stop offset="100%" stopColor="#D9A84E" stopOpacity="0" />
         </RadialGradient>
       </Defs>
@@ -48,7 +47,7 @@ export function CosmicDustLayer({ box, nightMode }: { box: { width: number; heig
         <Circle key={`dust-${i}`} cx={d.x * box.width} cy={d.y * box.height} r={d.r} fill={d.color} opacity={d.o} />
       ))}
       {GLINTS.map((d, i) => (
-        <Circle key={`glint-${i}`} cx={d.x * box.width} cy={d.y * box.height} r={d.r * 5} fill="url(#stardustGlint)" opacity={d.o} />
+        <Circle key={`glint-${i}`} cx={d.x * box.width} cy={d.y * box.height} r={d.r * 4} fill="url(#stardustGlint)" opacity={d.o} />
       ))}
     </G>
   );
