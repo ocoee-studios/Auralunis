@@ -22,8 +22,9 @@ type Props = {
 };
 
 // Named stars at or above this brightness get a text label; fainter ones render
-// as dots only to avoid clutter.
-const LABEL_MAG_LIMIT = 2.2;
+// as dots only to avoid clutter. Keep this conservative: Sky Lens should feel
+// like an elegant instrument first, not a labeled encyclopedia map.
+const LABEL_MAG_LIMIT = 1.35;
 
 // deterministic per-star hash → a tiny, repeatable wobble so each showpiece bloom is
 // a slightly different soft shape (feathered, not an identical perfect circle).
@@ -34,6 +35,8 @@ const hashStar = (s: string) => {
 };
 
 export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, extinction = false, bloom = true, fullSphere = false, onSelect }: Props) {
+  const quietLabelLimit = Math.min(labelMagLimit, LABEL_MAG_LIMIT);
+
   return (
     <G>
       {stars.map((star) => {
@@ -61,7 +64,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         const bright = bloom && !nightMode && star.magnitude < 2.0;
         const glint = bloom && !nightMode && star.magnitude < 1.2; // diffraction spike on the showpiece stars
         const spike = r + 9;
-        const labeled = showLabels && star.name !== undefined && star.magnitude <= labelMagLimit;
+        const labeled = showLabels && star.name !== undefined && star.magnitude <= quietLabelLimit;
 
         return (
           <G key={star.id} opacity={belowHorizon && !fullSphere ? 0.25 : 1}>
@@ -125,9 +128,9 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             {/* white-hot core for the showpiece stars */}
             {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.85} />}
             {labeled && (() => {
-              const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 13) : { x: p.x + r + 3, y: p.y + 3 };
+              const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 12) : { x: p.x + r + 3, y: p.y + 3 };
               return (
-                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={13} fontWeight="500" opacity={0.9}>
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={12} fontWeight="500" opacity={0.74}>
                   {star.name}
                 </SvgText>
               );
