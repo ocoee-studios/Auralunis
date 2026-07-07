@@ -1,7 +1,7 @@
-// The Sky Lens layer catalog. Phase 1 ships the free core (Grid, Stars,
-// Constellations, Planets — Moon is always-on and not a toggle). Phase 2 layers
-// are listed here so the layer bar can show them as locked/Coming Soon, which is
-// what signals the $49.99/yr upgrade without faking an unbuilt feature.
+// The Sky Lens layer catalog. Phase 1 ships the free core (Stars,
+// Constellations, Planets — Moon is always-on and not a toggle). Premium layers
+// remain available, but the default scene opens in a quieter, more cinematic
+// state so the sky feels premium instead of crowded.
 
 export type LayerKey =
   | "grid"
@@ -24,12 +24,15 @@ export interface LayerDef {
 }
 
 export const SKY_LENS_LAYERS: ReadonlyArray<LayerDef> = [
+  // Premium launch default: only the essential celestial reading layers are on.
+  // Grid/ecliptic/zodiac/deep-sky become deliberate discovery tools instead of
+  // visual noise in the first screenshot Apple reviewers and users see.
   { key: "stars", label: "Stars", icon: "☆", premium: false, available: true, defaultOn: true },
-  { key: "constellations", label: "Constellations", icon: "◎", premium: false, available: true, defaultOn: true },
-  { key: "zodiac", label: "Zodiac", icon: "♈", premium: false, available: true, defaultOn: false },
+  { key: "constellations", label: "Lines", icon: "◎", premium: false, available: true, defaultOn: true },
   { key: "planets", label: "Planets", icon: "●", premium: false, available: true, defaultOn: true },
-  { key: "grid", label: "Grid", icon: "#", premium: false, available: true, defaultOn: true },
-  { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true },
+  { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: false },
+  { key: "zodiac", label: "Zodiac", icon: "♈", premium: false, available: true, defaultOn: false },
+  { key: "grid", label: "Grid", icon: "#", premium: false, available: true, defaultOn: false },
   { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: true, defaultOn: false },
   { key: "deepsky", label: "Deep Sky", icon: "✦", premium: true, available: true, defaultOn: false },
   { key: "ecliptic", label: "Ecliptic", icon: "~", premium: true, available: true, defaultOn: false }
