@@ -1,7 +1,7 @@
-// The Sky Lens layer catalog. Phase 1 ships the free core (Stars,
-// Constellations, Planets, Milky Way — Moon is always-on and not a toggle).
-// Premium layers remain available, but the default scene still needs immediate
-// wonder: gold constellations, stardust, and the galactic river visible.
+// The Sky Lens layer catalog. Phase 1 ships the visual core: Stars,
+// Constellations, Planets, Milky Way, and Nebulae. Moon is always-on and not a
+// toggle. Technical overlays remain available, but the default scene must open
+// with wonder: gold constellations, stardust, nebula glow, and the galactic river.
 
 export type LayerKey =
   | "grid"
@@ -27,11 +27,11 @@ export const SKY_LENS_LAYERS: ReadonlyArray<LayerDef> = [
   { key: "stars", label: "Stars", icon: "☆", premium: false, available: true, defaultOn: true },
   { key: "constellations", label: "Constellations", icon: "◎", premium: false, available: true, defaultOn: true },
   { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true },
+  { key: "deepsky", label: "Nebulae", icon: "✦", premium: false, available: true, defaultOn: true },
   { key: "planets", label: "Planets", icon: "●", premium: false, available: true, defaultOn: true },
   { key: "zodiac", label: "Zodiac", icon: "♈", premium: false, available: true, defaultOn: false },
   { key: "grid", label: "Grid", icon: "#", premium: false, available: true, defaultOn: false },
   { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: true, defaultOn: false },
-  { key: "deepsky", label: "Nebulae", icon: "✦", premium: true, available: true, defaultOn: false },
   { key: "ecliptic", label: "Ecliptic", icon: "~", premium: true, available: true, defaultOn: false }
 ];
 
