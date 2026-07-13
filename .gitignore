@@ -9,3 +9,9 @@ android
 .env
 .env.*
 !.env.example
+
+# Local image-processing environment
+.venv-image-tools/
+
+# Local source nebula artwork
+assets/nebula-art/

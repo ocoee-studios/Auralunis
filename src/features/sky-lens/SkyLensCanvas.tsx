@@ -139,19 +139,23 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       {/* Horizon atmosphere glow — a warm dome hugging the projected horizon so the sky
           reads as a real dome with a "floor", not a flat chart. Tracks device tilt. */}
       <HorizonGlowLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} nightMode={nightMode} boost={milkyWayBoost} />
-      {/* Milky Way behind everything: a thin procedural band wraps the full galactic
-          plane (Sagittarius→Cygnus→Cassiopeia→Orion), then the REAL photographic core
-          glows on top at Sagittarius. */}
-      {activeLayers.has("milkyway") && (
-        <G transform={depth(0.6)}>
-          <MilkyWayLayer band={sky.milkyWay} stars={sky.milkyWayStars} dust={sky.milkyWayDust} project={project} box={box} nightMode={nightMode} boost={milkyWayBoost} />
-          {photographicCore && <MilkyWayCoreLayer band={sky.milkyWay} project={project} fov={fov} box={box} nightMode={nightMode} boost={milkyWayBoost} />}
-        </G>
-      )}
-      {/* Deep-sky nebulae — toggleable via the Deep Sky layer button */}
+      {/* Old transparent Milky Way rendering stays disabled.
+          Restore only positioned deep-sky nebula objects at restrained opacity. */}
       {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
-        <G transform={depth(1)} opacity={nebulaOpacity}>
-          <NebulaLayer nebulae={sky.nebulae} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} placeLabel={placeLabel} showLabels={showLabels} customShapes={vg.nebulaShapes} fullSphere={fullSphere} onSelect={onSelect} />
+        <G transform={depth(1)} opacity={Math.min(nebulaOpacity, 0.42)}>
+          <NebulaLayer
+            nebulae={sky.nebulae}
+            project={project}
+            palette={palette}
+            nightMode={nightMode}
+            focus={focus}
+            showcase={showcase}
+            placeLabel={placeLabel}
+            showLabels={showLabels}
+            customShapes={vg.nebulaShapes}
+            fullSphere={fullSphere}
+            onSelect={onSelect}
+          />
         </G>
       )}
       {activeLayers.has("grid") && !cinematic && (

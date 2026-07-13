@@ -15,7 +15,6 @@ try {
 }
 import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { CameraView } from "expo-camera";
 import { LinearGradient } from "expo-linear-gradient";
 import Slider from "@react-native-community/slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -36,6 +35,8 @@ import { computeAzimuthElevation } from "@/utils/alignmentEngine";
 import type { SkyLensSatellite } from "./layers/SatelliteLayer";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
+import { SolidSkyBackgroundLayer } from "./SolidSkyBackgroundLayer";
+import { NebulaImageLayer } from "./layers/NebulaImageLayer";
 import { SkyVignette } from "./SkyVignette";
 import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
 import { AstralBreathingLayer } from "./layers/AstralBreathingLayer";
@@ -211,11 +212,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   useEffect(() => {
     setNightMode(gate.nightVision && settings.nightVision);
   }, [gate.nightVision, settings.nightVision]);
-  // Three sky modes cycled by the half-moon button: AR (camera, 45% dim) → Immersive
-  // (camera, 75% dim — screenshot mode) → Planetarium (camera off, 95% dim) → AR.
-  const [skyMode, setSkyMode] = useState<"ar" | "immersive" | "planetarium">("ar");
-  const planetarium = skyMode === "planetarium";
-  const immersive = skyMode === "immersive";
+  // Sky Lens now uses a permanent full-screen planetarium presentation.
+  // The live camera AR mode was removed so the visual experience stays cinematic.
+  const planetarium = true;
+  const immersive = false;
   // Cinematic "Immersive Sky" (Week 4) — the no-UI mode for screenshots & wonder. All
   // chrome and labels vanish; only the sky remains, darkened to ~85%. Enter via a
   // triple-tap or a long-press on the mode button; a single tap anywhere restores the UI.
@@ -277,7 +277,6 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     }),
     [zoom]
   );
-  const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
 
   // Tap-to-select. SVG onPress does NOT fire inside an RNGH GestureDetector on iOS, so we
   // hit-test the tap point against projected object positions ourselves and open the info
@@ -411,20 +410,6 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     () => getSeasonalTint((observerTime ?? new Date()).getMonth(), location?.latitudeDegrees ?? 0),
     [observerTime, location?.latitudeDegrees]
   );
-  const cycleSkyMode = useCallback(() => {
-    // Half-moon button cycles AR → Immersive → Planetarium → AR. Entering Planetarium
-    // turns the Milky Way layer on. Both state updates stay at the TOP LEVEL of the
-    // handler — never nest a setState inside another's updater (React runs updaters
-    // during render → "Cannot update a component while rendering" throw).
-    // Immersive (75% dim screenshot mode) is premium — free users skip straight
-    // from AR to Planetarium and back.
-    const next = skyMode === "ar"
-      ? (gate.immersiveMode ? "immersive" : "planetarium")
-      : skyMode === "immersive" ? "planetarium" : "ar";
-    if (next === "planetarium") setActive((prev) => (prev.has("milkyway") ? prev : new Set(prev).add("milkyway")));
-    setSkyMode(next);
-  }, [skyMode, gate.immersiveMode]);
-
   const onLayout = useCallback((e: LayoutEvent) => {
     const { width, height } = e.nativeEvent.layout;
     setBox({ width, height });
@@ -721,8 +706,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={sceneGesture}>
         <View ref={sceneRef} collapsable={false} style={StyleSheet.absoluteFill}>
-          {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
-          {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
+          {/* Permanent cinematic planetarium background — no live camera feed. */}
 
           {/* Cosmic dark overlay */}
           <View
@@ -766,6 +750,19 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             />
           )}
           {nightMode && <View style={styles.nightFilter} pointerEvents="none" />}
+
+          <SolidSkyBackgroundLayer
+            visible={planetarium && !nightMode && active.has("milkyway")}
+          />
+
+          <NebulaImageLayer
+            nebulae={sky.nebulae}
+            pointing={pointing}
+            fov={fov}
+            box={box}
+            visible={!nightMode && active.has("deepsky")}
+            fullSphere={planetarium}
+          />
 
           {/* Ambient atmosphere (Gemini's refined pair): breathing sky bloom +
               shimmering luxury starfield, above the background and below the star
@@ -815,11 +812,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               is pointerEvents="none"). v1 shows it only in Planetarium ("fantasy /
               preview") mode; realistic camera mode stays off until an enable toggle /
               live AuroraForecastService gate is wired. */}
+          {/* Aurora curtains disabled — they created visible vertical bands
+              over the new cinematic full-background sky. */}
           <AuroraCurtainLayer
             width={box.width}
             height={box.height}
-            visible={planetarium}
-            intensity={0.55}
+            visible={false}
+            intensity={0}
             variant="cosmic"
             nightVision={nightMode}
           />
@@ -957,15 +956,6 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>🕐</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.iconBtn, skyMode !== "ar" && { backgroundColor: "rgba(217,168,78,0.32)" }]}
-            onPress={cycleSkyMode}
-            onLongPress={enterCinematic}
-            delayLongPress={400}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.iconBtnText}>{planetarium ? "🔭" : immersive ? "🌌" : "📷"}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconBtn, nightMode && { backgroundColor: "rgba(139,32,32,0.5)" }]}
