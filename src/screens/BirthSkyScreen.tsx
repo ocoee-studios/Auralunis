@@ -1,7 +1,5 @@
 // BirthSkyScreen.tsx
-// "What did the sky look like the night you were born?" — the most shareable
-// feature in AuraLunis. Birth date, local birth time, and birthplace are used to
-// generate an astronomically grounded personal sky and shareable certificate.
+// Personal birth-sky certificate using birth date, local birth time, and birthplace.
 
 import React, { useEffect, useRef, useState } from "react";
 import { Pressable, Share, StyleSheet, Text, TextInput, View } from "react-native";
@@ -38,7 +36,29 @@ type SavedBirthplace = {
   location: ObserverLocation;
 };
 
+type ParsedBirthTime = {
+  localTime24: string;
+  exact: boolean;
+  display: string;
+};
+
 const BIRTHPLACE_STORAGE_KEY = "auralunis.birthplace";
+const BIRTH_DATE_LOCAL_STORAGE_KEY = "auralunis.birthdate.local";
+const BIRTH_TIME_LOCAL_STORAGE_KEY = "auralunis.birthtime.local";
+
+const US_STATE_NAMES: Record<string, string> = {
+  AL: "alabama", AK: "alaska", AZ: "arizona", AR: "arkansas", CA: "california",
+  CO: "colorado", CT: "connecticut", DE: "delaware", FL: "florida", GA: "georgia",
+  HI: "hawaii", ID: "idaho", IL: "illinois", IN: "indiana", IA: "iowa",
+  KS: "kansas", KY: "kentucky", LA: "louisiana", ME: "maine", MD: "maryland",
+  MA: "massachusetts", MI: "michigan", MN: "minnesota", MS: "mississippi", MO: "missouri",
+  MT: "montana", NE: "nebraska", NV: "nevada", NH: "new hampshire", NJ: "new jersey",
+  NM: "new mexico", NY: "new york", NC: "north carolina", ND: "north dakota", OH: "ohio",
+  OK: "oklahoma", OR: "oregon", PA: "pennsylvania", RI: "rhode island", SC: "south carolina",
+  SD: "south dakota", TN: "tennessee", TX: "texas", UT: "utah", VT: "vermont",
+  VA: "virginia", WA: "washington", WV: "west virginia", WI: "wisconsin", WY: "wyoming",
+  DC: "district of columbia"
+};
 
 const PLANET_COLORS: Record<string, string> = {
   Mercury: "#C0C6D4",
@@ -88,9 +108,9 @@ function article(word: string): string {
   return /^[aeiou]/i.test(word) ? "an" : "a";
 }
 
-function azToDir(az: number): string {
-  const dirs = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"];
-  return dirs[Math.round((((az % 360) + 360) % 360) / 45) % 8];
+function azToDir(azimuth: number): string {
+  const directions = ["north", "northeast", "east", "southeast", "south", "southwest", "west", "northwest"];
+  return directions[Math.round((((azimuth % 360) + 360) % 360) / 45) % 8];
 }
 
 function extractSeason(profile: BirthSkyProfile): string {
@@ -108,36 +128,51 @@ function extractSeason(profile: BirthSkyProfile): string {
 function generateSkyStory(profile: BirthSkyProfile): string {
   const season = extractSeason(profile);
   const visible = profile.planets.filter((planet) => planet.visible);
+  const moonPhrase = profile.moonIllumination > 70
+    ? "beneath bright moonlight"
+    : profile.moonIllumination < 20
+      ? "beneath a dark, starlit sky"
+      : `with a ${profile.moonPhase.toLowerCase()} overhead`;
 
-  let moonPhrase: string;
-  if (profile.moonIllumination > 70) moonPhrase = "beneath bright moonlight";
-  else if (profile.moonIllumination < 20) moonPhrase = "beneath a dark, starlit sky";
-  else moonPhrase = `with a ${profile.moonPhase.toLowerCase()} overhead`;
-
-  let planetPhrase: string;
-  if (visible.length === 0) planetPhrase = "the stars held the stage";
-  else if (visible.length <= 2) planetPhrase = `${visible[0].name} stood watch in the ${azToDir(visible[0].azimuth)}`;
-  else planetPhrase = `${visible[0].name}, ${visible[1].name}, and ${visible[2].name} welcomed you`;
+  const planetPhrase = visible.length === 0
+    ? "the stars held the stage"
+    : visible.length <= 2
+      ? `${visible[0].name} stood watch in the ${azToDir(visible[0].azimuth)}`
+      : `${visible[0].name}, ${visible[1].name}, and ${visible[2].name} welcomed you`;
 
   const meaning = CONSTELLATION_MEANINGS[profile.dominantConstellation] ?? "an ancient pattern etched in starlight";
   const rarePhrase = visible.length >= 3 ? ` An uncommon ${visible.length}-planet sky, full of possibility.` : "";
-
   return `You arrived beneath ${article(season)} ${season} sky, ${moonPhrase}. ${planetPhrase}, while ${profile.dominantConstellation} carried the night overhead — ${meaning}.${rarePhrase}`;
+}
+
+function normalizeQualifier(value: string): string {
+  const cleaned = value.trim().toUpperCase();
+  return US_STATE_NAMES[cleaned] ?? value.trim().toLowerCase();
 }
 
 function buildPlaceName(place: GeocodingResult): string {
   return [place.name, place.admin1, place.country].filter(Boolean).join(", ");
 }
 
+function scorePlace(place: GeocodingResult, qualifiers: string[]): number {
+  if (qualifiers.length === 0) return 0;
+  const haystack = `${place.admin1 ?? ""} ${place.country ?? ""}`.toLowerCase();
+  return qualifiers.reduce((score, qualifier) => score + (haystack.includes(normalizeQualifier(qualifier)) ? 1 : 0), 0);
+}
+
 async function findBirthplace(query: string): Promise<SavedBirthplace> {
-  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=1&language=en&format=json`;
+  const parts = query.split(",").map((part) => part.trim()).filter(Boolean);
+  const city = parts[0] || query.trim();
+  const qualifiers = parts.slice(1);
+  const url = `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=10&language=en&format=json`;
   const response = await fetch(url);
   if (!response.ok) throw new Error("Birthplace search failed");
 
   const payload = (await response.json()) as { results?: GeocodingResult[] };
-  const place = payload.results?.[0];
-  if (!place) throw new Error("Birthplace not found");
+  const results = payload.results ?? [];
+  if (results.length === 0) throw new Error("Birthplace not found");
 
+  const place = [...results].sort((a, b) => scorePlace(b, qualifiers) - scorePlace(a, qualifiers))[0];
   return {
     query,
     displayName: buildPlaceName(place),
@@ -148,6 +183,31 @@ async function findBirthplace(query: string): Promise<SavedBirthplace> {
       altitudeMeters: place.elevation
     }
   };
+}
+
+function parseBirthTime(input: string): ParsedBirthTime | null {
+  const trimmed = input.trim();
+  if (!trimmed) return { localTime24: "12:00", exact: false, display: "" };
+
+  const meridiemMatch = trimmed.match(/^(\d{1,2})(?::(\d{2}))?\s*([ap])\.?\s*m\.?$/i);
+  if (meridiemMatch) {
+    let hour = Number(meridiemMatch[1]);
+    const minute = Number(meridiemMatch[2] ?? "0");
+    const meridiem = meridiemMatch[3].toLowerCase();
+    if (hour < 1 || hour > 12 || minute > 59) return null;
+    if (meridiem === "a" && hour === 12) hour = 0;
+    if (meridiem === "p" && hour !== 12) hour += 12;
+    const localTime24 = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+    return { localTime24, exact: true, display: trimmed.toUpperCase().replace(/\./g, "") };
+  }
+
+  const twentyFourHourMatch = trimmed.match(/^(\d{1,2}):(\d{2})$/);
+  if (!twentyFourHourMatch) return null;
+  const hour = Number(twentyFourHourMatch[1]);
+  const minute = Number(twentyFourHourMatch[2]);
+  if (hour > 23 || minute > 59) return null;
+  const localTime24 = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
+  return { localTime24, exact: true, display: localTime24 };
 }
 
 function timeZoneOffsetMs(utcMs: number, timeZone: string): number {
@@ -167,22 +227,13 @@ function timeZoneOffsetMs(utcMs: number, timeZone: string): number {
     if (part.type !== "literal") values[part.type] = Number(part.value);
   }
 
-  const representedUtc = Date.UTC(
-    values.year,
-    values.month - 1,
-    values.day,
-    values.hour,
-    values.minute,
-    values.second
-  );
-  return representedUtc - utcMs;
+  return Date.UTC(values.year, values.month - 1, values.day, values.hour, values.minute, values.second) - utcMs;
 }
 
 function localBirthMomentToUtc(dateText: string, timeText: string, timeZone: string): Date {
   const [year, month, day] = dateText.split("-").map(Number);
   const [hour, minute] = timeText.split(":").map(Number);
   const localAsUtc = Date.UTC(year, month - 1, day, hour, minute, 0);
-
   let utcMs = localAsUtc - timeZoneOffsetMs(localAsUtc, timeZone);
   utcMs = localAsUtc - timeZoneOffsetMs(utcMs, timeZone);
   return new Date(utcMs);
@@ -191,7 +242,6 @@ function localBirthMomentToUtc(dateText: string, timeText: string, timeZone: str
 export function BirthSkyScreen({ onClose }: Props) {
   const { isPremium } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
-
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [birthplaceQuery, setBirthplaceQuery] = useState("");
@@ -206,30 +256,25 @@ export function BirthSkyScreen({ onClose }: Props) {
     let active = true;
     Promise.all([
       AsyncStorage.getItem(BIRTHDAY_STORAGE_KEY),
+      AsyncStorage.getItem(BIRTH_DATE_LOCAL_STORAGE_KEY),
+      AsyncStorage.getItem(BIRTH_TIME_LOCAL_STORAGE_KEY),
       AsyncStorage.getItem(BIRTHPLACE_STORAGE_KEY)
-    ])
-      .then(([iso, savedPlace]) => {
-        if (!active) return;
-        if (iso) {
-          setDate(iso.slice(0, 10));
-          const savedTime = iso.slice(11, 16);
-          if (savedTime && savedTime !== "12:00") setTime(savedTime);
+    ]).then(([iso, localDate, localTime, savedPlace]) => {
+      if (!active) return;
+      if (localDate) setDate(localDate);
+      else if (iso) setDate(iso.slice(0, 10));
+      if (localTime) setTime(localTime);
+      if (savedPlace) {
+        try {
+          const parsed = JSON.parse(savedPlace) as SavedBirthplace;
+          setBirthplaceQuery(parsed.displayName || parsed.query);
+          setResolvedBirthplace(parsed);
+        } catch {
+          /* Ignore malformed local data. */
         }
-        if (savedPlace) {
-          try {
-            const parsed = JSON.parse(savedPlace) as SavedBirthplace;
-            setBirthplaceQuery(parsed.displayName || parsed.query);
-            setResolvedBirthplace(parsed);
-          } catch {
-            /* Ignore malformed local data. */
-          }
-        }
-      })
-      .catch(() => {});
-
-    return () => {
-      active = false;
-    };
+      }
+    }).catch(() => {});
+    return () => { active = false; };
   }, []);
 
   async function generate() {
@@ -249,39 +294,36 @@ export function BirthSkyScreen({ onClose }: Props) {
       return;
     }
 
-    const timeIsExact = /^\d{1,2}:\d{2}$/.test(time.trim());
-    const localTime = timeIsExact ? time.trim().padStart(5, "0") : "12:00";
-    const [hours, minutes] = localTime.split(":").map(Number);
-    if (hours > 23 || minutes > 59) {
-      setError("Enter birth time in 24-hour HH:MM format, such as 14:30.");
+    const parsedTime = parseBirthTime(time);
+    if (!parsedTime) {
+      setError("Enter a valid birth time such as 1:35 PM or 13:35, or leave it blank if unknown.");
       return;
     }
 
     setIsGenerating(true);
     try {
-      const savedPlace =
-        resolvedBirthplace && resolvedBirthplace.query.toLowerCase() === trimmedPlace.toLowerCase()
-          ? resolvedBirthplace
-          : await findBirthplace(trimmedPlace);
-
-      const birthMoment = localBirthMomentToUtc(trimmedDate, localTime, savedPlace.timezone);
-      const nextProfile = computeBirthSky(
-        birthMoment.toISOString(),
-        savedPlace.location,
-        savedPlace.displayName
-      );
+      const savedPlace = resolvedBirthplace && resolvedBirthplace.query.toLowerCase() === trimmedPlace.toLowerCase()
+        ? resolvedBirthplace
+        : await findBirthplace(trimmedPlace);
+      const birthMoment = localBirthMomentToUtc(trimmedDate, parsedTime.localTime24, savedPlace.timezone);
+      const nextProfile = computeBirthSky(birthMoment.toISOString(), savedPlace.location, savedPlace.displayName);
 
       setResolvedBirthplace(savedPlace);
       setBirthplaceQuery(savedPlace.displayName);
-      setExactTimeUsed(timeIsExact);
+      setTime(parsedTime.display);
+      setExactTimeUsed(parsedTime.exact);
       setProfile(nextProfile);
 
       await Promise.all([
         AsyncStorage.setItem(BIRTHDAY_STORAGE_KEY, birthMoment.toISOString()),
+        AsyncStorage.setItem(BIRTH_DATE_LOCAL_STORAGE_KEY, trimmedDate),
+        parsedTime.exact
+          ? AsyncStorage.setItem(BIRTH_TIME_LOCAL_STORAGE_KEY, parsedTime.display)
+          : AsyncStorage.removeItem(BIRTH_TIME_LOCAL_STORAGE_KEY),
         AsyncStorage.setItem(BIRTHPLACE_STORAGE_KEY, JSON.stringify(savedPlace))
       ]);
     } catch {
-      setError("We couldn't find that birthplace. Try adding the state, province, or country.");
+      setError("We couldn't find that birthplace. Try entering the city and state or country, such as Austell, Georgia.");
     } finally {
       setIsGenerating(false);
     }
@@ -328,9 +370,10 @@ export function BirthSkyScreen({ onClose }: Props) {
           style={styles.input}
           value={time}
           onChangeText={setTime}
-          placeholder="HH:MM — leave blank if unknown"
+          placeholder="1:35 PM or 13:35 — blank if unknown"
           placeholderTextColor={AuraLunisColors.faint}
-          keyboardType="numbers-and-punctuation"
+          keyboardType="default"
+          autoCapitalize="characters"
           autoCorrect={false}
         />
         <Text style={styles.fieldNote}>Use the local time shown on your birth record. Unknown times use noon and make horizon details approximate.</Text>
@@ -394,10 +437,7 @@ export function BirthSkyScreen({ onClose }: Props) {
           <Row label={exactTimeUsed ? "Eastern sky" : "Approx. eastern sky"} value={profile.risingSign} />
           <Row label="Dominant" value={profile.dominantConstellation} />
           <Row label="Seasonal sky" value={profile.seasonalSky} />
-          <Row
-            label="Planets up"
-            value={visiblePlanets.map((planet) => planet.name).join(", ") || "None above horizon"}
-          />
+          <Row label="Planets up" value={visiblePlanets.map((planet) => planet.name).join(", ") || "None above horizon"} />
           {!exactTimeUsed && (
             <Text style={styles.approximationNote}>Birth time was not entered, so horizon-based details use local noon and are approximate.</Text>
           )}
