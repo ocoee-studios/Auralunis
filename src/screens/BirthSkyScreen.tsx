@@ -90,30 +90,35 @@ function extractSeason(profile: BirthSkyProfile): string {
   return "autumn";
 }
 
-// A 3–4 sentence poetic narrative built from the birth-sky profile.
+// A concise poetic narrative built from the birth-sky profile.
 function generateSkyStory(profile: BirthSkyProfile): string {
   const season = extractSeason(profile);
   const visible = profile.planets.filter((p) => p.visible);
 
   let moonPhrase: string;
-  if (profile.moonIllumination > 70) moonPhrase = ", bathed in bright moonlight";
-  else if (profile.moonIllumination < 20) moonPhrase = ", under dark skies perfect for stargazing";
-  else moonPhrase = `, with a ${profile.moonPhase.toLowerCase()} rising`;
-  const s1 = `You arrived under ${article(season)} ${season} sky${moonPhrase}.`;
+  if (profile.moonIllumination > 70) moonPhrase = "beneath bright moonlight";
+  else if (profile.moonIllumination < 20) moonPhrase = "beneath a dark, starlit sky";
+  else moonPhrase = `with a ${profile.moonPhase.toLowerCase()} overhead`;
 
-  let s2: string;
-  if (visible.length === 0) s2 = "The stars had the stage to themselves.";
-  else if (visible.length <= 2) s2 = `${visible[0].name} stood watch in the ${azToDir(visible[0].azimuth)}.`;
-  else s2 = `${visible[0].name}, ${visible[1].name}, and ${visible[2].name} lined up to welcome you.`;
+  let planetPhrase: string;
+  if (visible.length === 0) {
+    planetPhrase = "the stars held the stage";
+  } else if (visible.length <= 2) {
+    planetPhrase = `${visible[0].name} stood watch in the ${azToDir(visible[0].azimuth)}`;
+  } else {
+    planetPhrase = `${visible[0].name}, ${visible[1].name}, and ${visible[2].name} welcomed you`;
+  }
 
-  const meaning = CONSTELLATION_MEANINGS[profile.dominantConstellation] ?? "an ancient pattern etched in starlight";
-  const s3 = `Your dominant constellation was ${profile.dominantConstellation} — ${meaning}.`;
+  const meaning =
+    CONSTELLATION_MEANINGS[profile.dominantConstellation] ??
+    "an ancient pattern etched in starlight";
 
-  const s4 = visible.length >= 3
-    ? ` Having ${visible.length} planets visible at birth is uncommon — a sky full of potential, like you.`
-    : "";
+  const rarePhrase =
+    visible.length >= 3
+      ? ` An uncommon ${visible.length}-planet sky, full of possibility.`
+      : "";
 
-  return `${s1} ${s2} ${s3}${s4}`;
+  return `You arrived beneath ${article(season)} ${season} sky, ${moonPhrase}. ${planetPhrase}, while ${profile.dominantConstellation} carried the night overhead — ${meaning}.${rarePhrase}`;
 }
 
 export function BirthSkyScreen({ onClose }: Props) {
@@ -251,7 +256,7 @@ export function BirthSkyScreen({ onClose }: Props) {
           <View style={styles.divider} />
           <Row label="Sun sign" value={profile.sunSign} />
           <Row label="Moon phase" value={`${profile.moonPhase} · ${profile.moonIllumination}%`} />
-          <Row label="Rising" value={profile.risingSign} />
+          <Row label="Approx. eastern sky" value={profile.risingSign} />
           <Row label="Dominant" value={profile.dominantConstellation} />
           <Row label="Seasonal sky" value={profile.seasonalSky} />
           <Row
@@ -345,13 +350,13 @@ const styles = StyleSheet.create({
   rowValue: { color: "#FFF", fontSize: 13, fontWeight: "700", flexShrink: 1, textAlign: "right" },
   planetsHeader: { color: AuraLunisColors.gold, fontSize: 9, letterSpacing: 2, fontWeight: "900", marginTop: 16, marginBottom: 10 },
   planetCard: {
-    backgroundColor: "rgba(255,255,255,0.04)", borderRadius: 14, padding: 12, marginBottom: 8,
+    backgroundColor: "rgba(255,255,255,0.04)", borderRadius: 14, paddingHorizontal: 12, paddingVertical: 9, marginBottom: 7,
     flexDirection: "row", alignItems: "center", gap: 12,
   },
-  planetDot: { width: 14, height: 14, borderRadius: 7 },
+  planetDot: { width: 12, height: 12, borderRadius: 6 },
   planetTextWrap: { flex: 1 },
   planetName: { color: "#FFF", fontSize: 14, fontWeight: "700" },
-  planetDesc: { color: AuraLunisColors.muted, fontSize: 12, lineHeight: 17, marginTop: 2 },
+  planetDesc: { color: AuraLunisColors.muted, fontSize: 11.5, lineHeight: 16, marginTop: 1 },
   shareBtn: {
     marginTop: 18, borderRadius: 14, paddingVertical: 13, alignItems: "center",
     borderWidth: 1, borderColor: AuraLunisColors.gold,

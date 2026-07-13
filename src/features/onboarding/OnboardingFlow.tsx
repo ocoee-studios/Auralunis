@@ -134,7 +134,7 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
             <Text style={s.stepTitle}>The sky remembers.</Text>
             {profile ? (
               <View style={s.revealChart}>
-                <BirthSkyCanvas birthDate={new Date(profile.birthDate)} location={location} size={236} />
+                <BirthSkyCanvas birthDate={new Date(profile.birthDate)} location={location} size={276} />
               </View>
             ) : (
               <Animated.View style={[s.revealRing, ringStyle]}>
@@ -170,7 +170,7 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
               </Text>
             )}
             <Pressable style={s.cta} onPress={() => setStep(3)}>
-              <Text style={s.ctaText}>Continue</Text>
+              <Text style={s.ctaText}>Explore My Birth Sky</Text>
             </Pressable>
           </View>
         )}
@@ -203,26 +203,26 @@ export function OnboardingFlow({ visible, onComplete, onOpenPaywall }: Props) {
 
 const s = StyleSheet.create({
   root: { flex: 1, backgroundColor: "#040611" },
-  content: { paddingHorizontal: 22, paddingTop: 72, paddingBottom: 50 },
+  content: { paddingHorizontal: 22, paddingTop: 58, paddingBottom: 36 },
   center: { alignItems: "center" },
   welcome: { color: AuraLunisColors.gold2, fontSize: 28, letterSpacing: 4, fontWeight: "900", marginTop: 20 },
   tagline: { fontStyle: "italic", color: AuraLunisColors.silver, fontSize: 15, marginTop: 8 },
   descriptor: { color: AuraLunisColors.muted, fontSize: 9, letterSpacing: 3, marginTop: 8 },
   bodyText: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 22, textAlign: "center", marginTop: 20, maxWidth: 300 },
   stepEyebrow: { color: AuraLunisColors.gold, fontSize: 10, letterSpacing: 2, fontWeight: "900" },
-  stepTitle: { color: "#FFF", fontSize: 28, fontWeight: "900", marginTop: 8, textAlign: "center" },
+  stepTitle: { color: "#FFF", fontSize: 30, fontWeight: "900", marginTop: 8, textAlign: "center" },
   input: { width: "100%", paddingVertical: 14, paddingHorizontal: 14, borderRadius: 14, borderWidth: 1, borderColor: "rgba(199,166,106,0.30)", backgroundColor: "rgba(4,7,14,0.62)", color: "#FFF", fontSize: 15, marginTop: 20, textAlign: "center" },
   skipText: { color: AuraLunisColors.gold2, fontWeight: "800", fontSize: 13, marginTop: 16 },
   revealRing: { width: 160, height: 160, borderRadius: 80, borderWidth: 2, borderColor: "rgba(199,166,106,0.6)", alignItems: "center", justifyContent: "center", marginTop: 24, marginBottom: 12 },
   revealCore: { width: 48, height: 48, borderRadius: 24, backgroundColor: AuraLunisColors.gold },
-  revealChart: { marginTop: 22, marginBottom: 14, alignItems: "center" },
-  birthSignature: { color: AuraLunisColors.gold2, fontSize: 15, lineHeight: 22, textAlign: "center", fontStyle: "italic", marginTop: 14, maxWidth: 320 },
-  birthStats: { flexDirection: "row", justifyContent: "center", gap: 22, marginTop: 20 },
+  revealChart: { marginTop: 18, marginBottom: 8, alignItems: "center" },
+  birthSignature: { color: "#F3E6C7", fontSize: 16, lineHeight: 24, textAlign: "center", fontStyle: "italic", marginTop: 12, maxWidth: 340 },
+  birthStats: { flexDirection: "row", justifyContent: "center", gap: 28, marginTop: 22 },
   birthStat: { alignItems: "center", maxWidth: 110 },
-  birthStatValue: { color: AuraLunisColors.gold, fontSize: 15, fontWeight: "900", textAlign: "center" },
-  birthStatLabel: { color: AuraLunisColors.muted, fontSize: 9, fontWeight: "800", letterSpacing: 1, marginTop: 4, textAlign: "center" },
-  birthPlanets: { color: AuraLunisColors.silver, fontSize: 12, lineHeight: 18, textAlign: "center", marginTop: 16, maxWidth: 300 },
-  cta: { width: "100%", borderRadius: 15, backgroundColor: AuraLunisColors.gold, paddingVertical: 15, alignItems: "center", marginTop: 24 },
+  birthStatValue: { color: AuraLunisColors.gold, fontSize: 17, fontWeight: "900", textAlign: "center" },
+  birthStatLabel: { color: AuraLunisColors.muted, fontSize: 9, fontWeight: "800", letterSpacing: 1.2, marginTop: 5, textAlign: "center" },
+  birthPlanets: { color: AuraLunisColors.muted, fontSize: 11.5, lineHeight: 18, textAlign: "center", marginTop: 14, maxWidth: 320 },
+  cta: { width: "100%", borderRadius: 15, backgroundColor: AuraLunisColors.gold, paddingVertical: 16, alignItems: "center", marginTop: 22 },
   ctaText: { color: "#17120B", fontWeight: "900", fontSize: 15 },
   secondaryCta: { width: "100%", borderRadius: 15, borderWidth: 1, borderColor: "rgba(199,166,106,0.34)", backgroundColor: "rgba(199,166,106,0.11)", paddingVertical: 14, alignItems: "center", marginTop: 10 },
   secondaryCtaText: { color: AuraLunisColors.gold2, fontWeight: "800", fontSize: 14 },
