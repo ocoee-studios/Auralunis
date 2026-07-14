@@ -12,7 +12,6 @@ import { PlanetLayer } from "./layers/PlanetLayer";
 import { MoonLayer, MOON_RADIUS } from "./layers/MoonLayer";
 import { CosmicDustLayer } from "./layers/CosmicDustLayer";
 import { HorizonGlowLayer } from "./layers/HorizonGlowLayer";
-import { NebulaLayer } from "./layers/NebulaLayer";
 import { ShootingStarLayer } from "./layers/ShootingStarLayer";
 import { EclipticLayer } from "./layers/EclipticLayer";
 import { ZodiacLayer } from "./layers/ZodiacLayer";
@@ -123,23 +122,12 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         />
         <HorizonGlowLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} nightMode={nightMode} boost={milkyWayBoost} />
 
-        {activeLayers.has("deepsky") && nebulaOpacity > 0 && (
-          <G transform={depth(1)} opacity={Math.min(nebulaOpacity, 0.32)}>
-            <NebulaLayer
-              nebulae={sky.nebulae}
-              project={project}
-              palette={palette}
-              nightMode={nightMode}
-              focus={focus}
-              showcase={showcase}
-              placeLabel={placeLabel}
-              showLabels={false}
-              customShapes={vg.nebulaShapes}
-              fullSphere={horizonCorrect}
-              onSelect={onSelect}
-            />
-          </G>
-        )}
+        {/* NEBULAE ARE RENDERED BY NebulaImageLayer (mounted in SkyLensScreen) — the ONE
+            nebula renderer. The procedural NebulaLayer used to draw here on the same
+            `deepsky` key, so every nebula was painted TWICE: doubled opacity, muddied
+            colour. It also built silhouettes from 9-point blobs (visibly angular) and
+            treated star clusters and galaxies as glowing emission clouds. Retired.
+            The file remains on disk; nothing mounts it. */}
 
         {activeLayers.has("grid") && !cinematic && (
           <GridLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} palette={palette} />

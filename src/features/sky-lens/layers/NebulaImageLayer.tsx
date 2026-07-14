@@ -2,6 +2,7 @@ import React from "react";
 import { StyleSheet } from "react-native";
 import Svg, { Circle, Defs, G, Path, RadialGradient, Stop } from "react-native-svg";
 import type { HorizontalNebula } from "../ephemeris/Nebulae";
+import type { SelectedObject } from "../SkyLensVisual";
 import {
   projectTarget,
   type CameraFov,
@@ -16,81 +17,130 @@ type Props = {
   box: OverlayBox;
   visible: boolean;
   fullSphere?: boolean;
+  onSelect?: (object: SelectedObject) => void;
 };
+
+// ─────────────────────────────────────────────────────────────────────────────
+// THE ONE NEBULA RENDERER.
+//
+// Sky Lens used to run TWO nebula renderers over the same objects at the same time:
+// this layer, and the procedural NebulaLayer inside SkyLensCanvas. Both were gated on
+// the same `deepsky` key, so every nebula was drawn twice — doubling the opacity and
+// muddying the colour. NebulaLayer's visible artwork is now retired (SkyLensCanvas);
+// this file is the single source of nebula imagery.
+//
+// It also renders ONLY curated hero nebulae. The deep-sky catalog is 38 objects — 12
+// star clusters and 9 galaxies among them — and the old renderer painted every one of
+// them as a glowing emission cloud. The Beehive is not a nebula; Andromeda is not a
+// nebula. They get no cloud artwork here.
+// ─────────────────────────────────────────────────────────────────────────────
+
+// Only these objects ever get cloud artwork. Curated, recognisable, and every one of
+// them genuinely IS a nebula (emission / reflection / planetary / supernova remnant).
+const HERO_NEBULA_IDS = new Set([
+  "m42", // Orion
+  "ngc2237", // Rosette
+  "m1", // Crab
+  "ngc7000", // North America
+  "ngc6960", // Veil
+  "m27", // Dumbbell
+  "m57", // Ring
+  "m8", // Lagoon
+  "m20", // Trifid
+  "m16", // Eagle
+  "ngc3372", // Carina
+  "m17", // Swan / Omega
+]);
+
+// Belt-and-braces: even inside the allowlist, refuse to paint a cloud over anything the
+// catalog classes as a cluster or a galaxy. If someone adds "m45" to the list above by
+// mistake, this stops the Pleiades becoming a pink cloud.
+const CLOUD_TYPES = new Set(["emission", "reflection", "planetary", "supernova"]);
 
 type ArtDirection = {
   scale: number;
   warm: string;
   cool: string;
   core: string;
-  haze: string; // wide lilac/violet outer breath — the "watercolour" that sells depth
+  haze: string;
   rotation: number;
   elongated?: boolean;
 };
 
-// SIZE DISCIPLINE IS LOCKED. Every `scale` below, the 16–34px clamp, and the veil
-// extents are UNCHANGED from the restrained pass. The former oversized look combined
-// large scales, a 34–68px clamp and 2× outer paths, and several nebulae dominated the
-// view — we are not going back.
-//
-// This pass adds LUMINOSITY and DETAIL inside that same footprint: a third (lilac)
-// haze gradient, a finer inner veil, richer gradient stops, and a softer silhouette.
-// Brighter and more refined, not one pixel bigger.
+// PALETTE — dusty rose, mauve, violet, indigo, icy blue, teal, amber, silver. No neon,
+// no electric magenta, no saturated cyan, no black.
+const ROSE = "#F2AEC2";
+const PINK = "#F58AB0";
+const VIOLET = "#9A7DE2";
+const INDIGO = "#6F76D9";
+const CYAN = "#7CCFE0";
+const TEAL = "#66C7C1";
+const AMBER = "#E8A36A";
+const SILVER = "#EAF1FF";
+const CREAM = "#FFF0D8";
+
+// SIZE. `scale` multiplies the catalog radius, then a hard clamp bounds the result, then
+// a screen-relative cap bounds it again (see MAX_OUTER_FRAC). Three independent ceilings,
+// so no object can run away regardless of its catalog entry or the FOV.
 const ART: Record<string, ArtDirection> = {
-  m42: { scale: 1.55, warm: "#F36BAE", cool: "#719FFF", core: "#FFF4DE", haze: "#B98CF0", rotation: -18 },
-  ngc2237: { scale: 1.35, warm: "#F06DAD", cool: "#9B79FF", core: "#FFE7F5", haze: "#A97BEE", rotation: 8 },
-  m1: { scale: 1.2, warm: "#EA8A68", cool: "#62BDD6", core: "#FFF1CE", haze: "#8FA6E8", rotation: 28, elongated: true },
-  ngc3372: { scale: 1.55, warm: "#F18A62", cool: "#55BED3", core: "#FFF0C9", haze: "#9E9AE6", rotation: -12 },
-  m8: { scale: 1.5, warm: "#F06C9F", cool: "#65ACEE", core: "#FFF0D8", haze: "#AE8AF0", rotation: 14, elongated: true },
-  m20: { scale: 1.35, warm: "#EC5FA0", cool: "#69AEFA", core: "#FFF5E8", haze: "#B287F2", rotation: -8 },
-  m16: { scale: 1.25, warm: "#DB7D72", cool: "#739BE8", core: "#FFE9C8", haze: "#9B92E4", rotation: 18 },
-  m17: { scale: 1.25, warm: "#F17F98", cool: "#6AB2F0", core: "#FFF0D6", haze: "#A88EEE", rotation: -28, elongated: true },
-  ngc7000: { scale: 1.4, warm: "#EC708F", cool: "#60C1D1", core: "#FFE6D8", haze: "#8FA0E8", rotation: 20, elongated: true },
-  m27: { scale: 1.15, warm: "#66D0BA", cool: "#7399F5", core: "#F1FFF8", haze: "#7FB6E8", rotation: 35, elongated: true },
-  m57: { scale: 1.05, warm: "#DE6CAB", cool: "#5CC4D0", core: "#F5FFF2", haze: "#96A8EA", rotation: 0 },
-  ngc6960: { scale: 1.4, warm: "#EC7AA0", cool: "#61C4E0", core: "#EFFFFF", haze: "#8FB2EE", rotation: -34, elongated: true },
+  m42: { scale: 1.1, warm: ROSE, cool: "#8FB6FF", core: CREAM, haze: VIOLET, rotation: -18 },
+  ngc2237: { scale: 0.9, warm: ROSE, cool: VIOLET, core: "#FFE7F5", haze: "#B08AD8", rotation: 8 },
+  m1: { scale: 0.72, warm: AMBER, cool: TEAL, core: CREAM, haze: INDIGO, rotation: 28, elongated: true },
+  ngc3372: { scale: 1.0, warm: AMBER, cool: TEAL, core: CREAM, haze: VIOLET, rotation: -12 },
+  m8: { scale: 1.0, warm: ROSE, cool: INDIGO, core: CREAM, haze: VIOLET, rotation: 14, elongated: true },
+  m20: { scale: 0.82, warm: PINK, cool: INDIGO, core: "#FFF5E8", haze: VIOLET, rotation: -8 },
+  m16: { scale: 0.82, warm: AMBER, cool: VIOLET, core: "#FFE9C8", haze: INDIGO, rotation: 18 },
+  m17: { scale: 0.78, warm: PINK, cool: VIOLET, core: "#FFF0D6", haze: INDIGO, rotation: -28, elongated: true },
+  ngc7000: { scale: 1.0, warm: ROSE, cool: CYAN, core: "#FFE6D8", haze: INDIGO, rotation: 20, elongated: true },
+  m27: { scale: 0.7, warm: TEAL, cool: "#9FC7F0", core: SILVER, haze: INDIGO, rotation: 35, elongated: true },
+  m57: { scale: 0.58, warm: TEAL, cool: "#B8A6E8", core: SILVER, haze: VIOLET, rotation: 0 },
+  ngc6960: { scale: 0.95, warm: CYAN, cool: VIOLET, core: SILVER, haze: INDIGO, rotation: -34, elongated: true },
 };
 
-// Prefer the most recognisable hero objects, then fill any remaining slot with the
-// closest-to-centre object. This prevents a wall of overlapping clouds.
-const HERO_PRIORITY = ["m42", "m8", "ngc3372", "ngc7000", "ngc6960", "ngc2237", "m20"];
-const MAX_VISIBLE_NEBULAE = 3;
+// Curated billing order — which object wins a slot when several are on screen.
+const HERO_PRIORITY = ["m42", "m8", "ngc3372", "ngc7000", "ngc6960", "ngc2237", "m20", "m16", "m17", "m1", "m27", "m57"];
 
-// Per-rank luminosity. The best object on screen shines; its companions recede. Three
-// equally-bright clouds read as a sticker sheet — one bright cloud with two quiet
-// companions reads as a composition.
-const HERO_FALLOFF = [0.94, 0.74, 0.58];
+// TWO. Not three. A sky with one luminous hero and one quiet companion reads as a
+// composition; a sky with several competing clouds reads as a sticker sheet.
+const MAX_VISIBLE_NEBULAE = 2;
 
+// Group opacity per rank. Low-to-medium: these sit INSIDE the sky, not on top of it.
+const HERO_FALLOFF = [0.62, 0.42];
+
+const MIN_BASE = 14;
+const MAX_BASE = 30;
+// The outermost veil is 1.5 × base, and no nebula may exceed ~18% of the screen width.
+// That bounds the drawn diameter, so a wide FOV or a fat catalog radius can't produce a
+// screen-filling blob.
+const MAX_OUTER_FRAC = 0.09; // × box.width, as a RADIUS
+const OUTER_VEIL = 1.5;
+
+// UI EXCLUSION ZONES. Measured against the real chrome (top HUD ≈ 150px, bottom tray +
+// shutter ≈ 240px), not guessed. A nebula whose centre lands under the controls is
+// dropped outright rather than drawn beneath them.
+const UI_TOP = 150;
+const UI_BOTTOM = 240;
+// The shutter/camera control sits bottom-right; keep clouds off it.
+const SHUTTER_W = 150;
+const SHUTTER_H = 230;
+
+// Smooth, high-point organic silhouette. 28 control points and three low-frequency
+// lobe harmonics — no corners, no polygon. (The retired NebulaLayer built its blobs from
+// NINE points, which is exactly why they read as angular.)
 function cloudPath(cx: number, cy: number, rx: number, ry: number, seed: number): string {
   const count = 28;
   const points: Array<[number, number]> = [];
   for (let i = 0; i < count; i += 1) {
     const angle = (i / count) * Math.PI * 2;
-
-    // FINE irregularity — high-frequency crinkle along the edge. Feathering, not shape.
     const fine =
       ((Math.sin(seed * 17.17 + i * 9.73) + 1) / 2) * 0.05 +
       ((Math.sin(seed * 5.31 + i * 23.9) + 1) / 2) * 0.02;
-
-    // LOBES — the fix for "still reads as a soft glowing circle". Low-frequency harmonics
-    // with seeded phases make one flank bulge while another pinches, the way a real
-    // emission cloud does. Fine wobble alone only ever produces a crinkly CIRCLE. THREE
-    // harmonics now (2-, 3- and 5-lobed) at ~1.6× the previous amplitude: enough that no
-    // two nebulae share a silhouette and none of them reads as round.
     const lobes =
       Math.cos(angle * 2 + seed * 1.7) * 0.11 +
       Math.cos(angle * 3 - seed * 0.9) * 0.07 +
       Math.cos(angle * 5 + seed * 2.3) * 0.04;
-
-    // Base pulled 0.90 → 0.88 to PAY for the bigger lobes. Mean radius ≈ 0.915, BELOW the
-    // previous pass's ≈0.945 and the pass before that's ≈0.97. Each round of this has
-    // made them more irregular and very slightly smaller — never bigger.
     const wobble = 0.88 + fine + lobes;
-
-    points.push([
-      cx + Math.cos(angle) * rx * wobble,
-      cy + Math.sin(angle) * ry * wobble,
-    ]);
+    points.push([cx + Math.cos(angle) * rx * wobble, cy + Math.sin(angle) * ry * wobble]);
   }
   const mid = (a: number, b: number): [number, number] => [
     (points[a][0] + points[b][0]) / 2,
@@ -105,19 +155,28 @@ function cloudPath(cx: number, cy: number, rx: number, ry: number, seed: number)
   return `${d} Z`;
 }
 
-export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props) {
-  if (!visible) return null;
+export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSphere = false, onSelect }: Props) {
+  if (!visible || box.width <= 0 || box.height <= 0) return null;
+
+  const maxOuter = box.width * MAX_OUTER_FRAC;
 
   const candidates = nebulae
-    // Normal Sky Lens viewing never paints objects below the astronomical horizon.
-    .filter((nebula) => nebula.aboveHorizon && ART[nebula.id])
+    .filter((nebula) => {
+      if (!HERO_NEBULA_IDS.has(nebula.id)) return false; // curated heroes only
+      if (!ART[nebula.id]) return false;
+      if (!CLOUD_TYPES.has(nebula.type)) return false; // never a cluster or a galaxy
+      // HORIZON RULE. Strict: at or below the horizon, nothing is painted. No permissive
+      // -20° grace band — an object at altitude −10° is under the ground.
+      if (!fullSphere && nebula.altitudeDegrees <= 0) return false;
+      return true;
+    })
     .map((nebula, index) => {
       const projected = projectTarget(pointing, nebula.azimuthDegrees, nebula.altitudeDegrees, fov, box);
       if (projected.behind || !projected.onScreen) return null;
 
-      // Keep decorative artwork away from the top HUD and bottom control tray. The object
-      // remains available through the projected deep-sky layer when it moves into view.
-      if (projected.y < 112 || projected.y > box.height - 188) return null;
+      // UI exclusion zones — drop, don't draw-under.
+      if (projected.y < UI_TOP || projected.y > box.height - UI_BOTTOM) return null;
+      if (projected.x > box.width - SHUTTER_W && projected.y > box.height - SHUTTER_H) return null;
 
       const priorityIndex = HERO_PRIORITY.indexOf(nebula.id);
       const centreDistance = Math.hypot(projected.x - box.width / 2, projected.y - box.height / 2);
@@ -125,6 +184,7 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props
         nebula,
         projected,
         index,
+        // Curated billing first, then nearest-to-centre.
         rank: priorityIndex >= 0 ? priorityIndex * 10_000 + centreDistance : 100_000 + centreDistance,
       };
     })
@@ -135,94 +195,105 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props
   if (candidates.length === 0) return null;
 
   return (
-    <Svg pointerEvents="none" width={box.width} height={box.height} style={StyleSheet.absoluteFillObject}>
+    // box-none, not none: the clouds themselves ignore touches, but the hit targets below
+    // stay tappable (this layer inherited nebula selection when NebulaLayer was retired).
+    <Svg pointerEvents="box-none" width={box.width} height={box.height} style={StyleSheet.absoluteFillObject}>
       {candidates.map(({ nebula, projected, index }, rank) => {
         const art = ART[nebula.id];
-        // UNCHANGED — the size contract. Do not widen this clamp.
-        const base = Math.max(16, Math.min(34, nebula.radius * art.scale));
+
+        // THREE size ceilings, applied in order.
+        const scaled = nebula.radius * art.scale;
+        const clamped = Math.max(MIN_BASE, Math.min(MAX_BASE, scaled));
+        // …and finally: the outermost veil may never exceed MAX_OUTER_FRAC of the width.
+        const base = Math.min(clamped, maxOuter / OUTER_VEIL);
+
         const rx = art.elongated ? base * 1.36 : base;
         const ry = art.elongated ? base * 0.62 : base * 0.84;
         const seed = index + nebula.id.length * 13;
-        const warmId = `nebula-warm-${nebula.id}`;
-        const coolId = `nebula-cool-${nebula.id}`;
-        const coreId = `nebula-core-${nebula.id}`;
-        const hazeId = `nebula-haze-${nebula.id}`;
+        const warmId = `neb-warm-${nebula.id}`;
+        const coolId = `neb-cool-${nebula.id}`;
+        const coreId = `neb-core-${nebula.id}`;
+        const hazeId = `neb-haze-${nebula.id}`;
         const rotation = `rotate(${art.rotation} ${projected.x.toFixed(1)} ${projected.y.toFixed(1)})`;
 
         return (
-          // ONLY A FEW REALLY SHINE. `candidates` is already sorted by hero priority, so
-          // rank 0 is the best object on screen. Fading each subsequent one gives the
-          // composition a clear protagonist instead of three equal glowing shapes
-          // competing — the difference between a scene and a sticker sheet.
-          <G key={nebula.id} transform={rotation} opacity={HERO_FALLOFF[rank] ?? 0.6}>
-            <Defs>
-              <RadialGradient id={warmId} cx="48%" cy="48%" r="52%">
-                <Stop offset="0%" stopColor={art.core} stopOpacity={0.6} />
-                <Stop offset="20%" stopColor={art.warm} stopOpacity={0.58} />
-                <Stop offset="46%" stopColor={art.warm} stopOpacity={0.34} />
-                <Stop offset="72%" stopColor={art.warm} stopOpacity={0.12} />
-                <Stop offset="100%" stopColor={art.warm} stopOpacity={0} />
-              </RadialGradient>
-              <RadialGradient id={coolId} cx="48%" cy="48%" r="52%">
-                <Stop offset="0%" stopColor="#EDF6FF" stopOpacity={0.4} />
-                <Stop offset="28%" stopColor={art.cool} stopOpacity={0.5} />
-                <Stop offset="56%" stopColor={art.cool} stopOpacity={0.28} />
-                <Stop offset="80%" stopColor={art.cool} stopOpacity={0.09} />
-                <Stop offset="100%" stopColor={art.cool} stopOpacity={0} />
-              </RadialGradient>
-              {/* The lilac breath. Wide, extremely faint, and it never reaches full
-                  opacity even at its centre — this is what turns two-tone gradients into
-                  something that reads as watercolour rather than airbrush. */}
-              <RadialGradient id={hazeId} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor={art.haze} stopOpacity={0.2} />
-                <Stop offset="45%" stopColor={art.haze} stopOpacity={0.12} />
-                <Stop offset="100%" stopColor={art.haze} stopOpacity={0} />
-              </RadialGradient>
-              {/* Core softened AGAIN (white 0.30 → 0.20, no pure-white plateau at all).
-                  Nebulae are the DIFFUSE tier of the glow hierarchy — they must never have
-                  a crisp core, because that's what bright stars have. A nebula's centre is
-                  a swell of light, not a bead. Still no dark centre — the punched-out
-                  middle is never coming back. */}
-              <RadialGradient id={coreId} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.2} />
-                <Stop offset="28%" stopColor={art.core} stopOpacity={0.16} />
-                <Stop offset="62%" stopColor={art.core} stopOpacity={0.07} />
-                <Stop offset="100%" stopColor={art.core} stopOpacity={0} />
-              </RadialGradient>
-            </Defs>
+          <G key={nebula.id}>
+            <G transform={rotation} opacity={HERO_FALLOFF[rank] ?? 0.42} pointerEvents="none">
+              <Defs>
+                {/* Restrained stops — translucent mist over the Milky Way, never a solid
+                    painted patch. Every gradient fades fully to zero. */}
+                <RadialGradient id={warmId} cx="48%" cy="48%" r="52%">
+                  <Stop offset="0%" stopColor={art.warm} stopOpacity={0.32} />
+                  <Stop offset="45%" stopColor={art.warm} stopOpacity={0.16} />
+                  <Stop offset="80%" stopColor={art.warm} stopOpacity={0.04} />
+                  <Stop offset="100%" stopColor={art.warm} stopOpacity={0} />
+                </RadialGradient>
+                <RadialGradient id={coolId} cx="48%" cy="48%" r="52%">
+                  <Stop offset="0%" stopColor={art.cool} stopOpacity={0.28} />
+                  <Stop offset="45%" stopColor={art.cool} stopOpacity={0.14} />
+                  <Stop offset="80%" stopColor={art.cool} stopOpacity={0.03} />
+                  <Stop offset="100%" stopColor={art.cool} stopOpacity={0} />
+                </RadialGradient>
+                <RadialGradient id={hazeId} cx="50%" cy="50%" r="50%">
+                  <Stop offset="0%" stopColor={art.haze} stopOpacity={0.16} />
+                  <Stop offset="50%" stopColor={art.haze} stopOpacity={0.09} />
+                  <Stop offset="100%" stopColor={art.haze} stopOpacity={0} />
+                </RadialGradient>
+                {/* Soft core. No white plateau, and emphatically NO dark oval stamp — the
+                    centre is a diffuse swell of light, nothing else. */}
+                <RadialGradient id={coreId} cx="50%" cy="50%" r="50%">
+                  <Stop offset="0%" stopColor={art.core} stopOpacity={0.42} />
+                  <Stop offset="30%" stopColor={art.core} stopOpacity={0.22} />
+                  <Stop offset="70%" stopColor={art.core} stopOpacity={0.07} />
+                  <Stop offset="100%" stopColor={art.core} stopOpacity={0} />
+                </RadialGradient>
+              </Defs>
 
-            {/* Translucent, offset veils feather the edge — no hard outer cutout. The
-                EXTENTS (1.52 / 1.24 / 0.88 / 0.7) are unchanged; only the light is. */}
-            <Path d={cloudPath(projected.x, projected.y, rx * 1.52, ry * 1.52, seed)} fill={`url(#${hazeId})`} opacity={0.5} />
-            <Path d={cloudPath(projected.x, projected.y, rx * 1.52, ry * 1.52, seed)} fill={`url(#${coolId})`} opacity={0.38} />
-            <Path d={cloudPath(projected.x - rx * 0.2, projected.y + ry * 0.06, rx * 1.24, ry * 1.12, seed + 3)} fill={`url(#${warmId})`} opacity={0.6} />
-            <Path d={cloudPath(projected.x + rx * 0.28, projected.y - ry * 0.2, rx * 0.88, ry * 0.86, seed + 7)} fill={`url(#${coolId})`} opacity={0.56} />
-            <Path d={cloudPath(projected.x + rx * 0.08, projected.y + ry * 0.26, rx * 0.7, ry * 0.62, seed + 11)} fill={`url(#${warmId})`} opacity={0.52} />
-            {/* Inner veil — pure detail, well inside the existing silhouette. It adds the
-                internal structure that separates "astrophotograph" from "painted blob",
-                and cannot enlarge the object. */}
-            <Path d={cloudPath(projected.x - rx * 0.12, projected.y - ry * 0.1, rx * 0.46, ry * 0.44, seed + 17)} fill={`url(#${coolId})`} opacity={0.44} />
+              {/* Outer haze → warm lobes → cool lobes → core. Overlapping feathered veils,
+                  each offset, so the silhouette has no single hard boundary. 11 elements. */}
+              <Path d={cloudPath(projected.x, projected.y, rx * OUTER_VEIL, ry * OUTER_VEIL, seed)} fill={`url(#${hazeId})`} />
+              <Path d={cloudPath(projected.x - rx * 0.2, projected.y + ry * 0.06, rx * 1.22, ry * 1.1, seed + 3)} fill={`url(#${warmId})`} />
+              <Path d={cloudPath(projected.x + rx * 0.28, projected.y - ry * 0.2, rx * 0.88, ry * 0.86, seed + 7)} fill={`url(#${coolId})`} />
+              <Path d={cloudPath(projected.x + rx * 0.08, projected.y + ry * 0.26, rx * 0.7, ry * 0.62, seed + 11)} fill={`url(#${warmId})`} />
+              <Path d={cloudPath(projected.x - rx * 0.12, projected.y - ry * 0.1, rx * 0.46, ry * 0.44, seed + 17)} fill={`url(#${coolId})`} />
 
-            {/* INTERNAL COLOUR VARIATION — five off-centre tint pools (rose, lilac, blue)
-                at varied radii, well inside the silhouette. Without these, a nebula is one
-                gradient blending two colours, which always reads as airbrush. Real clouds
-                are patchy: a rose flank, a lilac hollow, a cold blue edge. Low opacity and
-                small radii — felt as richness, never seen as blobs. Two more than last pass,
-                deliberately uneven in size so no symmetry creeps back in. */}
-            <Circle cx={projected.x - rx * 0.3} cy={projected.y - ry * 0.22} r={base * 0.32} fill={art.warm} opacity={0.17} />
-            <Circle cx={projected.x + rx * 0.26} cy={projected.y + ry * 0.3} r={base * 0.24} fill={art.haze} opacity={0.16} />
-            <Circle cx={projected.x + rx * 0.34} cy={projected.y - ry * 0.3} r={base * 0.2} fill={art.cool} opacity={0.15} />
-            <Circle cx={projected.x - rx * 0.12} cy={projected.y + ry * 0.36} r={base * 0.17} fill={art.cool} opacity={0.12} />
-            <Circle cx={projected.x + rx * 0.05} cy={projected.y - ry * 0.1} r={base * 0.27} fill={art.haze} opacity={0.1} />
+              {/* Internal colour variation — uneven tint pools, well inside the silhouette. */}
+              <Circle cx={projected.x - rx * 0.3} cy={projected.y - ry * 0.22} r={base * 0.3} fill={art.warm} opacity={0.1} />
+              <Circle cx={projected.x + rx * 0.26} cy={projected.y + ry * 0.3} r={base * 0.24} fill={art.haze} opacity={0.09} />
+              <Circle cx={projected.x + rx * 0.32} cy={projected.y - ry * 0.28} r={base * 0.2} fill={art.cool} opacity={0.09} />
 
-            {/* No dark oval/dust stamp. The centre is only a quiet, diffuse glow. */}
-            <Circle cx={projected.x} cy={projected.y} r={Math.max(7, base * 0.3)} fill={`url(#${coreId})`} />
-            {/* Embedded stars — the trick that makes a nebula read as a real object in a
-                real star field instead of a decal floating on top of one. */}
-            <Circle cx={projected.x - base * 0.18} cy={projected.y + base * 0.08} r={1.1} fill="#FFFDF5" opacity={0.8} />
-            <Circle cx={projected.x + base * 0.22} cy={projected.y - base * 0.13} r={0.8} fill="#EAF4FF" opacity={0.74} />
-            <Circle cx={projected.x + base * 0.05} cy={projected.y + base * 0.24} r={0.7} fill="#FFF6E2" opacity={0.6} />
-            <Circle cx={projected.x - base * 0.3} cy={projected.y - base * 0.2} r={0.6} fill="#F2F8FF" opacity={0.52} />
+              <Circle cx={projected.x} cy={projected.y} r={Math.max(6, base * 0.3)} fill={`url(#${coreId})`} />
+
+              {/* Embedded stars — what ties the cloud into the star field instead of
+                  floating it on top. Kept crisp so stars stay legible over the mist. */}
+              <Circle cx={projected.x - base * 0.18} cy={projected.y + base * 0.08} r={0.9} fill="#FFFDF5" opacity={0.75} />
+              <Circle cx={projected.x + base * 0.22} cy={projected.y - base * 0.13} r={0.7} fill={SILVER} opacity={0.66} />
+            </G>
+
+            {/* Hit target → info card. Nebula selection used to live in NebulaLayer; it
+                moves here so retiring that layer doesn't cost the user the tap. */}
+            {onSelect && (
+              <Circle
+                cx={projected.x}
+                cy={projected.y}
+                r={Math.max(base * 0.8, 22)}
+                fill="transparent"
+                onPress={() =>
+                  onSelect({
+                    kind: "nebula",
+                    id: nebula.id,
+                    name: nebula.name,
+                    subtitle: `${nebula.catalog} · Nebula`,
+                    facts: [
+                      { label: "Distance", value: nebula.distanceLy },
+                      { label: "Constellation", value: nebula.constellation },
+                      { label: "Azimuth", value: `${Math.round(nebula.azimuthDegrees)}°` },
+                      { label: "Altitude", value: `${Math.round(nebula.altitudeDegrees)}°` },
+                    ],
+                  })
+                }
+              />
+            )}
           </G>
         );
       })}

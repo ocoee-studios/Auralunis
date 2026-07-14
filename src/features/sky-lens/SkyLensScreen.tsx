@@ -94,9 +94,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Time Scrub: when the scrub bar is dragged, freeze the sky to the offset instant.
   const [timeOffsetMin, setTimeOffsetMin] = useState(0);
   const [scrubVisible, setScrubVisible] = useState(false);
-  // The analytical overlays (Nebulae / Zodiac / Grid / Satellites / Ecliptic) moved off
-  // the bottom bar and into a sheet. Opening it changes nothing about what is rendered —
-  // every one of them still starts OFF.
+  // The secondary overlays live in a sheet, not on the bottom bar. Nebulae is the one
+  // that ships ON (it's part of the default beauty set now — max 2 curated heroes at low
+  // opacity); Zodiac / Grid / Satellites / Ecliptic all still start OFF and stay off
+  // until the user asks for them.
   const [layersSheet, setLayersSheet] = useState(false);
   const observerTime = useMemo(
     () => (timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000)),
@@ -773,13 +774,18 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             visible={planetarium && !nightMode && active.has("milkyway")}
           />
 
+          {/* THE nebula renderer. `fullSphere={false}` — normal viewing is horizon-correct,
+              so nothing below the horizon is ever painted, matching every other layer.
+              (It used to receive `planetarium` here, which is permanently true, meaning
+              below-horizon nebulae would have been drawn into the visible sky.) */}
           <NebulaImageLayer
             nebulae={sky.nebulae}
             pointing={pointing}
             fov={fov}
             box={box}
             visible={!nightMode && active.has("deepsky")}
-            fullSphere={planetarium}
+            fullSphere={false}
+            onSelect={setSelected}
           />
 
           {/* Ambient atmosphere: breathing sky bloom, above the background and below the

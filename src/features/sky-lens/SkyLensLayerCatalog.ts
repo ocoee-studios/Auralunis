@@ -34,7 +34,7 @@ export const SKY_LENS_LAYERS: ReadonlyArray<LayerDef> = [
   { key: "constellations", label: "Constellations", icon: "◎", premium: false, available: true, defaultOn: true, primary: true },
   { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true, primary: true },
   { key: "planets", label: "Planets", icon: "●", premium: false, available: true, defaultOn: true, primary: true },
-  { key: "deepsky", label: "Nebulae", icon: "✦", premium: false, available: true, defaultOn: false, primary: false, description: "Emission clouds and deep-sky jewels" },
+  { key: "deepsky", label: "Nebulae", icon: "✦", premium: false, available: true, defaultOn: true, primary: false, description: "Emission clouds and deep-sky jewels" },
   { key: "zodiac", label: "Zodiac", icon: "♈", premium: false, available: true, defaultOn: false, primary: false, description: "The twelve signs along the ecliptic" },
   { key: "grid", label: "Grid", icon: "#", premium: false, available: true, defaultOn: false, primary: false, description: "Altitude and azimuth reference lines" },
   { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: true, defaultOn: false, primary: false, description: "Live-tracked spacecraft overhead" },

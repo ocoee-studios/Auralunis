@@ -21,13 +21,21 @@ type Props = {
 // behind one quiet "Layers" button (SkyLensLayersSheet). No ScrollView, nothing clipped,
 // nothing hidden off-screen. The row fits, always.
 //
-// This moved the CONTROLS only. It did not turn anything on: the five secondary layers
-// still default to OFF and stay off until the user opens the sheet and asks.
+// Nebulae is a secondary layer that ships ON — it's part of the default beauty set (max 2
+// curated heroes, low opacity), but its CONTROL lives in the sheet rather than earning a
+// fifth pill. Zodiac / Grid / Satellites / Ecliptic remain off until the user asks.
 export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: Props) {
   const accent = nightMode ? "#B64A4A" : AuraLunisColors.gold;
 
   // A quiet count so the button reveals that overlays are live without shouting.
-  const activeExtras = SECONDARY_LAYERS.filter((def) => active.has(def.key)).length;
+  //
+  // Counts only overlays the USER turned on — layers that ship on by default (Nebulae)
+  // are excluded, or the badge would read "1" on a fresh launch and imply the user had
+  // changed something they hadn't. The badge answers "what did I switch on?", not "what
+  // is rendering?".
+  const activeExtras = SECONDARY_LAYERS.filter(
+    (def) => !def.defaultOn && active.has(def.key)
+  ).length;
 
   return (
     <View style={styles.shell} pointerEvents="box-none">
