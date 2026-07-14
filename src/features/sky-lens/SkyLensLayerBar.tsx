@@ -67,6 +67,12 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
         })}
       </ScrollView>
 
+      {/* A fixed hairline divider gives the Layers button a CONSISTENT relationship to the
+          scrolling pills, whatever the slack. Without it the button floated a variable
+          distance from Planets depending on how much room the row had left — the "spacing
+          and alignment" wobble. This is a fixed structural seam, not a margin. */}
+      <View style={styles.divider} />
+
       {/* Pinned — outside the scroller, so it is always reachable and can never be the
           half-cut sliver at the screen edge that started all this. */}
       <TouchableOpacity
@@ -120,30 +126,33 @@ const styles = StyleSheet.create({
   scroller: { flex: 1 },
   scrollContent: {
     alignItems: "center",
-    paddingLeft: 8,
-    // Trailing breath so the LAST pill (Planets) can always scroll fully clear of the
-    // pinned Layers button instead of dying half-cut against it.
-    paddingRight: 10,
-    gap: 5,
+    paddingLeft: 6,
+    paddingRight: 6,
+    gap: 4,
   },
   pill: {
     flexDirection: "row",
     alignItems: "center",
     height: 36,
-    // 9 → 8 → 7. Measured: at padding 8 with a 10.5pt label the four pills + the pinned
-    // Layers button needed ~446pt on a 430pt screen, so Planets died at the edge. This
-    // (with fontSize 10) brings it to ~428pt — it fits, with the ScrollView still there
-    // as the safety net if a device's font metrics run wider than my estimate.
-    paddingHorizontal: 7,
+    // Measured on a 430pt screen: four pills + divider + Layers = ~419pt, ~12pt of real
+    // slack. The ScrollView remains the safety net if a device's font metrics run wider.
+    paddingHorizontal: 6,
     borderRadius: 18,
     borderWidth: 1,
     backgroundColor: "rgba(5,13,29,0.38)",
   },
-  // Square-ish icon button, not a text pill — ~38pt instead of ~88pt.
+  // A fixed seam between the scrolling pills and the Layers button — always the same
+  // width, so the Layers button sits in a consistent place instead of drifting with slack.
+  divider: {
+    width: StyleSheet.hairlineWidth,
+    height: 24,
+    marginHorizontal: 5,
+    backgroundColor: "rgba(217,168,78,0.2)",
+  },
+  // Square-ish icon button, not a text pill — ~38pt instead of ~88pt. Fixed width so the
+  // badge appearing/disappearing can't shift it.
   layersPill: {
-    marginLeft: 4,
-    minWidth: 38,
-    paddingHorizontal: 8,
+    width: 40,
     justifyContent: "center",
     backgroundColor: "rgba(5,13,29,0.62)",
   },

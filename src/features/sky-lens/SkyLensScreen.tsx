@@ -56,7 +56,7 @@ import { TimeScrubBar } from "./TimeScrubBar";
 import { TargetPulse } from "./TargetPulse";
 import { HeroSpotlight } from "./HeroSpotlight";
 import { DEFAULT_ACTIVE_LAYERS, SKY_LENS_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
-import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
+import { projectTarget, DEFAULT_FOV, type CameraPointing } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { getVisualGate } from "./PremiumVisualGating";
 
@@ -90,7 +90,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Ramp EMA smoothing DOWN (steadier, more damped) as zoom climbs, because a
   // narrow FOV amplifies hand-shake: ~0.32 at 1× → 0.10 at 12×.
   const smoothAlpha = Math.max(0.1, 0.32 - (zoom - 1) * 0.02);
-  const { pointing, available } = useDevicePointing(120, 0, smoothAlpha);
+  const { pointing: sensorPointing, available } = useDevicePointing(120, 0, smoothAlpha);
   const parallax = useParallaxOffset();
   // Time Scrub: when the scrub bar is dragged, freeze the sky to the offset instant.
   const [timeOffsetMin, setTimeOffsetMin] = useState(0);
@@ -138,11 +138,37 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // dark rounded bar with a slider in it) routinely mistaken for the time-travel panel.
   // It is a set-once control; it does not deserve permanent residency over the sky.
   const [brightnessVisible, setBrightnessVisible] = useState(false);
-  const observerTime = useMemo(
-    () => (timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000)),
-    [timeOffsetMin]
-  );
+  // ── DETERMINISTIC REVIEW MODE (dev + no compass only) ─────────────────────────
+  //
+  // The whole review loop has been broken: a simulator has no magnetometer, so `available`
+  // is false and the sky freezes at a meaningless heading. That made Orion impossible to
+  // inspect anywhere except by physically hunting for it with a real phone — which is not
+  // a testing process, it's a scavenger hunt.
+  //
+  // So when a DEV build finds no compass (i.e. a simulator), we stop pretending to point
+  // and instead aim deliberately: fix the clock to a night when Orion is high, and aim the
+  // camera straight at M42. The scene becomes reproducible, screenshot-able, and diffable.
+  //
+  // This can NEVER fire on a real device: `available` is true the moment a magnetometer
+  // reports, and __DEV__ is false in release. Production behaviour is untouched.
+  const reviewMode = __DEV__ && !available;
+  // Orion high in the south (matches scripts/orion-selftest.js exactly).
+  const REVIEW_TIME = useMemo(() => new Date("2026-01-15T22:00:00-08:00"), []);
+
+  const observerTime = useMemo(() => {
+    if (reviewMode) return REVIEW_TIME;
+    return timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000);
+  }, [reviewMode, REVIEW_TIME, timeOffsetMin]);
   const sky = useSkyData(location, undefined, observerTime);
+
+  // Aim at the review target, so it lands dead centre.
+  const REVIEW_TARGET = "m42";
+  const pointing = useMemo<CameraPointing>(() => {
+    if (!reviewMode) return sensorPointing;
+    const t = sky.nebulae.find((n) => n.id === REVIEW_TARGET);
+    if (!t) return sensorPointing;
+    return { azimuthDegrees: t.azimuthDegrees, altitudeDegrees: t.altitudeDegrees, rollDegrees: 0 };
+  }, [reviewMode, sensorPointing, sky.nebulae]);
 
   // Photo capture — captureScreen grabs the full rendered screen including SVG
   const sceneRef = useRef<View>(null);
