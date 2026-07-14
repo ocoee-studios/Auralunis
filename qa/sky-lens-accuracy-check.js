@@ -1,11 +1,12 @@
 const fs = require("fs");
 const path = require("path");
 
+// Only the accuracy scaffolding that actually ships. SkyLensMath / SkyLensMockTargets /
+// SkyLensAccuracyRunner were planned but never built (absent on main and every branch);
+// requiring them made this audit fail on unrelated commits. SkyLensAccuracyTypes.ts is
+// real (imported by useSkyProjection) and stays.
 const required = [
   "src/features/sky-lens/accuracy/SkyLensAccuracyTypes.ts",
-  "src/features/sky-lens/accuracy/SkyLensMath.ts",
-  "src/features/sky-lens/accuracy/SkyLensMockTargets.ts",
-  "src/features/sky-lens/accuracy/SkyLensAccuracyRunner.ts",
   "docs/SKY_LENS_ACCURACY_PLAN.md",
   "qa/SKY_LENS_DEVICE_QA_CHECKLIST.md"
 ];

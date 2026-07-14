@@ -38,21 +38,19 @@ check(
   "RevenueCat iOS public key placeholder",
   Boolean(app.expo.extra && app.expo.extra.revenueCatIosApiKey)
 );
-check(
-  "RevenueCat Android public key placeholder",
-  Boolean(app.expo.extra && app.expo.extra.revenueCatAndroidApiKey)
-);
+// (No Android RevenueCat key check — AuraLunis ships iOS-only; app.json carries only the
+// iOS key. Requiring an Android key audited a platform the app doesn't target.)
 
+// The pricing was migrated off the old `chronaura` Horizon/Aura/Sovereign product model
+// to the shipped AuraLunis Premium model. Assert the REAL product IDs + entitlement that
+// live in MonetizationCatalog.ts today (CLAUDE.md: premium monthly/annual + founders
+// lifetime, all unlocking one entitlement). This audits the pricing that ships — it does
+// not change it.
 for (const term of [
-  "com.ocoee.chronaura.horizon.monthly",
-  "com.ocoee.chronaura.horizon.annual",
-  "com.ocoee.chronaura.aura.monthly",
-  "com.ocoee.chronaura.aura.annual",
-  "com.ocoee.chronaura.sovereign.annual",
-  "horizon_plus",
-  "aura_pro",
-  "sovereign",
-  "chronaura_launch"
+  "com.ocoeestudios.auralunis.premium.monthly",
+  "com.ocoeestudios.auralunis.premium.annual",
+  "com.ocoeestudios.auralunis.lifetime",
+  "AuraLunis Premium"
 ]) {
   check(`catalog: ${term}`, catalog.includes(term));
 }
@@ -68,27 +66,13 @@ for (const term of [
   check(`RevenueCat service: ${term}`, service.includes(term));
 }
 
-check("paywall copy: Horizon free option", paywall.includes("Continue with Horizon Free"));
-check(
-  "paywall copy: trial eligibility",
-  paywall.includes("SEVEN_DAY_TRIAL_COPY") || paywall.includes("7-day")
-);
-check(
-  "paywall copy: Sovereign labeled Coming Later",
-  catalog.includes('"Waitlist · Coming Later"')
-);
+// Real three-tier paywall: Monthly, Annual, Lifetime, plus Restore Purchases. (The old
+// "Horizon Free / Aura Pro / Sovereign Coming Later" tier gating belonged to the retired
+// chronaura model and is no longer part of the shipped paywall.)
+check("paywall copy: Monthly tier", paywall.includes("Monthly"));
+check("paywall copy: Annual tier", paywall.includes("Annual"));
+check("paywall copy: Lifetime tier", paywall.includes("Lifetime"));
 check("paywall copy: Restore Purchases", paywall.includes("Restore Purchases"));
-
-check(
-  "Aura Pro launch purchase disabled",
-  catalog.includes('tierId: "aura_pro"') &&
-    catalog.includes('"COMING LATER"')
-);
-check(
-  "Sovereign launch purchase disabled",
-  catalog.includes('tierId: "sovereign"') &&
-    catalog.includes('availableAtLaunch: false')
-);
 
 console.log("");
 console.log(`RevenueCat preflight: ${passes.length} pass, ${failures.length} fail.`);

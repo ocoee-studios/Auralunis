@@ -97,8 +97,12 @@ check("image-backed nebula layer is wired", skyLens.includes("NebulaImageLayer")
 check("aurora curtain visual bands stay disabled", skyLens.includes("visible={false}") && skyLens.includes("intensity={0}"));
 
 const nebulaLayer = read("src/features/sky-lens/layers/NebulaImageLayer.tsx");
+// Nebulae are now PROCEDURAL (an `ART` record of SVG art directions), not PNG assets.
+// The whole project direction moved off image "stickers" to restrained procedural
+// clouds, so the old `${id}: require(...png)` expectation is obsolete. Verify each hero
+// still has an art-direction entry instead.
 for (const id of ["m42", "m8", "m16", "ngc3372", "ngc7000", "m17", "m20", "ngc2237", "m27", "m57", "m1", "ngc6960"]) {
-  check(`nebula image mapping: ${id}`, nebulaLayer.includes(`${id}: require(`));
+  check(`nebula art mapping: ${id}`, nebulaLayer.includes(`${id}: { scale`));
 }
 
 const birthSky = read("src/screens/BirthSkyScreen.tsx");
@@ -145,7 +149,9 @@ check("haptics cannot block FeatureCard action", featureCard.includes("selection
 
 const shell = read("src/components/ScreenShell.tsx");
 check("ScreenShell respects safe area", shell.includes("useSafeAreaInsets") && shell.includes("insets.top"));
-check("theme gradient tuple is preserved", shell.includes("colors={palette.gradient}"));
+// The real usage casts the tuple: `colors={palette.gradient as unknown as ...}`. Match
+// the prefix, not an exact `}`, so the (correct) cast does not fail this check.
+check("theme gradient tuple is preserved", shell.includes("colors={palette.gradient"));
 
 const appConfig = JSON.parse(read("app.json"));
 check("app version is launch version or newer", /^\d+\.\d+\.\d+$/.test(appConfig.expo.version) && appConfig.expo.version !== "0.1.0", appConfig.expo.version);
