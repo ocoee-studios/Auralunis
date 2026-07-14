@@ -43,13 +43,15 @@ type Props = {
   gate?: VisualGateConfig;
   photographicCore?: boolean;
   fullSphere?: boolean;
+  /** Height of the bottom control dock (px). Labels are kept out of it. */
+  bottomInset?: number;
   onSelect: (object: SelectedObject) => void;
 };
 
 // Composes the enabled celestial layers over the cinematic sky. The presentation may
 // look like a planetarium, but normal viewing remains horizon-correct: objects beneath
 // the observer are never painted into the visible sky.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, bottomInset = 120, onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
   const vg = gate ?? getVisualGate(isPremium);
   const horizonCorrect = false;
@@ -62,9 +64,11 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
   }, [sky.domeStars, domeStarMultiplier]);
 
   const showLabels = !cinematic;
-  // Safe margins keep every label clear of the top HUD and the bottom four-pill control
-  // tray, instead of labels sliding underneath the controls at the edges of the field.
-  const placeLabel = makeLabelPlacer(box, { top: 108, bottom: 176 });
+  // Safe margins keep every label clear of the top HUD and the bottom control dock. The
+  // bottom figure is now DERIVED from the dock the screen actually rendered (it shrinks
+  // when brightness/time-travel are collapsed), rather than a fixed 176 that assumed the
+  // tall stack — so compacting the UI genuinely hands the reclaimed space back to labels.
+  const placeLabel = makeLabelPlacer(box, { top: 108, bottom: bottomInset });
   const depth = (d: number) => `translate(${(parallax.x * d).toFixed(2)} ${(parallax.y * d).toFixed(2)})`;
   const constellations = sky.constellations;
 

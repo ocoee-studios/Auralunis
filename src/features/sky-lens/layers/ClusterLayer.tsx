@@ -17,6 +17,8 @@ type Props = {
   box: OverlayBox;
   visible: boolean;
   fullSphere?: boolean;
+  /** Height of the bottom control dock (px) — artwork centred inside it is dropped. */
+  uiBottom?: number;
   onSelect?: (object: SelectedObject) => void;
 };
 
@@ -62,7 +64,6 @@ const MAX_VISIBLE_CLUSTERS = 2;
 // Same UI exclusion zones as the nebula layer — a cluster centred under the HUD or the
 // bottom tray is dropped, not drawn beneath them.
 const UI_TOP = 150;
-const UI_BOTTOM = 240;
 const SHUTTER_W = 150;
 const SHUTTER_H = 230;
 
@@ -108,7 +109,7 @@ const SWARMS: Record<string, Dot[]> = Object.fromEntries(
   HERO_CLUSTER_IDS.map((id) => [id, buildSwarm(id)])
 );
 
-export function ClusterLayer({ nebulae, pointing, fov, box, visible, fullSphere = false, onSelect }: Props) {
+export function ClusterLayer({ nebulae, pointing, fov, box, visible, fullSphere = false, uiBottom = 120, onSelect }: Props) {
   if (!visible || box.width <= 0 || box.height <= 0) return null;
 
   const candidates = nebulae
@@ -122,7 +123,7 @@ export function ClusterLayer({ nebulae, pointing, fov, box, visible, fullSphere 
     .map((n) => {
       const p = projectTarget(pointing, n.azimuthDegrees, n.altitudeDegrees, fov, box);
       if (p.behind || !p.onScreen) return null;
-      if (p.y < UI_TOP || p.y > box.height - UI_BOTTOM) return null;
+      if (p.y < UI_TOP || p.y > box.height - uiBottom) return null;
       if (p.x > box.width - SHUTTER_W && p.y > box.height - SHUTTER_H) return null;
 
       const priority = HERO_CLUSTER_IDS.indexOf(n.id);

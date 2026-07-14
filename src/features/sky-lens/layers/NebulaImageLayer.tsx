@@ -17,6 +17,8 @@ type Props = {
   box: OverlayBox;
   visible: boolean;
   fullSphere?: boolean;
+  /** Height of the bottom control dock (px) — artwork centred inside it is dropped. */
+  uiBottom?: number;
   onSelect?: (object: SelectedObject) => void;
 };
 
@@ -119,7 +121,6 @@ const OUTER_VEIL = 1.5;
 // shutter ≈ 240px), not guessed. A nebula whose centre lands under the controls is
 // dropped outright rather than drawn beneath them.
 const UI_TOP = 150;
-const UI_BOTTOM = 240;
 // The shutter/camera control sits bottom-right; keep clouds off it.
 const SHUTTER_W = 150;
 const SHUTTER_H = 230;
@@ -155,7 +156,7 @@ function cloudPath(cx: number, cy: number, rx: number, ry: number, seed: number)
   return `${d} Z`;
 }
 
-export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSphere = false, onSelect }: Props) {
+export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSphere = false, uiBottom = 120, onSelect }: Props) {
   if (!visible || box.width <= 0 || box.height <= 0) return null;
 
   const maxOuter = box.width * MAX_OUTER_FRAC;
@@ -175,7 +176,7 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSph
       if (projected.behind || !projected.onScreen) return null;
 
       // UI exclusion zones — drop, don't draw-under.
-      if (projected.y < UI_TOP || projected.y > box.height - UI_BOTTOM) return null;
+      if (projected.y < UI_TOP || projected.y > box.height - uiBottom) return null;
       if (projected.x > box.width - SHUTTER_W && projected.y > box.height - SHUTTER_H) return null;
 
       const priorityIndex = HERO_PRIORITY.indexOf(nebula.id);

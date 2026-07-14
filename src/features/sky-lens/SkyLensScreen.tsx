@@ -47,7 +47,7 @@ import { LunarGodRayLayer } from "./layers/LunarGodRayLayer";
 import { OrbitalGhostTrailsLayer } from "./layers/OrbitalGhostTrailsLayer";
 import { AuroraCurtainLayer } from "./layers/AuroraCurtainLayer";
 import { ConstellationForgeLayer, type ForgePoint, type ForgeSegment } from "./layers/ConstellationForgeLayer";
-import { SkyLensLayerBar } from "./SkyLensLayerBar";
+import { SkyLensLayerBar, LAYER_BAR_HEIGHT } from "./SkyLensLayerBar";
 import { SkyLensLayersSheet } from "./SkyLensLayersSheet";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
@@ -100,6 +100,11 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // opacity); Zodiac / Grid / Satellites / Ecliptic all still start OFF and stay off
   // until the user asks for them.
   const [layersSheet, setLayersSheet] = useState(false);
+  // Sky brightness lives behind a top-bar button now. It used to be a permanently-mounted
+  // slider bar sitting directly above the pills — 62pt of chrome, always on, and (being a
+  // dark rounded bar with a slider in it) routinely mistaken for the time-travel panel.
+  // It is a set-once control; it does not deserve permanent residency over the sky.
+  const [brightnessVisible, setBrightnessVisible] = useState(false);
   const observerTime = useMemo(
     () => (timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000)),
     [timeOffsetMin]
@@ -595,6 +600,24 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
+  // ── THE DOCK ────────────────────────────────────────────────────────────────────
+  // One number, derived from what is actually mounted. Everything that must sit clear of
+  // the bottom chrome — the Moon prompt, the shutter, and the LABEL EXCLUSION ZONE — is
+  // computed from this, so nothing can drift out of sync with a magic constant again.
+  // (The old code hard-coded `bottom: insets.bottom + 168/175` for the shutter and the
+  // Moon prompt, numbers that assumed a layout which no longer exists.)
+  const BRIGHTNESS_H = 62; // slider bar + its margin, when expanded
+  const SCRUB_H = 70;      // time-travel panel, when expanded
+  const dockHeight =
+    LAYER_BAR_HEIGHT +
+    6 +
+    (brightnessVisible && !selected ? BRIGHTNESS_H : 0) +
+    (scrubVisible && !selected ? SCRUB_H : 0);
+  // Top edge of the bottom chrome, in screen px — the exclusion line for labels/artwork.
+  const dockTop = box.height - dockHeight - insets.bottom - 12;
+  // Where floating controls perch: just above the dock, never on top of it.
+  const floatAbove = insets.bottom + dockHeight + 16;
+
   // Hero Object Spotlight: reverse-map the selected object's id to its LIVE az/alt
   // (one place, no per-layer wiring), then project it so the spotlight dims the
   // field around whatever you've focused and tracks it as you pan.
@@ -786,6 +809,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             box={box}
             visible={!nightMode && active.has("deepsky")}
             fullSphere={false}
+            uiBottom={box.height - dockTop}
             onSelect={setSelected}
           />
 
@@ -799,6 +823,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             box={box}
             visible={!nightMode && active.has("deepsky")}
             fullSphere={false}
+            uiBottom={box.height - dockTop}
             onSelect={setSelected}
           />
 
@@ -892,6 +917,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               satellites={satellites}
               cinematic={cinematic}
               fullSphere={planetarium}
+              bottomInset={box.height - dockTop}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>
@@ -993,6 +1019,15 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
         <View style={styles.toggleRow} pointerEvents="box-none">
           <TouchableOpacity
+            style={[styles.iconBtn, brightnessVisible && { backgroundColor: "rgba(217,168,78,0.32)" }]}
+            onPress={() => setBrightnessVisible((v) => !v)}
+            accessibilityRole="button"
+            accessibilityLabel="Sky brightness"
+            activeOpacity={0.8}
+          >
+            <Text style={styles.iconBtnText}>☀</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
             style={[styles.iconBtn, scrubVisible && { backgroundColor: "rgba(217,168,78,0.32)" }]}
             onPress={() => {
               // Time Travel (scrubbing the sky through time) is premium — free users get
@@ -1022,13 +1057,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
       {/* Find-Mode target banner (from a Learn lesson) takes priority */}
       {!cinematic && !selected && targetFinder && (
-        <View style={[styles.finder, { bottom: insets.bottom + 175 }]} pointerEvents="none">
+        <View style={[styles.finder, { bottom: floatAbove + 52 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{targetFinder}</Text>
         </View>
       )}
       {/* Moon finder banner (hidden while an info card is open or a target is set) */}
       {!cinematic && !selected && !targetFinder && moonFinder && (
-        <View style={[styles.finder, { bottom: insets.bottom + 175 }]} pointerEvents="none">
+        <View style={[styles.finder, { bottom: floatAbove + 52 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{moonFinder}</Text>
         </View>
       )}
@@ -1037,7 +1072,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           Premium only (gate.photoCapture). */}
       {!cinematic && !selected && gate.photoCapture && (
         <TouchableOpacity
-          style={[styles.shutterBtn, { bottom: insets.bottom + 168, borderColor: accent }]}
+          style={[styles.shutterBtn, { bottom: floatAbove, borderColor: accent }]}
           onPress={captureSky}
           disabled={capturing}
           activeOpacity={0.8}
@@ -1051,7 +1086,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       <View style={[styles.bottom, { paddingBottom: insets.bottom + 6 }]} pointerEvents="box-none">
         {/* Sky brightness — slide to lighten/darken the backdrop. Hidden while an info
             card is open so they don't overlap. */}
-        {!selected && (
+        {brightnessVisible && !selected && (
           <View style={styles.skySliderWrap}>
             <Text style={styles.skySliderLabel}>☾ Dark</Text>
             <Slider
@@ -1116,7 +1151,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       {preview?.phase === "prompt" && (
         <Pressable style={StyleSheet.absoluteFill} onPress={() => { endPreview(); openPaywall(); }}>
           <Animated.View style={[StyleSheet.absoluteFill, styles.previewScrim, { opacity: previewFade }]} pointerEvents="none" />
-          <Animated.View style={[styles.previewPrompt, { bottom: insets.bottom + 132, opacity: previewFade }]} pointerEvents="none">
+          <Animated.View style={[styles.previewPrompt, { bottom: floatAbove + 8, opacity: previewFade }]} pointerEvents="none">
             <Text style={styles.previewTitle}>✦ Unlock the living universe</Text>
             <Text style={styles.previewSub}>Tap to see {preview.label} like never before</Text>
           </Animated.View>
