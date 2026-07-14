@@ -37,6 +37,7 @@ import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
 import { SolidSkyBackgroundLayer } from "./SolidSkyBackgroundLayer";
 import { NebulaImageLayer } from "./layers/NebulaImageLayer";
+import { ClusterLayer } from "./layers/ClusterLayer";
 import { SkyVignette } from "./SkyVignette";
 import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
 import { AstralBreathingLayer } from "./layers/AstralBreathingLayer";
@@ -779,6 +780,19 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               (It used to receive `planetarium` here, which is permanently true, meaning
               below-horizon nebulae would have been drawn into the visible sky.) */}
           <NebulaImageLayer
+            nebulae={sky.nebulae}
+            pointing={pointing}
+            fov={fov}
+            box={box}
+            visible={!nightMode && active.has("deepsky")}
+            fullSphere={false}
+            onSelect={setSelected}
+          />
+
+          {/* Star clusters, rendered as STARS — a swarm of individual suns, not a cloud.
+              Disjoint from NebulaImageLayer's object set (clusters vs emission heroes),
+              so no object is ever drawn by two renderers. Galaxies stay unrendered. */}
+          <ClusterLayer
             nebulae={sky.nebulae}
             pointing={pointing}
             fov={fov}
