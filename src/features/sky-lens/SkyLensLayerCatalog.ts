@@ -21,18 +21,24 @@ export interface LayerDef {
   premium: boolean;
   available: boolean;
   defaultOn: boolean;
+  /** One-line explanation, shown in the Layers sheet. Primary layers don't need one. */
+  description?: string;
+  // PRIMARY = the beauty set. These four earn a permanent pill on the main screen and
+  // are the default scene. Everything else is an ANALYTICAL overlay, reachable through
+  // the "Layers" sheet — present, but never cluttering the sky you open into.
+  primary: boolean;
 }
 
 export const SKY_LENS_LAYERS: ReadonlyArray<LayerDef> = [
-  { key: "stars", label: "Stars", icon: "☆", premium: false, available: true, defaultOn: true },
-  { key: "constellations", label: "Constellations", icon: "◎", premium: false, available: true, defaultOn: true },
-  { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true },
-  { key: "planets", label: "Planets", icon: "●", premium: false, available: true, defaultOn: true },
-  { key: "deepsky", label: "Nebulae", icon: "✦", premium: false, available: true, defaultOn: false },
-  { key: "zodiac", label: "Zodiac", icon: "♈", premium: false, available: true, defaultOn: false },
-  { key: "grid", label: "Grid", icon: "#", premium: false, available: true, defaultOn: false },
-  { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: true, defaultOn: false },
-  { key: "ecliptic", label: "Ecliptic", icon: "~", premium: true, available: true, defaultOn: false }
+  { key: "stars", label: "Stars", icon: "☆", premium: false, available: true, defaultOn: true, primary: true },
+  { key: "constellations", label: "Constellations", icon: "◎", premium: false, available: true, defaultOn: true, primary: true },
+  { key: "milkyway", label: "Milky Way", icon: "☁", premium: false, available: true, defaultOn: true, primary: true },
+  { key: "planets", label: "Planets", icon: "●", premium: false, available: true, defaultOn: true, primary: true },
+  { key: "deepsky", label: "Nebulae", icon: "✦", premium: false, available: true, defaultOn: false, primary: false, description: "Emission clouds and deep-sky jewels" },
+  { key: "zodiac", label: "Zodiac", icon: "♈", premium: false, available: true, defaultOn: false, primary: false, description: "The twelve signs along the ecliptic" },
+  { key: "grid", label: "Grid", icon: "#", premium: false, available: true, defaultOn: false, primary: false, description: "Altitude and azimuth reference lines" },
+  { key: "satellites", label: "Satellites", icon: "◈", premium: true, available: true, defaultOn: false, primary: false, description: "Live-tracked spacecraft overhead" },
+  { key: "ecliptic", label: "Ecliptic", icon: "~", premium: true, available: true, defaultOn: false, primary: false, description: "The Sun's path across the sky" }
 ];
 
 export const FREE_CONSTELLATION_IDS: ReadonlyArray<string> = [
@@ -43,3 +49,8 @@ export const FREE_CONSTELLATION_IDS: ReadonlyArray<string> = [
 export const DEFAULT_ACTIVE_LAYERS: LayerKey[] = SKY_LENS_LAYERS.filter((layer) => layer.defaultOn).map(
   (layer) => layer.key
 );
+
+/** The four pills on the main screen. */
+export const PRIMARY_LAYERS: ReadonlyArray<LayerDef> = SKY_LENS_LAYERS.filter((l) => l.primary);
+/** The analytical overlays, reachable through the "Layers" sheet. */
+export const SECONDARY_LAYERS: ReadonlyArray<LayerDef> = SKY_LENS_LAYERS.filter((l) => !l.primary);

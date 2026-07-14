@@ -1,69 +1,87 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AuraLunisColors } from "@/theme/tokens";
-import { SKY_LENS_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
+import { PRIMARY_LAYERS, SECONDARY_LAYERS, type LayerKey } from "./SkyLensLayerCatalog";
 
 type Props = {
   active: Set<LayerKey>;
-  isPremium: boolean;
   nightMode: boolean;
   onToggle: (key: LayerKey) => void;
-  onLockedPress: (def: LayerDef) => void;
+  onOpenLayers: () => void;
 };
 
-export function SkyLensLayerBar({ active, isPremium, nightMode, onToggle, onLockedPress }: Props) {
+// THE BOTTOM BAR IS NOW THE BEAUTY SET, AND NOTHING ELSE.
+//
+// It used to be a horizontally-scrolling strip of all NINE layers. Two things were wrong
+// with that: the fifth pill sat permanently half-cut at the screen edge (so the very
+// first thing under a beautiful sky was a chopped-off technical control), and the strip
+// gave equal billing to "Milky Way" and "Ecliptic" — which are not equal.
+//
+// Now: the four beauty layers get permanent pills, and every analytical overlay lives
+// behind one quiet "Layers" button (SkyLensLayersSheet). No ScrollView, nothing clipped,
+// nothing hidden off-screen. The row fits, always.
+//
+// This moved the CONTROLS only. It did not turn anything on: the five secondary layers
+// still default to OFF and stay off until the user opens the sheet and asks.
+export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: Props) {
   const accent = nightMode ? "#B64A4A" : AuraLunisColors.gold;
+
+  // A quiet count so the button reveals that overlays are live without shouting.
+  const activeExtras = SECONDARY_LAYERS.filter((def) => active.has(def.key)).length;
 
   return (
     <View style={styles.shell} pointerEvents="box-none">
-      <ScrollView
-        horizontal
-        style={styles.scroller}
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.bar}
-        keyboardShouldPersistTaps="handled"
-        pointerEvents="box-none"
-        bounces={false}
-        alwaysBounceHorizontal={false}
-        decelerationRate="fast"
-      >
-        {SKY_LENS_LAYERS.map((def, index) => {
-          const locked = def.premium && !isPremium;
-          const comingSoon = !def.available;
-          const on = active.has(def.key) && def.available;
-
+      <View style={styles.bar}>
+        {PRIMARY_LAYERS.map((def) => {
+          const on = active.has(def.key);
           return (
             <TouchableOpacity
               key={def.key}
               activeOpacity={0.82}
               accessibilityRole="button"
               accessibilityState={{ selected: on }}
-              accessibilityLabel={`${def.label} layer${comingSoon ? ", coming soon" : on ? ", on" : ", off"}`}
-              onPress={() => {
-                if (comingSoon || locked) onLockedPress(def);
-                else onToggle(def.key);
-              }}
+              accessibilityLabel={`${def.label} layer, ${on ? "on" : "off"}`}
+              onPress={() => onToggle(def.key)}
               style={[
                 styles.pill,
-                index === 4 && styles.secondGroup,
                 { borderColor: on ? accent : "rgba(217,168,78,0.22)" },
                 on && { backgroundColor: accent },
-                comingSoon && styles.pillDim,
               ]}
             >
               <Text style={[styles.icon, on && styles.iconOn]}>{def.icon}</Text>
               <Text style={[styles.label, on && styles.labelOn]} numberOfLines={1}>
                 {def.label}
               </Text>
-              {comingSoon ? (
-                <Text style={styles.lock}> ◷</Text>
-              ) : locked && !on ? (
-                <Text style={[styles.lock, { color: accent }]}> ✦</Text>
-              ) : null}
             </TouchableOpacity>
           );
         })}
-      </ScrollView>
+
+        <View style={styles.divider} />
+
+        <TouchableOpacity
+          activeOpacity={0.82}
+          accessibilityRole="button"
+          accessibilityLabel={
+            activeExtras > 0 ? `Layers, ${activeExtras} overlays on` : "Layers, more overlays"
+          }
+          onPress={onOpenLayers}
+          style={[
+            styles.pill,
+            styles.layersPill,
+            { borderColor: activeExtras > 0 ? accent : "rgba(217,168,78,0.22)" },
+          ]}
+        >
+          <Text style={[styles.icon, activeExtras > 0 && { color: accent }]}>⋮</Text>
+          <Text style={styles.label} numberOfLines={1}>
+            Layers
+          </Text>
+          {activeExtras > 0 && (
+            <View style={[styles.badge, { backgroundColor: accent }]}>
+              <Text style={styles.badgeText}>{activeExtras}</Text>
+            </View>
+          )}
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -73,8 +91,7 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     marginHorizontal: 8,
     borderRadius: 24,
-    // Softened with the rest of the chrome: a lighter bar with a hairline edge and a
-    // wider, gentler shadow reads as a floating glass tray instead of a dark slab.
+    // Glass tray, not a dark slab (matches the lightened HUD chrome).
     backgroundColor: "rgba(2,8,20,0.52)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(217,168,78,0.13)",
@@ -84,15 +101,16 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     overflow: "hidden",
   },
-  scroller: {
-    width: "100%",
-    flexGrow: 0,
-  },
+  // Wraps to a second line on narrow phones rather than clipping or scrolling — the old
+  // bar's cardinal sin was hiding a control off the edge of the screen.
   bar: {
-    paddingHorizontal: 12,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 10,
     paddingVertical: 8,
     gap: 6,
-    alignItems: "center",
   },
   pill: {
     flexDirection: "row",
@@ -104,11 +122,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: "rgba(5,13,29,0.38)",
   },
-  // Leave a deliberate clean gutter after the four primary controls. This prevents
-  // the fifth pill from appearing as a chopped gold sliver at rest, while a swipe still
-  // reveals the remaining layers.
-  secondGroup: { marginLeft: 26 },
-  pillDim: { opacity: 0.5 },
+  layersPill: { backgroundColor: "rgba(5,13,29,0.55)" },
+  // A hairline breath between the beauty set and the way into everything else.
+  divider: {
+    width: StyleSheet.hairlineWidth,
+    height: 22,
+    backgroundColor: "rgba(231,236,248,0.14)",
+    marginHorizontal: 3,
+  },
   icon: { color: "rgba(231,236,248,0.8)", fontSize: 11, marginRight: 4 },
   iconOn: { color: "#030816" },
   label: {
@@ -118,5 +139,18 @@ const styles = StyleSheet.create({
     letterSpacing: 0.1,
   },
   labelOn: { color: "#030816", fontWeight: "900" },
-  lock: { color: "rgba(231,236,248,0.72)", fontSize: 9, fontWeight: "800" },
+  badge: {
+    marginLeft: 5,
+    minWidth: 15,
+    height: 15,
+    borderRadius: 7.5,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 3,
+  },
+  badgeText: {
+    color: "#030816",
+    fontSize: 9,
+    fontWeight: "900",
+  },
 });

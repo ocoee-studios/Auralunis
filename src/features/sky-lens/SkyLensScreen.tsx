@@ -47,6 +47,7 @@ import { OrbitalGhostTrailsLayer } from "./layers/OrbitalGhostTrailsLayer";
 import { AuroraCurtainLayer } from "./layers/AuroraCurtainLayer";
 import { ConstellationForgeLayer, type ForgePoint, type ForgeSegment } from "./layers/ConstellationForgeLayer";
 import { SkyLensLayerBar } from "./SkyLensLayerBar";
+import { SkyLensLayersSheet } from "./SkyLensLayersSheet";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
@@ -93,6 +94,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Time Scrub: when the scrub bar is dragged, freeze the sky to the offset instant.
   const [timeOffsetMin, setTimeOffsetMin] = useState(0);
   const [scrubVisible, setScrubVisible] = useState(false);
+  // The analytical overlays (Nebulae / Zodiac / Grid / Satellites / Ecliptic) moved off
+  // the bottom bar and into a sheet. Opening it changes nothing about what is rendered —
+  // every one of them still starts OFF.
+  const [layersSheet, setLayersSheet] = useState(false);
   const observerTime = useMemo(
     () => (timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000)),
     [timeOffsetMin]
@@ -1060,14 +1065,31 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         ) : (
           <SkyLensLayerBar
             active={active}
-            isPremium={isPremium}
             nightMode={nightMode}
             onToggle={toggleLayer}
-            onLockedPress={onLockedPress}
+            onOpenLayers={() => setLayersSheet(true)}
           />
         )}
       </View>
       )}
+
+      {/* The analytical overlays. Off the sky, one tap away. */}
+      <SkyLensLayersSheet
+        visible={layersSheet}
+        active={active}
+        isPremium={isPremium}
+        nightMode={nightMode}
+        onToggle={toggleLayer}
+        onLockedPress={(def) => {
+          // The locked-layer flow PREVIEWS the premium layer on the live sky for ~2s and
+          // then raises the paywall prompt. That whole moment happens behind this modal,
+          // so the sheet has to get out of the way first or the user would just see a
+          // dimmed sheet and no sky.
+          setLayersSheet(false);
+          onLockedPress(def);
+        }}
+        onClose={() => setLayersSheet(false)}
+      />
 
       {/* THE CONVERSION MOMENT — after a 2s preview of the premium beauty, the scene
           gently fades and the unlock prompt rises. Tap anywhere on it → the paywall. */}
