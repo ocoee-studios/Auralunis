@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Modal, Pressable, StyleSheet, Text, View } from "react-native";
 import { AuraLunisColors } from "@/theme/tokens";
 import { SECONDARY_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
@@ -34,10 +34,35 @@ export function SkyLensLayersSheet({
 }: Props) {
   const accent = nightMode ? "#B64A4A" : AuraLunisColors.gold;
 
+  // ── INPUT GUARD ───────────────────────────────────────────────────────────────
+  // A tap that lands while the sheet is still animating in should NOT flip a switch.
+  // This is not hypothetical: while driving the simulator I toggled Zodiac, Grid,
+  // Satellites and Ecliptic on entirely by accident, and the result was pixel-for-pixel
+  // the "cluttered default" bug we spent a round chasing. A stray tap must never be able
+  // to silently reconfigure the sky.
+  //
+  // The sheet stays DISARMED for 300ms after it becomes visible, and re-disarms the moment
+  // it closes, so the press that opened it (or a press landing mid-animation) is swallowed.
+  const [armed, setArmed] = useState(false);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (timer.current) clearTimeout(timer.current);
+    if (!visible) {
+      setArmed(false);
+      return;
+    }
+    setArmed(false);
+    timer.current = setTimeout(() => setArmed(true), 300);
+    return () => {
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, [visible]);
+
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       {/* Tap anywhere off the sheet to dismiss — the sky stays visible behind it. */}
-      <Pressable style={styles.scrim} onPress={onClose}>
+      <Pressable style={styles.scrim} onPress={() => { if (armed) onClose(); }}>
         <Pressable style={styles.sheet} onPress={(e) => e.stopPropagation()}>
           <View style={styles.grabber} />
 
@@ -56,7 +81,11 @@ export function SkyLensLayersSheet({
                   accessibilityRole="switch"
                   accessibilityState={{ checked: on, disabled: comingSoon }}
                   accessibilityLabel={`${def.label}${comingSoon ? ", coming soon" : on ? ", on" : ", off"}`}
+                  // Only a deliberate press on the row itself toggles. Blank space between
+                  // rows belongs to the sheet body, which does nothing.
+                  hitSlop={{ top: 2, bottom: 2, left: 6, right: 6 }}
                   onPress={() => {
+                    if (!armed) return; // still animating in — swallow the stray tap
                     if (comingSoon || locked) onLockedPress(def);
                     else onToggle(def.key);
                   }}
@@ -103,7 +132,10 @@ export function SkyLensLayersSheet({
 
           <Pressable
             accessibilityRole="button"
-            onPress={onClose}
+            onPress={() => {
+              if (!armed) return;
+              onClose();
+            }}
             style={({ pressed }) => [styles.done, pressed && { opacity: 0.7 }]}
           >
             <Text style={[styles.doneText, { color: accent }]}>Done</Text>

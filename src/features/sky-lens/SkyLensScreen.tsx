@@ -55,7 +55,7 @@ import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
 import { TimeScrubBar } from "./TimeScrubBar";
 import { TargetPulse } from "./TargetPulse";
 import { HeroSpotlight } from "./HeroSpotlight";
-import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
+import { DEFAULT_ACTIVE_LAYERS, SKY_LENS_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { getVisualGate } from "./PremiumVisualGating";
@@ -100,6 +100,39 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // opacity); Zodiac / Grid / Satellites / Ecliptic all still start OFF and stay off
   // until the user asks for them.
   const [layersSheet, setLayersSheet] = useState(false);
+
+  // DEV-ONLY COLD-START ASSERTION.
+  // We spent a round chasing a "cluttered default" that turned out to be four analytical
+  // overlays switched on by stray taps. This logs the ACTUAL layer state at mount, so a
+  // genuine cold-start anomaly (a real persistence path, say) is immediately obvious
+  // instead of being inferred from screenshots. Stripped in production; no UI impact.
+  const mountLogged = useRef(false);
+  useEffect(() => {
+    if (!__DEV__ || mountLogged.current) return;
+    mountLogged.current = true;
+    const analytical = SKY_LENS_LAYERS.filter((l) => !l.primary && !l.defaultOn);
+    const analyticalOn = analytical.filter((l) => active.has(l.key)).map((l) => l.key);
+    // eslint-disable-next-line no-console
+    console.log("[SkyLens] cold-start layer state", {
+      defaults: DEFAULT_ACTIVE_LAYERS,
+      activeNow: [...active],
+      analyticalOnCount: analyticalOn.length, // MUST be 0 on a clean launch
+      analyticalOn,
+      layersSheetOpen: layersSheet,           // MUST be false on a clean launch
+      scrubVisible,                            // MUST be false on a clean launch
+    });
+    if (analyticalOn.length > 0 || layersSheet || scrubVisible) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[SkyLens] UNEXPECTED cold-start state — analytical overlays / sheet / time panel " +
+          "should all start off. If this fires on a genuine fresh launch, there IS a " +
+          "persistence path and the 'stray tap' explanation is wrong.",
+        { analyticalOn, layersSheet, scrubVisible }
+      );
+    }
+    // Mount-only snapshot by design — deps intentionally empty.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   // Sky brightness lives behind a top-bar button now. It used to be a permanently-mounted
   // slider bar sitting directly above the pills — 62pt of chrome, always on, and (being a
   // dark rounded bar with a slider in it) routinely mistaken for the time-travel panel.
