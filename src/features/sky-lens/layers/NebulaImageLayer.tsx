@@ -1,6 +1,6 @@
-import React, { useMemo } from "react";
-import { StyleSheet, View } from "react-native";
-import Svg, { Circle, Defs, Ellipse, G, RadialGradient, Stop } from "react-native-svg";
+import React from "react";
+import { StyleSheet } from "react-native";
+import Svg, { Circle, Defs, Ellipse, G, Path, RadialGradient, Stop } from "react-native-svg";
 import type { HorizontalNebula } from "../ephemeris/Nebulae";
 import {
   projectTarget,
@@ -18,272 +18,123 @@ type Props = {
   fullSphere?: boolean;
 };
 
-type NebulaArt = {
+type ArtDirection = {
+  scale: number;
   warm: string;
   cool: string;
   core: string;
-  scale: number;
   rotation: number;
-  lobes: ReadonlyArray<{ x: number; y: number; rx: number; ry: number; tone: "warm" | "cool"; opacity: number }>;
-  lanes?: ReadonlyArray<{ x: number; y: number; rx: number; ry: number; rotation: number; opacity: number }>;
+  elongated?: boolean;
 };
 
-const ART: Record<string, NebulaArt> = {
-  m42: {
-    warm: "#F58AB0",
-    cool: "#79A7FF",
-    core: "#FFF1D6",
-    scale: 1.05,
-    rotation: -18,
-    lobes: [
-      { x: 0, y: 0.12, rx: 1.05, ry: 0.72, tone: "warm", opacity: 0.78 },
-      { x: -0.5, y: -0.35, rx: 0.74, ry: 0.52, tone: "cool", opacity: 0.6 },
-      { x: 0.48, y: 0.38, rx: 0.76, ry: 0.5, tone: "warm", opacity: 0.54 },
-    ],
-    lanes: [{ x: 0.18, y: -0.02, rx: 0.5, ry: 0.12, rotation: -24, opacity: 0.24 }],
-  },
-  m8: {
-    warm: "#F07A9C",
-    cool: "#63B7FF",
-    core: "#FFE5B8",
-    scale: 1.14,
-    rotation: 10,
-    lobes: [
-      { x: 0, y: 0, rx: 1.12, ry: 0.7, tone: "warm", opacity: 0.72 },
-      { x: 0.55, y: -0.24, rx: 0.62, ry: 0.42, tone: "cool", opacity: 0.42 },
-      { x: -0.5, y: 0.2, rx: 0.62, ry: 0.45, tone: "warm", opacity: 0.5 },
-    ],
-    lanes: [{ x: 0.04, y: 0, rx: 0.14, ry: 0.78, rotation: 12, opacity: 0.28 }],
-  },
-  m16: {
-    warm: "#E99A6E",
-    cool: "#7C9CF5",
-    core: "#FFE9B8",
-    scale: 0.98,
-    rotation: -8,
-    lobes: [
-      { x: 0, y: 0, rx: 0.92, ry: 0.76, tone: "warm", opacity: 0.7 },
-      { x: -0.42, y: -0.34, rx: 0.58, ry: 0.5, tone: "cool", opacity: 0.38 },
-      { x: 0.4, y: 0.34, rx: 0.58, ry: 0.48, tone: "warm", opacity: 0.48 },
-    ],
-    lanes: [
-      { x: -0.08, y: 0.22, rx: 0.1, ry: 0.54, rotation: -10, opacity: 0.3 },
-      { x: 0.16, y: 0.2, rx: 0.08, ry: 0.45, rotation: 9, opacity: 0.24 },
-    ],
-  },
-  ngc3372: {
-    warm: "#F3A064",
-    cool: "#5DBDD8",
-    core: "#FFF0C5",
-    scale: 1.28,
-    rotation: 22,
-    lobes: [
-      { x: 0, y: 0, rx: 1.1, ry: 0.82, tone: "warm", opacity: 0.64 },
-      { x: -0.52, y: -0.38, rx: 0.72, ry: 0.52, tone: "cool", opacity: 0.44 },
-      { x: 0.55, y: 0.34, rx: 0.76, ry: 0.54, tone: "warm", opacity: 0.5 },
-      { x: 0.08, y: -0.64, rx: 0.58, ry: 0.42, tone: "cool", opacity: 0.32 },
-    ],
-    lanes: [{ x: 0.08, y: 0.04, rx: 0.46, ry: 0.13, rotation: -32, opacity: 0.3 }],
-  },
-  ngc7000: {
-    warm: "#EF7F8E",
-    cool: "#5CB8D8",
-    core: "#FFD7BC",
-    scale: 1.18,
-    rotation: -12,
-    lobes: [
-      { x: 0, y: 0, rx: 1.08, ry: 0.78, tone: "warm", opacity: 0.54 },
-      { x: -0.52, y: -0.24, rx: 0.65, ry: 0.52, tone: "cool", opacity: 0.36 },
-      { x: 0.52, y: 0.28, rx: 0.7, ry: 0.48, tone: "warm", opacity: 0.42 },
-    ],
-  },
-  m17: {
-    warm: "#F68BBD",
-    cool: "#7B8BEF",
-    core: "#FFE7CC",
-    scale: 0.92,
-    rotation: -24,
-    lobes: [
-      { x: 0, y: 0, rx: 1.05, ry: 0.52, tone: "warm", opacity: 0.7 },
-      { x: -0.38, y: -0.3, rx: 0.64, ry: 0.42, tone: "cool", opacity: 0.38 },
-      { x: 0.48, y: 0.18, rx: 0.62, ry: 0.38, tone: "warm", opacity: 0.45 },
-    ],
-  },
-  m20: {
-    warm: "#F46FAD",
-    cool: "#68A9F4",
-    core: "#FFE9D8",
-    scale: 0.98,
-    rotation: 4,
-    lobes: [
-      { x: 0, y: 0.18, rx: 0.94, ry: 0.74, tone: "warm", opacity: 0.76 },
-      { x: 0, y: -0.62, rx: 0.72, ry: 0.48, tone: "cool", opacity: 0.62 },
-      { x: -0.48, y: 0.38, rx: 0.56, ry: 0.44, tone: "warm", opacity: 0.48 },
-      { x: 0.48, y: 0.38, rx: 0.56, ry: 0.44, tone: "warm", opacity: 0.48 },
-    ],
-    lanes: [
-      { x: 0, y: 0.1, rx: 0.09, ry: 0.72, rotation: 2, opacity: 0.32 },
-      { x: -0.22, y: 0.35, rx: 0.08, ry: 0.56, rotation: -42, opacity: 0.28 },
-      { x: 0.24, y: 0.35, rx: 0.08, ry: 0.56, rotation: 42, opacity: 0.28 },
-    ],
-  },
-  ngc2237: {
-    warm: "#F47DA5",
-    cool: "#8A77E8",
-    core: "#FFD9C9",
-    scale: 1.02,
-    rotation: 0,
-    lobes: [
-      { x: 0, y: 0, rx: 1, ry: 1, tone: "warm", opacity: 0.48 },
-      { x: -0.42, y: -0.22, rx: 0.56, ry: 0.52, tone: "cool", opacity: 0.28 },
-      { x: 0.44, y: 0.28, rx: 0.58, ry: 0.54, tone: "warm", opacity: 0.3 },
-    ],
-    lanes: [{ x: 0, y: 0, rx: 0.38, ry: 0.34, rotation: 0, opacity: 0.2 }],
-  },
-  m27: {
-    warm: "#54D3C4",
-    cool: "#7A8BFF",
-    core: "#E8FFF6",
-    scale: 0.72,
-    rotation: 24,
-    lobes: [
-      { x: -0.28, y: 0, rx: 0.72, ry: 0.56, tone: "cool", opacity: 0.56 },
-      { x: 0.28, y: 0, rx: 0.72, ry: 0.56, tone: "warm", opacity: 0.58 },
-    ],
-  },
-  m57: {
-    warm: "#E86AB6",
-    cool: "#66D2D2",
-    core: "#F7F4FF",
-    scale: 0.58,
-    rotation: 0,
-    lobes: [{ x: 0, y: 0, rx: 0.88, ry: 0.72, tone: "warm", opacity: 0.52 }],
-    lanes: [{ x: 0, y: 0, rx: 0.4, ry: 0.3, rotation: 0, opacity: 0.34 }],
-  },
-  m1: {
-    warm: "#F38B6B",
-    cool: "#58B7C9",
-    core: "#FFF0CF",
-    scale: 0.78,
-    rotation: -16,
-    lobes: [
-      { x: 0, y: 0, rx: 0.92, ry: 0.66, tone: "warm", opacity: 0.58 },
-      { x: -0.4, y: -0.26, rx: 0.56, ry: 0.44, tone: "cool", opacity: 0.36 },
-      { x: 0.42, y: 0.3, rx: 0.56, ry: 0.42, tone: "warm", opacity: 0.38 },
-    ],
-  },
-  ngc6960: {
-    warm: "#E76DB6",
-    cool: "#55C4D7",
-    core: "#EFFFFF",
-    scale: 1.05,
-    rotation: -32,
-    lobes: [
-      { x: -0.35, y: 0, rx: 1.15, ry: 0.18, tone: "cool", opacity: 0.44 },
-      { x: 0.3, y: 0.18, rx: 1.05, ry: 0.16, tone: "warm", opacity: 0.4 },
-      { x: 0.08, y: -0.22, rx: 0.78, ry: 0.12, tone: "cool", opacity: 0.3 },
-    ],
-  },
+const ART: Record<string, ArtDirection> = {
+  m42: { scale: 3.0, warm: "#F36BAE", cool: "#719FFF", core: "#FFF4DE", rotation: -18 },
+  ngc2237: { scale: 2.8, warm: "#F06DAD", cool: "#9B79FF", core: "#FFE7F5", rotation: 8 },
+  m1: { scale: 2.35, warm: "#EA8A68", cool: "#62BDD6", core: "#FFF1CE", rotation: 28, elongated: true },
+  ngc3372: { scale: 3.2, warm: "#F18A62", cool: "#55BED3", core: "#FFF0C9", rotation: -12 },
+  m8: { scale: 3.0, warm: "#F06C9F", cool: "#65ACEE", core: "#FFF0D8", rotation: 14, elongated: true },
+  m20: { scale: 2.8, warm: "#EC5FA0", cool: "#69AEFA", core: "#FFF5E8", rotation: -8 },
+  m16: { scale: 2.65, warm: "#DB7D72", cool: "#739BE8", core: "#FFE9C8", rotation: 18 },
+  m17: { scale: 2.65, warm: "#F17F98", cool: "#6AB2F0", core: "#FFF0D6", rotation: -28, elongated: true },
+  ngc7000: { scale: 2.95, warm: "#EC708F", cool: "#60C1D1", core: "#FFE6D8", rotation: 20, elongated: true },
+  m27: { scale: 2.3, warm: "#66D0BA", cool: "#7399F5", core: "#F1FFF8", rotation: 35, elongated: true },
+  m57: { scale: 2.05, warm: "#DE6CAB", cool: "#5CC4D0", core: "#F5FFF2", rotation: 0 },
+  ngc6960: { scale: 3.0, warm: "#EC7AA0", cool: "#61C4E0", core: "#EFFFFF", rotation: -34, elongated: true },
 };
+
+function cloudPath(cx: number, cy: number, rx: number, ry: number, seed: number): string {
+  const count = 12;
+  const points: Array<[number, number]> = [];
+  for (let i = 0; i < count; i += 1) {
+    const angle = (i / count) * Math.PI * 2;
+    const wobble = 0.72 + (((Math.sin(seed * 17.17 + i * 9.73) + 1) / 2) * 0.38);
+    points.push([
+      cx + Math.cos(angle) * rx * wobble,
+      cy + Math.sin(angle) * ry * wobble,
+    ]);
+  }
+  const mid = (a: number, b: number): [number, number] => [
+    (points[a][0] + points[b][0]) / 2,
+    (points[a][1] + points[b][1]) / 2,
+  ];
+  const start = mid(count - 1, 0);
+  let d = `M ${start[0].toFixed(1)} ${start[1].toFixed(1)}`;
+  for (let i = 0; i < count; i += 1) {
+    const next = mid(i, (i + 1) % count);
+    d += ` Q ${points[i][0].toFixed(1)} ${points[i][1].toFixed(1)} ${next[0].toFixed(1)} ${next[1].toFixed(1)}`;
+  }
+  return `${d} Z`;
+}
 
 export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSphere = false }: Props) {
-  const projected = useMemo(() => {
-    if (!visible) return [];
+  if (!visible) return null;
 
-    return nebulae.flatMap((nebula) => {
-      const art = ART[nebula.id];
-      if (!art) return [];
-      if (!fullSphere && !nebula.aboveHorizon) return [];
+  const rendered = nebulae.flatMap((nebula, index) => {
+    const art = ART[nebula.id];
+    if (!art) return [];
+    if (!fullSphere && !nebula.aboveHorizon) return [];
 
-      const point = projectTarget(
-        pointing,
-        nebula.azimuthDegrees,
-        nebula.altitudeDegrees,
-        fov,
-        box
-      );
-      if (!point.onScreen || point.behind) return [];
+    const projected = projectTarget(pointing, nebula.azimuthDegrees, nebula.altitudeDegrees, fov, box);
+    if (projected.behind || !projected.onScreen) return [];
 
-      const base = Math.max(24, Math.min(58, nebula.radius * 1.7));
-      return [{ nebula, art, point, radius: base * art.scale }];
-    });
-  }, [box, fov, fullSphere, nebulae, pointing, visible]);
+    const base = Math.max(34, Math.min(68, nebula.radius * art.scale));
+    const rx = art.elongated ? base * 1.5 : base;
+    const ry = art.elongated ? base * 0.74 : base * 0.92;
+    const seed = index + nebula.id.length * 13;
+    const warmId = `nebula-warm-${nebula.id}`;
+    const coolId = `nebula-cool-${nebula.id}`;
+    const coreId = `nebula-core-${nebula.id}`;
+    const rotation = `rotate(${art.rotation} ${projected.x.toFixed(1)} ${projected.y.toFixed(1)})`;
 
-  if (!visible || projected.length === 0) return null;
-
-  return (
-    <View pointerEvents="none" style={StyleSheet.absoluteFill}>
-      <Svg width={box.width} height={box.height} style={StyleSheet.absoluteFill}>
+    return [
+      <G key={nebula.id} transform={rotation} opacity={nebula.aboveHorizon || fullSphere ? 1 : 0.18}>
         <Defs>
-          {projected.map(({ nebula, art }) => (
-            <React.Fragment key={`defs-${nebula.id}`}>
-              <RadialGradient id={`warm-${nebula.id}`} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor={art.core} stopOpacity={0.7} />
-                <Stop offset="28%" stopColor={art.warm} stopOpacity={0.46} />
-                <Stop offset="68%" stopColor={art.warm} stopOpacity={0.16} />
-                <Stop offset="100%" stopColor={art.warm} stopOpacity={0} />
-              </RadialGradient>
-              <RadialGradient id={`cool-${nebula.id}`} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor="#EDF6FF" stopOpacity={0.42} />
-                <Stop offset="34%" stopColor={art.cool} stopOpacity={0.34} />
-                <Stop offset="72%" stopColor={art.cool} stopOpacity={0.12} />
-                <Stop offset="100%" stopColor={art.cool} stopOpacity={0} />
-              </RadialGradient>
-              <RadialGradient id={`dust-${nebula.id}`} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor="#03030B" stopOpacity={0.58} />
-                <Stop offset="58%" stopColor="#050610" stopOpacity={0.2} />
-                <Stop offset="100%" stopColor="#050610" stopOpacity={0} />
-              </RadialGradient>
-            </React.Fragment>
-          ))}
+          <RadialGradient id={warmId} cx="48%" cy="48%" r="52%">
+            <Stop offset="0%" stopColor={art.core} stopOpacity={0.96} />
+            <Stop offset="18%" stopColor={art.warm} stopOpacity={0.9} />
+            <Stop offset="56%" stopColor={art.warm} stopOpacity={0.42} />
+            <Stop offset="100%" stopColor={art.warm} stopOpacity={0} />
+          </RadialGradient>
+          <RadialGradient id={coolId} cx="48%" cy="48%" r="52%">
+            <Stop offset="0%" stopColor="#EDF6FF" stopOpacity={0.76} />
+            <Stop offset="30%" stopColor={art.cool} stopOpacity={0.68} />
+            <Stop offset="68%" stopColor={art.cool} stopOpacity={0.3} />
+            <Stop offset="100%" stopColor={art.cool} stopOpacity={0} />
+          </RadialGradient>
+          <RadialGradient id={coreId} cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={1} />
+            <Stop offset="32%" stopColor={art.core} stopOpacity={0.92} />
+            <Stop offset="100%" stopColor={art.core} stopOpacity={0} />
+          </RadialGradient>
         </Defs>
 
-        {projected.map(({ nebula, art, point, radius }) => (
-          <G
-            key={nebula.id}
-            transform={`rotate(${art.rotation} ${point.x.toFixed(1)} ${point.y.toFixed(1)})`}
-            opacity={0.92}
-          >
-            <Ellipse
-              cx={point.x}
-              cy={point.y}
-              rx={radius * 2.15}
-              ry={radius * 1.55}
-              fill={`url(#${art.lobes.some((l) => l.tone === "cool") ? `cool-${nebula.id}` : `warm-${nebula.id}`})`}
-              opacity={0.2}
-            />
+        <Path d={cloudPath(projected.x, projected.y, rx * 2.05, ry * 2.05, seed)} fill={`url(#${coolId})`} opacity={0.58} />
+        <Path d={cloudPath(projected.x - rx * 0.3, projected.y + ry * 0.05, rx * 1.72, ry * 1.58, seed + 3)} fill={`url(#${warmId})`} opacity={0.86} />
+        <Path d={cloudPath(projected.x + rx * 0.4, projected.y - ry * 0.28, rx * 1.16, ry * 1.18, seed + 7)} fill={`url(#${coolId})`} opacity={0.88} />
+        <Path d={cloudPath(projected.x + rx * 0.2, projected.y + ry * 0.38, rx * 0.94, ry * 0.84, seed + 11)} fill={`url(#${warmId})`} opacity={0.9} />
 
-            {art.lobes.map((lobe, index) => (
-              <Ellipse
-                key={`${nebula.id}-lobe-${index}`}
-                cx={point.x + lobe.x * radius}
-                cy={point.y + lobe.y * radius}
-                rx={radius * lobe.rx}
-                ry={radius * lobe.ry}
-                fill={`url(#${lobe.tone}-${nebula.id})`}
-                opacity={lobe.opacity}
-              />
-            ))}
+        <Ellipse
+          cx={projected.x + rx * 0.08}
+          cy={projected.y + ry * 0.04}
+          rx={Math.max(5, rx * 0.13)}
+          ry={Math.max(14, ry * 0.64)}
+          fill="#040716"
+          opacity={0.23}
+          transform={`rotate(${nebula.id === "m20" ? 36 : -24} ${projected.x.toFixed(1)} ${projected.y.toFixed(1)})`}
+        />
+        <Circle cx={projected.x} cy={projected.y} r={Math.max(10, base * 0.36)} fill={`url(#${coreId})`} />
+        <Circle cx={projected.x - base * 0.2} cy={projected.y + base * 0.1} r={1.5} fill="#FFFDF5" opacity={0.95} />
+        <Circle cx={projected.x + base * 0.28} cy={projected.y - base * 0.16} r={1.1} fill="#EAF4FF" opacity={0.9} />
+        <Circle cx={projected.x + base * 0.08} cy={projected.y + base * 0.3} r={0.9} fill="#FFF1D5" opacity={0.86} />
+      </G>,
+    ];
+  });
 
-            {art.lanes?.map((lane, index) => (
-              <Ellipse
-                key={`${nebula.id}-lane-${index}`}
-                cx={point.x + lane.x * radius}
-                cy={point.y + lane.y * radius}
-                rx={radius * lane.rx}
-                ry={radius * lane.ry}
-                fill={`url(#dust-${nebula.id})`}
-                opacity={lane.opacity}
-                rotation={lane.rotation}
-                originX={point.x + lane.x * radius}
-                originY={point.y + lane.y * radius}
-              />
-            ))}
+  if (rendered.length === 0) return null;
 
-            <Circle cx={point.x} cy={point.y} r={Math.max(1.2, radius * 0.045)} fill={art.core} opacity={0.9} />
-          </G>
-        ))}
-      </Svg>
-    </View>
+  return (
+    <Svg pointerEvents="none" width={box.width} height={box.height} style={StyleSheet.absoluteFillObject}>
+      {rendered}
+    </Svg>
   );
 }
