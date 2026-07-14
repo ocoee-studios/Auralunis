@@ -1,5 +1,5 @@
 import React from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { AuraLunisColors } from "@/theme/tokens";
 import { PRIMARY_LAYERS, SECONDARY_LAYERS, type LayerKey } from "./SkyLensLayerCatalog";
 
@@ -10,16 +10,16 @@ type Props = {
   onOpenLayers: () => void;
 };
 
-// ONE ROW. NEVER TWO.
+// ALL FIVE VISIBLE, ONE ROW, NO SCROLL.
 //
-// The previous version used `flexWrap: "wrap"` to avoid clipping. On a 430pt screen the
-// five pills need ~516pt, so it wrapped — and "Layers" landed on a row of its own,
-// doubling the height of the dock and eating ~45pt of sky. Wrapping traded a clipped
-// pill for a stolen row, which is the worse deal in a planetarium.
+// History: v1 wrapped to two rows (stole sky); v2 scrolled horizontally (a hidden Planets
+// control reads as broken, and swiping the dock fights panning the sky). Both rejected.
 //
-// Now: the four beauty pills SCROLL horizontally (so they can never be clipped mid-pill),
-// and the Layers pill is PINNED outside the scroller on the right — always visible, never
-// scrolled away, never on its own row. Fixed height, one line, always.
+// v3 (this): a plain non-scrolling flex row at the 16pt accessibility floor. The four
+// beauty pills + a fixed divider + the icon-only Layers button all fit at 430pt because
+// the dock LABEL for constellations is shortened to "Constell." (the full word stays
+// everywhere else). Pills flex-shrink their PADDING, never their text, so a narrow device
+// degrades to snug rather than clipping a word.
 export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: Props) {
   const accent = nightMode ? "#B64A4A" : AuraLunisColors.gold;
 
@@ -32,45 +32,37 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
 
   return (
     <View style={styles.shell} pointerEvents="box-none">
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.scroller}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-        bounces={false}
-        alwaysBounceHorizontal={false}
-        decelerationRate="fast"
-      >
-        {PRIMARY_LAYERS.map((def) => {
-          const on = active.has(def.key);
-          return (
-            <TouchableOpacity
-              key={def.key}
-              activeOpacity={0.82}
-              accessibilityRole="button"
-              accessibilityState={{ selected: on }}
-              accessibilityLabel={`${def.label} layer, ${on ? "on" : "off"}`}
-              onPress={() => onToggle(def.key)}
-              style={[
-                styles.pill,
-                { borderColor: on ? accent : "rgba(217,168,78,0.22)" },
-                on && { backgroundColor: accent },
-              ]}
-            >
-              <Text style={[styles.icon, on && styles.iconOn]}>{def.icon}</Text>
-              <Text style={[styles.label, on && styles.labelOn]} numberOfLines={1}>
-                {def.label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </ScrollView>
+      {/* NON-SCROLLING flex row. Horizontal scrolling was removed deliberately: a hidden
+          Planets control reads as broken, and a swipe on the dock competes with panning the
+          sky. All five controls are always visible. Each pill flex-shrinks its PADDING (not
+          its text) if space is tight, so the row degrades to snug rather than clipping. */}
+      {PRIMARY_LAYERS.map((def) => {
+        const on = active.has(def.key);
+        // Dock-only shorthand so all five fit at the 16pt floor. The full word
+        // "Constellations" is unchanged everywhere else (sheet, accessibility, info card).
+        const dockLabel = def.key === "constellations" ? "Constell." : def.label;
+        return (
+          <TouchableOpacity
+            key={def.key}
+            activeOpacity={0.82}
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
+            accessibilityLabel={`${def.label} layer, ${on ? "on" : "off"}`}
+            onPress={() => onToggle(def.key)}
+            style={[
+              styles.pill,
+              { borderColor: on ? accent : "rgba(217,168,78,0.22)" },
+              on && { backgroundColor: accent },
+            ]}
+          >
+            <Text style={[styles.icon, on && styles.iconOn]}>{def.icon}</Text>
+            <Text style={[styles.label, on && styles.labelOn]} numberOfLines={1}>
+              {dockLabel}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
 
-      {/* A fixed hairline divider gives the Layers button a CONSISTENT relationship to the
-          scrolling pills, whatever the slack. Without it the button floated a variable
-          distance from Planets depending on how much room the row had left — the "spacing
-          and alignment" wobble. This is a fixed structural seam, not a margin. */}
       <View style={styles.divider} />
 
       {/* Pinned — outside the scroller, so it is always reachable and can never be the
@@ -103,16 +95,17 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
 
 /** The bar's fixed height, exported so the screen can derive the dock/exclusion zones
  *  from it instead of hard-coding a magic number that silently drifts out of sync. */
-export const LAYER_BAR_HEIGHT = 56;
+export const LAYER_BAR_HEIGHT = 52;
 
 const styles = StyleSheet.create({
   shell: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     alignSelf: "stretch",
     height: LAYER_BAR_HEIGHT,
-    marginHorizontal: 8,
-    paddingRight: 6,
+    marginHorizontal: 6,
+    paddingHorizontal: 4,
     borderRadius: 22,
     backgroundColor: "rgba(2,8,20,0.52)",
     borderWidth: StyleSheet.hairlineWidth,
@@ -123,21 +116,14 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     overflow: "hidden",
   },
-  scroller: { flex: 1 },
-  scrollContent: {
-    alignItems: "center",
-    paddingLeft: 6,
-    paddingRight: 6,
-    gap: 4,
-  },
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    height: 40,
-    // Measured on a 430pt screen: four pills + divider + Layers = ~419pt, ~12pt of real
-    // slack. The ScrollView remains the safety net if a device's font metrics run wider.
+    height: 44, // comfortable tap target
+    flexShrink: 1, // shrink padding, never the 16pt text
+    marginHorizontal: 2,
     paddingHorizontal: 6,
-    borderRadius: 18,
+    borderRadius: 20,
     borderWidth: 1,
     backgroundColor: "rgba(5,13,29,0.38)",
   },
@@ -145,19 +131,22 @@ const styles = StyleSheet.create({
   // width, so the Layers button sits in a consistent place instead of drifting with slack.
   divider: {
     width: StyleSheet.hairlineWidth,
-    height: 24,
-    marginHorizontal: 5,
+    height: 26,
+    marginHorizontal: 3,
     backgroundColor: "rgba(217,168,78,0.2)",
   },
-  // Square-ish icon button, not a text pill — ~38pt instead of ~88pt. Fixed width so the
-  // badge appearing/disappearing can't shift it.
+  // Fixed 44x44 icon button (not a text pill). The menu glyph communicates its function
+  // and opens a labelled sheet, so it needs no "Layers" word. Fixed size so the badge
+  // appearing/disappearing can't shift it.
   layersPill: {
-    width: 46,
+    width: 44,
+    height: 44,
+    flexShrink: 0,
     justifyContent: "center",
     backgroundColor: "rgba(5,13,29,0.62)",
   },
   layersIcon: { color: "rgba(231,236,248,0.92)", fontSize: 17, fontWeight: "700" },
-  icon: { color: "rgba(231,236,248,0.85)", fontSize: 13, marginRight: 4 },
+  icon: { color: "rgba(231,236,248,0.85)", fontSize: 12, marginRight: 3 },
   iconOn: { color: "#030816" },
   label: {
     color: "rgba(231,236,248,0.92)",
