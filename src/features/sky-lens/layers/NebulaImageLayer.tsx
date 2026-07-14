@@ -61,15 +61,24 @@ function cloudPath(cx: number, cy: number, rx: number, ry: number, seed: number)
   const points: Array<[number, number]> = [];
   for (let i = 0; i < count; i += 1) {
     const angle = (i / count) * Math.PI * 2;
-    // A narrow wobble range plus many control points creates a soft organic edge rather
-    // than a faceted/polygonal silhouette. Two summed harmonics (rather than one) give
-    // the outline a second, finer scale of irregularity — the difference between a
-    // wobbly ellipse and something that reads as *cloud*. The wobble RANGE is unchanged,
-    // so the silhouette gains detail without gaining size.
-    const wobble =
-      0.86 +
-      ((Math.sin(seed * 17.17 + i * 9.73) + 1) / 2) * 0.15 +
-      ((Math.sin(seed * 5.31 + i * 23.9) + 1) / 2) * 0.07;
+
+    // FINE irregularity — high-frequency crinkle along the edge. Feathering, not shape.
+    const fine =
+      ((Math.sin(seed * 17.17 + i * 9.73) + 1) / 2) * 0.06 +
+      ((Math.sin(seed * 5.31 + i * 23.9) + 1) / 2) * 0.03;
+
+    // LOBES — the actual fix for "too perfectly round". Low-frequency 2- and 3-lobed
+    // harmonics with seeded phases make one flank bulge while another pinches, the way a
+    // real emission cloud does. Fine wobble alone only ever produced a crinkly CIRCLE;
+    // it's these that give the silhouette a direction and a character.
+    const lobes =
+      Math.cos(angle * 2 + seed * 1.7) * 0.09 +
+      Math.cos(angle * 3 - seed * 0.9) * 0.05;
+
+    // Mean radius ≈ 0.945 — slightly BELOW the previous pass's ≈0.97, so the asymmetry
+    // is bought without a single pixel of extra footprint. Bulges are paid for by pinches.
+    const wobble = 0.9 + fine + lobes;
+
     points.push([
       cx + Math.cos(angle) * rx * wobble,
       cy + Math.sin(angle) * ry * wobble,
@@ -158,10 +167,14 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props
                 <Stop offset="45%" stopColor={art.haze} stopOpacity={0.12} />
                 <Stop offset="100%" stopColor={art.haze} stopOpacity={0} />
               </RadialGradient>
+              {/* Core softened (white 0.50 → 0.30, and the falloff starts sooner). A hot
+                  white pinpoint made these read as a bright bead with fluff around it;
+                  a real core is a diffuse SWELL of light. Still no dark centre — the
+                  punched-out middle is never coming back. */}
               <RadialGradient id={coreId} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.5} />
-                <Stop offset="34%" stopColor={art.core} stopOpacity={0.3} />
-                <Stop offset="70%" stopColor={art.core} stopOpacity={0.1} />
+                <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.3} />
+                <Stop offset="30%" stopColor={art.core} stopOpacity={0.22} />
+                <Stop offset="66%" stopColor={art.core} stopOpacity={0.09} />
                 <Stop offset="100%" stopColor={art.core} stopOpacity={0} />
               </RadialGradient>
             </Defs>
@@ -173,10 +186,19 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props
             <Path d={cloudPath(projected.x - rx * 0.2, projected.y + ry * 0.06, rx * 1.24, ry * 1.12, seed + 3)} fill={`url(#${warmId})`} opacity={0.6} />
             <Path d={cloudPath(projected.x + rx * 0.28, projected.y - ry * 0.2, rx * 0.88, ry * 0.86, seed + 7)} fill={`url(#${coolId})`} opacity={0.56} />
             <Path d={cloudPath(projected.x + rx * 0.08, projected.y + ry * 0.26, rx * 0.7, ry * 0.62, seed + 11)} fill={`url(#${warmId})`} opacity={0.52} />
-            {/* NEW inner veil — pure detail, well inside the existing silhouette. It adds
-                the sense of internal structure that separates "astrophotograph" from
-                "painted blob", and cannot enlarge the object. */}
+            {/* Inner veil — pure detail, well inside the existing silhouette. It adds the
+                internal structure that separates "astrophotograph" from "painted blob",
+                and cannot enlarge the object. */}
             <Path d={cloudPath(projected.x - rx * 0.12, projected.y - ry * 0.1, rx * 0.46, ry * 0.44, seed + 17)} fill={`url(#${coolId})`} opacity={0.44} />
+
+            {/* INTERNAL COLOUR VARIATION — three small off-centre tint pools (rose, lilac,
+                blue) well inside the silhouette. Without these, a nebula is one gradient
+                blending two colours, which always reads as airbrush. Real clouds have
+                patches: a rose flank, a lilac hollow, a cold blue edge. Tiny radii and low
+                opacity — this is felt as richness, not seen as blobs. */}
+            <Circle cx={projected.x - rx * 0.3} cy={projected.y - ry * 0.22} r={base * 0.3} fill={art.warm} opacity={0.16} />
+            <Circle cx={projected.x + rx * 0.26} cy={projected.y + ry * 0.3} r={base * 0.26} fill={art.haze} opacity={0.15} />
+            <Circle cx={projected.x + rx * 0.34} cy={projected.y - ry * 0.3} r={base * 0.22} fill={art.cool} opacity={0.14} />
 
             {/* No dark oval/dust stamp. The centre is only a quiet, diffuse glow. */}
             <Circle cx={projected.x} cy={projected.y} r={Math.max(7, base * 0.3)} fill={`url(#${coreId})`} />

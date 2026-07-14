@@ -142,16 +142,17 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const { addItem } = useAuraLunisVault();
 
   const [box, setBox] = useState({ width: 360, height: 720 });
+  // The default scene is EXACTLY four layers: Stars, Constellations, Milky Way, Planets
+  // (DEFAULT_ACTIVE_LAYERS — the only entries with defaultOn: true). Nothing else may
+  // switch itself on.
+  //
+  // Deep Sky used to auto-enable the moment entitlement resolved to premium ("they paid
+  // for it, give it to them"), which meant a premium user's first impression of Sky Lens
+  // silently included Nebulae — a fifth active layer nobody asked for, and a busier
+  // opening scene than the free user's. Premium value stays in HOW layers render
+  // (PremiumVisualGating: spectral stars, hero moon, shooting stars); Nebulae is now an
+  // opt-in tap for everyone, so the calm four-pill first impression is universal.
   const [active, setActive] = useState<Set<LayerKey>>(() => new Set(DEFAULT_ACTIVE_LAYERS));
-  // Deep Sky is premium and starts OFF (so free users never get the paywalled nebulae for
-  // free). Once entitlement resolves to premium, turn it on by default — what they paid for.
-  const deepSkyApplied = useRef(false);
-  useEffect(() => {
-    if (isPremium && !deepSkyApplied.current) {
-      deepSkyApplied.current = true;
-      setActive((prev) => (prev.has("deepsky") ? prev : new Set(prev).add("deepsky")));
-    }
-  }, [isPremium]);
 
   // Live satellite tracking for the AR "Satellites" layer — reuses the Orbital fleet
   // service (live-TLE-backed positions → absolute observer az/alt). Refreshed every

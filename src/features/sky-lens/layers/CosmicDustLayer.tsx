@@ -38,6 +38,10 @@ import type { TwinkleTarget } from "../TwinkleOverlay";
 const SILVER = ["#FFFFFF", "#EAF0FF", "#F6F9FF", "#DCE6FA"];
 const GOLD = ["#FFF1C8", "#E8C77E", "#D9A84E", "#FFF8E7"];
 
+// How far off the galactic spine the dust may drift, as a fraction of screen height.
+// 0.085 → 0.07: a tighter band hugs the Milky Way rather than hazing the sky around it.
+const BAND_THICKNESS_FRAC = 0.07;
+
 // Galactic longitude → relative dust density. The band is not uniform: it swells
 // toward the Sagittarius core (l≈0) and the Cygnus star cloud (l≈80), and thins
 // toward the anticentre (l≈180). Weighting the dust this way is what makes the
@@ -72,8 +76,10 @@ const BAND_MOTES: BandMote[] = (() => {
     // clouds instead of spreading evenly around the ring.
     if (rng() > bandDensity(lDeg) / 1.7) continue;
     // Two summed uniforms ≈ a soft triangular falloff, so the band has a dense spine
-    // that feathers outward rather than a hard-edged stripe.
-    const perp = (rng() + rng() - 1) * (0.55 + rng() * 0.45);
+    // that feathers outward rather than a hard-edged stripe. Tightened after device
+    // review (was 0.55 + 0.45): the dust was spreading far enough off the spine to read
+    // as a general sprinkle rather than as the Milky Way's own atmosphere.
+    const perp = (rng() + rng() - 1) * (0.4 + rng() * 0.35);
     const silver = rng() > 0.42;
     out.push({
       t: lDeg / 4, // computeMilkyWay samples every 4° → index = l / 4
@@ -87,17 +93,23 @@ const BAND_MOTES: BandMote[] = (() => {
 })();
 
 // Faint dust everywhere else, seeded in SKY coords so it pans with the stars.
+//
+// CUT 46 → 16 AND DIMMED after device review. A uniform sprinkle across the whole sphere
+// is the enemy of this effect: spread evenly, dust stops reading as the Milky Way's
+// atmosphere and starts reading as a field of faint extra stars — which is precisely the
+// "ordinary extra stars" note. What's left is just enough to keep the sky off the
+// galactic plane from being a dead void. The luxury lives in the band, not out here.
 const AMBIENT_MOTES = (() => {
   let s = 0x5f3759df >>> 0;
   const rng = () => ((s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff);
-  return Array.from({ length: 46 }, () => {
+  return Array.from({ length: 16 }, () => {
     const silver = rng() > 0.5;
     return {
       az: rng() * 360,
       // Biased upward — the murk near the horizon is HorizonGlowLayer's job.
       alt: Math.sqrt(rng()) * 88,
-      r: 0.35 + rng() * 0.7,
-      o: 0.05 + rng() * 0.1,
+      r: 0.35 + rng() * 0.6,
+      o: 0.03 + rng() * 0.055,
       color: (silver ? SILVER : GOLD)[Math.floor(rng() * 4)],
     };
   });
@@ -184,7 +196,7 @@ export function CosmicDustLayer({
   nightMode: boolean;
   fullSphere?: boolean;
 }) {
-  const thickness = box.height * 0.085;
+  const thickness = box.height * BAND_THICKNESS_FRAC;
 
   const motes = useMemo(() => {
     if (nightMode || box.width <= 0 || box.height <= 0) return null;
@@ -253,7 +265,7 @@ export function stardustGlints(
 ): TwinkleTarget[] {
   if (box.width <= 0 || box.height <= 0) return [];
   const proj = projectBand(band, project, fullSphere);
-  const thickness = box.height * 0.085;
+  const thickness = box.height * BAND_THICKNESS_FRAC;
   const out: TwinkleTarget[] = [];
 
   for (let i = 0; i < GLINT_MOTES.length; i += 1) {
@@ -268,6 +280,10 @@ export function stardustGlints(
       size: m.size,
       color: m.color,
       offset: m.offset,
+      // "dust" puts these on TwinkleOverlay's slow 11 s clock with a deep fade, instead
+      // of the 2.6 s star clock. Riding the star clock is what made them read as extra
+      // stars rather than as glints. Same count (14) — only the motion changed.
+      kind: "dust" as const,
       // Ranked after every real star, so dust can never crowd an actual star out of
       // the twinkle budget.
       magnitude: 90 + i,

@@ -10,6 +10,8 @@ import Animated, {
   type SharedValue
 } from "react-native-reanimated";
 
+export type TwinkleKind = "star" | "dust";
+
 export type TwinkleTarget = {
   id: string;
   x: number;
@@ -18,18 +20,43 @@ export type TwinkleTarget = {
   color: string;
   offset: number;
   magnitude: number;
+  kind?: TwinkleKind; // default "star"
 };
 
 // A View-based twinkle overlay rendered OVER the SVG canvas. Animating an
-// Animated.View's opacity via useAnimatedStyle is the supported, crash-safe
-// Reanimated pattern (the SVG-prop animation we had before crashed on RN 0.81 +
-// Reanimated 4 + react-native-svg 15). One shared clock drives every dot, each
-// with its own phase offset so they shimmer out of sync.
-function TwinkleDot({ clock, t }: { clock: SharedValue<number>; t: TwinkleTarget }) {
+// Animated.View's opacity via useAnimatedStyle is the supported, crash-safe Reanimated
+// pattern (the SVG-prop animation we had before crashed on RN 0.81 + Reanimated 4 +
+// react-native-svg 15). One clock drives many dots, each with its own phase offset.
+//
+// TWO CLOCKS, deliberately:
+//
+//   * STARS twinkle fast and shallow (2.6 s, ±12% around near-full opacity) — that's
+//     atmospheric scintillation, and it should read as "the stars are alive".
+//
+//   * STARDUST breathes slowly and deeply (11 s, fading nearly out and back). On the
+//     first device pass the dust glints rode the STAR clock, which is exactly why they
+//     read as "ordinary extra stars": anything twinkling at star speed IS a star to the
+//     eye. Slow and deep is what makes a mote read as a drifting glint of light rather
+//     than a point source.
+//
+// Two shared clocks total — this stays one animation system, not a particle engine.
+const STAR_PERIOD_MS = 2600;
+const DUST_PERIOD_MS = 11000;
+
+function TwinkleDot({
+  clock,
+  t,
+  base,
+  amp
+}: {
+  clock: SharedValue<number>;
+  t: TwinkleTarget;
+  base: number;
+  amp: number;
+}) {
   const offset = t.offset;
-  // ±12% opacity around a near-full base — a very subtle living shimmer.
   const style = useAnimatedStyle(() => ({
-    opacity: 0.88 + 0.12 * Math.sin((clock.value + offset) * Math.PI * 2)
+    opacity: base + amp * Math.sin((clock.value + offset) * Math.PI * 2)
   }));
   return (
     <Animated.View
@@ -52,19 +79,31 @@ function TwinkleDot({ clock, t }: { clock: SharedValue<number>; t: TwinkleTarget
 }
 
 export function TwinkleOverlay({ targets, nightMode }: { targets: TwinkleTarget[]; nightMode: boolean }) {
-  const clock = useSharedValue(0);
+  const starClock = useSharedValue(0);
+  const dustClock = useSharedValue(0);
+
   useEffect(() => {
-    clock.value = withRepeat(withTiming(1, { duration: 2600, easing: Easing.linear }), -1, false);
-    return () => cancelAnimation(clock);
-  }, [clock]);
+    starClock.value = withRepeat(withTiming(1, { duration: STAR_PERIOD_MS, easing: Easing.linear }), -1, false);
+    dustClock.value = withRepeat(withTiming(1, { duration: DUST_PERIOD_MS, easing: Easing.linear }), -1, false);
+    return () => {
+      cancelAnimation(starClock);
+      cancelAnimation(dustClock);
+    };
+  }, [starClock, dustClock]);
 
   if (nightMode) return null;
 
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
-      {targets.map((t) => (
-        <TwinkleDot key={t.id} clock={clock} t={t} />
-      ))}
+      {targets.map((t) =>
+        t.kind === "dust" ? (
+          // Slow, deep swell: 0.10 → 0.62. A glint that nearly vanishes, then returns.
+          <TwinkleDot key={t.id} clock={dustClock} t={t} base={0.36} amp={0.26} />
+        ) : (
+          // Quick, shallow scintillation around near-full opacity.
+          <TwinkleDot key={t.id} clock={starClock} t={t} base={0.88} amp={0.12} />
+        )
+      )}
     </View>
   );
 }

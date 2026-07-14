@@ -23,16 +23,23 @@ const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 // Restrained planet radii for a wide-field planetarium. The illustrations remain
 // recognizable, but no object should dominate the full Sky Lens viewport.
 //
-// Nudged up ~10% on the disc and ~40% on the GLOW. The glow is doing the heavy lifting
-// deliberately: a planet needs to out-present the stars around it, and a big soft halo
-// reads as "bright object" far better than a big hard disc, which just reads as
-// "cartoon". Discs stay small; the light around them grows.
+// DEVICE-REVIEW CORRECTION: the previous pass pushed the discs too far and Jupiter,
+// Venus and the Moon read as cartoon stickers. Discs come back down hard; the GLOW does
+// the "this is a planet, not a star" work, because a soft halo reads as brightness while
+// a fat disc just reads as a decal. Discs shrink more than glows do.
+//
+//   jupiter −24%   venus −20%   saturn −21%   mercury −15%   mars −8%
+//
+// Saturn was NOT in the brief, but it had to come down with Jupiter: cutting Jupiter 24%
+// alone would have left Saturn rendering LARGER than Jupiter, inverting the one size
+// relationship every stargazer already knows. Hierarchy preserved:
+//   jupiter 14.5 > saturn 13.5 > venus 12 = mars 12 > mercury 6.8
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  mercury: { disc: 8, glow: 17 }, // still the shy one — findable, never showy
-  venus: { disc: 15, glow: 32 }, // brightest object after the Moon; unmistakable
-  mars: { disc: 13, glow: 30 }, // the hero of this pass
-  jupiter: { disc: 19, glow: 35 },
-  saturn: { disc: 17, glow: 32 },
+  mercury: { disc: 6.8, glow: 14.5 }, // still the shy one — findable, never showy
+  venus: { disc: 12, glow: 28 }, // brightest after the Moon: smallest disc, biggest glow
+  mars: { disc: 12, glow: 26 }, // barely touched — it was reading correctly
+  jupiter: { disc: 14.5, glow: 26.5 },
+  saturn: { disc: 13.5, glow: 25.5 },
 };
 
 // Each planet gets its OWN halo colour. Previously every planet shared a single gold
@@ -62,6 +69,31 @@ export function PlanetLayer({
   // nominal size, which is where a lot of the "planets get lost" problem came from.
   const planetScale = Math.min(1.45, Math.max(1.0, 1.0 + (zoom - 1) * 0.12));
 
+  // PRE-PASS. Project every visible planet and CLAIM ITS ARTWORK in the shared label
+  // placer before a single label is placed. Without this, planet labels are placed in
+  // body order, so Jupiter's label could be dropped straight on top of Saturn's disc —
+  // the placer only knew about other LABELS, never about artwork. Projection is
+  // identical to before; this just runs it once up front instead of inside the map.
+  const visible = bodies
+    .filter((body) => PLANET_IDS.has(body.id) && body.aboveHorizon)
+    .map((body) => {
+      // POSITION IS SACRED. This call and the x/y it yields are untouched by this pass —
+      // every change in this file is radius, colour, opacity or label layout.
+      const point = project(body.azimuthDegrees, body.altitudeDegrees);
+      if (!point.onScreen) return null;
+      const style = STYLE[body.id] ?? { disc: 8, glow: 14 };
+      return { body, point, disc: style.disc * planetScale, glow: style.glow * planetScale };
+    })
+    .filter((v): v is NonNullable<typeof v> => v !== null);
+
+  if (placeLabel) {
+    for (const v of visible) {
+      // Reserve the DISC (plus a hair), not the whole glow — reserving the full halo
+      // would be so greedy it would shove every nearby star label off screen.
+      placeLabel.reserveCircle(v.point.x, v.point.y, v.disc * 1.15);
+    }
+  }
+
   return (
     <G>
       <Defs>
@@ -82,17 +114,7 @@ export function PlanetLayer({
         </RadialGradient>
       </Defs>
 
-      {bodies.map((body) => {
-        if (!PLANET_IDS.has(body.id) || !body.aboveHorizon) return null;
-
-        // POSITION IS SACRED. This projection call, and the x/y it yields, are
-        // untouched by this pass — every change below is radius, colour or opacity.
-        const point = project(body.azimuthDegrees, body.altitudeDegrees);
-        if (!point.onScreen) return null;
-
-        const style = STYLE[body.id] ?? { disc: 8, glow: 14 };
-        const disc = style.disc * planetScale;
-        const glow = style.glow * planetScale;
+      {visible.map(({ body, point, disc, glow }) => {
         const color = nightMode ? palette.accent : PLANET_COLORS[body.id] ?? palette.accent;
         const haloId = nightMode ? "planetHaloNight" : `planetHalo-${body.id}`;
         const { x, y } = point;
@@ -160,23 +182,30 @@ export function PlanetLayer({
               return <Circle cx={x} cy={y} r={disc} fill={color} />;
             })()}
 
+            {/* Specular highlight, softened 0.42 → 0.26. A hard white dot on a small disc
+                is a big part of what read as "cartoon sticker" on device. */}
             {!nightMode && (
               <Circle
                 cx={x - disc * 0.3}
                 cy={y - disc * 0.3}
-                r={Math.max(1.2, disc * 0.16)}
+                r={Math.max(1, disc * 0.14)}
                 fill="#FFFFFF"
-                opacity={0.42}
+                opacity={0.26}
               />
             )}
 
             <Circle cx={x} cy={y} r={Math.max(disc + 14, 24)} fill="transparent" onPress={onPress} />
 
             {showLabels && (() => {
-              const labelX = x + Math.max(disc * 1.25, 12);
+              // The label now ORBITS the planet rather than always sitting to its right,
+              // and the avoid radius is measured off the GLOW (×0.8 — the visibly bright
+              // part of the bloom), not the disc. Previously the offset was disc-based,
+              // so on a big-glow planet like Venus the label landed inside its own halo.
+              const avoid = { x, y, r: glow * 0.8 };
+              const fallbackX = x + glow * 0.8 + 6;
               const labelPoint = placeLabel
-                ? placeLabel(labelX, y + 4, body.name, 12)
-                : { x: labelX, y: y + 4 };
+                ? placeLabel(fallbackX, y + 4, body.name, 12, avoid)
+                : { x: fallbackX, y: y + 4 };
               return (
                 <G>
                   {/* Contrast without a hard plate behind the text: the label is drawn

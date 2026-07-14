@@ -9,7 +9,7 @@ import { ConstellationArtLayer } from "./layers/ConstellationArtLayer";
 import { StarLayer } from "./layers/StarLayer";
 import { DomeStarLayer } from "./layers/DomeStarLayer";
 import { PlanetLayer } from "./layers/PlanetLayer";
-import { MoonLayer } from "./layers/MoonLayer";
+import { MoonLayer, MOON_RADIUS } from "./layers/MoonLayer";
 import { CosmicDustLayer } from "./layers/CosmicDustLayer";
 import { HorizonGlowLayer } from "./layers/HorizonGlowLayer";
 import { NebulaLayer } from "./layers/NebulaLayer";
@@ -63,7 +63,9 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
   }, [sky.domeStars, domeStarMultiplier]);
 
   const showLabels = !cinematic;
-  const placeLabel = makeLabelPlacer(box);
+  // Safe margins keep every label clear of the top HUD and the bottom four-pill control
+  // tray, instead of labels sliding underneath the controls at the edges of the field.
+  const placeLabel = makeLabelPlacer(box, { top: 108, bottom: 176 });
   const depth = (d: number) => `translate(${(parallax.x * d).toFixed(2)} ${(parallax.y * d).toFixed(2)})`;
   const constellations = sky.constellations;
 
@@ -81,6 +83,14 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
   const moonOnScreen = !!moonProj?.onScreen;
   const heroDim = moonOnScreen ? 0.85 : 1;
   const lensR = Math.min(box.height * 0.95, box.height * (30 / Math.max(8, fov.verticalDegrees)));
+
+  // The Moon renders LAST (it sits outside the hero-dim group so it keeps full
+  // brightness), which means it would claim its artwork only after every other layer had
+  // already placed its labels — a star or planet label could land right on the Moon.
+  // Claim it HERE, up front, so the whole scene lays out around it.
+  if (moonOnScreen && moonProj) {
+    placeLabel.reserveCircle(moonProj.x, moonProj.y, MOON_RADIUS * 1.2);
+  }
 
   return (
     <Svg style={StyleSheet.absoluteFillObject} pointerEvents="box-none">
@@ -204,6 +214,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       <MoonLayer
         moon={moon}
         illuminationPercent={sky.moonIlluminationPercent}
+        placeLabel={placeLabel}
         project={project}
         palette={palette}
         nightMode={nightMode}
