@@ -151,7 +151,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
             focus={focus}
             showcase={showcase}
             placeLabel={placeLabel}
-            showLabels={showLabels}
+            showLabels={false}
             customShapes={vg.nebulaShapes}
             fullSphere={fullSphere}
             onSelect={onSelect}
