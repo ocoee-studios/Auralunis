@@ -141,16 +141,16 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
               // 12 → 18pt, semibold: readable on a moving sky at arm's length. The bigger
               // font also enlarges the placer's collision box (it keys off fontSize), so
               // labels claim the room they actually occupy.
-              const lp = placeLabel ? placeLabel(p.x + r + 5, p.y + 5, star.name ?? "", 18) : { x: p.x + r + 5, y: p.y + 5 };
+              const lp = placeLabel ? placeLabel(p.x + r + 5, p.y + 5, star.name ?? "", 16) : { x: p.x + r + 5, y: p.y + 5 };
               // PRIORITY 2. No clean slot → SUPPRESS rather than clip or overlap.
               if (!Number.isFinite(lp.x)) return null;
               return (
                 <G>
                   {/* Soft dark outline so warm-ivory names stay legible over the Milky Way. */}
-                  <SvgText x={lp.x} y={lp.y} fill="none" stroke="#05070F" strokeWidth={3} strokeOpacity={0.55} fontSize={18} fontWeight="600">
+                  <SvgText x={lp.x} y={lp.y} fill="none" stroke="#05070F" strokeWidth={1.8} strokeOpacity={0.5} fontSize={16} fontWeight="600">
                     {star.name}
                   </SvgText>
-                  <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={18} fontWeight="600" opacity={0.92}>
+                  <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={16} fontWeight="600" opacity={0.9}>
                     {star.name}
                   </SvgText>
                 </G>

@@ -15,11 +15,11 @@ type Props = {
 // History: v1 wrapped to two rows (stole sky); v2 scrolled horizontally (a hidden Planets
 // control reads as broken, and swiping the dock fights panning the sky). Both rejected.
 //
-// v3 (this): a plain non-scrolling flex row at the 16pt accessibility floor. The four
-// beauty pills + a fixed divider + the icon-only Layers button all fit at 430pt because
-// the dock LABEL for constellations is shortened to "Constell." (the full word stays
-// everywhere else). Pills flex-shrink their PADDING, never their text, so a narrow device
-// degrades to snug rather than clipping a word.
+// v3 (this): a plain non-scrolling flex row of TEXT-ONLY pills at 15pt, with a fixed
+// divider and a fixed 44x44 icon-only Layers button. Text-only + the "Constell." dock
+// shorthand leaves ~6pt of real gap between every control at 430pt — breathing room, not
+// a crammed strip. Pills flex-shrink padding (never text) as a safety net on narrow
+// devices. The full word "Constellations" is unchanged everywhere else.
 export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: Props) {
   const accent = nightMode ? "#B64A4A" : AuraLunisColors.gold;
 
@@ -55,7 +55,10 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
               on && { backgroundColor: accent },
             ]}
           >
-            <Text style={[styles.icon, on && styles.iconOn]}>{def.icon}</Text>
+            {/* Text-only. The little glyphs (☆◎☁●) were decorative and duplicated the
+                word — dropping them is what buys the breathing room to run 15pt labels
+                with real gaps instead of crammed icon+text. The ON state reads clearly
+                from the filled gold pill. */}
             <Text style={[styles.label, on && styles.labelOn]} numberOfLines={1}>
               {dockLabel}
             </Text>
@@ -117,12 +120,12 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   pill: {
-    flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center",
     height: 44, // comfortable tap target
-    flexShrink: 1, // shrink padding, never the 16pt text
-    marginHorizontal: 2,
-    paddingHorizontal: 6,
+    flexShrink: 1,
+    marginHorizontal: 3, // → 6pt visible gap between controls
+    paddingHorizontal: 9,
     borderRadius: 20,
     borderWidth: 1,
     backgroundColor: "rgba(5,13,29,0.38)",
@@ -131,8 +134,8 @@ const styles = StyleSheet.create({
   // width, so the Layers button sits in a consistent place instead of drifting with slack.
   divider: {
     width: StyleSheet.hairlineWidth,
-    height: 26,
-    marginHorizontal: 3,
+    height: 24,
+    marginHorizontal: 6, // clear space on both sides — never touches the Planets pill
     backgroundColor: "rgba(217,168,78,0.2)",
   },
   // Fixed 44x44 icon button (not a text pill). The menu glyph communicates its function
@@ -146,23 +149,21 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(5,13,29,0.62)",
   },
   layersIcon: { color: "rgba(231,236,248,0.92)", fontSize: 17, fontWeight: "700" },
-  icon: { color: "rgba(231,236,248,0.85)", fontSize: 12, marginRight: 3 },
-  iconOn: { color: "#030816" },
   label: {
     color: "rgba(231,236,248,0.92)",
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
-    letterSpacing: 0,
+    letterSpacing: 0.1,
   },
   labelOn: { color: "#030816", fontWeight: "900" },
   badge: {
-    marginLeft: 5,
-    minWidth: 18,
-    height: 18,
-    borderRadius: 9,
+    marginLeft: 4,
+    minWidth: 16,
+    height: 16,
+    borderRadius: 8,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 4,
+    paddingHorizontal: 3,
   },
-  badgeText: { color: "#030816", fontSize: 11, fontWeight: "900" },
+  badgeText: { color: "#030816", fontSize: 10, fontWeight: "900" },
 });

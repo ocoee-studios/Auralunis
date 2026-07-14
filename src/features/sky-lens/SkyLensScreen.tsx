@@ -1068,16 +1068,18 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         </TouchableOpacity>
 
         <View style={styles.hudPill} pointerEvents="none">
-          <Text style={[styles.hudText, { color: accent }]}>{hud}</Text>
+          {/* numberOfLines={1} on every line: the HUD must stay a compact strip, never
+              grow into a tall text card that covers Betelgeuse and the nearby sky. */}
+          <Text style={[styles.hudText, { color: accent }]} numberOfLines={1}>{hud}</Text>
           {planetarium ? (
-            <Text style={styles.hudSub}>🔭 Planetarium — pan to explore</Text>
+            <Text style={styles.hudSub} numberOfLines={1}>🔭 Planetarium — pan to explore</Text>
           ) : immersive ? (
-            <Text style={styles.hudSub}>🌌 Immersive — dimmed for photos</Text>
+            <Text style={styles.hudSub} numberOfLines={1}>🌌 Immersive — dimmed for photos</Text>
           ) : status === "fallback" ? (
-            <Text style={styles.hudSub}>Default location</Text>
+            <Text style={styles.hudSub} numberOfLines={1}>Default location</Text>
           ) : null}
           {satellitesActive && (
-            <Text style={styles.hudSub}>◈ Satellites · {satellitesLive ? "LIVE TLE" : "Simulated"}</Text>
+            <Text style={styles.hudSubSmall} numberOfLines={1}>◈ Satellites · {satellitesLive ? "LIVE TLE" : "Simulated"}</Text>
           )}
         </View>
 
@@ -1338,8 +1340,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
-  hudText: { fontSize: 19, fontWeight: "900", fontVariant: ["tabular-nums"], textShadowColor: "rgba(0,0,0,0.6)", textShadowRadius: 3 },
-  hudSub: { color: AuraLunisColors.muted, fontSize: 15, fontWeight: "500", marginTop: 2, opacity: 0.82 },
+  hudText: { fontSize: 17, fontWeight: "800", fontVariant: ["tabular-nums"], textShadowColor: "rgba(0,0,0,0.55)", textShadowRadius: 2 },
+  hudSub: { color: AuraLunisColors.muted, fontSize: 13, fontWeight: "500", marginTop: 1, opacity: 0.82 },
+  hudSubSmall: { color: AuraLunisColors.muted, fontSize: 12.5, fontWeight: "500", marginTop: 1, opacity: 0.72 },
   bottom: { position: "absolute", left: 0, right: 0, bottom: 0 },
   skySliderWrap: {
     flexDirection: "row",
