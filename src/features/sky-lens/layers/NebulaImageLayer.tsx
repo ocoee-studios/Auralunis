@@ -322,6 +322,25 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSph
                   <Stop offset="70%" stopColor={art.core} stopOpacity={kA[2]} />
                   <Stop offset="100%" stopColor={art.core} stopOpacity={0} />
                 </RadialGradient>
+                {isHero && (
+                  <>
+                    {/* The dark dust lane — M42's "Fish's Mouth". A SOFT navy fold on one
+                        flank, fully fading to transparent, NOT a central capsule or a hard
+                        oval. This is what gives Orion its structure rather than a smooth orb. */}
+                    <RadialGradient id={`neb-dust-${nebula.id}`} cx="50%" cy="50%" r="50%">
+                      <Stop offset="0%" stopColor="#0A1226" stopOpacity={0.22} />
+                      <Stop offset="55%" stopColor="#0A1226" stopOpacity={0.1} />
+                      <Stop offset="100%" stopColor="#0A1226" stopOpacity={0} />
+                    </RadialGradient>
+                    {/* A concentrated silver-white glow behind the Trapezium, so the heart
+                        blazes rather than blending into the rose. */}
+                    <RadialGradient id={`neb-heart-${nebula.id}`} cx="50%" cy="50%" r="50%">
+                      <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.85} />
+                      <Stop offset="35%" stopColor="#EAF1FF" stopOpacity={0.4} />
+                      <Stop offset="100%" stopColor="#EAF1FF" stopOpacity={0} />
+                    </RadialGradient>
+                  </>
+                )}
               </Defs>
 
               {/* Outer haze → warm lobes → cool lobes → core. Overlapping feathered veils,
@@ -332,33 +351,55 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSph
               <Path d={cloudPath(projected.x + rx * 0.08, projected.y + ry * 0.26, rx * 0.7, ry * 0.62, seed + 11)} fill={`url(#${warmId})`} />
               <Path d={cloudPath(projected.x - rx * 0.12, projected.y - ry * 0.1, rx * 0.46, ry * 0.44, seed + 17)} fill={`url(#${coolId})`} />
 
-              {/* Internal colour variation — uneven tint pools, well inside the silhouette. */}
-              <Circle cx={projected.x - rx * 0.3} cy={projected.y - ry * 0.22} r={base * 0.3} fill={art.warm} opacity={0.1} />
-              <Circle cx={projected.x + rx * 0.26} cy={projected.y + ry * 0.3} r={base * 0.24} fill={art.haze} opacity={0.09} />
+              {/* Internal colour variation — uneven tint pools, well inside the silhouette.
+                  For the hero these are pushed to OPPOSITE flanks and strengthened, so rose
+                  and violet read as distinct regions rather than one blended wash: warm
+                  rose pools lower-left, cool violet upper-right. */}
+              <Circle cx={projected.x - rx * (isHero ? 0.36 : 0.3)} cy={projected.y + ry * (isHero ? 0.24 : -0.22)} r={base * 0.32} fill={art.warm} opacity={isHero ? 0.2 : 0.1} />
+              <Circle cx={projected.x + rx * (isHero ? 0.34 : 0.26)} cy={projected.y - ry * (isHero ? 0.28 : -0.3)} r={base * 0.28} fill={art.haze} opacity={isHero ? 0.18 : 0.09} />
               <Circle cx={projected.x + rx * 0.32} cy={projected.y - ry * 0.28} r={base * 0.2} fill={art.cool} opacity={0.09} />
 
-              {/* HERO-ONLY STRUCTURE. Extra offset veils at different seeds, so M42 is not
-                  visibly the same stamped silhouette as its companions, plus the bright
-                  wing/sword asymmetry that makes Orion recognisable. No hard ellipse, no
-                  repeated shape, no dark central capsule. */}
+              {/* HERO-ONLY STRUCTURE. Extra strongly-offset veils break the circle so the
+                  silhouette reads as an irregular cloud, not an orb. Different seeds, so it
+                  is never the same stamped shape as its companions. No hard ellipse, no
+                  central capsule. */}
               {isHero && (
                 <>
-                  <Path d={cloudPath(projected.x - rx * 0.34, projected.y - ry * 0.3, rx * 0.9, ry * 0.78, seed + 23)} fill={`url(#${coolId})`} opacity={0.75} />
-                  <Path d={cloudPath(projected.x + rx * 0.36, projected.y + ry * 0.28, rx * 0.72, ry * 0.66, seed + 29)} fill={`url(#${warmId})`} opacity={0.8} />
-                  <Path d={cloudPath(projected.x + rx * 0.02, projected.y - ry * 0.34, rx * 0.55, ry * 0.5, seed + 31)} fill={`url(#${hazeId})`} opacity={0.9} />
+                  <Path d={cloudPath(projected.x - rx * 0.42, projected.y - ry * 0.34, rx * 0.94, ry * 0.8, seed + 23)} fill={`url(#${coolId})`} opacity={0.8} />
+                  <Path d={cloudPath(projected.x + rx * 0.44, projected.y + ry * 0.32, rx * 0.7, ry * 0.64, seed + 29)} fill={`url(#${warmId})`} opacity={0.85} />
+                  <Path d={cloudPath(projected.x + rx * 0.06, projected.y - ry * 0.4, rx * 0.5, ry * 0.46, seed + 31)} fill={`url(#${hazeId})`} opacity={0.95} />
+                  {/* An asymmetric wing pulled well off-centre — the single biggest cue that
+                      this is a shaped nebula and not a radial glow. */}
+                  <Path d={cloudPath(projected.x - rx * 0.62, projected.y + ry * 0.1, rx * 0.62, ry * 0.5, seed + 37)} fill={`url(#${warmId})`} opacity={0.7} />
+
+                  {/* THE DARK DUST LANE, offset onto the lower-right flank and rotated across
+                      it — soft, feathered, fading fully to transparent. It carves the glow so
+                      the eye reads folds and depth. Never over the Trapezium. */}
+                  <G transform={`rotate(24 ${(projected.x + rx * 0.22).toFixed(1)} ${(projected.y + ry * 0.26).toFixed(1)})`}>
+                    <Path
+                      d={cloudPath(projected.x + rx * 0.22, projected.y + ry * 0.26, rx * 0.6, ry * 0.28, seed + 41)}
+                      fill={`url(#neb-dust-${nebula.id})`}
+                    />
+                  </G>
                 </>
               )}
 
               <Circle cx={projected.x} cy={projected.y} r={Math.max(6, base * 0.3)} fill={`url(#${coreId})`} />
 
-              {/* The Trapezium — the knot of hot young stars at Orion's heart. Small, crisp,
-                  and the thing that makes the core read as a NURSERY rather than a smudge. */}
+              {/* Silver-white heart glow behind the Trapezium — the blaze at Orion's centre. */}
+              {isHero && (
+                <Circle cx={projected.x - base * 0.03} cy={projected.y + base * 0.02} r={base * 0.2} fill={`url(#neb-heart-${nebula.id})`} />
+              )}
+
+              {/* The Trapezium — the knot of hot young stars at Orion's heart. Now brighter
+                  and larger-cored (full white, r up ~30%), so it reads as a blazing nursery
+                  rather than a soft smudge. Kept crisp against the surrounding mist. */}
               {isHero && (
                 <>
-                  <Circle cx={projected.x - base * 0.05} cy={projected.y - base * 0.02} r={1.5} fill="#FFFFFF" opacity={0.95} />
-                  <Circle cx={projected.x + base * 0.07} cy={projected.y + base * 0.04} r={1.2} fill="#F2F6FF" opacity={0.85} />
-                  <Circle cx={projected.x + base * 0.01} cy={projected.y + base * 0.09} r={1} fill="#FFF8EC" opacity={0.8} />
-                  <Circle cx={projected.x - base * 0.1} cy={projected.y + base * 0.06} r={0.9} fill="#EAF1FF" opacity={0.7} />
+                  <Circle cx={projected.x - base * 0.05} cy={projected.y - base * 0.02} r={2} fill="#FFFFFF" opacity={1} />
+                  <Circle cx={projected.x + base * 0.07} cy={projected.y + base * 0.04} r={1.6} fill="#FFFFFF" opacity={0.95} />
+                  <Circle cx={projected.x + base * 0.01} cy={projected.y + base * 0.09} r={1.3} fill="#FFF8EC" opacity={0.92} />
+                  <Circle cx={projected.x - base * 0.1} cy={projected.y + base * 0.06} r={1.2} fill="#EAF1FF" opacity={0.88} />
                 </>
               )}
 
