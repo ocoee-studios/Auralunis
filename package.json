@@ -17,7 +17,7 @@
     "qa:sky": "node ./qa/sky-lens-accuracy-check.js",
     "qa:whole": "node ./qa/whole-app-qa-check.js",
     "qa:native-device": "node ./scripts/native-device-preflight.js",
-    "qa:all": "npm run qa:static && npm run qa:sky && npm run qa:whole && npm run qa:native-device && npm run qa:revenuecat && npm run qa:aura-pro && npm run qa:fresh-bugs && npm run qa:ephemeris && npm run qa:satellite && npm run qa:skylens",
+    "qa:all": "npm run qa:static && npm run qa:sky && npm run qa:whole && npm run qa:native-device && npm run qa:revenuecat && npm run qa:aura-pro && npm run qa:fresh-bugs && npm run qa:ephemeris && npm run qa:satellite && npm run qa:skylens && npm run qa:orion",
     "eas:dev:ios": "npx eas-cli@latest build --platform ios --profile development",
     "eas:sim:ios": "npx eas-cli@latest build --platform ios --profile development-simulator",
     "eas:preview:ios": "npx eas-cli@latest build --platform ios --profile preview",
@@ -26,7 +26,8 @@
     "qa:fresh-bugs": "node ./scripts/fresh-bug-check.js",
     "qa:ephemeris": "node ./scripts/ephemeris-selftest.js",
     "qa:satellite": "node ./scripts/satellite-selftest.js",
-    "qa:skylens": "node ./scripts/skylens-selftest.js"
+    "qa:skylens": "node ./scripts/skylens-selftest.js",
+    "qa:orion": "node ./scripts/orion-selftest.js"
   },
   "dependencies": {
     "@expo-google-fonts/cinzel": "^0.2.3",

@@ -67,6 +67,8 @@ type ArtDirection = {
   haze: string;
   rotation: number;
   elongated?: boolean;
+  /** THE hero. Larger size ceilings and richer gradients. Exactly one object has this. */
+  hero?: boolean;
 };
 
 // PALETTE — dusty rose, mauve, violet, indigo, icy blue, teal, amber, silver. No neon,
@@ -85,7 +87,17 @@ const CREAM = "#FFF0D8";
 // a screen-relative cap bounds it again (see MAX_OUTER_FRAC). Three independent ceilings,
 // so no object can run away regardless of its catalog entry or the FOV.
 const ART: Record<string, ArtDirection> = {
-  m42: { scale: 1.1, warm: ROSE, cool: "#8FB6FF", core: CREAM, haze: VIOLET, rotation: -18 },
+  // M42 — THE hero, and it was being strangled by rules written for its companions.
+  //
+  // Measured on a 16 Pro Max: the shared screen cap (MAX_OUTER_FRAC 0.09) bound BEFORE
+  // the catalog radius mattered, so Orion rendered 77px wide — of which only ~63px was
+  // the visible lobe — at a peak alpha of 0.72 x 0.32 = 0.23 over a bright Milky Way.
+  // A speck. Raising the global opacity could never fix that; the CAPS were the bug.
+  //
+  // It now has its own ceilings (see MAX_*_HERO) and its own richer gradients, and it is
+  // the ONLY object with hero: true. Every other nebula keeps the restrained treatment.
+  // Rose + violet + soft blue, silver-white core.
+  m42: { scale: 1.55, warm: ROSE, cool: "#8FB6FF", core: "#F6F2FF", haze: VIOLET, rotation: -18, hero: true },
   ngc2237: { scale: 0.9, warm: ROSE, cool: VIOLET, core: "#FFE7F5", haze: "#B08AD8", rotation: 8 },
   m1: { scale: 0.72, warm: AMBER, cool: TEAL, core: CREAM, haze: INDIGO, rotation: 28, elongated: true },
   ngc3372: { scale: 1.0, warm: AMBER, cool: TEAL, core: CREAM, haze: VIOLET, rotation: -12 },
@@ -114,11 +126,16 @@ const HERO_FALLOFF = [0.72, 0.46];
 
 const MIN_BASE = 14;
 const MAX_BASE = 30;
-// The outermost veil is 1.5 × base, and no nebula may exceed ~18% of the screen width.
-// That bounds the drawn diameter, so a wide FOV or a fat catalog radius can't produce a
-// screen-filling blob.
+// The outermost veil is 1.5 × base, and no ordinary nebula may exceed ~18% of the screen
+// width. That bounds the drawn diameter, so a wide FOV or a fat catalog radius can't
+// produce a screen-filling blob.
 const MAX_OUTER_FRAC = 0.09; // × box.width, as a RADIUS
 const OUTER_VEIL = 1.5;
+
+// HERO ceilings — M42 only. 0.15 × 430pt = 64.5px outer radius → ~129px apparent width,
+// inside the 90–140px target. Still a hard cap: it cannot run away on a wider screen.
+const MAX_BASE_HERO = 44;
+const MAX_OUTER_FRAC_HERO = 0.15;
 
 // UI EXCLUSION ZONES. Measured against the real chrome (top HUD ≈ 150px, bottom tray +
 // shutter ≈ 240px), not guessed. A nebula whose centre lands under the controls is
@@ -162,8 +179,6 @@ function cloudPath(cx: number, cy: number, rx: number, ry: number, seed: number)
 export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSphere = false, uiBottom = 120, onSelect }: Props) {
   if (!visible || box.width <= 0 || box.height <= 0) return null;
 
-  const maxOuter = box.width * MAX_OUTER_FRAC;
-
   const candidates = nebulae
     .filter((nebula) => {
       if (!HERO_NEBULA_IDS.has(nebula.id)) return false; // curated heroes only
@@ -196,6 +211,52 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSph
     .sort((a, b) => a.rank - b.rank)
     .slice(0, MAX_VISIBLE_NEBULAE);
 
+  // ── DEV-ONLY M42 DIAGNOSTIC ───────────────────────────────────────────────────
+  // Orion "not landing" could mean four different things (not selected / wrong position /
+  // too small / too faint). This says which, instead of leaving it to guesswork.
+  if (__DEV__) {
+    const m42 = nebulae.find((n) => n.id === "m42");
+    if (!m42) {
+      console.log("[M42] absent from catalog");
+    } else {
+      const chosen = candidates.find((c) => c.nebula.id === "m42");
+      let reject: string | null = null;
+      if (!chosen) {
+        if (!fullSphere && m42.altitudeDegrees <= 0) reject = `below horizon (alt ${m42.altitudeDegrees.toFixed(1)}°)`;
+        else {
+          const p = projectTarget(pointing, m42.azimuthDegrees, m42.altitudeDegrees, fov, box);
+          if (p.behind) reject = "behind the viewer";
+          else if (!p.onScreen) reject = `off-screen (x ${p.x.toFixed(0)}, y ${p.y.toFixed(0)})`;
+          else if (p.y < UI_TOP) reject = `under the top HUD (y ${p.y.toFixed(0)} < ${UI_TOP})`;
+          else if (p.y > box.height - uiBottom) reject = `under the bottom dock (y ${p.y.toFixed(0)})`;
+          else reject = "lost its slot to higher-priority heroes";
+        }
+      }
+      if (chosen) {
+        const art = ART.m42;
+        const maxOuter = box.width * MAX_OUTER_FRAC_HERO;
+        const base = Math.min(
+          Math.max(MIN_BASE, Math.min(MAX_BASE_HERO, m42.radius * art.scale)),
+          maxOuter / OUTER_VEIL
+        );
+        const w = base * OUTER_VEIL * 2;
+        const h = base * 0.84 * OUTER_VEIL * 2;
+        console.log("[M42] RENDERED", {
+          selected: true,
+          altitudeDeg: +m42.altitudeDegrees.toFixed(2),
+          x: +chosen.projected.x.toFixed(1),
+          y: +chosen.projected.y.toFixed(1),
+          widthPx: +w.toFixed(0),   // target 90–140
+          heightPx: +h.toFixed(0),
+          groupOpacity: 0.82,
+          peakAlpha: +(0.82 * 0.52).toFixed(2),
+        });
+      } else {
+        console.log("[M42] NOT RENDERED", { selected: false, altitudeDeg: +m42.altitudeDegrees.toFixed(2), reason: reject });
+      }
+    }
+  }
+
   if (candidates.length === 0) return null;
 
   return (
@@ -204,11 +265,12 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSph
     <Svg pointerEvents="box-none" width={box.width} height={box.height} style={StyleSheet.absoluteFillObject}>
       {candidates.map(({ nebula, projected, index }, rank) => {
         const art = ART[nebula.id];
+        const isHero = !!art.hero;
 
-        // THREE size ceilings, applied in order.
+        // THREE size ceilings, applied in order. The hero gets its own, larger ones.
+        const maxOuter = box.width * (isHero ? MAX_OUTER_FRAC_HERO : MAX_OUTER_FRAC);
         const scaled = nebula.radius * art.scale;
-        const clamped = Math.max(MIN_BASE, Math.min(MAX_BASE, scaled));
-        // …and finally: the outermost veil may never exceed MAX_OUTER_FRAC of the width.
+        const clamped = Math.max(MIN_BASE, Math.min(isHero ? MAX_BASE_HERO : MAX_BASE, scaled));
         const base = Math.min(clamped, maxOuter / OUTER_VEIL);
 
         const rx = art.elongated ? base * 1.36 : base;
@@ -220,35 +282,44 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSph
         const hazeId = `neb-haze-${nebula.id}`;
         const rotation = `rotate(${art.rotation} ${projected.x.toFixed(1)} ${projected.y.toFixed(1)})`;
 
+        // The hero carries roughly 1.7x the peak alpha of a companion. Measured: the old
+        // 0.72 x 0.32 = 0.23 simply vanished into the Milky Way. This lands near 0.42 —
+        // clearly present, still translucent, still integrated (nowhere near opaque).
+        const groupOpacity = isHero ? 0.82 : HERO_FALLOFF[rank] ?? 0.42;
+        const wA = isHero ? [0.52, 0.3, 0.08] : [0.32, 0.16, 0.04];
+        const cA = isHero ? [0.46, 0.28, 0.07] : [0.28, 0.14, 0.03];
+        const hA = isHero ? [0.26, 0.15] : [0.16, 0.09];
+        const kA = isHero ? [0.5, 0.28, 0.1] : [0.42, 0.22, 0.07];
+
         return (
           <G key={nebula.id}>
-            <G transform={rotation} opacity={HERO_FALLOFF[rank] ?? 0.42} pointerEvents="none">
+            <G transform={rotation} opacity={groupOpacity} pointerEvents="none">
               <Defs>
-                {/* Restrained stops — translucent mist over the Milky Way, never a solid
-                    painted patch. Every gradient fades fully to zero. */}
+                {/* Translucent mist over the Milky Way, never a solid painted patch. Every
+                    gradient fades fully to zero — no hard edge anywhere. */}
                 <RadialGradient id={warmId} cx="48%" cy="48%" r="52%">
-                  <Stop offset="0%" stopColor={art.warm} stopOpacity={0.32} />
-                  <Stop offset="45%" stopColor={art.warm} stopOpacity={0.16} />
-                  <Stop offset="80%" stopColor={art.warm} stopOpacity={0.04} />
+                  <Stop offset="0%" stopColor={art.warm} stopOpacity={wA[0]} />
+                  <Stop offset="45%" stopColor={art.warm} stopOpacity={wA[1]} />
+                  <Stop offset="80%" stopColor={art.warm} stopOpacity={wA[2]} />
                   <Stop offset="100%" stopColor={art.warm} stopOpacity={0} />
                 </RadialGradient>
                 <RadialGradient id={coolId} cx="48%" cy="48%" r="52%">
-                  <Stop offset="0%" stopColor={art.cool} stopOpacity={0.28} />
-                  <Stop offset="45%" stopColor={art.cool} stopOpacity={0.14} />
-                  <Stop offset="80%" stopColor={art.cool} stopOpacity={0.03} />
+                  <Stop offset="0%" stopColor={art.cool} stopOpacity={cA[0]} />
+                  <Stop offset="45%" stopColor={art.cool} stopOpacity={cA[1]} />
+                  <Stop offset="80%" stopColor={art.cool} stopOpacity={cA[2]} />
                   <Stop offset="100%" stopColor={art.cool} stopOpacity={0} />
                 </RadialGradient>
                 <RadialGradient id={hazeId} cx="50%" cy="50%" r="50%">
-                  <Stop offset="0%" stopColor={art.haze} stopOpacity={0.16} />
-                  <Stop offset="50%" stopColor={art.haze} stopOpacity={0.09} />
+                  <Stop offset="0%" stopColor={art.haze} stopOpacity={hA[0]} />
+                  <Stop offset="50%" stopColor={art.haze} stopOpacity={hA[1]} />
                   <Stop offset="100%" stopColor={art.haze} stopOpacity={0} />
                 </RadialGradient>
                 {/* Soft core. No white plateau, and emphatically NO dark oval stamp — the
                     centre is a diffuse swell of light, nothing else. */}
                 <RadialGradient id={coreId} cx="50%" cy="50%" r="50%">
-                  <Stop offset="0%" stopColor={art.core} stopOpacity={0.42} />
-                  <Stop offset="30%" stopColor={art.core} stopOpacity={0.22} />
-                  <Stop offset="70%" stopColor={art.core} stopOpacity={0.07} />
+                  <Stop offset="0%" stopColor={art.core} stopOpacity={kA[0]} />
+                  <Stop offset="30%" stopColor={art.core} stopOpacity={kA[1]} />
+                  <Stop offset="70%" stopColor={art.core} stopOpacity={kA[2]} />
                   <Stop offset="100%" stopColor={art.core} stopOpacity={0} />
                 </RadialGradient>
               </Defs>
@@ -266,7 +337,30 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSph
               <Circle cx={projected.x + rx * 0.26} cy={projected.y + ry * 0.3} r={base * 0.24} fill={art.haze} opacity={0.09} />
               <Circle cx={projected.x + rx * 0.32} cy={projected.y - ry * 0.28} r={base * 0.2} fill={art.cool} opacity={0.09} />
 
+              {/* HERO-ONLY STRUCTURE. Extra offset veils at different seeds, so M42 is not
+                  visibly the same stamped silhouette as its companions, plus the bright
+                  wing/sword asymmetry that makes Orion recognisable. No hard ellipse, no
+                  repeated shape, no dark central capsule. */}
+              {isHero && (
+                <>
+                  <Path d={cloudPath(projected.x - rx * 0.34, projected.y - ry * 0.3, rx * 0.9, ry * 0.78, seed + 23)} fill={`url(#${coolId})`} opacity={0.75} />
+                  <Path d={cloudPath(projected.x + rx * 0.36, projected.y + ry * 0.28, rx * 0.72, ry * 0.66, seed + 29)} fill={`url(#${warmId})`} opacity={0.8} />
+                  <Path d={cloudPath(projected.x + rx * 0.02, projected.y - ry * 0.34, rx * 0.55, ry * 0.5, seed + 31)} fill={`url(#${hazeId})`} opacity={0.9} />
+                </>
+              )}
+
               <Circle cx={projected.x} cy={projected.y} r={Math.max(6, base * 0.3)} fill={`url(#${coreId})`} />
+
+              {/* The Trapezium — the knot of hot young stars at Orion's heart. Small, crisp,
+                  and the thing that makes the core read as a NURSERY rather than a smudge. */}
+              {isHero && (
+                <>
+                  <Circle cx={projected.x - base * 0.05} cy={projected.y - base * 0.02} r={1.5} fill="#FFFFFF" opacity={0.95} />
+                  <Circle cx={projected.x + base * 0.07} cy={projected.y + base * 0.04} r={1.2} fill="#F2F6FF" opacity={0.85} />
+                  <Circle cx={projected.x + base * 0.01} cy={projected.y + base * 0.09} r={1} fill="#FFF8EC" opacity={0.8} />
+                  <Circle cx={projected.x - base * 0.1} cy={projected.y + base * 0.06} r={0.9} fill="#EAF1FF" opacity={0.7} />
+                </>
+              )}
 
               {/* Embedded stars — what ties the cloud into the star field instead of
                   floating it on top. Kept crisp so stars stay legible over the mist. */}
