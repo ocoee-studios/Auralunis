@@ -97,7 +97,20 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
       )}
 
       <G opacity={heroDim}>
-        <CosmicDustLayer box={box} nightMode={nightMode} />
+        {/* §1 — SHIMMERING STARDUST. Sky-locked silver-gold dust, concentrated along the
+            REAL galactic plane (sky.milkyWay, projected) so it hugs the Milky Way and
+            thins out when you point away — no faked screen-space band. Backmost layer,
+            behind the stars. Its animated glints ride TwinkleOverlay's shared clock
+            (see stardustGlints in SkyLensScreen) rather than a second animation system.
+            horizonCorrect keeps its motes off the below-horizon sky, same as every
+            other layer here. */}
+        <CosmicDustLayer
+          box={box}
+          project={project}
+          band={sky.milkyWay}
+          nightMode={nightMode}
+          fullSphere={horizonCorrect}
+        />
         <HorizonGlowLayer project={project} centerAzimuth={pointing.azimuthDegrees} box={box} nightMode={nightMode} boost={milkyWayBoost} />
 
         {activeLayers.has("deepsky") && nebulaOpacity > 0 && (

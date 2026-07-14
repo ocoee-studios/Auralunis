@@ -22,12 +22,29 @@ const PLANET_IDS = new Set(["mercury", "venus", "mars", "jupiter", "saturn"]);
 
 // Restrained planet radii for a wide-field planetarium. The illustrations remain
 // recognizable, but no object should dominate the full Sky Lens viewport.
+//
+// Nudged up ~10% on the disc and ~40% on the GLOW. The glow is doing the heavy lifting
+// deliberately: a planet needs to out-present the stars around it, and a big soft halo
+// reads as "bright object" far better than a big hard disc, which just reads as
+// "cartoon". Discs stay small; the light around them grows.
 const STYLE: Record<string, { disc: number; glow: number }> = {
-  mercury: { disc: 7, glow: 12 },
-  venus: { disc: 14, glow: 22 },
-  mars: { disc: 12, glow: 19 },
-  jupiter: { disc: 18, glow: 27 },
-  saturn: { disc: 16, glow: 24 },
+  mercury: { disc: 8, glow: 17 }, // still the shy one — findable, never showy
+  venus: { disc: 15, glow: 32 }, // brightest object after the Moon; unmistakable
+  mars: { disc: 13, glow: 30 }, // the hero of this pass
+  jupiter: { disc: 19, glow: 35 },
+  saturn: { disc: 17, glow: 32 },
+};
+
+// Each planet gets its OWN halo colour. Previously every planet shared a single gold
+// bloom, which is why Mars never read as red and why nothing separated from the star
+// field. Colouring the halo is the single biggest legibility win here — Mars now sits
+// in a warm rust glow, Venus in a cold platinum one, and the eye sorts them instantly.
+const HALO: Record<string, string> = {
+  mercury: "#C0C6D4",
+  venus: "#FFFBEA",
+  mars: "#FF5E2C",
+  jupiter: "#EF9F27",
+  saturn: "#D9A84E",
 };
 
 export function PlanetLayer({
@@ -41,21 +58,35 @@ export function PlanetLayer({
   zoom = 1,
   onSelect,
 }: Props) {
-  const planetScale = Math.min(1.35, Math.max(0.9, 0.9 + (zoom - 1) * 0.12));
+  // Floor lifted 0.9 → 1.0: at rest (zoom = 1) planets were rendering at 90% of their
+  // nominal size, which is where a lot of the "planets get lost" problem came from.
+  const planetScale = Math.min(1.45, Math.max(1.0, 1.0 + (zoom - 1) * 0.12));
 
   return (
     <G>
       <Defs>
-        <RadialGradient id="planetSoftBloom" cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFF4D6" stopOpacity={0.22} />
-          <Stop offset="48%" stopColor="#E8C77E" stopOpacity={0.08} />
-          <Stop offset="100%" stopColor="#D9A84E" stopOpacity={0} />
+        {/* Per-planet halos, built from HALO above. */}
+        {Object.entries(HALO).map(([id, hue]) => (
+          <RadialGradient key={id} id={`planetHalo-${id}`} cx="50%" cy="50%" r="50%">
+            <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.3} />
+            <Stop offset="26%" stopColor={hue} stopOpacity={0.26} />
+            <Stop offset="58%" stopColor={hue} stopOpacity={0.1} />
+            <Stop offset="100%" stopColor={hue} stopOpacity={0} />
+          </RadialGradient>
+        ))}
+        {/* Night Mode keeps the flat-red discipline — one red halo, no colour. */}
+        <RadialGradient id="planetHaloNight" cx="50%" cy="50%" r="50%">
+          <Stop offset="0%" stopColor={palette.accent} stopOpacity={0.2} />
+          <Stop offset="55%" stopColor={palette.accent} stopOpacity={0.07} />
+          <Stop offset="100%" stopColor={palette.accent} stopOpacity={0} />
         </RadialGradient>
       </Defs>
 
       {bodies.map((body) => {
         if (!PLANET_IDS.has(body.id) || !body.aboveHorizon) return null;
 
+        // POSITION IS SACRED. This projection call, and the x/y it yields, are
+        // untouched by this pass — every change below is radius, colour or opacity.
         const point = project(body.azimuthDegrees, body.altitudeDegrees);
         if (!point.onScreen) return null;
 
@@ -63,6 +94,7 @@ export function PlanetLayer({
         const disc = style.disc * planetScale;
         const glow = style.glow * planetScale;
         const color = nightMode ? palette.accent : PLANET_COLORS[body.id] ?? palette.accent;
+        const haloId = nightMode ? "planetHaloNight" : `planetHalo-${body.id}`;
         const { x, y } = point;
 
         const onPress = () => {
@@ -83,7 +115,11 @@ export function PlanetLayer({
 
         return (
           <G key={body.id}>
-            <Circle cx={x} cy={y} r={glow} fill="url(#planetSoftBloom)" opacity={nightMode ? 0.18 : 0.7} />
+            {/* Two-stage halo: a wide, very faint outer wash that lifts the planet off
+                the star field, then a tighter, brighter inner bloom that gives it the
+                "burning" quality a bright planet actually has to the naked eye. */}
+            <Circle cx={x} cy={y} r={glow * 1.5} fill={`url(#${haloId})`} opacity={nightMode ? 0.1 : 0.3} />
+            <Circle cx={x} cy={y} r={glow} fill={`url(#${haloId})`} opacity={nightMode ? 0.2 : 0.82} />
 
             {body.id === "saturn" && useIllustrations && (
               <G>
@@ -142,16 +178,34 @@ export function PlanetLayer({
                 ? placeLabel(labelX, y + 4, body.name, 12)
                 : { x: labelX, y: y + 4 };
               return (
-                <SvgText
-                  x={labelPoint.x}
-                  y={labelPoint.y}
-                  fill={palette.starLabel}
-                  fontSize={12}
-                  fontWeight="700"
-                  opacity={0.86}
-                >
-                  {body.name}
-                </SvgText>
+                <G>
+                  {/* Contrast without a hard plate behind the text: the label is drawn
+                      twice — once as a soft dark outline, once as the fill on top. It
+                      stays legible against a bright nebula or the Milky Way without
+                      putting an opaque box on the sky. */}
+                  <SvgText
+                    x={labelPoint.x}
+                    y={labelPoint.y}
+                    fill="none"
+                    stroke="#050914"
+                    strokeWidth={2.6}
+                    strokeOpacity={0.55}
+                    fontSize={12}
+                    fontWeight="700"
+                  >
+                    {body.name}
+                  </SvgText>
+                  <SvgText
+                    x={labelPoint.x}
+                    y={labelPoint.y}
+                    fill={palette.starLabel}
+                    fontSize={12}
+                    fontWeight="700"
+                    opacity={0.96}
+                  >
+                    {body.name}
+                  </SvgText>
+                </G>
               );
             })()}
           </G>

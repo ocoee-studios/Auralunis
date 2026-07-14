@@ -40,7 +40,8 @@ import { NebulaImageLayer } from "./layers/NebulaImageLayer";
 import { SkyVignette } from "./SkyVignette";
 import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
 import { AstralBreathingLayer } from "./layers/AstralBreathingLayer";
-import { LuxuryStarfieldFXLayer } from "./layers/LuxuryStarfieldFXLayer";
+import { stardustGlints } from "./layers/CosmicDustLayer";
+// LuxuryStarfieldFXLayer stays retired — see the note at its old mount point below.
 import { LunarGodRayLayer } from "./layers/LunarGodRayLayer";
 import { OrbitalGhostTrailsLayer } from "./layers/OrbitalGhostTrailsLayer";
 import { AuroraCurtainLayer } from "./layers/AuroraCurtainLayer";
@@ -570,8 +571,19 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         magnitude: s.magnitude
       });
     }
-    return out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 10);
-  }, [sky.stars, pointing, fov, box]);
+    const brightest = out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 10);
+    if (nightMode) return brightest;
+    // The stardust's SHIMMER rides this same overlay. TwinkleOverlay is the only
+    // crash-safe animator in the stack (View opacity on one shared clock), and it was
+    // driving just 10 dots — adding ~14 sky-locked dust glints costs one clock, no new
+    // animation system, and keeps the sparkle in lockstep with the star twinkle.
+    // The glints sit on the real galactic plane, exactly like CosmicDustLayer's motes.
+    const project = (az: number, alt: number) => projectTarget(pointing, az, alt, fov, box);
+    // `false` mirrors SkyLensCanvas's horizonCorrect: the sky below the horizon stays
+    // unpainted. This MUST match the flag the canvas hands CosmicDustLayer, or the
+    // glints would shimmer below the horizon in places the dust itself isn't drawn.
+    return [...brightest, ...stardustGlints(sky.milkyWay, project, box, false)];
+  }, [sky.stars, sky.milkyWay, pointing, fov, box, nightMode]);
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
 
@@ -764,29 +776,40 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             fullSphere={planetarium}
           />
 
-          {/* Ambient atmosphere (Gemini's refined pair): breathing sky bloom +
-              shimmering luxury starfield, above the background and below the star
-              canvas + labels/cards. Crash-safe (Animated.View + useAnimatedStyle). */}
+          {/* Ambient atmosphere: breathing sky bloom, above the background and below the
+              star canvas + labels/cards. Crash-safe (Animated.View + useAnimatedStyle).
+              COORDINATED WITH THE STARDUST: both of these are flat full-screen gradients
+              — they add glow, but they also VEIL, and it's contrast that lets stardust
+              and nebulae read. Now that CosmicDustLayer carries the atmosphere with
+              sky-locked texture (and its old dark #0A0806 wash is gone), these two step
+              back ~18% so the dust and the nebulae are what you actually see. Total
+              ambient light is roughly conserved; it's just better distributed. */}
           <PremiumSkyBloomLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
             moonVisible={sky.bodies.find((b) => b.id === "moon")?.aboveHorizon ?? false}
             milkyWayVisible={active.has("milkyway")}
-            intensity={(planetarium ? 0.9 : 0.55) * horizonFade}
+            intensity={(planetarium ? 0.74 : 0.45) * horizonFade}
           />
-          {/* AstralBreathingLayer — re-enabled at LOW intensity (Path-to-10 §6): a
-              barely-perceptible 22s breathing swell so the sky feels alive, not static.
-              Crash-safe (single Animated.View + useAnimatedStyle over a static Svg).
-              Faded out below the horizon with the other screen-fixed FX. */}
+          {/* AstralBreathingLayer — a barely-perceptible 22s breathing swell so the sky
+              feels alive, not static. Crash-safe (single Animated.View + useAnimatedStyle
+              over a static Svg). Faded out below the horizon with the other screen-fixed
+              FX. This is the layer that makes the whole sky "breathe"; the per-mote
+              sparkle is TwinkleOverlay's job. Two scales of motion, one calm result. */}
           <AstralBreathingLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
-            intensity={(planetarium ? 0.55 : 0.4) * horizonFade}
+            intensity={(planetarium ? 0.44 : 0.32) * horizonFade}
           />
-          {/* LuxuryStarfieldFXLayer disabled — 110 particles + shimmer animation
-              is expensive. Re-enable when performance budget allows. */}
+          {/* LuxuryStarfieldFXLayer stays RETIRED — and is no longer even imported.
+              It rendered 90 screen-fixed particles on its own shimmer clock, plus two
+              hardcoded "diffraction spike" stars pinned at (0.18, 0.24) and (0.82, 0.42)
+              — fake objects glued to the screen that slid over the real sky as you
+              panned. CosmicDustLayer now does this properly: sky-locked, galactic-plane
+              weighted, static SVG, with its shimmer riding TwinkleOverlay's existing
+              clock. Nothing here to re-enable. */}
           {moonProj && (
             <LunarGodRayLayer
               width={box.width}
