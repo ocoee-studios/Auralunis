@@ -56,6 +56,11 @@ const ART: Record<string, ArtDirection> = {
 const HERO_PRIORITY = ["m42", "m8", "ngc3372", "ngc7000", "ngc6960", "ngc2237", "m20"];
 const MAX_VISIBLE_NEBULAE = 3;
 
+// Per-rank luminosity. The best object on screen shines; its companions recede. Three
+// equally-bright clouds read as a sticker sheet — one bright cloud with two quiet
+// companions reads as a composition.
+const HERO_FALLOFF = [0.94, 0.74, 0.58];
+
 function cloudPath(cx: number, cy: number, rx: number, ry: number, seed: number): string {
   const count = 28;
   const points: Array<[number, number]> = [];
@@ -64,20 +69,23 @@ function cloudPath(cx: number, cy: number, rx: number, ry: number, seed: number)
 
     // FINE irregularity — high-frequency crinkle along the edge. Feathering, not shape.
     const fine =
-      ((Math.sin(seed * 17.17 + i * 9.73) + 1) / 2) * 0.06 +
-      ((Math.sin(seed * 5.31 + i * 23.9) + 1) / 2) * 0.03;
+      ((Math.sin(seed * 17.17 + i * 9.73) + 1) / 2) * 0.05 +
+      ((Math.sin(seed * 5.31 + i * 23.9) + 1) / 2) * 0.02;
 
-    // LOBES — the actual fix for "too perfectly round". Low-frequency 2- and 3-lobed
-    // harmonics with seeded phases make one flank bulge while another pinches, the way a
-    // real emission cloud does. Fine wobble alone only ever produced a crinkly CIRCLE;
-    // it's these that give the silhouette a direction and a character.
+    // LOBES — the fix for "still reads as a soft glowing circle". Low-frequency harmonics
+    // with seeded phases make one flank bulge while another pinches, the way a real
+    // emission cloud does. Fine wobble alone only ever produces a crinkly CIRCLE. THREE
+    // harmonics now (2-, 3- and 5-lobed) at ~1.6× the previous amplitude: enough that no
+    // two nebulae share a silhouette and none of them reads as round.
     const lobes =
-      Math.cos(angle * 2 + seed * 1.7) * 0.09 +
-      Math.cos(angle * 3 - seed * 0.9) * 0.05;
+      Math.cos(angle * 2 + seed * 1.7) * 0.11 +
+      Math.cos(angle * 3 - seed * 0.9) * 0.07 +
+      Math.cos(angle * 5 + seed * 2.3) * 0.04;
 
-    // Mean radius ≈ 0.945 — slightly BELOW the previous pass's ≈0.97, so the asymmetry
-    // is bought without a single pixel of extra footprint. Bulges are paid for by pinches.
-    const wobble = 0.9 + fine + lobes;
+    // Base pulled 0.90 → 0.88 to PAY for the bigger lobes. Mean radius ≈ 0.915, BELOW the
+    // previous pass's ≈0.945 and the pass before that's ≈0.97. Each round of this has
+    // made them more irregular and very slightly smaller — never bigger.
+    const wobble = 0.88 + fine + lobes;
 
     points.push([
       cx + Math.cos(angle) * rx * wobble,
@@ -128,7 +136,7 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props
 
   return (
     <Svg pointerEvents="none" width={box.width} height={box.height} style={StyleSheet.absoluteFillObject}>
-      {candidates.map(({ nebula, projected, index }) => {
+      {candidates.map(({ nebula, projected, index }, rank) => {
         const art = ART[nebula.id];
         // UNCHANGED — the size contract. Do not widen this clamp.
         const base = Math.max(16, Math.min(34, nebula.radius * art.scale));
@@ -142,8 +150,11 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props
         const rotation = `rotate(${art.rotation} ${projected.x.toFixed(1)} ${projected.y.toFixed(1)})`;
 
         return (
-          // 0.82 → 0.94: the ~15% luminosity lift, applied to the whole jewel at once.
-          <G key={nebula.id} transform={rotation} opacity={0.94}>
+          // ONLY A FEW REALLY SHINE. `candidates` is already sorted by hero priority, so
+          // rank 0 is the best object on screen. Fading each subsequent one gives the
+          // composition a clear protagonist instead of three equal glowing shapes
+          // competing — the difference between a scene and a sticker sheet.
+          <G key={nebula.id} transform={rotation} opacity={HERO_FALLOFF[rank] ?? 0.6}>
             <Defs>
               <RadialGradient id={warmId} cx="48%" cy="48%" r="52%">
                 <Stop offset="0%" stopColor={art.core} stopOpacity={0.6} />
@@ -167,14 +178,15 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props
                 <Stop offset="45%" stopColor={art.haze} stopOpacity={0.12} />
                 <Stop offset="100%" stopColor={art.haze} stopOpacity={0} />
               </RadialGradient>
-              {/* Core softened (white 0.50 → 0.30, and the falloff starts sooner). A hot
-                  white pinpoint made these read as a bright bead with fluff around it;
-                  a real core is a diffuse SWELL of light. Still no dark centre — the
-                  punched-out middle is never coming back. */}
+              {/* Core softened AGAIN (white 0.30 → 0.20, no pure-white plateau at all).
+                  Nebulae are the DIFFUSE tier of the glow hierarchy — they must never have
+                  a crisp core, because that's what bright stars have. A nebula's centre is
+                  a swell of light, not a bead. Still no dark centre — the punched-out
+                  middle is never coming back. */}
               <RadialGradient id={coreId} cx="50%" cy="50%" r="50%">
-                <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.3} />
-                <Stop offset="30%" stopColor={art.core} stopOpacity={0.22} />
-                <Stop offset="66%" stopColor={art.core} stopOpacity={0.09} />
+                <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.2} />
+                <Stop offset="28%" stopColor={art.core} stopOpacity={0.16} />
+                <Stop offset="62%" stopColor={art.core} stopOpacity={0.07} />
                 <Stop offset="100%" stopColor={art.core} stopOpacity={0} />
               </RadialGradient>
             </Defs>
@@ -191,14 +203,17 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible }: Props
                 and cannot enlarge the object. */}
             <Path d={cloudPath(projected.x - rx * 0.12, projected.y - ry * 0.1, rx * 0.46, ry * 0.44, seed + 17)} fill={`url(#${coolId})`} opacity={0.44} />
 
-            {/* INTERNAL COLOUR VARIATION — three small off-centre tint pools (rose, lilac,
-                blue) well inside the silhouette. Without these, a nebula is one gradient
-                blending two colours, which always reads as airbrush. Real clouds have
-                patches: a rose flank, a lilac hollow, a cold blue edge. Tiny radii and low
-                opacity — this is felt as richness, not seen as blobs. */}
-            <Circle cx={projected.x - rx * 0.3} cy={projected.y - ry * 0.22} r={base * 0.3} fill={art.warm} opacity={0.16} />
-            <Circle cx={projected.x + rx * 0.26} cy={projected.y + ry * 0.3} r={base * 0.26} fill={art.haze} opacity={0.15} />
-            <Circle cx={projected.x + rx * 0.34} cy={projected.y - ry * 0.3} r={base * 0.22} fill={art.cool} opacity={0.14} />
+            {/* INTERNAL COLOUR VARIATION — five off-centre tint pools (rose, lilac, blue)
+                at varied radii, well inside the silhouette. Without these, a nebula is one
+                gradient blending two colours, which always reads as airbrush. Real clouds
+                are patchy: a rose flank, a lilac hollow, a cold blue edge. Low opacity and
+                small radii — felt as richness, never seen as blobs. Two more than last pass,
+                deliberately uneven in size so no symmetry creeps back in. */}
+            <Circle cx={projected.x - rx * 0.3} cy={projected.y - ry * 0.22} r={base * 0.32} fill={art.warm} opacity={0.17} />
+            <Circle cx={projected.x + rx * 0.26} cy={projected.y + ry * 0.3} r={base * 0.24} fill={art.haze} opacity={0.16} />
+            <Circle cx={projected.x + rx * 0.34} cy={projected.y - ry * 0.3} r={base * 0.2} fill={art.cool} opacity={0.15} />
+            <Circle cx={projected.x - rx * 0.12} cy={projected.y + ry * 0.36} r={base * 0.17} fill={art.cool} opacity={0.12} />
+            <Circle cx={projected.x + rx * 0.05} cy={projected.y - ry * 0.1} r={base * 0.27} fill={art.haze} opacity={0.1} />
 
             {/* No dark oval/dust stamp. The centre is only a quiet, diffuse glow. */}
             <Circle cx={projected.x} cy={projected.y} r={Math.max(7, base * 0.3)} fill={`url(#${coreId})`} />

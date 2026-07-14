@@ -73,12 +73,14 @@ const styles = StyleSheet.create({
     alignSelf: "stretch",
     marginHorizontal: 8,
     borderRadius: 24,
-    backgroundColor: "rgba(2,8,20,0.66)",
-    borderWidth: 1,
-    borderColor: "rgba(217,168,78,0.16)",
+    // Softened with the rest of the chrome: a lighter bar with a hairline edge and a
+    // wider, gentler shadow reads as a floating glass tray instead of a dark slab.
+    backgroundColor: "rgba(2,8,20,0.52)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(217,168,78,0.13)",
     shadowColor: "#000",
-    shadowOpacity: 0.3,
-    shadowRadius: 18,
+    shadowOpacity: 0.22,
+    shadowRadius: 22,
     shadowOffset: { width: 0, height: 8 },
     overflow: "hidden",
   },
@@ -100,7 +102,7 @@ const styles = StyleSheet.create({
     paddingVertical: 7,
     borderRadius: 18,
     borderWidth: 1,
-    backgroundColor: "rgba(5,13,29,0.48)",
+    backgroundColor: "rgba(5,13,29,0.38)",
   },
   // Leave a deliberate clean gutter after the four primary controls. This prevents
   // the fifth pill from appearing as a chopped gold sliver at rest, while a swipe still

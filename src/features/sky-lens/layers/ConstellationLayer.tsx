@@ -5,6 +5,10 @@ import { type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLens
 import type { LabelPlacer } from "../labelLayout";
 
 const GOLD = "#D9A84E";
+// Constellation NAMES get a softer, warmer gold than the line work. The saturated
+// #D9A84E reads as UI chrome when set as text; this is closer to engraved brass — it
+// sits back into the sky instead of sitting on top of it.
+const CON_LABEL_GOLD = "#C9A468";
 
 type Props = {
   constellations: HorizontalConstellation[];
@@ -49,19 +53,22 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
             const ix1 = a.x + (b.x - a.x) * 0.82;
             const iy1 = a.y + (b.y - a.y) * 0.82;
 
+            // LINE WORK STEPS BACK (−15% opacity, thinner). The figures were still reading
+            // as a diagram drawn ON the sky rather than a constellation felt WITHIN it.
+            // The stars are the heroes; the lines are only a hint that joins them.
             if (!showNodes) {
               return (
                 <G key={`${c.id}-l${idx}`} opacity={belowHorizon && !fullSphere ? 0.15 : 1}>
-                  <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.65} strokeOpacity={0.34} strokeLinecap="round" />
+                  <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.55} strokeOpacity={0.29} strokeLinecap="round" />
                 </G>
               );
             }
 
             return (
               <G key={`${c.id}-l${idx}`} opacity={belowHorizon && !fullSphere ? 0.15 : 1}>
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={3} strokeOpacity={0.025} strokeLinecap="round" />
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.5} strokeOpacity={0.26} strokeLinecap="round" />
-                <Line x1={ix0} y1={iy0} x2={ix1} y2={iy1} stroke={lineColor} strokeWidth={1.15} strokeOpacity={0.34} strokeLinecap="round" />
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={3} strokeOpacity={0.022} strokeLinecap="round" />
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.45} strokeOpacity={0.22} strokeLinecap="round" />
+                <Line x1={ix0} y1={iy0} x2={ix1} y2={iy1} stroke={lineColor} strokeWidth={1} strokeOpacity={0.29} strokeLinecap="round" />
               </G>
             );
           });
@@ -94,18 +101,22 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
             {segments}
             {nodes}
             {labelVisible && (() => {
+              // A REGION name, not an object name — so it must sit BELOW star and planet
+              // labels in the visual hierarchy. Lighter weight (500 → 400), smaller
+              // (11 → 10.5), fainter (0.42 → 0.36) and warmed into brass. Wider letter
+              // spacing keeps it legible while it recedes: engraved, not printed.
               const label = c.name.toUpperCase();
-              const position = placeLabel ? placeLabel(centroid.x, centroid.y, label, 11) : { x: centroid.x, y: centroid.y };
+              const position = placeLabel ? placeLabel(centroid.x, centroid.y, label, 10.5) : { x: centroid.x, y: centroid.y };
               return (
                 <>
                   <SvgText
                     x={position.x}
                     y={position.y}
-                    fill={nightMode ? palette.conLabel : GOLD}
-                    fontSize={11}
-                    fontWeight="500"
-                    letterSpacing={2.2}
-                    opacity={0.42}
+                    fill={nightMode ? palette.conLabel : CON_LABEL_GOLD}
+                    fontSize={10.5}
+                    fontWeight="400"
+                    letterSpacing={2.6}
+                    opacity={0.36}
                     textAnchor="middle"
                   >
                     {label}

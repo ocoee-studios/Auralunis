@@ -39,8 +39,9 @@ const SILVER = ["#FFFFFF", "#EAF0FF", "#F6F9FF", "#DCE6FA"];
 const GOLD = ["#FFF1C8", "#E8C77E", "#D9A84E", "#FFF8E7"];
 
 // How far off the galactic spine the dust may drift, as a fraction of screen height.
-// 0.085 → 0.07: a tighter band hugs the Milky Way rather than hazing the sky around it.
-const BAND_THICKNESS_FRAC = 0.07;
+// 0.085 → 0.07 → 0.06: each pass pulls the dust tighter onto the Milky Way rather than
+// letting it haze the sky around it. Curated, not scattered.
+const BAND_THICKNESS_FRAC = 0.06;
 
 // Galactic longitude → relative dust density. The band is not uniform: it swells
 // toward the Sagittarius core (l≈0) and the Cygnus star cloud (l≈80), and thins
@@ -48,7 +49,10 @@ const BAND_THICKNESS_FRAC = 0.07;
 // shimmer feel like it belongs to the galaxy rather than sprinkled over it.
 function bandDensity(lDeg: number): number {
   const rad = (lDeg * Math.PI) / 180;
-  const core = Math.cos(rad) * 0.5 + 0.5; // 1 at the core, 0 at the anticentre
+  // Raised to a power so the curve is PEAKED rather than a gentle cosine swell: dust
+  // now clusters hard into the bright star clouds and all but vanishes at the anticentre.
+  // This is what makes the shimmer feel curated instead of evenly sprinkled along a ring.
+  const core = (Math.cos(rad) * 0.5 + 0.5) ** 1.7; // 1 at the core, 0 at the anticentre
   const cygnus = Math.exp(-(((lDeg - 80) / 34) ** 2)) * 0.55;
   const carina = Math.exp(-(((lDeg - 287) / 30) ** 2)) * 0.4;
   return 0.3 + core * 0.7 + cygnus + carina;
@@ -69,7 +73,7 @@ const BAND_MOTES: BandMote[] = (() => {
   const rng = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 0xffffffff);
   const out: BandMote[] = [];
   let guard = 0;
-  while (out.length < 110 && guard < 6000) {
+  while (out.length < 88 && guard < 6000) {
     guard += 1;
     const lDeg = rng() * 360;
     // Rejection-sample against the density curve so motes cluster in the bright star
@@ -94,7 +98,7 @@ const BAND_MOTES: BandMote[] = (() => {
 
 // Faint dust everywhere else, seeded in SKY coords so it pans with the stars.
 //
-// CUT 46 → 16 AND DIMMED after device review. A uniform sprinkle across the whole sphere
+// CUT 46 → 16 → 9 AND DIMMED across two device reviews. A uniform sprinkle across the sphere
 // is the enemy of this effect: spread evenly, dust stops reading as the Milky Way's
 // atmosphere and starts reading as a field of faint extra stars — which is precisely the
 // "ordinary extra stars" note. What's left is just enough to keep the sky off the
@@ -102,7 +106,7 @@ const BAND_MOTES: BandMote[] = (() => {
 const AMBIENT_MOTES = (() => {
   let s = 0x5f3759df >>> 0;
   const rng = () => ((s = (s * 1103515245 + 12345) >>> 0) / 0xffffffff);
-  return Array.from({ length: 16 }, () => {
+  return Array.from({ length: 9 }, () => {
     const silver = rng() > 0.5;
     return {
       az: rng() * 360,
@@ -122,7 +126,7 @@ const GLINT_MOTES = (() => {
   const rng = () => ((s = (s * 1664525 + 1013904223) >>> 0) / 0xffffffff);
   const out: { t: number; perp: number; size: number; color: string; offset: number }[] = [];
   let guard = 0;
-  while (out.length < 14 && guard < 2000) {
+  while (out.length < 10 && guard < 2000) {
     guard += 1;
     const lDeg = rng() * 360;
     if (rng() > bandDensity(lDeg) / 1.7) continue;

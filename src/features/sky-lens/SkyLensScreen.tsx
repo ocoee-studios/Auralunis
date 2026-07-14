@@ -1137,18 +1137,23 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 21,
-    backgroundColor: "rgba(7,18,37,0.8)",
-    borderWidth: 1,
-    borderColor: "rgba(217,168,78,0.34)",
+    backgroundColor: "rgba(7,18,37,0.58)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(217,168,78,0.24)",
     alignItems: "center",
     justifyContent: "center"
   },
   iconBtnText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
+  // UI CHROME — lightened. The panels were dense enough to read as opaque slabs sitting
+  // ON the sky. Dropping the fills and adding a hairline gold edge lets the sky show
+  // through, so the chrome reads as GLASS resting over the scene rather than as a lid.
   hudPill: {
     flex: 1,
     marginHorizontal: 10,
-    backgroundColor: "rgba(7,18,37,0.6)",
-    borderRadius: 14,
+    backgroundColor: "rgba(7,18,37,0.42)",
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(217,168,78,0.14)",
     paddingVertical: 8,
     paddingHorizontal: 12,
     alignItems: "center"
@@ -1187,7 +1192,7 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   hudText: { fontSize: 13, fontWeight: "900", fontVariant: ["tabular-nums"] },
-  hudSub: { color: AuraLunisColors.muted, fontSize: 10, marginTop: 1 },
+  hudSub: { color: AuraLunisColors.muted, fontSize: 10, marginTop: 1, opacity: 0.72 },
   bottom: { position: "absolute", left: 0, right: 0, bottom: 0 },
   skySliderWrap: {
     flexDirection: "row",

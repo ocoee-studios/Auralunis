@@ -105,14 +105,20 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
                 </G>
               );
             })()}
-            {/* Feathered glow on the bright stars — a smooth multi-step opacity ramp
-                (no hard ring). Brightest get the widest, faintest outer halo so the
-                falloff reads as soft light, not concentric discs. */}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.035} />}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.06} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.1} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.16} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 1.2} fill={color} opacity={0.24} />}
+            {/* GLOW HIERARCHY — bright stars are the CRISP tier. The halo is pulled in
+                tighter and the inner steps are brightened, so a star reads as a hard point
+                of light wearing a neat halo. That's deliberately the opposite of the
+                nebulae, which are pure diffuse haze with no crisp core anywhere. Same
+                number of circles; the ramp is just steeper and narrower.
+                  · bright stars → tight, crisp, luminous  (this block)
+                  · planets      → richer, more solid      (PlanetLayer)
+                  · nebulae      → soft haze, never sharp  (NebulaImageLayer)
+                  · dome stars   → restrained              (DomeStarLayer, untouched) */}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 7} fill={color} opacity={0.03} />}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 5.5} fill={color} opacity={0.055} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 3.6} fill={color} opacity={0.1} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.3} fill={color} opacity={0.18} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 1.1} fill={color} opacity={0.28} />}
             {glint && (
               <>
                 {/* tapered 4-point diffraction — a faint wide underlay glow + a crisp
@@ -126,7 +132,8 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             )}
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
             {/* white-hot core for the showpiece stars */}
-            {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.85} />}
+            {/* White-hot core — the crispness that makes a showpiece star a JEWEL. */}
+            {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.92} />}
             {labeled && (() => {
               const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 12) : { x: p.x + r + 3, y: p.y + 3 };
               return (

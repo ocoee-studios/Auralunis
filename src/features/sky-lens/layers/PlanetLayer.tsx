@@ -98,11 +98,16 @@ export function PlanetLayer({
     <G>
       <Defs>
         {/* Per-planet halos, built from HALO above. */}
+        {/* Planets are the RICH tier of the glow hierarchy: not as crisp as a bright star,
+            never as diffuse as a nebula. Their halo holds more colour deeper in (26% →
+            34% at the inner stop) so the light feels SOLID and saturated around the disc
+            rather than thinning immediately into haze. Radii are unchanged — this is
+            density, not size. */}
         {Object.entries(HALO).map(([id, hue]) => (
           <RadialGradient key={id} id={`planetHalo-${id}`} cx="50%" cy="50%" r="50%">
-            <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.3} />
-            <Stop offset="26%" stopColor={hue} stopOpacity={0.26} />
-            <Stop offset="58%" stopColor={hue} stopOpacity={0.1} />
+            <Stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.34} />
+            <Stop offset="24%" stopColor={hue} stopOpacity={0.34} />
+            <Stop offset="52%" stopColor={hue} stopOpacity={0.14} />
             <Stop offset="100%" stopColor={hue} stopOpacity={0} />
           </RadialGradient>
         ))}
@@ -140,8 +145,15 @@ export function PlanetLayer({
             {/* Two-stage halo: a wide, very faint outer wash that lifts the planet off
                 the star field, then a tighter, brighter inner bloom that gives it the
                 "burning" quality a bright planet actually has to the naked eye. */}
-            <Circle cx={x} cy={y} r={glow * 1.5} fill={`url(#${haloId})`} opacity={nightMode ? 0.1 : 0.3} />
+            <Circle cx={x} cy={y} r={glow * 1.5} fill={`url(#${haloId})`} opacity={nightMode ? 0.1 : 0.28} />
             <Circle cx={x} cy={y} r={glow} fill={`url(#${haloId})`} opacity={nightMode ? 0.2 : 0.82} />
+            {/* A tight inner bloom hugging the disc. This is what reads as SOLIDITY — the
+                planet sits in a dense pool of its own light instead of fading straight out
+                into a wide soft wash. It's also what separates a planet from a bright star
+                at a glance: the star's halo is crisp and thin, the planet's is deep. */}
+            {!nightMode && (
+              <Circle cx={x} cy={y} r={disc * 1.75} fill={`url(#${haloId})`} opacity={0.55} />
+            )}
 
             {body.id === "saturn" && useIllustrations && (
               <G>
