@@ -1260,8 +1260,10 @@ const styles = StyleSheet.create({
   watermarkSub: { color: "rgba(244,227,184,0.75)", fontSize: 11, fontWeight: "600", marginTop: 1 },
   finder: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   finderText: {
-    backgroundColor: "rgba(7,18,37,0.78)",
-    fontSize: 13,
+    backgroundColor: "rgba(7,18,37,0.82)",
+    fontSize: 17,
+    textShadowColor: "rgba(0,0,0,0.6)",
+    textShadowRadius: 3,
     fontWeight: "800",
     paddingHorizontal: 16,
     paddingVertical: 9,
@@ -1336,8 +1338,8 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
-  hudText: { fontSize: 13, fontWeight: "900", fontVariant: ["tabular-nums"] },
-  hudSub: { color: AuraLunisColors.muted, fontSize: 10, marginTop: 1, opacity: 0.72 },
+  hudText: { fontSize: 19, fontWeight: "900", fontVariant: ["tabular-nums"], textShadowColor: "rgba(0,0,0,0.6)", textShadowRadius: 3 },
+  hudSub: { color: AuraLunisColors.muted, fontSize: 15, fontWeight: "500", marginTop: 2, opacity: 0.82 },
   bottom: { position: "absolute", left: 0, right: 0, bottom: 0 },
   skySliderWrap: {
     flexDirection: "row",

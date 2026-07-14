@@ -137,6 +137,26 @@ const OUTER_VEIL = 1.5;
 const MAX_BASE_HERO = 44;
 const MAX_OUTER_FRAC_HERO = 0.15;
 
+// M42 texture — elongated feathered FILAMENTS that curve around the Trapezium, instead of
+// concentric circular pools (which read as identifiable bubbles). Each is placed at an
+// angle around the core and elongated TANGENTIALLY (its long axis perpendicular to the
+// radius), so it wraps the centre rather than pointing at it — and, being tangential, its
+// long axis never grows the radial footprint. Low per-filament opacity: no single one is
+// identifiable; together they read as one integrated rose-violet cloud.
+//   ang  — degrees around the core
+//   dist — centre offset, × rx
+//   len  — tangential half-length, × rx    wid — radial half-width, × ry
+//   tone — warm | cool | haze              op  — this filament's opacity
+const HERO_FILAMENTS = [
+  { ang: 18,  dist: 0.52, len: 0.98, wid: 0.30, tone: "warm", op: 0.4, seed: 51 },
+  { ang: 74,  dist: 0.55, len: 0.84, wid: 0.26, tone: "haze", op: 0.38, seed: 57 },
+  { ang: 128, dist: 0.58, len: 0.92, wid: 0.28, tone: "cool", op: 0.4, seed: 61 },
+  { ang: 196, dist: 0.5,  len: 1.0,  wid: 0.30, tone: "warm", op: 0.42, seed: 67 },
+  { ang: 252, dist: 0.55, len: 0.86, wid: 0.26, tone: "haze", op: 0.38, seed: 71 },
+  { ang: 312, dist: 0.58, len: 0.9,  wid: 0.30, tone: "cool", op: 0.4, seed: 73 },
+  { ang: 348, dist: 0.34, len: 0.72, wid: 0.24, tone: "warm", op: 0.36, seed: 79 },
+] as const;
+
 // UI EXCLUSION ZONES. Measured against the real chrome (top HUD ≈ 150px, bottom tray +
 // shutter ≈ 240px), not guessed. A nebula whose centre lands under the controls is
 // dropped outright rather than drawn beneath them.
@@ -351,37 +371,47 @@ export function NebulaImageLayer({ nebulae, pointing, fov, box, visible, fullSph
               <Path d={cloudPath(projected.x + rx * 0.08, projected.y + ry * 0.26, rx * 0.7, ry * 0.62, seed + 11)} fill={`url(#${warmId})`} />
               <Path d={cloudPath(projected.x - rx * 0.12, projected.y - ry * 0.1, rx * 0.46, ry * 0.44, seed + 17)} fill={`url(#${coolId})`} />
 
-              {/* Internal colour variation — uneven tint pools, well inside the silhouette.
-                  For the hero these are pushed to OPPOSITE flanks and strengthened, so rose
-                  and violet read as distinct regions rather than one blended wash: warm
-                  rose pools lower-left, cool violet upper-right. */}
-              <Circle cx={projected.x - rx * (isHero ? 0.36 : 0.3)} cy={projected.y + ry * (isHero ? 0.24 : -0.22)} r={base * 0.32} fill={art.warm} opacity={isHero ? 0.2 : 0.1} />
-              <Circle cx={projected.x + rx * (isHero ? 0.34 : 0.26)} cy={projected.y - ry * (isHero ? 0.28 : -0.3)} r={base * 0.28} fill={art.haze} opacity={isHero ? 0.18 : 0.09} />
-              <Circle cx={projected.x + rx * 0.32} cy={projected.y - ry * 0.28} r={base * 0.2} fill={art.cool} opacity={0.09} />
-
-              {/* HERO-ONLY STRUCTURE. Extra strongly-offset veils break the circle so the
-                  silhouette reads as an irregular cloud, not an orb. Different seeds, so it
-                  is never the same stamped shape as its companions. No hard ellipse, no
-                  central capsule. */}
-              {isHero && (
+              {/* Companion nebulae keep the simple tint pools — cheap, and at their small
+                  size a soft circle never reads as a "bubble". The HERO does not use these;
+                  it gets the filament system below instead. */}
+              {!isHero && (
                 <>
-                  <Path d={cloudPath(projected.x - rx * 0.42, projected.y - ry * 0.34, rx * 0.94, ry * 0.8, seed + 23)} fill={`url(#${coolId})`} opacity={0.8} />
-                  <Path d={cloudPath(projected.x + rx * 0.44, projected.y + ry * 0.32, rx * 0.7, ry * 0.64, seed + 29)} fill={`url(#${warmId})`} opacity={0.85} />
-                  <Path d={cloudPath(projected.x + rx * 0.06, projected.y - ry * 0.4, rx * 0.5, ry * 0.46, seed + 31)} fill={`url(#${hazeId})`} opacity={0.95} />
-                  {/* An asymmetric wing pulled well off-centre — the single biggest cue that
-                      this is a shaped nebula and not a radial glow. */}
-                  <Path d={cloudPath(projected.x - rx * 0.62, projected.y + ry * 0.1, rx * 0.62, ry * 0.5, seed + 37)} fill={`url(#${warmId})`} opacity={0.7} />
-
-                  {/* THE DARK DUST LANE, offset onto the lower-right flank and rotated across
-                      it — soft, feathered, fading fully to transparent. It carves the glow so
-                      the eye reads folds and depth. Never over the Trapezium. */}
-                  <G transform={`rotate(24 ${(projected.x + rx * 0.22).toFixed(1)} ${(projected.y + ry * 0.26).toFixed(1)})`}>
-                    <Path
-                      d={cloudPath(projected.x + rx * 0.22, projected.y + ry * 0.26, rx * 0.6, ry * 0.28, seed + 41)}
-                      fill={`url(#neb-dust-${nebula.id})`}
-                    />
-                  </G>
+                  <Circle cx={projected.x - rx * 0.3} cy={projected.y + ry * 0.22} r={base * 0.32} fill={art.warm} opacity={0.1} />
+                  <Circle cx={projected.x + rx * 0.26} cy={projected.y + ry * 0.3} r={base * 0.28} fill={art.haze} opacity={0.09} />
+                  <Circle cx={projected.x + rx * 0.32} cy={projected.y - ry * 0.28} r={base * 0.2} fill={art.cool} opacity={0.09} />
                 </>
+              )}
+
+              {/* HERO FILAMENTS. Seven elongated feathered veils, each placed around the
+                  Trapezium and elongated TANGENTIALLY so they curve around the core instead
+                  of radiating from it. Individually faint (no single one is identifiable);
+                  together they weave one integrated rose-violet cloud. This replaces the
+                  circular pools that read as overlapping bubbles. */}
+              {isHero &&
+                HERO_FILAMENTS.map((f, i) => {
+                  const rad = (f.ang * Math.PI) / 180;
+                  const fx = projected.x + Math.cos(rad) * f.dist * rx;
+                  const fy = projected.y + Math.sin(rad) * f.dist * ry;
+                  const fillId = f.tone === "warm" ? warmId : f.tone === "cool" ? coolId : hazeId;
+                  // Long axis tangential = radius angle + 90°, plus the group's own rotation.
+                  const tangent = f.ang + 90 + art.rotation;
+                  return (
+                    <G key={`fil-${i}`} transform={`rotate(${tangent.toFixed(1)} ${fx.toFixed(1)} ${fy.toFixed(1)})`}>
+                      <Path d={cloudPath(fx, fy, rx * f.len, ry * f.wid, seed + f.seed)} fill={`url(#${fillId})`} opacity={f.op} />
+                    </G>
+                  );
+                })}
+
+              {/* THE DARK DUST CHANNEL — one soft, elongated navy fold crossing the
+                  lower-right, feathered and fully fading to transparent. Carves depth into
+                  the glow. Not a hard capsule, not a black stripe, never over the Trapezium. */}
+              {isHero && (
+                <G transform={`rotate(${(28 + art.rotation).toFixed(1)} ${(projected.x + rx * 0.24).toFixed(1)} ${(projected.y + ry * 0.3).toFixed(1)})`}>
+                  <Path
+                    d={cloudPath(projected.x + rx * 0.24, projected.y + ry * 0.3, rx * 0.72, ry * 0.2, seed + 41)}
+                    fill={`url(#neb-dust-${nebula.id})`}
+                  />
+                </G>
               )}
 
               <Circle cx={projected.x} cy={projected.y} r={Math.max(6, base * 0.3)} fill={`url(#${coreId})`} />

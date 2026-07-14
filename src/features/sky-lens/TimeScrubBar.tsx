@@ -114,8 +114,8 @@ const styles = StyleSheet.create({
     borderColor: "rgba(217,168,78,0.22)",
   },
   header: { flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 8 },
-  time: { fontSize: 15, fontWeight: "800", letterSpacing: 0.5 },
-  meta: { fontSize: 10, color: "rgba(233,236,245,0.7)", fontWeight: "600" },
+  time: { fontSize: 21, fontWeight: "800", letterSpacing: 0.5 },
+  meta: { fontSize: 15, color: "rgba(233,236,245,0.8)", fontWeight: "600" },
   track: { height: 16, justifyContent: "center", marginTop: 4 },
   fill: { position: "absolute", left: 0, right: 0, height: 2, borderRadius: 1, opacity: 0.35 },
   nowTick: { position: "absolute", left: "50%", width: 1.5, height: 10, top: 3 },
@@ -128,5 +128,5 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(7,10,19,0.95)",
     borderWidth: 2,
   },
-  hint: { fontSize: 9, color: "rgba(233,236,245,0.45)", textAlign: "center", marginTop: 2, letterSpacing: 0.3 },
+  hint: { fontSize: 14, color: "rgba(233,236,245,0.6)", textAlign: "center", marginTop: 3, letterSpacing: 0.3 },
 });

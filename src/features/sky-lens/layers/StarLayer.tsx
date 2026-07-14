@@ -138,14 +138,22 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             {/* White-hot core — the crispness that makes a showpiece star a JEWEL. */}
             {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.92} />}
             {labeled && (() => {
-              const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 12) : { x: p.x + r + 3, y: p.y + 3 };
-              // PRIORITY 2. If no clean slot exists (the placer returns NaN), the label is
-              // SUPPRESSED rather than drawn off the edge or on top of something else.
+              // 12 → 18pt, semibold: readable on a moving sky at arm's length. The bigger
+              // font also enlarges the placer's collision box (it keys off fontSize), so
+              // labels claim the room they actually occupy.
+              const lp = placeLabel ? placeLabel(p.x + r + 5, p.y + 5, star.name ?? "", 18) : { x: p.x + r + 5, y: p.y + 5 };
+              // PRIORITY 2. No clean slot → SUPPRESS rather than clip or overlap.
               if (!Number.isFinite(lp.x)) return null;
               return (
-                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={12} fontWeight="500" opacity={0.74}>
-                  {star.name}
-                </SvgText>
+                <G>
+                  {/* Soft dark outline so warm-ivory names stay legible over the Milky Way. */}
+                  <SvgText x={lp.x} y={lp.y} fill="none" stroke="#05070F" strokeWidth={3} strokeOpacity={0.55} fontSize={18} fontWeight="600">
+                    {star.name}
+                  </SvgText>
+                  <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={18} fontWeight="600" opacity={0.92}>
+                    {star.name}
+                  </SvgText>
+                </G>
               );
             })()}
           </G>

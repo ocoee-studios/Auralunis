@@ -79,7 +79,7 @@ export function GridLayer({ project, centerAzimuth, box, palette }: Props) {
         const p = project(centerAzimuth, alt);
         if (p.behind || p.x < 0 || p.x > box.width) return null;
         return (
-          <SvgText key={`alt-${alt}`} x={p.x + 4} y={p.y - 3} fill={palette.gridLabel} fontSize={9}>
+          <SvgText key={`alt-${alt}`} x={p.x + 4} y={p.y - 3} fill={palette.gridLabel} fontSize={14} fontWeight="600">
             {alt}°
           </SvgText>
         );
@@ -90,7 +90,7 @@ export function GridLayer({ project, centerAzimuth, box, palette }: Props) {
         <G>
           <Line x1={zenith.x - 7} y1={zenith.y} x2={zenith.x + 7} y2={zenith.y} stroke={palette.horizon} strokeWidth={1} />
           <Line x1={zenith.x} y1={zenith.y - 7} x2={zenith.x} y2={zenith.y + 7} stroke={palette.horizon} strokeWidth={1} />
-          <SvgText x={zenith.x + 10} y={zenith.y + 3} fill={palette.gridLabel} fontSize={9}>
+          <SvgText x={zenith.x + 10} y={zenith.y + 3} fill={palette.gridLabel} fontSize={14} fontWeight="600">
             90° zenith
           </SvgText>
         </G>
@@ -108,7 +108,7 @@ export function GridLayer({ project, centerAzimuth, box, palette }: Props) {
               x={p.x}
               y={p.y + 20}
               fill={major ? palette.accent : palette.gridLabel}
-              fontSize={major ? 14 : 10}
+              fontSize={major ? 15 : 13}
               fontWeight={major ? "900" : "600"}
               textAnchor="middle"
             >

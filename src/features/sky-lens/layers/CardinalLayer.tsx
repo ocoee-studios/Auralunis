@@ -31,7 +31,7 @@ export function CardinalLayer({ project, box, nightMode }: { project: ProjectFn;
             x={p.x}
             y={p.y}
             fill={color}
-            fontSize={16}
+            fontSize={18}
             fontWeight="800"
             opacity={0.55}
             textAnchor="middle"

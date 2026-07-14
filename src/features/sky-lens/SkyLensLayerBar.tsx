@@ -103,7 +103,7 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
 
 /** The bar's fixed height, exported so the screen can derive the dock/exclusion zones
  *  from it instead of hard-coding a magic number that silently drifts out of sync. */
-export const LAYER_BAR_HEIGHT = 52;
+export const LAYER_BAR_HEIGHT = 56;
 
 const styles = StyleSheet.create({
   shell: {
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   pill: {
     flexDirection: "row",
     alignItems: "center",
-    height: 36,
+    height: 40,
     // Measured on a 430pt screen: four pills + divider + Layers = ~419pt, ~12pt of real
     // slack. The ScrollView remains the safety net if a device's font metrics run wider.
     paddingHorizontal: 6,
@@ -152,28 +152,28 @@ const styles = StyleSheet.create({
   // Square-ish icon button, not a text pill — ~38pt instead of ~88pt. Fixed width so the
   // badge appearing/disappearing can't shift it.
   layersPill: {
-    width: 40,
+    width: 46,
     justifyContent: "center",
     backgroundColor: "rgba(5,13,29,0.62)",
   },
-  layersIcon: { color: "rgba(231,236,248,0.86)", fontSize: 14, fontWeight: "700" },
-  icon: { color: "rgba(231,236,248,0.8)", fontSize: 11, marginRight: 3 },
+  layersIcon: { color: "rgba(231,236,248,0.92)", fontSize: 17, fontWeight: "700" },
+  icon: { color: "rgba(231,236,248,0.85)", fontSize: 13, marginRight: 4 },
   iconOn: { color: "#030816" },
   label: {
-    color: "rgba(231,236,248,0.86)",
-    fontSize: 10,
-    fontWeight: "800",
+    color: "rgba(231,236,248,0.92)",
+    fontSize: 16,
+    fontWeight: "600",
     letterSpacing: 0,
   },
   labelOn: { color: "#030816", fontWeight: "900" },
   badge: {
     marginLeft: 5,
-    minWidth: 15,
-    height: 15,
-    borderRadius: 7.5,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
     alignItems: "center",
     justifyContent: "center",
-    paddingHorizontal: 3,
+    paddingHorizontal: 4,
   },
-  badgeText: { color: "#030816", fontSize: 9, fontWeight: "900" },
+  badgeText: { color: "#030816", fontSize: 11, fontWeight: "900" },
 });

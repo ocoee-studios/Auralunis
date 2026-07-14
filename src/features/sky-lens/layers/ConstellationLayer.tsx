@@ -111,20 +111,24 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
               // constellation label collision-tested a box half a label-width to the right
               // of where it actually drew.
               const position = placeLabel
-                ? placeLabel(centroid.x, centroid.y, label, 10.5, undefined, true)
+                ? placeLabel(centroid.x, centroid.y, label, 15, undefined, true)
                 : { x: centroid.x, y: centroid.y };
               // PRIORITY 3 — below planets and named stars. Dropped if there's no clean slot.
               if (!Number.isFinite(position.x)) return null;
               return (
                 <>
+                  {/* Dark outline keeps the brass name legible over the bright band. */}
+                  <SvgText x={position.x} y={position.y} fill="none" stroke="#05070F" strokeWidth={2.6} strokeOpacity={0.5} fontSize={15} fontWeight="500" letterSpacing={2} textAnchor="middle">
+                    {label}
+                  </SvgText>
                   <SvgText
                     x={position.x}
                     y={position.y}
                     fill={nightMode ? palette.conLabel : CON_LABEL_GOLD}
-                    fontSize={10.5}
-                    fontWeight="400"
-                    letterSpacing={2.6}
-                    opacity={0.5}
+                    fontSize={15}
+                    fontWeight="500"
+                    letterSpacing={2}
+                    opacity={0.62}
                     textAnchor="middle"
                   >
                     {label}
