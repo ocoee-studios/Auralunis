@@ -606,8 +606,11 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // computed from this, so nothing can drift out of sync with a magic constant again.
   // (The old code hard-coded `bottom: insets.bottom + 168/175` for the shutter and the
   // Moon prompt, numbers that assumed a layout which no longer exists.)
-  const BRIGHTNESS_H = 62; // slider bar + its margin, when expanded
-  const SCRUB_H = 70;      // time-travel panel, when expanded
+  const BRIGHTNESS_H = 62; // slider bar (8+36+8) + its 10pt margin — exact
+  // The time panel was TRIMMED ~23% (TimeScrubBar) and this figure corrected: it was 70,
+  // but the panel really measured ~89pt, so the exclusion zone ran 19pt short and labels
+  // could slide under it. Now ~61pt of panel + 10pt margin = 71.
+  const SCRUB_H = 71;
   const dockHeight =
     LAYER_BAR_HEIGHT +
     6 +
@@ -1057,13 +1060,15 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
       {/* Find-Mode target banner (from a Learn lesson) takes priority */}
       {!cinematic && !selected && targetFinder && (
-        <View style={[styles.finder, { bottom: floatAbove + 52 }]} pointerEvents="none">
+        <View style={[styles.finder, { bottom: floatAbove + 72 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{targetFinder}</Text>
         </View>
       )}
-      {/* Moon finder banner (hidden while an info card is open or a target is set) */}
+      {/* Moon finder banner (hidden while an info card is open or a target is set).
+          +72 clears the 60pt shutter that sits at floatAbove — at +52 the prompt was
+          crossing it. Derived, so it also rides up when the time panel opens. */}
       {!cinematic && !selected && !targetFinder && moonFinder && (
-        <View style={[styles.finder, { bottom: floatAbove + 52 }]} pointerEvents="none">
+        <View style={[styles.finder, { bottom: floatAbove + 72 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{moonFinder}</Text>
         </View>
       )}
@@ -1174,7 +1179,9 @@ const styles = StyleSheet.create({
     paddingVertical: 6
   },
   zoomText: { fontSize: 12, fontWeight: "800", fontVariant: ["tabular-nums"] },
-  toggleRow: { flexDirection: "row", gap: 8 },
+  // Three circular buttons now (brightness / time / night). 42→38 and a tighter gap so
+  // the cluster stops crowding the HUD pill beside it.
+  toggleRow: { flexDirection: "row", gap: 6 },
   shutterBtn: {
     position: "absolute",
     right: 16,
@@ -1211,22 +1218,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14
   },
   iconBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
+    width: 38,
+    height: 38,
+    borderRadius: 19,
     backgroundColor: "rgba(7,18,37,0.58)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(217,168,78,0.24)",
     alignItems: "center",
     justifyContent: "center"
   },
-  iconBtnText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
+  iconBtnText: { color: "#FFF", fontSize: 15, fontWeight: "800" },
   // UI CHROME — lightened. The panels were dense enough to read as opaque slabs sitting
   // ON the sky. Dropping the fills and adding a hairline gold edge lets the sky show
   // through, so the chrome reads as GLASS resting over the scene rather than as a lid.
   hudPill: {
     flex: 1,
-    marginHorizontal: 10,
+    marginHorizontal: 8,
     backgroundColor: "rgba(7,18,37,0.42)",
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,

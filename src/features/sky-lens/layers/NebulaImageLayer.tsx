@@ -107,7 +107,10 @@ const HERO_PRIORITY = ["m42", "m8", "ngc3372", "ngc7000", "ngc6960", "ngc2237", 
 const MAX_VISIBLE_NEBULAE = 2;
 
 // Group opacity per rank. Low-to-medium: these sit INSIDE the sky, not on top of it.
-const HERO_FALLOFF = [0.62, 0.42];
+// Nudged 0.62 → 0.70 (hero) and 0.42 → 0.46 (companion) after device review — Orion read
+// beautifully but a touch too faint. A ~13% lift on the hero only; the companion barely
+// moves, so the composition still has one clear protagonist.
+const HERO_FALLOFF = [0.70, 0.46];
 
 const MIN_BASE = 14;
 const MAX_BASE = 30;

@@ -82,10 +82,9 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
           { borderColor: activeExtras > 0 ? accent : "rgba(217,168,78,0.22)" },
         ]}
       >
-        <Text style={[styles.icon, activeExtras > 0 && { color: accent }]}>⋮</Text>
-        <Text style={styles.label} numberOfLines={1}>
-          Layers
-        </Text>
+        {/* ICON ONLY. The word "Layers" cost ~50pt of the row — enough that the Planets
+            pill got squeezed off the edge. The glyph carries it; the badge says the rest. */}
+        <Text style={[styles.layersIcon, activeExtras > 0 && { color: accent }]}>☰</Text>
         {activeExtras > 0 && (
           <View style={[styles.badge, { backgroundColor: accent }]}>
             <Text style={styles.badgeText}>{activeExtras}</Text>
@@ -121,29 +120,41 @@ const styles = StyleSheet.create({
   scroller: { flex: 1 },
   scrollContent: {
     alignItems: "center",
-    paddingHorizontal: 8,
-    gap: 6,
+    paddingLeft: 8,
+    // Trailing breath so the LAST pill (Planets) can always scroll fully clear of the
+    // pinned Layers button instead of dying half-cut against it.
+    paddingRight: 10,
+    gap: 5,
   },
   pill: {
     flexDirection: "row",
     alignItems: "center",
     height: 36,
-    paddingHorizontal: 9,
+    // 9 → 8 → 7. Measured: at padding 8 with a 10.5pt label the four pills + the pinned
+    // Layers button needed ~446pt on a 430pt screen, so Planets died at the edge. This
+    // (with fontSize 10) brings it to ~428pt — it fits, with the ScrollView still there
+    // as the safety net if a device's font metrics run wider than my estimate.
+    paddingHorizontal: 7,
     borderRadius: 18,
     borderWidth: 1,
     backgroundColor: "rgba(5,13,29,0.38)",
   },
+  // Square-ish icon button, not a text pill — ~38pt instead of ~88pt.
   layersPill: {
     marginLeft: 4,
+    minWidth: 38,
+    paddingHorizontal: 8,
+    justifyContent: "center",
     backgroundColor: "rgba(5,13,29,0.62)",
   },
-  icon: { color: "rgba(231,236,248,0.8)", fontSize: 11, marginRight: 4 },
+  layersIcon: { color: "rgba(231,236,248,0.86)", fontSize: 14, fontWeight: "700" },
+  icon: { color: "rgba(231,236,248,0.8)", fontSize: 11, marginRight: 3 },
   iconOn: { color: "#030816" },
   label: {
     color: "rgba(231,236,248,0.86)",
-    fontSize: 10.5,
+    fontSize: 10,
     fontWeight: "800",
-    letterSpacing: 0.1,
+    letterSpacing: 0,
   },
   labelOn: { color: "#030816", fontWeight: "900" },
   badge: {
