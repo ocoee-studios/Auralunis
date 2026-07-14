@@ -25,8 +25,9 @@ export function SkyLensLayerBar({ active, isPremium, nightMode, onToggle, onLock
         pointerEvents="box-none"
         bounces={false}
         alwaysBounceHorizontal={false}
+        decelerationRate="fast"
       >
-        {SKY_LENS_LAYERS.map((def) => {
+        {SKY_LENS_LAYERS.map((def, index) => {
           const locked = def.premium && !isPremium;
           const comingSoon = !def.available;
           const on = active.has(def.key) && def.available;
@@ -44,6 +45,7 @@ export function SkyLensLayerBar({ active, isPremium, nightMode, onToggle, onLock
               }}
               style={[
                 styles.pill,
+                index === 4 && styles.secondGroup,
                 { borderColor: on ? accent : "rgba(217,168,78,0.22)" },
                 on && { backgroundColor: accent },
                 comingSoon && styles.pillDim,
@@ -100,6 +102,10 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: "rgba(5,13,29,0.48)",
   },
+  // Leave a deliberate clean gutter after the four primary controls. This prevents
+  // the fifth pill from appearing as a chopped gold sliver at rest, while a swipe still
+  // reveals the remaining layers.
+  secondGroup: { marginLeft: 26 },
   pillDim: { opacity: 0.5 },
   icon: { color: "rgba(231,236,248,0.8)", fontSize: 11, marginRight: 4 },
   iconOn: { color: "#030816" },
