@@ -18,10 +18,13 @@ export function SkyLensLayerBar({ active, isPremium, nightMode, onToggle, onLock
     <View style={styles.shell} pointerEvents="box-none">
       <ScrollView
         horizontal
+        style={styles.scroller}
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.bar}
         keyboardShouldPersistTaps="handled"
         pointerEvents="box-none"
+        bounces={false}
+        alwaysBounceHorizontal={false}
       >
         {SKY_LENS_LAYERS.map((def) => {
           const locked = def.premium && !isPremium;
@@ -65,8 +68,9 @@ export function SkyLensLayerBar({ active, isPremium, nightMode, onToggle, onLock
 
 const styles = StyleSheet.create({
   shell: {
-    marginHorizontal: 14,
-    borderRadius: 26,
+    alignSelf: "stretch",
+    marginHorizontal: 8,
+    borderRadius: 24,
     backgroundColor: "rgba(2,8,20,0.66)",
     borderWidth: 1,
     borderColor: "rgba(217,168,78,0.16)",
@@ -76,9 +80,12 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 8 },
     overflow: "hidden",
   },
+  scroller: {
+    width: "100%",
+    flexGrow: 0,
+  },
   bar: {
-    paddingLeft: 10,
-    paddingRight: 30,
+    paddingHorizontal: 12,
     paddingVertical: 8,
     gap: 6,
     alignItems: "center",
