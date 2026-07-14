@@ -215,9 +215,11 @@ export function PlanetLayer({
               // so on a big-glow planet like Venus the label landed inside its own halo.
               const avoid = { x, y, r: glow * 0.8 };
               const fallbackX = x + glow * 0.8 + 6;
-              const labelPoint = placeLabel
-                ? placeLabel(fallbackX, y + 4, body.name, 12, avoid)
-                : { x: fallbackX, y: y + 4 };
+              const placed = placeLabel ? placeLabel(fallbackX, y + 4, body.name, 12, avoid) : null;
+              // PRIORITY 1. A planet's name is never dropped — if the placer can't find a
+              // clean slot it falls back to the natural position rather than vanishing.
+              const labelPoint =
+                placed && Number.isFinite(placed.x) ? placed : { x: fallbackX, y: y + 4 };
               return (
                 <G>
                   {/* Contrast without a hard plate behind the text: the label is drawn

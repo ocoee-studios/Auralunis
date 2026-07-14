@@ -155,6 +155,7 @@ export function SatelliteLayer({ satellites, project, palette, nightMode, placeL
               const lp = placeLabel
                 ? placeLabel(fx, p.y + 3, s.shortName, 9, avoid)
                 : { x: fx, y: p.y + 3 };
+              if (!Number.isFinite(lp.x)) return null; // lowest priority — drop it
               return (
                 <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={9} fontWeight="600" opacity={0.62}>
                   {s.shortName}

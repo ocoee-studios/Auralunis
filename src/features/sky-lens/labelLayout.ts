@@ -1,37 +1,35 @@
 // labelLayout.ts
 // Shared cross-layer label collision avoidance. SkyLensCanvas creates ONE placer per
-// render and passes it to every label-rendering layer. As each layer places a label,
-// the placer checks it against everything already claimed this frame and moves it into
-// the nearest free slot (so e.g. Mercury / ISS / Jupiter, or Beehive / Cancer, stack
-// instead of overlapping). First-come keeps its spot; the canvas renders the
-// highest-priority layers (Moon, planets, satellites, bright stars) before the denser
-// ones so the important labels win the natural position.
+// render and passes it to every label-rendering layer, so labels from different layers
+// (Moon / planets / stars / constellations / satellites) can't land on top of each other
+// or on top of another object's artwork.
 //
-// Three capabilities beyond a plain nudge-down loop:
-//
-//   * reserveCircle() lets a layer claim the SPACE ITS ARTWORK OCCUPIES, not just its
-//     label. Planets and the Moon reserve their glow discs, so no other label can be
-//     drawn on top of a planet — which is what made labels look like they were sitting
-//     inside the artwork.
-//
-//   * an `avoid` circle lets a label orbit its own object — right, left, above, below —
+// Capabilities:
+//   * reserveCircle() — claim the SPACE AN OBJECT'S ARTWORK OCCUPIES, so no label is ever
+//     drawn on top of a planet or the Moon.
+//   * an `avoid` circle — lets a label orbit its own object (right / left / above / below)
 //     instead of only sliding downward into whatever is beneath it.
-//
-//   * safe margins keep labels out of the top HUD and the bottom control tray.
+//   * `centered` — for labels drawn with textAnchor="middle" (see the bug note below).
+//   * safe margins + LABEL_SAFE_INSET — keeps labels out of the top HUD, the bottom dock,
+//     and away from the screen edges, with a horizontal FLIP rather than a clip.
 
 export type LabelBox = { width: number; height: number };
 export type AvoidCircle = { x: number; y: number; r: number };
+
+// Labels must never touch the screen edge. At the old value (4px) a star label near the
+// right-hand side was "in bounds" right up to the last few pixels, so its text ran off the
+// display — which is exactly the clipped-label problem on device. 26px gives real air.
+export const LABEL_SAFE_INSET = 26;
 
 export type LabelPlacer = ((
   cx: number,
   cy: number,
   text: string,
   fontSize: number,
-  avoid?: AvoidCircle
+  avoid?: AvoidCircle,
+  centered?: boolean
 ) => { x: number; y: number }) & {
-  /** Claim an arbitrary rect (e.g. the seasonal caption, a HUD element). */
   reserve: (x: number, y: number, w: number, h: number) => void;
-  /** Claim a circular region — an object's artwork, so labels never land on it. */
   reserveCircle: (x: number, y: number, r: number) => void;
 };
 
@@ -50,8 +48,8 @@ export function makeLabelPlacer(
   const claimed: Rect[] = [];
 
   const inBounds = (r: Rect): boolean =>
-    r.x >= 4 &&
-    r.x + r.w <= box.width - 4 &&
+    r.x >= LABEL_SAFE_INSET &&
+    r.x + r.w <= box.width - LABEL_SAFE_INSET &&
     r.y >= safeTop &&
     r.y + r.h <= box.height - safeBottom;
 
@@ -60,20 +58,24 @@ export function makeLabelPlacer(
     cy: number,
     text: string,
     fontSize: number,
-    avoid?: AvoidCircle
+    avoid?: AvoidCircle,
+    centered?: boolean
   ): { x: number; y: number } => {
     const w = Math.max(8, text.length * fontSize * 0.58);
     const h = fontSize * 1.25;
-    // y is the text BASELINE; the visual box sits ~h above it.
-    const rectAt = (x: number, y: number): Rect => ({ x, y: y - h, w, h });
+
+    // BUG FIX. `x` means different things to different callers: for a star label it's the
+    // LEFT edge of the text, but ConstellationLayer draws with textAnchor="middle", so for
+    // it `x` is the CENTRE. The placer always treated x as the left edge — so every
+    // constellation label claimed (and collision-tested) a box sitting half a label-width
+    // to the right of where it actually drew. Half its collision detection was fiction.
+    const leftOf = (x: number) => (centered ? x - w / 2 : x);
+    const rectAt = (x: number, y: number): Rect => ({ x: leftOf(x), y: y - h, w, h });
 
     const candidates: Array<[number, number]> = [];
 
     if (avoid) {
-      // Orbit the object: preferred side first, then the opposite side, then above and
-      // below, then the same four pushed further out. `gap` is measured from the glow
-      // radius the caller passed, so the label always clears the ARTWORK, not just the
-      // disc — that's the fix for labels sitting inside a planet's bloom.
+      // Orbit the object: preferred side, opposite side, above, below — then pushed out.
       const gap = avoid.r + 6;
       const mid = avoid.y + fontSize * 0.35;
       for (const push of [0, h, h * 2]) {
@@ -86,9 +88,19 @@ export function makeLabelPlacer(
         candidates.push([avoid.x + gap, mid - push]);
         candidates.push([avoid.x - gap - w, mid - push]);
       }
+    } else if (centered) {
+      // Centred labels can only move vertically without lying about their anchor.
+      for (const dy of [0, h, -h, h * 2, -h * 2, h * 3, -h * 3]) candidates.push([cx, cy + dy]);
     } else {
+      // FLIP, don't clip. Try the natural (right-of-object) position and its vertical
+      // nudges; then MIRROR to the left of the object. A star near the right edge now puts
+      // its name on its left instead of running off the display.
+      const mirrored = cx - w - 8;
       for (const dy of [0, h, -h, h * 2, -h * 2, h * 3, -h * 3, h * 4]) {
         candidates.push([cx, cy + dy]);
+      }
+      for (const dy of [0, h, -h, h * 2, -h * 2]) {
+        candidates.push([mirrored, cy + dy]);
       }
     }
 
@@ -100,12 +112,7 @@ export function makeLabelPlacer(
       return { x, y };
     }
 
-    // Nothing clear anywhere — accept the natural spot. A slightly crowded label still
-    // beats a missing one, and this is rare now that artwork is reserved.
-    const fallbackX = avoid ? avoid.x + avoid.r + 6 : cx;
-    const fallbackY = avoid ? avoid.y + fontSize * 0.35 : cy;
-    claimed.push(rectAt(fallbackX, fallbackY));
-    return { x: fallbackX, y: fallbackY };
+    return { x: NaN, y: NaN }; // no clean slot — caller suppresses the label
   };
 
   place.reserve = (x: number, y: number, w: number, h: number) => {

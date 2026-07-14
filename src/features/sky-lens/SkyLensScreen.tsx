@@ -511,7 +511,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const moonFinder = useMemo(() => {
     const moon = sky.bodies.find((b) => b.id === "moon");
     if (!moon) return null;
-    if (!moon.aboveHorizon) return "☾  The Moon is below the horizon right now";
+    // Below the horizon → say nothing. A permanent "the Moon is below the horizon" banner
+    // is a nag, not guidance: there is no action the user can take.
+    if (!moon.aboveHorizon) return null;
     const p = projectTarget(pointing, moon.azimuthDegrees, moon.altitudeDegrees, fov, box);
     if (p.onScreen) return null; // it's in view — no need to point you to it
     return p.behind ? "☾  Turn around for the Moon ↻" : `☾  Pan ${arrowFor(p.bearingDegrees)} to the Moon`;
@@ -1067,7 +1069,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       {/* Moon finder banner (hidden while an info card is open or a target is set).
           +72 clears the 60pt shutter that sits at floatAbove — at +52 the prompt was
           crossing it. Derived, so it also rides up when the time panel opens. */}
-      {!cinematic && !selected && !targetFinder && moonFinder && (
+      {!cinematic && !selected && !scrubVisible && !targetFinder && moonFinder && (
         <View style={[styles.finder, { bottom: floatAbove + 72 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{moonFinder}</Text>
         </View>
@@ -1184,7 +1186,7 @@ const styles = StyleSheet.create({
   toggleRow: { flexDirection: "row", gap: 6 },
   shutterBtn: {
     position: "absolute",
-    right: 16,
+    right: 20,
     width: 60,
     height: 60,
     borderRadius: 30,

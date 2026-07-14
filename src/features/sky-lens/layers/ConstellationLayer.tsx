@@ -106,7 +106,15 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
               // (11 → 10.5), fainter (0.42 → 0.36) and warmed into brass. Wider letter
               // spacing keeps it legible while it recedes: engraved, not printed.
               const label = c.name.toUpperCase();
-              const position = placeLabel ? placeLabel(centroid.x, centroid.y, label, 10.5) : { x: centroid.x, y: centroid.y };
+              // `centered` = true: this label draws with textAnchor="middle", so the placer
+              // must treat x as the CENTRE, not the left edge. It didn't — so every
+              // constellation label collision-tested a box half a label-width to the right
+              // of where it actually drew.
+              const position = placeLabel
+                ? placeLabel(centroid.x, centroid.y, label, 10.5, undefined, true)
+                : { x: centroid.x, y: centroid.y };
+              // PRIORITY 3 — below planets and named stars. Dropped if there's no clean slot.
+              if (!Number.isFinite(position.x)) return null;
               return (
                 <>
                   <SvgText
@@ -116,7 +124,7 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
                     fontSize={10.5}
                     fontWeight="400"
                     letterSpacing={2.6}
-                    opacity={0.36}
+                    opacity={0.5}
                     textAnchor="middle"
                   >
                     {label}

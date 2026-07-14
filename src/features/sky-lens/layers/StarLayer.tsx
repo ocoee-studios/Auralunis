@@ -94,7 +94,10 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
                 core) instead of one hard-edged disc, with a tiny per-star centre offset
                 so each bloom is a slightly different organic shape, not a sharp circle. */}
             {bloom && feature && (() => {
-              const gr = feature.glowRadius * 0.85 * (1 + sf * 1.0);
+              // HALO CAP. Sirius peaked at 24 × 0.85 = 20.4, and the showcase multiplier
+              // could double it — a giant translucent disc rather than a star. Clamped to
+              // 7–19 so even the showpieces stay jewels.
+              const gr = Math.max(7, Math.min(19, feature.glowRadius * 0.85 * (1 + sf * 1.0)));
               const h = hashStar(star.id);
               const ox = ((h % 7) - 3) * 0.1, oy = (((h >> 3) % 7) - 3) * 0.1; // ±0.3·gr
               return (
@@ -136,6 +139,9 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.92} />}
             {labeled && (() => {
               const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 12) : { x: p.x + r + 3, y: p.y + 3 };
+              // PRIORITY 2. If no clean slot exists (the placer returns NaN), the label is
+              // SUPPRESSED rather than drawn off the edge or on top of something else.
+              if (!Number.isFinite(lp.x)) return null;
               return (
                 <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={12} fontWeight="500" opacity={0.74}>
                   {star.name}

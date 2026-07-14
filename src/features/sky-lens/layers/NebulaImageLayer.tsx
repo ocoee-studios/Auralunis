@@ -110,7 +110,7 @@ const MAX_VISIBLE_NEBULAE = 2;
 // Nudged 0.62 → 0.70 (hero) and 0.42 → 0.46 (companion) after device review — Orion read
 // beautifully but a touch too faint. A ~13% lift on the hero only; the companion barely
 // moves, so the composition still has one clear protagonist.
-const HERO_FALLOFF = [0.70, 0.46];
+const HERO_FALLOFF = [0.72, 0.46];
 
 const MIN_BASE = 14;
 const MAX_BASE = 30;

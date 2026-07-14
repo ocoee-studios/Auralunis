@@ -151,9 +151,9 @@ export function MoonLayer({ moon, illuminationPercent, project, palette, nightMo
         if (placeLabel) placeLabel.reserveCircle(cx, cy, R * 1.2);
         const avoid = { x: cx, y: cy, r: R * 1.35 };
         const fallbackX = cx + R * 1.35 + 6;
-        const lp = placeLabel
-          ? placeLabel(fallbackX, cy + 4, "Moon", 11, avoid)
-          : { x: fallbackX, y: cy + 4 };
+        const placed = placeLabel ? placeLabel(fallbackX, cy + 4, "Moon", 11, avoid) : null;
+        // PRIORITY 1, with the planets. Never dropped.
+        const lp = placed && Number.isFinite(placed.x) ? placed : { x: fallbackX, y: cy + 4 };
         return (
           <G>
             <SvgText x={lp.x} y={lp.y} fill="none" stroke="#050914" strokeWidth={2.4} strokeOpacity={0.5} fontSize={11} fontWeight="700">
