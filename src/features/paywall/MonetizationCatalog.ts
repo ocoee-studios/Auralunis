@@ -117,7 +117,7 @@ export const premiumFeatures = [
   "Experience the Living Universe",
   "✨ Watch the Milky Way come alive with animated dust and hydrogen clouds",
   "💜 Explore breathtaking nebulae — Orion, Lagoon, Trifid in stunning detail",
-  "🪐 See planets like never before — Jupiter's storms, Saturn's rings, Mars' polar caps",
+  "🪐 See planets like never before — Jupiter's cloud bands and Great Red Spot, Saturn's rings, Mars' rust-toned surface, and phase-aware Venus",
   "🌕 A cinematic Moon with craters, earthshine, and atmospheric god rays",
   "🌙 Birth Sky — the exact sky the moment you were born",
   "☁️ Astro Weather — know instantly if tonight is worth going outside",
