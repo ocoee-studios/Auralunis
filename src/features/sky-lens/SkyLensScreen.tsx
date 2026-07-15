@@ -214,9 +214,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const { addItem } = useAuraLunisVault();
 
   const [box, setBox] = useState({ width: 360, height: 720 });
-  // The default scene is EXACTLY four layers: Stars, Constellations, Milky Way, Planets
-  // (DEFAULT_ACTIVE_LAYERS — the only entries with defaultOn: true). Nothing else may
-  // switch itself on.
+  // The default scene is FIVE layers: Stars, Constellations, Milky Way, Planets, and
+  // Nebulae — the entries with defaultOn: true (Nebulae ships on as a curated 2-hero
+  // accent; see the note above). The four analytical overlays (zodiac/grid/satellites/
+  // ecliptic) stay off, and nothing may switch them on automatically.
   //
   // Deep Sky used to auto-enable the moment entitlement resolved to premium ("they paid
   // for it, give it to them"), which meant a premium user's first impression of Sky Lens
@@ -1079,7 +1080,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         <View style={styles.hudPill} pointerEvents="none">
           {/* numberOfLines={1} on every line: the HUD must stay a compact strip, never
               grow into a tall text card that covers Betelgeuse and the nearby sky. */}
-          <Text style={[styles.hudText, { color: accent }]} numberOfLines={1}>{hud}</Text>
+          <Text style={[styles.hudText, { color: accent }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{hud}</Text>
           {planetarium ? (
             <Text style={styles.hudSub} numberOfLines={1}>🔭 Planetarium — pan to explore</Text>
           ) : immersive ? (

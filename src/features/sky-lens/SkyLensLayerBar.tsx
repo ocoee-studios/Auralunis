@@ -18,8 +18,13 @@ type Props = {
 // v3 (this): a plain non-scrolling flex row of TEXT-ONLY pills at 15pt, with a fixed
 // divider and a fixed 44x44 icon-only Layers button. Text-only + the "Constell." dock
 // shorthand leaves ~6pt of real gap between every control at 430pt — breathing room, not
-// a crammed strip. Pills flex-shrink padding (never text) as a safety net on narrow
-// devices. The full word "Constellations" is unchanged everywhere else.
+// a crammed strip. The full word "Constellations" is unchanged everywhere else.
+//
+// TUNED FOR 430pt (iPhone Pro Max). Pills are flexShrink:0 (content-sized, so text is
+// never ellipsized) and the shell is overflow:hidden — so on a NARROWER device (~375pt
+// SE/mini) the row can exceed the width and clip a few px at each edge. Acceptable for
+// the current single-device target; revisit (shorter labels / icon-only) if smaller
+// phones become a target.
 export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: Props) {
   const accent = nightMode ? "#B64A4A" : AuraLunisColors.gold;
 
@@ -68,8 +73,8 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
 
       <View style={styles.divider} />
 
-      {/* Pinned — outside the scroller, so it is always reachable and can never be the
-          half-cut sliver at the screen edge that started all this. */}
+      {/* Pinned to the right of the divider, always fully visible — never the half-cut
+          sliver at the screen edge that started all this. */}
       <TouchableOpacity
         activeOpacity={0.82}
         accessibilityRole="button"
@@ -131,8 +136,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     backgroundColor: "rgba(5,13,29,0.38)",
   },
-  // A fixed seam between the scrolling pills and the Layers button — always the same
-  // width, so the Layers button sits in a consistent place instead of drifting with slack.
+  // A fixed seam between the pills and the Layers button, so the button sits in a
+  // consistent place instead of drifting with the row's slack.
   divider: {
     width: StyleSheet.hairlineWidth,
     height: 24,

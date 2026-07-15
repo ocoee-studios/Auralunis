@@ -1,13 +1,16 @@
 import React, { memo, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Svg, { Circle, Defs, Line, RadialGradient, Stop, G } from "react-native-svg";
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
+import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
 
 interface Props { width: number; height: number; moonX: number; moonY: number; moonRadius?: number; visible?: boolean; nightVision?: boolean; intensity?: number; }
 
 export const LunarGodRayLayer = memo(function LunarGodRayLayer({ width, height, moonX, moonY, moonRadius = 20, visible = true, nightVision = false, intensity = 1 }: Props) {
   const drift = useSharedValue(0);
-  useEffect(() => { drift.value = withRepeat(withTiming(1, { duration: 18000, easing: Easing.inOut(Easing.sin) }), -1, true); }, [drift]);
+  useEffect(() => {
+    drift.value = withRepeat(withTiming(1, { duration: 18000, easing: Easing.inOut(Easing.sin) }), -1, true);
+    return () => cancelAnimation(drift); // stop the UI-thread loop when the moon leaves view
+  }, [drift]);
   const style = useAnimatedStyle(() => ({ opacity: visible ? 0.5 + drift.value * 0.06 : 0, transform: [{ rotate: `${drift.value * 0.45}deg` }] }));
   const gold = nightVision ? "#FF453A" : "#D9A84E";
   const starlight = nightVision ? "#FFB3AA" : "#FFF6D6";
