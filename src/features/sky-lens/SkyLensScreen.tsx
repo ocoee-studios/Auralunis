@@ -54,6 +54,7 @@ import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
 import { TimeScrubBar } from "./TimeScrubBar";
 import { TargetPulse } from "./TargetPulse";
+import { SelectionRing } from "./SelectionRing";
 import { HeroSpotlight } from "./HeroSpotlight";
 import { DEFAULT_ACTIVE_LAYERS, SKY_LENS_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
 import { projectTarget, DEFAULT_FOV, type CameraPointing } from "./ar/SkyLensProjection";
@@ -1005,6 +1006,12 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Hero Object Spotlight — dims the field around the selected object so it
               becomes the star of the scene. Above the field, below the forge + HUD. */}
           {focusProj && <HeroSpotlight x={focusProj.x} y={focusProj.y} box={box} nightMode={nightMode} />}
+          {/* Selected-object marker: a steady ring + gentle pulse on the object whose
+              info card is open, so it's obvious WHICH object was tapped. Only while a
+              card is showing and the object is on screen. */}
+          {selected && focusProj?.onScreen && (
+            <SelectionRing x={focusProj.x} y={focusProj.y} color={nightMode ? "#C24A4A" : accent} />
+          )}
           {/* Constellation Forge — gold ink-draw on identify (above canvas, below HUD) */}
           <ConstellationForgeLayer
             width={box.width}
@@ -1303,7 +1310,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(217,168,78,0.14)",
-    paddingVertical: 8,
+    paddingVertical: 6,
     paddingHorizontal: 12,
     alignItems: "center"
   },
@@ -1342,7 +1349,7 @@ const styles = StyleSheet.create({
   },
   hudText: { fontSize: 17, fontWeight: "800", fontVariant: ["tabular-nums"], textShadowColor: "rgba(0,0,0,0.55)", textShadowRadius: 2 },
   hudSub: { color: AuraLunisColors.muted, fontSize: 13, fontWeight: "500", marginTop: 1, opacity: 0.82 },
-  hudSubSmall: { color: AuraLunisColors.muted, fontSize: 12.5, fontWeight: "500", marginTop: 1, opacity: 0.72 },
+  hudSubSmall: { color: AuraLunisColors.muted, fontSize: 13, fontWeight: "500", marginTop: 0, opacity: 0.72 },
   bottom: { position: "absolute", left: 0, right: 0, bottom: 0 },
   skySliderWrap: {
     flexDirection: "row",

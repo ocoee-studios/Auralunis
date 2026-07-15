@@ -83,9 +83,10 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
           { borderColor: activeExtras > 0 ? accent : "rgba(217,168,78,0.22)" },
         ]}
       >
-        {/* ICON ONLY. The word "Layers" cost ~50pt of the row — enough that the Planets
-            pill got squeezed off the edge. The glyph carries it; the badge says the rest. */}
-        <Text style={[styles.layersIcon, activeExtras > 0 && { color: accent }]}>☰</Text>
+        {/* The button stays DARK regardless of state — recolouring the whole glyph gold
+            made the control feel crowded. Active overlays are signalled by a small gold
+            count badge pinned to the upper-right corner instead, hidden entirely at zero. */}
+        <Text style={styles.layersIcon}>☰</Text>
         {activeExtras > 0 && (
           <View style={[styles.badge, { backgroundColor: accent }]}>
             <Text style={styles.badgeText}>{activeExtras}</Text>
@@ -157,13 +158,15 @@ const styles = StyleSheet.create({
   },
   labelOn: { color: "#030816", fontWeight: "900" },
   badge: {
-    marginLeft: 4,
-    minWidth: 16,
-    height: 16,
-    borderRadius: 8,
+    position: "absolute",
+    top: 3,
+    right: 3,
+    minWidth: 15,
+    height: 15,
+    borderRadius: 7.5,
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: 3,
   },
-  badgeText: { color: "#030816", fontSize: 10, fontWeight: "900" },
+  badgeText: { color: "#030816", fontSize: 9.5, fontWeight: "900" },
 });
