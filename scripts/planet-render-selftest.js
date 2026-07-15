@@ -63,7 +63,7 @@ check("Jupiter has cloud bands", /const JUPITER_BANDS/.test(illus) && (illus.mat
 check("Jupiter draws one restrained Great Red Spot", (illusCode.match(/#B4512B|#D07548/g) || []).length >= 1);
 check("Saturn draws tilted rings", /const SATURN_TILT/.test(illus) && (illusCode.match(/rotation=\{SATURN_TILT\}/g) || []).length >= 2);
 check("Saturn casts a ring shadow on the globe", /#20180A/.test(illusCode) && /-globe/.test(illusCode));
-check("Saturn has a Cassini division", (illusCode.match(/#1A1408/g) || []).length >= 1);
+check("Saturn has a Cassini division", (illusCode.match(/#0A0803/g) || []).length >= 1);
 check("Saturn rings pass in front of the globe", /-front/.test(illusCode) && /ClipPath id=\{`\$\{key\}-front`\}/.test(illusCode));
 check("Mars has a CONDITIONAL polar cap", /polarCap && </.test(illusCode) && /polarCap\?: boolean/.test(illusCode));
 check("Mars draws rust-toned albedo variation", (illusCode.match(/#6E2814|#8A3A1E/g) || []).length >= 1);

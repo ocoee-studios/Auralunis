@@ -108,12 +108,14 @@ const SATURN_TILT = -18; // degrees; near side of the ring plane dips to the bot
 
 export function SaturnIllustration({ cx, cy, r, nightMode }: Props) {
   const key = `sat-${cx.toFixed(1)}-${cy.toFixed(1)}`;
-  const ringRx = r * 2.1; // outer A-ring radius — restrained, collision-safe (~current)
-  const ringRy = r * 0.58;
-  const innerRx = r * 1.5; // inner B-ring
-  const innerRy = ringRy * (innerRx / ringRx);
-  const divRx = r * 1.78; // Cassini division sits between A and B rings
-  const divRy = ringRy * (divRx / ringRx);
+  // Ring radii. Outer A-ring extent stays restrained and collision-safe — this is ≤ the
+  // previous outer reach (bands are now thinner), so nothing grows. Every ring shares one
+  // tilted plane via scale(), so tilt and depth ordering are preserved exactly.
+  const aRx = r * 2.0; // outer A-ring
+  const aRy = r * 0.56;
+  const scale = (rx: number) => (aRy * rx) / aRx;
+  const divRx = r * 1.75; // Cassini division, between A and B rings
+  const bRx = r * 1.5; // inner B-ring
   return (
     <G>
       <Defs>
@@ -127,15 +129,16 @@ export function SaturnIllustration({ cx, cy, r, nightMode }: Props) {
         </ClipPath>
         {/* Front half of the rings = the near (bottom) portion, drawn over the globe. */}
         <ClipPath id={`${key}-front`}>
-          <Rect x={cx - ringRx} y={cy} width={ringRx * 2} height={ringRy + r} />
+          <Rect x={cx - aRx} y={cy} width={aRx * 2} height={aRy + r} />
         </ClipPath>
       </Defs>
 
-      {/* BACK of the rings — behind the globe. */}
+      {/* BACK of the rings — behind the globe. Thinner, more opaque bands read crisper than
+          the old fat soft strokes, and a wider, darker Cassini gap separates A from B. */}
       <G rotation={SATURN_TILT} originX={cx} originY={cy}>
-        <Ellipse cx={cx} cy={cy} rx={ringRx} ry={ringRy} fill="none" stroke="#C9B27E" strokeWidth={r * 0.34} strokeOpacity={0.5} />
-        <Ellipse cx={cx} cy={cy} rx={innerRx} ry={innerRy} fill="none" stroke="#E7D4A2" strokeWidth={r * 0.2} strokeOpacity={0.42} />
-        <Ellipse cx={cx} cy={cy} rx={divRx} ry={divRy} fill="none" stroke="#1A1408" strokeWidth={r * 0.05} strokeOpacity={0.6} />
+        <Ellipse cx={cx} cy={cy} rx={aRx} ry={aRy} fill="none" stroke="#CDB682" strokeWidth={r * 0.22} strokeOpacity={0.78} />
+        <Ellipse cx={cx} cy={cy} rx={bRx} ry={scale(bRx)} fill="none" stroke="#ECDAA6" strokeWidth={r * 0.3} strokeOpacity={0.74} />
+        <Ellipse cx={cx} cy={cy} rx={divRx} ry={scale(divRx)} fill="none" stroke="#0A0803" strokeWidth={r * 0.09} strokeOpacity={0.9} />
       </G>
 
       {/* GLOBE with limb shading. */}
@@ -143,16 +146,18 @@ export function SaturnIllustration({ cx, cy, r, nightMode }: Props) {
       {/* Ring shadow cast across the globe, along the ring plane. */}
       <G clipPath={`url(#${key}-globe)`}>
         <G rotation={SATURN_TILT} originX={cx} originY={cy}>
-          <Ellipse cx={cx} cy={cy - r * 0.08} rx={r * 0.98} ry={r * 0.14} fill="#20180A" opacity={0.34} />
+          <Ellipse cx={cx} cy={cy - r * 0.08} rx={r * 0.98} ry={r * 0.14} fill="#20180A" opacity={0.36} />
         </G>
       </G>
       <LimbShade cx={cx} cy={cy} r={r} nightMode={nightMode} id={`${key}-limb`} />
 
-      {/* FRONT of the rings — the near portion passes in front of the globe. */}
+      {/* FRONT of the rings — near (bottom) portion passes in front of the globe. Slightly
+          brighter than the back, with the same crisp Cassini gap. */}
       <G clipPath={`url(#${key}-front)`}>
         <G rotation={SATURN_TILT} originX={cx} originY={cy}>
-          <Ellipse cx={cx} cy={cy} rx={ringRx} ry={ringRy} fill="none" stroke="#D8C08A" strokeWidth={r * 0.34} strokeOpacity={0.62} />
-          <Ellipse cx={cx} cy={cy} rx={divRx} ry={divRy} fill="none" stroke="#1A1408" strokeWidth={r * 0.05} strokeOpacity={0.55} />
+          <Ellipse cx={cx} cy={cy} rx={aRx} ry={aRy} fill="none" stroke="#DAC290" strokeWidth={r * 0.22} strokeOpacity={0.88} />
+          <Ellipse cx={cx} cy={cy} rx={bRx} ry={scale(bRx)} fill="none" stroke="#F2E2AE" strokeWidth={r * 0.3} strokeOpacity={0.82} />
+          <Ellipse cx={cx} cy={cy} rx={divRx} ry={scale(divRx)} fill="none" stroke="#0A0803" strokeWidth={r * 0.09} strokeOpacity={0.9} />
         </G>
       </G>
     </G>

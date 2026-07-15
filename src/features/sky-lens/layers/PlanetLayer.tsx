@@ -105,10 +105,15 @@ export function PlanetLayer({
   // Because planet labels now CLAIM before star labels (labelsOnly pass mounts first), a
   // nearby named star (e.g. Aldebaran by Mars) yields its slot to the planet instead.
   const renderLabel = (v: (typeof visible)[number]) => {
-    const { body, point, glow } = v;
+    const { body, point, glow, disc } = v;
     const { x, y } = point;
-    const avoid = { x, y, r: glow * 0.8 };
-    const fallbackX = x + glow * 0.8 + 6;
+    // Saturn's rings reach well past its glow (aRx ≈ 2×disc); push its label clear of the
+    // ring tips so the planet and its name breathe. Every other planet keeps the original
+    // spacing. This only shifts the label's starting slot — positions are untouched.
+    const ringReach = body.id === "saturn" ? disc * 2.0 : 0;
+    const reach = Math.max(glow * 0.8, ringReach);
+    const avoid = { x, y, r: reach };
+    const fallbackX = x + reach + (body.id === "saturn" ? 12 : 6);
     const placed = placeLabel ? placeLabel(fallbackX, y + 4, body.name, 17, avoid) : null;
     const labelPoint = placed && Number.isFinite(placed.x) ? placed : { x: fallbackX, y: y + 4 };
     return (
