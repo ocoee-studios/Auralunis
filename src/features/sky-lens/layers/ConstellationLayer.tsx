@@ -20,10 +20,99 @@ type Props = {
   showLabels?: boolean;
   showNodes?: boolean;
   fullSphere?: boolean;
+  // LABEL-PRIORITY SPLIT. The shared label placer is first-come-first-served, and z-order
+  // forces the constellation FIGURES to render before the stars (lines belong under star
+  // discs). If this layer also placed its labels in that early pass, constellation names
+  // (priority 3) would claim slots before star names (priority 2) — inverting the ladder.
+  //   • labelsOnly=false (default): render FIGURES only (lines + nodes), never labels.
+  //   • labelsOnly=true: render LABELS only — mounted LATE (after stars & planets) so the
+  //     names claim their slots in correct priority order.
+  labelsOnly?: boolean;
   onSelect: (object: SelectedObject) => void;
 };
 
-export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, showLabels = true, showNodes = true, fullSphere = false, onSelect }: Props) {
+export function ConstellationLayer({
+  constellations,
+  project,
+  box,
+  palette,
+  nightMode,
+  placeLabel,
+  showLabels = true,
+  showNodes = true,
+  fullSphere = false,
+  labelsOnly = false,
+  onSelect,
+}: Props) {
+  // Render one constellation's NAME through the shared placer. Returns null when labels are
+  // off, the centroid is off-screen/behind, or the placer finds no clean slot (priority-3
+  // suppression). Kept identical to the pre-split behavior — only WHEN it runs changed.
+  const renderLabel = (c: HorizontalConstellation) => {
+    if (!showLabels) return null;
+    const centroid = project(c.centroid.azimuthDegrees, c.centroid.altitudeDegrees);
+    const labelVisible =
+      !centroid.behind &&
+      centroid.x > 14 &&
+      centroid.x < box.width - 14 &&
+      centroid.y > 38 &&
+      centroid.y < box.height - 110;
+    if (!labelVisible) return null;
+
+    // A REGION name, not an object name — so it sits BELOW star and planet labels. Because
+    // `centered` = true, the placer treats x as the CENTRE (matches textAnchor="middle").
+    const label = c.name.toUpperCase();
+    const position = placeLabel
+      ? placeLabel(centroid.x, centroid.y, label, 13, undefined, true)
+      : { x: centroid.x, y: centroid.y };
+    // No clean slot → dropped (priority 3, below planets and named stars).
+    if (!Number.isFinite(position.x)) return null;
+
+    return (
+      <G key={`${c.id}-label`}>
+        {/* Dark outline keeps the brass name legible over the bright band. */}
+        <SvgText x={position.x} y={position.y} fill="none" stroke="#05070F" strokeWidth={1.6} strokeOpacity={0.45} fontSize={13} fontWeight="500" letterSpacing={1.6} textAnchor="middle">
+          {label}
+        </SvgText>
+        <SvgText
+          x={position.x}
+          y={position.y}
+          fill={nightMode ? palette.conLabel : CON_LABEL_GOLD}
+          fontSize={13}
+          fontWeight="500"
+          letterSpacing={1.6}
+          opacity={0.55}
+          textAnchor="middle"
+        >
+          {label}
+        </SvgText>
+        <Circle
+          cx={position.x}
+          cy={position.y - 3}
+          r={26}
+          fill="transparent"
+          onPress={() =>
+            onSelect({
+              kind: "constellation",
+              id: c.id,
+              name: c.name,
+              subtitle: "Constellation",
+              facts: [{ label: "Best season", value: c.season }],
+              description: c.myth,
+            })
+          }
+        />
+      </G>
+    );
+  };
+
+  // LABELS-ONLY pass: cheap (projects centroids only), mounted late for correct priority.
+  if (labelsOnly) {
+    return <G>{constellations.map((c) => renderLabel(c))}</G>;
+  }
+
+  // FIGURES pass: lines + nodes. Labels are handled by the separate labels-only mount, so
+  // this pass never draws them (renderLabel short-circuits on !showLabels when the canvas
+  // passes showLabels={false} here).
   return (
     <G>
       {constellations.map((c) => {
@@ -75,83 +164,28 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
 
         if (segments.length === 0) return null;
 
-        const nodes = showNodes ? [...usedPts].map((pointIndex) => {
-          const point = projected[pointIndex];
-          if (!point || point.behind) return null;
-          const dim = !c.points[pointIndex]?.aboveHorizon;
-          return (
-            <G key={`${c.id}-n${pointIndex}`} opacity={dim && !fullSphere ? 0.15 : 1}>
-              <Circle cx={point.x} cy={point.y} r={4.5} fill={lineColor} opacity={0.055} />
-              <Circle cx={point.x} cy={point.y} r={1.2} fill={lineColor} opacity={0.72} />
-            </G>
-          );
-        }) : null;
-
-        const centroid = project(c.centroid.azimuthDegrees, c.centroid.altitudeDegrees);
-        const labelVisible =
-          showLabels &&
-          !centroid.behind &&
-          centroid.x > 14 &&
-          centroid.x < box.width - 14 &&
-          centroid.y > 38 &&
-          centroid.y < box.height - 110;
+        const nodes = showNodes
+          ? [...usedPts].map((pointIndex) => {
+              const point = projected[pointIndex];
+              if (!point || point.behind) return null;
+              const dim = !c.points[pointIndex]?.aboveHorizon;
+              return (
+                <G key={`${c.id}-n${pointIndex}`} opacity={dim && !fullSphere ? 0.15 : 1}>
+                  <Circle cx={point.x} cy={point.y} r={4.5} fill={lineColor} opacity={0.055} />
+                  <Circle cx={point.x} cy={point.y} r={1.2} fill={lineColor} opacity={0.72} />
+                </G>
+              );
+            })
+          : null;
 
         return (
           <G key={c.id}>
             {segments}
             {nodes}
-            {labelVisible && (() => {
-              // A REGION name, not an object name — so it must sit BELOW star and planet
-              // labels in the visual hierarchy. Lighter weight (500 → 400), smaller
-              // (11 → 10.5), fainter (0.42 → 0.36) and warmed into brass. Wider letter
-              // spacing keeps it legible while it recedes: engraved, not printed.
-              const label = c.name.toUpperCase();
-              // `centered` = true: this label draws with textAnchor="middle", so the placer
-              // must treat x as the CENTRE, not the left edge. It didn't — so every
-              // constellation label collision-tested a box half a label-width to the right
-              // of where it actually drew.
-              const position = placeLabel
-                ? placeLabel(centroid.x, centroid.y, label, 13, undefined, true)
-                : { x: centroid.x, y: centroid.y };
-              // PRIORITY 3 — below planets and named stars. Dropped if there's no clean slot.
-              if (!Number.isFinite(position.x)) return null;
-              return (
-                <>
-                  {/* Dark outline keeps the brass name legible over the bright band. */}
-                  <SvgText x={position.x} y={position.y} fill="none" stroke="#05070F" strokeWidth={1.6} strokeOpacity={0.45} fontSize={13} fontWeight="500" letterSpacing={1.6} textAnchor="middle">
-                    {label}
-                  </SvgText>
-                  <SvgText
-                    x={position.x}
-                    y={position.y}
-                    fill={nightMode ? palette.conLabel : CON_LABEL_GOLD}
-                    fontSize={13}
-                    fontWeight="500"
-                    letterSpacing={1.6}
-                    opacity={0.55}
-                    textAnchor="middle"
-                  >
-                    {label}
-                  </SvgText>
-                  <Circle
-                    cx={position.x}
-                    cy={position.y - 3}
-                    r={26}
-                    fill="transparent"
-                    onPress={() =>
-                      onSelect({
-                        kind: "constellation",
-                        id: c.id,
-                        name: c.name,
-                        subtitle: "Constellation",
-                        facts: [{ label: "Best season", value: c.season }],
-                        description: c.myth
-                      })
-                    }
-                  />
-                </>
-              );
-            })()}
+            {/* Labels are drawn by the separate labels-only pass (correct priority order);
+                this only fires for a hypothetical combined-mode caller (showLabels + not
+                labelsOnly). The canvas figures mount passes showLabels={false}. */}
+            {renderLabel(c)}
           </G>
         );
       })}

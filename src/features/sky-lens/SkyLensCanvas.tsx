@@ -146,6 +146,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         {activeLayers.has("constellations") && (
           <ConstellationArtLayer constellations={constellations} project={project} box={box} fov={fov} enabled={false} />
         )}
+        {/* Constellation FIGURES (lines) — rendered here, UNDER the stars. Labels are NOT
+            drawn in this pass (showLabels={false}); they are placed later, after the stars
+            and planets, so constellation names correctly yield to star/planet names in the
+            shared label placer (see the labels-only mount further down). */}
         {activeLayers.has("constellations") && (
           <G opacity={cinematic ? 0.48 : 0.72}>
             <ConstellationLayer
@@ -154,8 +158,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
               box={box}
               palette={palette}
               nightMode={nightMode}
-              placeLabel={placeLabel}
-              showLabels={showLabels}
+              showLabels={false}
               showNodes={false}
               fullSphere={horizonCorrect}
               onSelect={onSelect}
@@ -197,6 +200,27 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
             fullSphere={horizonCorrect}
             onSelect={onSelect}
           />
+        )}
+        {/* Constellation LABELS — placed HERE, after stars & planets have claimed their
+            slots, so a constellation name yields to a nearby star/planet name (priority
+            ladder) instead of stealing its slot. Same opacity wrapper as the figures so
+            the names keep their tuned ~0.40 effective opacity. Rendered above the stars,
+            which is correct for label legibility. */}
+        {activeLayers.has("constellations") && showLabels && (
+          <G opacity={cinematic ? 0.48 : 0.72}>
+            <ConstellationLayer
+              constellations={constellations}
+              project={project}
+              box={box}
+              palette={palette}
+              nightMode={nightMode}
+              placeLabel={placeLabel}
+              showLabels
+              labelsOnly
+              fullSphere={horizonCorrect}
+              onSelect={onSelect}
+            />
+          </G>
         )}
         {activeLayers.has("satellites") && !cinematic && (
           <SatelliteLayer satellites={satellites} project={project} palette={palette} nightMode={nightMode} placeLabel={placeLabel} onSelect={onSelect} />
