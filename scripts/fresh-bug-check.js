@@ -163,6 +163,18 @@ check("planet positions untouched — PlanetLayer projects straight from body az
   planetLayer.includes("project(body.azimuthDegrees, body.altitudeDegrees)"));
 check("planet render self-test exists", exists("scripts/planet-render-selftest.js"));
 
+// Dev-only planet review aid must be inert in production: the env target is read only
+// behind the __DEV__ + review-mode gate, and the aim override falls back to live sensor
+// pointing whenever review mode is off.
+const skyLensScreen = read("src/features/sky-lens/SkyLensScreen.tsx");
+check("planet review target env var is read only behind the reviewMode gate",
+  skyLensScreen.includes('reviewMode ? (process.env.EXPO_PUBLIC_SKYLENS_REVIEW_TARGET') &&
+  (skyLensScreen.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1").match(/EXPO_PUBLIC_SKYLENS_REVIEW_TARGET/g) || []).length === 1);
+check("review mode stays dev + explicit-flag gated",
+  skyLensScreen.includes('const reviewMode = __DEV__ && process.env.EXPO_PUBLIC_SKYLENS_REVIEW_MODE === "1"'));
+check("review pointing override falls back to live sensor pointing off review mode",
+  skyLensScreen.includes("if (!reviewMode) return sensorPointing;"));
+
 // Dev-only "Preview Paywall" button in Settings — lets QA inspect trial/pricing states
 // without altering release behavior. It MUST stay guarded by __DEV__ so it is stripped
 // from production builds, and it MUST open the real paywall (openPaywall), not a stub.

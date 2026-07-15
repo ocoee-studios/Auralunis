@@ -119,6 +119,38 @@ const hz = Astronomy.Horizon(PWHEN, OBS, eq.ra, eq.dec, "normal");
 check("Jupiter position fixture stable (az≈114.90°)", near(hz.azimuth, 114.9, 0.05), `az ${hz.azimuth.toFixed(2)}°`);
 check("Jupiter position fixture stable (alt≈62.15°)", near(hz.altitude, 62.15, 0.05), `alt ${hz.altitude.toFixed(2)}°`);
 
+// ── 6. Dev-only planet review aid cannot activate in production ────────────────────
+const screen = read("src/features/sky-lens/SkyLensScreen.tsx");
+const screenCode = stripComments(screen);
+check(
+  "review mode is dev + env gated",
+  /const reviewMode = __DEV__ && process\.env\.EXPO_PUBLIC_SKYLENS_REVIEW_MODE === "1"/.test(screen)
+);
+check(
+  "review TARGET env var is read ONLY behind the reviewMode gate",
+  /reviewMode \? \(process\.env\.EXPO_PUBLIC_SKYLENS_REVIEW_TARGET/.test(screen)
+);
+check(
+  "review TARGET env var has no ungated read (exactly one, gated, occurrence)",
+  (screenCode.match(/EXPO_PUBLIC_SKYLENS_REVIEW_TARGET/g) || []).length === 1
+);
+check(
+  "planet review targets limited to the four premium planets",
+  /jupiter: Body\.Jupiter/.test(screen) &&
+    /saturn: Body\.Saturn/.test(screen) &&
+    /mars: Body\.Mars/.test(screen) &&
+    /venus: Body\.Venus/.test(screen)
+);
+check(
+  "review pointing override is guarded — production uses live sensor pointing",
+  /if \(!reviewMode\) return sensorPointing;/.test(screenCode)
+);
+check(
+  "review aid only picks a time (SearchHourAngle), never alters projection or sensors",
+  /SearchHourAngle\(REVIEW_PLANET_BODY\[reviewPlanet\]/.test(screenCode)
+);
+check("planet review aid does not restore the camera", !/CameraView|expo-camera/.test(screenCode));
+
 console.log("");
 if (failed) {
   console.error(`Planet render self-test: ${failed} FAILED.`);
