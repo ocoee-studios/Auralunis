@@ -1,6 +1,12 @@
 // MonetizationCatalog.ts
 // AuraLunis pricing — optimized for launch.
-// Three products: Monthly, Annual, Lifetime (one-time). No free trials on any plan.
+// Three products: Monthly, Annual, Lifetime (one-time).
+//
+// FREE TRIAL: a 7-day introductory trial may be available to eligible new subscribers on
+// the monthly and annual plans. The trial is an Apple-configured introductory offer — it
+// is NOT defined here and is NOT granted by the app. StoreKit/RevenueCat reports the offer
+// and per-account eligibility; the paywall (see usePaywallOffers.ts) only shows trial copy
+// when both are confirmed. Lifetime is a one-time purchase and never carries a trial.
 // NOTE: the lifetime App Store / RevenueCat *product id* is
 // `com.ocoeestudios.auralunis.lifetime`. Its RevenueCat *package* identifier is the
 // dashboard default `$rc_lifetime` — that's what the offering uses, so the code must

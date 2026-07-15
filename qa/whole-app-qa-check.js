@@ -124,7 +124,13 @@ const monetization = read("src/features/paywall/MonetizationCatalog.ts");
 for (const price of ["$9.99/month", "$49.99/year", "$129.99"]) {
   check(`current price present: ${price}`, monetization.includes(price));
 }
-check("no free-trial launch claim", monetization.includes("No free trials on any plan"));
+// A 7-day Apple intro trial may be offered to eligible new subscribers. The claim must be
+// CONDITIONAL (eligibility-gated), never an unconditional "everyone gets a trial".
+check(
+  "trial claim is conditional (eligibility-gated)",
+  monetization.includes("may be available to eligible new subscribers") &&
+    !monetization.includes("No free trials on any plan")
+);
 check("lifetime RevenueCat package id is canonical", monetization.includes('lifetime:          "$rc_lifetime"'));
 check("premium entitlement identifier is exact", monetization.includes('entitlement: "AuraLunis Premium"'));
 

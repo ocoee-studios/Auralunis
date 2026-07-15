@@ -101,7 +101,14 @@ check("onboarding no longer advertises camera AR", !onboarding.includes("Point y
 check("current monthly price is $9.99", monetization.includes("$9.99/month"));
 check("current annual price is $49.99", monetization.includes("$49.99/year"));
 check("current lifetime price is $129.99", monetization.includes("$129.99"));
-check("no free trials are promised", monetization.includes("No free trials on any plan"));
+// The old "No free trials on any plan" claim is retired: a 7-day Apple intro trial may be
+// offered to eligible new subscribers. Guard that the trial is described as CONDITIONAL
+// (eligibility-gated), never as an unconditional promise every user receives.
+check(
+  "trial copy is conditional (eligibility-gated), not unconditional",
+  monetization.includes("may be available to eligible new subscribers") &&
+    !/No free trials on any plan/.test(monetization)
+);
 check("lifetime package identifier is correct", monetization.includes('"$rc_lifetime"'));
 check("entitlement identifier is exact", monetization.includes('"AuraLunis Premium"'));
 check("retired founder pricing is absent", !monetization.includes("$24.99") && !monetization.includes("FOUNDER OFFER"));

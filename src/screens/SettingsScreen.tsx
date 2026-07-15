@@ -128,7 +128,7 @@ export function SettingsScreen() {
             AuraLunis Premium: {AuraLunisPricing.monthly} or {AuraLunisPricing.annual}. Lifetime {AuraLunisPricing.lifetime} one-time.
           </Text>
           <Text style={styles.infoCopy}>
-            Subscribe when you're ready. Cancel anytime.
+            A 7-day introductory trial may be available to eligible new subscribers. Subscribe when you're ready. Cancel anytime.
           </Text>
           {!isPremium && (
             <Pressable style={styles.actionButton} onPress={openPaywall}>
@@ -275,7 +275,7 @@ export function SettingsScreen() {
 
         <Pressable style={styles.secondaryButton} onPress={() => Alert.alert(
           "Frequently Asked Questions",
-          "How do I use Sky Lens?\nPoint your phone at the sky. Stars, constellations, and planets align to the direction your phone is pointing.\n\nWhy can't I see the Milky Way?\nTurn toward the south (heading ~160-180°). The galactic core is brightest in Sagittarius.\n\nHow do I find a specific object?\nLook for the 'Pan to...' hint at the bottom of Sky Lens. It guides you to bright objects.\n\nHow do I restore my purchase?\nGo to Settings → Manage Subscription → Restore Purchases.\n\nNeed more help?\nTap 'Contact Support' below to email us."
+          "How do I use Sky Lens?\nPoint your phone at the sky. Stars, constellations, and planets align to the direction your phone is pointing.\n\nWhy can't I see the Milky Way?\nTurn toward the south (heading ~160-180°). The galactic core is brightest in Sagittarius.\n\nHow do I find a specific object?\nLook for the 'Pan to...' hint at the bottom of Sky Lens. It guides you to bright objects.\n\nIs there a free trial?\nA 7-day introductory trial may be available to eligible new subscribers on the monthly and annual plans. Apple determines eligibility, so the trial appears at checkout only when your account qualifies. Lifetime has no trial.\n\nHow do I restore my purchase?\nGo to Settings → Manage Subscription → Restore Purchases.\n\nNeed more help?\nTap 'Contact Support' below to email us."
         )}>
           <Text style={styles.secondaryButtonText}>FAQ / Help</Text>
         </Pressable>
