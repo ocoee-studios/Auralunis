@@ -137,6 +137,32 @@ check("privacy policy exists", exists("docs/PRIVACY_POLICY.md"));
 check("App Store listing exists", exists("docs/APP_STORE_LISTING.md"));
 check("app version is not prototype version", !read("app.json").includes('"version": "0.1.0"'));
 
+// ── Premium planet surface renderers ─────────────────────────────────────────────
+// The paywall promises planet-specific artwork. Guard that the renderers exist, stay
+// procedural (no camera / no raster stickers), that Venus is phase-aware from real
+// ephemeris, and that the artwork upgrade did not touch coordinate math.
+const planetArt = read("src/features/sky-lens/layers/PlanetIllustrations.tsx");
+const planetLayer = read("src/features/sky-lens/layers/PlanetLayer.tsx");
+const skyEphem = read("src/features/sky-lens/ephemeris/SkyEphemerisService.ts");
+check("planet renderers exist for all four premium planets",
+  ["Jupiter", "Saturn", "Mars", "Venus"].every((p) => planetArt.includes(`export function ${p}Illustration`)));
+check("planet artwork is camera-free (no CameraView / expo-camera)",
+  !/CameraView|expo-camera/.test(planetArt.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/[^\n]*/g, "$1")));
+check("planet artwork uses procedural SVG, not raster stickers",
+  planetArt.includes('from "react-native-svg"') && !/require\(.*\.(png|jpg|jpeg|webp)/i.test(planetArt));
+check("Venus phase is astronomy-driven (illuminationFraction threaded from ephemeris)",
+  skyEphem.includes("illuminationFraction") && skyEphem.includes("phase_fraction") &&
+  planetLayer.includes("illumination: body.illuminationFraction"));
+check("Venus does not fake a phase without ephemeris data",
+  planetArt.includes("venusPhaseSpec") && /hasPhase: false/.test(planetArt));
+check("Mars polar cap is conditional", planetArt.includes("polarCap?: boolean") && planetArt.includes("polarCap && <"));
+check("planet position math untouched — ephemeris still uses Equator + Horizon",
+  skyEphem.includes("Equator(entry.body, when, observer, true, true)") &&
+  skyEphem.includes('Horizon(when, observer, equatorial.ra, equatorial.dec, "normal")'));
+check("planet positions untouched — PlanetLayer projects straight from body az/alt",
+  planetLayer.includes("project(body.azimuthDegrees, body.altitudeDegrees)"));
+check("planet render self-test exists", exists("scripts/planet-render-selftest.js"));
+
 // Dev-only "Preview Paywall" button in Settings — lets QA inspect trial/pricing states
 // without altering release behavior. It MUST stay guarded by __DEV__ so it is stripped
 // from production builds, and it MUST open the real paywall (openPaywall), not a stub.
