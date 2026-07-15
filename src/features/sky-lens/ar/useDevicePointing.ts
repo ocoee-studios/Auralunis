@@ -57,6 +57,11 @@ export function useDevicePointing(
     Sensors.Magnetometer.setUpdateInterval(updateMs);
 
     const ema = (prev: Vec3, next: SensorReading): Vec3 => {
+      // STABILITY CEILING. The caller's requested alpha (~0.32→0.10 over zoom) is capped
+      // at 0.16 here — the sensor low-pass never follows RAW readings faster than this, so
+      // hand-shake can't jump the sky. Net effect: alpha is ~0.16 from 1×–9× zoom and only
+      // drops below 0.16 past ~9×. The requested curve is a REQUEST; this is the real floor.
+      // (Do not raise without re-testing motion on-device — shakiness was a top complaint.)
       const a = Math.min(alphaRef.current, 0.16);
       return {
         x: prev.x + (next.x - prev.x) * a,

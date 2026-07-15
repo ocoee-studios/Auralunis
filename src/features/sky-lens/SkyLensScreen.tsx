@@ -90,6 +90,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   zoomRef.current = zoom;
   // Ramp EMA smoothing DOWN (steadier, more damped) as zoom climbs, because a
   // narrow FOV amplifies hand-shake: ~0.32 at 1× → 0.10 at 12×.
+  // Requested EMA smoothing: less at low zoom, more as you zoom in. NOTE: useDevicePointing
+  // caps this at 0.16 (a stability ceiling), so values above 0.16 (roughly zoom 1×–9×)
+  // resolve to 0.16 in practice — see the cap comment there. Kept as a request, not a lie.
   const smoothAlpha = Math.max(0.1, 0.32 - (zoom - 1) * 0.02);
   const { pointing: sensorPointing, available } = useDevicePointing(120, 0, smoothAlpha);
   const parallax = useParallaxOffset();
@@ -150,9 +153,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // and instead aim deliberately: fix the clock to a night when Orion is high, and aim the
   // camera straight at M42. The scene becomes reproducible, screenshot-able, and diffable.
   //
-  // This can NEVER fire on a real device: `available` is true the moment a magnetometer
-  // reports, and __DEV__ is false in release. Production behaviour is untouched.
-  const reviewMode = __DEV__ && !available;
+  // GATING: explicit opt-in only. Enable with `EXPO_PUBLIC_SKYLENS_REVIEW_MODE=1` when
+  // building for a simulator (which has no magnetometer to point with). It is off unless
+  // that flag is set AND this is a dev build, so it can never surprise-activate — not in a
+  // release build (__DEV__ false) and not transiently on a physical dev build (the old
+  // `!available` gate was briefly true at cold start before the first magnetometer sample,
+  // which flashed the review scene on real devices).
+  const reviewMode = __DEV__ && process.env.EXPO_PUBLIC_SKYLENS_REVIEW_MODE === "1";
   // Orion high in the south (matches scripts/orion-selftest.js exactly).
   const REVIEW_TIME = useMemo(() => new Date("2026-01-15T22:00:00-08:00"), []);
 

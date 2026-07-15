@@ -15,16 +15,15 @@ type Props = {
 // History: v1 wrapped to two rows (stole sky); v2 scrolled horizontally (a hidden Planets
 // control reads as broken, and swiping the dock fights panning the sky). Both rejected.
 //
-// v3 (this): a plain non-scrolling flex row of TEXT-ONLY pills at 15pt, with a fixed
-// divider and a fixed 44x44 icon-only Layers button. Text-only + the "Constell." dock
-// shorthand leaves ~6pt of real gap between every control at 430pt — breathing room, not
-// a crammed strip. The full word "Constellations" is unchanged everywhere else.
+// v3 (this): a plain non-scrolling flex row of TEXT-ONLY pills, a fixed divider, and a
+// fixed 44x44 icon-only Layers button. The full word "Constellations" is shortened to
+// "Constell." in the dock ONLY (unchanged everywhere else).
 //
-// TUNED FOR 430pt (iPhone Pro Max). Pills are flexShrink:0 (content-sized, so text is
-// never ellipsized) and the shell is overflow:hidden — so on a NARROWER device (~375pt
-// SE/mini) the row can exceed the width and clip a few px at each edge. Acceptable for
-// the current single-device target; revisit (shorter labels / icon-only) if smaller
-// phones become a target.
+// RESPONSIVE AT ANY WIDTH. Pills are flexShrink:1 and each label is 15pt with
+// adjustsFontSizeToFit + minimumFontScale 0.72 — so at 430pt (Pro Max) everything sits at
+// a comfortable 15pt with real gaps, and on a narrower phone (390/375/320pt) the pills
+// shrink and the font auto-scales DOWN (never below ~10.8pt) rather than clipping or
+// ellipsizing. The same mechanism absorbs Dynamic Type and long localized strings.
 export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: Props) {
   const accent = nightMode ? "#B64A4A" : AuraLunisColors.gold;
 
@@ -37,10 +36,10 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
 
   return (
     <View style={styles.shell} pointerEvents="box-none">
-      {/* NON-SCROLLING flex row. Horizontal scrolling was removed deliberately: a hidden
-          Planets control reads as broken, and a swipe on the dock competes with panning the
-          sky. All five controls are always visible. Each pill flex-shrinks its PADDING (not
-          its text) if space is tight, so the row degrades to snug rather than clipping. */}
+      {/* NON-SCROLLING flex row: all five controls always visible. Scrolling was removed
+          deliberately (a hidden Planets control reads as broken, and swiping the dock
+          fights panning the sky). On narrow screens the pills shrink and their label font
+          auto-scales to fit — never clipped, never ellipsized. */}
       {PRIMARY_LAYERS.map((def) => {
         const on = active.has(def.key);
         // Dock-only shorthand so all five fit at the 16pt floor. The full word
@@ -64,7 +63,12 @@ export function SkyLensLayerBar({ active, nightMode, onToggle, onOpenLayers }: P
                 word — dropping them is what buys the breathing room to run 15pt labels
                 with real gaps instead of crammed icon+text. The ON state reads clearly
                 from the filled gold pill. */}
-            <Text style={[styles.label, on && styles.labelOn]} numberOfLines={1}>
+            <Text
+              style={[styles.label, on && styles.labelOn]}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.72}
+            >
               {dockLabel}
             </Text>
           </TouchableOpacity>
@@ -129,7 +133,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     height: 44, // comfortable tap target
-    flexShrink: 0, // size to content — text can never be ellipsized
+    flexShrink: 1, // shrink to fit narrow screens; the label font auto-scales with it
     marginHorizontal: 2, // ~4pt gap between controls
     paddingHorizontal: 6,
     borderRadius: 20,

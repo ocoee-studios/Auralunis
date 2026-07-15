@@ -21,8 +21,12 @@ type Props = {
 // hidden UI. Now the main screen keeps only the four BEAUTY layers, and everything
 // analytical is one tap away behind "Layers".
 //
-// Crucially this changes only WHERE the toggles live, never what's on: every overlay in
-// here still starts OFF (defaultOn: false) and stays off until the user asks for it.
+// Two kinds of layer live in this sheet:
+//   • Nebulae — DECORATIVE and DEFAULT-ON (part of the five-layer beauty default); it has
+//     no dock pill but ships enabled.
+//   • Zodiac / Grid / Satellites / Ecliptic — OPTIONAL ANALYTICAL overlays, default-OFF.
+// So "everything in the sheet starts off" is NOT true — only the analytical four do. This
+// sheet changes only WHERE the toggles live, never the default on/off state of any layer.
 export function SkyLensLayersSheet({
   visible,
   active,
@@ -78,9 +82,12 @@ export function SkyLensLayersSheet({
               return (
                 <Pressable
                   key={def.key}
-                  accessibilityRole="switch"
-                  accessibilityState={{ checked: on, disabled: comingSoon }}
-                  accessibilityLabel={`${def.label}${comingSoon ? ", coming soon" : on ? ", on" : ", off"}`}
+                  // A locked (premium) row opens the paywall rather than toggling, so it
+                  // is announced as a disabled switch with a hint — not a live on/off switch.
+                  accessibilityRole={locked || comingSoon ? "button" : "switch"}
+                  accessibilityState={{ checked: on, disabled: comingSoon || locked }}
+                  accessibilityLabel={`${def.label}${comingSoon ? ", coming soon" : locked ? ", locked" : on ? ", on" : ", off"}`}
+                  accessibilityHint={locked ? "Requires AuraLunis Premium" : comingSoon ? "Coming soon" : undefined}
                   // Only a deliberate press on the row itself toggles. Blank space between
                   // rows belongs to the sheet body, which does nothing.
                   hitSlop={{ top: 2, bottom: 2, left: 6, right: 6 }}

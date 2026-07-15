@@ -1,7 +1,11 @@
-// The Sky Lens layer catalog. The default scene stays calm and legible:
-// stars, constellations, planets, and the Milky Way are visible; technical
-// overlays and deep-sky artwork are opt-in until their device presentation is
-// fully polished.
+// The Sky Lens layer catalog. Three categories:
+//   • PRIMARY beauty layers (primary: true, defaultOn: true) — Stars, Constellations,
+//     Milky Way, Planets. Each gets a dock pill; together they are the default scene.
+//   • DEFAULT decorative content (primary: false, defaultOn: true) — Nebulae. No dock
+//     pill, but ships ON as a curated 2-hero accent; toggled via the Layers sheet.
+//   • OPTIONAL analytical overlays (primary: false, defaultOn: false) — Zodiac, Grid,
+//     Satellites, Ecliptic. Off by default; opt-in via the Layers sheet.
+// So the default scene is FIVE active layers (the four beauty pills + Nebulae), not four.
 
 export type LayerKey =
   | "grid"
