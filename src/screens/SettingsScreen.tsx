@@ -147,6 +147,15 @@ export function SettingsScreen() {
           >
             <Text style={styles.secondaryButtonText}>Restore Purchases</Text>
           </Pressable>
+          {/* Development-only: opens the REAL ThreeTierPaywallModal so trial/pricing
+              states can be inspected visually. __DEV__ is false in release builds, so
+              this is stripped from production. It only calls openPaywall() — it never
+              touches entitlement state, RevenueCat config, or purchase logic. */}
+          {__DEV__ && (
+            <Pressable style={styles.devButton} onPress={openPaywall}>
+              <Text style={styles.devButtonText}>Preview Paywall (Dev Only)</Text>
+            </Pressable>
+          )}
         </GlassPanel>
       </SettingsSection>
 
@@ -350,6 +359,9 @@ const styles = StyleSheet.create({
   secondaryButtonText: { color: "#FFF", fontWeight: "800" },
   dangerButton: { borderRadius: 17, paddingVertical: 13, paddingHorizontal: 12, alignItems: "center", marginTop: 10, backgroundColor: "rgba(255,120,120,0.08)", borderWidth: 1, borderColor: "rgba(255,120,120,0.22)" },
   dangerButtonText: { color: "#FFD2D2", fontWeight: "800" },
+  // Dev-only preview button — dashed border marks it as a non-production tool.
+  devButton: { borderRadius: 17, paddingVertical: 13, paddingHorizontal: 12, alignItems: "center", marginTop: 10, backgroundColor: "rgba(120,180,255,0.08)", borderWidth: 1, borderStyle: "dashed", borderColor: "rgba(120,180,255,0.40)" },
+  devButtonText: { color: "#BFD8FF", fontWeight: "800" },
   qualityLabel: { color: "#FFF", fontSize: 14, fontWeight: "800", marginTop: 12 },
   qualityDescription: { color: AuraLunisColors.silver, fontSize: 12, lineHeight: 17, marginTop: 4, marginBottom: 10 },
   segmentRow: { flexDirection: "row", gap: 8, marginBottom: 12 },

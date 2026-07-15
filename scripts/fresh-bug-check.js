@@ -137,6 +137,22 @@ check("privacy policy exists", exists("docs/PRIVACY_POLICY.md"));
 check("App Store listing exists", exists("docs/APP_STORE_LISTING.md"));
 check("app version is not prototype version", !read("app.json").includes('"version": "0.1.0"'));
 
+// Dev-only "Preview Paywall" button in Settings — lets QA inspect trial/pricing states
+// without altering release behavior. It MUST stay guarded by __DEV__ so it is stripped
+// from production builds, and it MUST open the real paywall (openPaywall), not a stub.
+const settingsScreen = read("src/screens/SettingsScreen.tsx");
+const devPaywallGuarded = /__DEV__\s*&&\s*\(\s*<Pressable[^>]*onPress=\{openPaywall\}[\s\S]*?Preview Paywall \(Dev Only\)/.test(settingsScreen);
+check(
+  "dev Preview Paywall button is guarded by __DEV__ and opens the real paywall",
+  devPaywallGuarded,
+  "expected a __DEV__-guarded <Pressable onPress={openPaywall}> labeled 'Preview Paywall (Dev Only)' in SettingsScreen"
+);
+check(
+  "dev Preview Paywall button does not appear outside a __DEV__ guard",
+  !/Preview Paywall \(Dev Only\)/.test(settingsScreen) || devPaywallGuarded,
+  "the 'Preview Paywall (Dev Only)' label must only exist inside the __DEV__ block"
+);
+
 console.log("");
 console.log(`Fresh bug check: ${passes.length} pass, ${failures.length} fail.`);
 
