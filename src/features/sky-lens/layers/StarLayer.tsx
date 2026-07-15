@@ -22,8 +22,9 @@ type Props = {
 };
 
 // Named stars at or above this brightness get a text label; fainter ones render
-// as dots only to avoid clutter.
-const LABEL_MAG_LIMIT = 2.2;
+// as dots only to avoid clutter. Keep this conservative: Sky Lens should feel
+// like an elegant instrument first, not a labeled encyclopedia map.
+const LABEL_MAG_LIMIT = 1.35;
 
 // deterministic per-star hash → a tiny, repeatable wobble so each showpiece bloom is
 // a slightly different soft shape (feathered, not an identical perfect circle).
@@ -34,6 +35,8 @@ const hashStar = (s: string) => {
 };
 
 export function StarLayer({ stars, project, palette, nightMode, focus = null, showcase = null, placeLabel, labelMagLimit = LABEL_MAG_LIMIT, showLabels = true, extinction = false, bloom = true, fullSphere = false, onSelect }: Props) {
+  const quietLabelLimit = Math.min(labelMagLimit, LABEL_MAG_LIMIT);
+
   return (
     <G>
       {stars.map((star) => {
@@ -61,11 +64,11 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
         const bright = bloom && !nightMode && star.magnitude < 2.0;
         const glint = bloom && !nightMode && star.magnitude < 1.2; // diffraction spike on the showpiece stars
         const spike = r + 9;
-        const labeled = showLabels && star.name !== undefined && star.magnitude <= labelMagLimit;
+        const labeled = showLabels && star.name !== undefined && star.magnitude <= quietLabelLimit;
 
         return (
           <G key={star.id} opacity={belowHorizon && !fullSphere ? 0.25 : 1}>
-            {/* Bigger invisible hit target — 24px minimum for easy tapping with AR jitter */}
+            {/* Bigger invisible hit target — 24px minimum for easy tapping with sensor jitter */}
             <Circle
               cx={p.x}
               cy={p.y}
@@ -91,7 +94,10 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
                 core) instead of one hard-edged disc, with a tiny per-star centre offset
                 so each bloom is a slightly different organic shape, not a sharp circle. */}
             {bloom && feature && (() => {
-              const gr = feature.glowRadius * 0.85 * (1 + sf * 1.0);
+              // HALO CAP. Sirius peaked at 24 × 0.85 = 20.4, and the showcase multiplier
+              // could double it — a giant translucent disc rather than a star. Clamped to
+              // 7–19 so even the showpieces stay jewels.
+              const gr = Math.max(7, Math.min(19, feature.glowRadius * 0.85 * (1 + sf * 1.0)));
               const h = hashStar(star.id);
               const ox = ((h % 7) - 3) * 0.1, oy = (((h >> 3) % 7) - 3) * 0.1; // ±0.3·gr
               return (
@@ -102,14 +108,20 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
                 </G>
               );
             })()}
-            {/* Feathered glow on the bright stars — a smooth multi-step opacity ramp
-                (no hard ring). Brightest get the widest, faintest outer halo so the
-                falloff reads as soft light, not concentric discs. */}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 8} fill={color} opacity={0.035} />}
-            {brightest && <Circle cx={p.x} cy={p.y} r={r + 6} fill={color} opacity={0.06} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 4} fill={color} opacity={0.1} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.5} fill={color} opacity={0.16} />}
-            {bright && <Circle cx={p.x} cy={p.y} r={r + 1.2} fill={color} opacity={0.24} />}
+            {/* GLOW HIERARCHY — bright stars are the CRISP tier. The halo is pulled in
+                tighter and the inner steps are brightened, so a star reads as a hard point
+                of light wearing a neat halo. That's deliberately the opposite of the
+                nebulae, which are pure diffuse haze with no crisp core anywhere. Same
+                number of circles; the ramp is just steeper and narrower.
+                  · bright stars → tight, crisp, luminous  (this block)
+                  · planets      → richer, more solid      (PlanetLayer)
+                  · nebulae      → soft haze, never sharp  (NebulaImageLayer)
+                  · dome stars   → restrained              (DomeStarLayer, untouched) */}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 7} fill={color} opacity={0.03} />}
+            {brightest && <Circle cx={p.x} cy={p.y} r={r + 5.5} fill={color} opacity={0.055} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 3.6} fill={color} opacity={0.1} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 2.3} fill={color} opacity={0.18} />}
+            {bright && <Circle cx={p.x} cy={p.y} r={r + 1.1} fill={color} opacity={0.28} />}
             {glint && (
               <>
                 {/* tapered 4-point diffraction — a faint wide underlay glow + a crisp
@@ -123,13 +135,25 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
             )}
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
             {/* white-hot core for the showpiece stars */}
-            {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.85} />}
+            {/* White-hot core — the crispness that makes a showpiece star a JEWEL. */}
+            {glint && <Circle cx={p.x} cy={p.y} r={Math.max(r - 1, 1)} fill="#FFFFFF" opacity={0.92} />}
             {labeled && (() => {
-              const lp = placeLabel ? placeLabel(p.x + r + 3, p.y + 3, star.name ?? "", 13) : { x: p.x + r + 3, y: p.y + 3 };
+              // 12 → 18pt, semibold: readable on a moving sky at arm's length. The bigger
+              // font also enlarges the placer's collision box (it keys off fontSize), so
+              // labels claim the room they actually occupy.
+              const lp = placeLabel ? placeLabel(p.x + r + 5, p.y + 5, star.name ?? "", 16) : { x: p.x + r + 5, y: p.y + 5 };
+              // PRIORITY 2. No clean slot → SUPPRESS rather than clip or overlap.
+              if (!Number.isFinite(lp.x)) return null;
               return (
-                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={13} fontWeight="500" opacity={0.9}>
-                  {star.name}
-                </SvgText>
+                <G>
+                  {/* Soft dark outline so warm-ivory names stay legible over the Milky Way. */}
+                  <SvgText x={lp.x} y={lp.y} fill="none" stroke="#05070F" strokeWidth={1.8} strokeOpacity={0.5} fontSize={16} fontWeight="600">
+                    {star.name}
+                  </SvgText>
+                  <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={16} fontWeight="600" opacity={0.9}>
+                    {star.name}
+                  </SvgText>
+                </G>
               );
             })()}
           </G>

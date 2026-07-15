@@ -1,3 +1,5 @@
+> ⚠️ **SUPERSEDED (planetarium pivot):** Sky Lens no longer uses the live camera feed — it is a sensor-aligned cinematic planetarium. Ignore camera-feed / expo-camera / CameraView references below; they describe the removed AR mode.
+
 # AuraLunis Visual Quality Spec — "Better Than the Competition"
 
 ## Design Philosophy

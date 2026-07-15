@@ -72,6 +72,21 @@ const TYPE_LABEL: Record<NebulaType, string> = {
   supernova: "Supernova Remnant",
 };
 
+const REAL_IMAGE_NEBULA_IDS = new Set([
+  "m42",
+  "m8",
+  "m16",
+  "ngc3372",
+  "ngc7000",
+  "m17",
+  "m20",
+  "ngc2237",
+  "m27",
+  "m57",
+  "m1",
+  "ngc6960",
+]);
+
 // SIGNATURE objects: the few nebulae that earn a hand-built ORGANIC SHAPE instead of
 // a round blob, so they read like astrophotography — soft lobes that bleed and swirl,
 // thin filaments, hollow rose rings. Offsets/sizes are in units of the base radius r.
@@ -379,6 +394,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
               }}
             />
 
+            {!REAL_IMAGE_NEBULA_IDS.has(n.id) && (
             <G opacity={Math.min(arMode ? 0.15 : 1, breathe * opMul)}>
               {n.type === "cluster" ? (
                 /* STAR CLUSTER — not a smooth glow but a tight swarm of individual
@@ -494,6 +510,7 @@ export function NebulaLayer({ nebulae, project, palette, nightMode, focus = null
                   hollow; Big Five supply their own embedded stars) */}
               {n.type !== "cluster" && !sig?.filaments && (!customShapes || (!sig?.ring && !bf)) && <Circle cx={p.x} cy={p.y} r={2.6} fill="#FFF6E8" opacity={0.7} />}
             </G>
+            )}
 
             {/* label */}
             {showLabels && (() => {

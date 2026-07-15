@@ -9,6 +9,10 @@ function read(rel) {
   return fs.readFileSync(path.join(root, rel), "utf8");
 }
 
+function exists(rel) {
+  return fs.existsSync(path.join(root, rel));
+}
+
 function check(label, condition, detail = "") {
   if (condition) {
     passes.push(label);
@@ -19,165 +23,161 @@ function check(label, condition, detail = "") {
   }
 }
 
+const packageJson = read("package.json");
+const app = read("App.tsx");
+const rootTabs = read("src/navigation/RootTabs.tsx");
+const home = read("src/screens/HomeScreen.tsx");
+const sky = read("src/screens/SkyScreen.tsx");
+const skyLens = read("src/features/sky-lens/SkyLensScreen.tsx");
+const birthSky = read("src/screens/BirthSkyScreen.tsx");
+const onboarding = read("src/features/onboarding/OnboardingFlow.tsx");
+const monetization = read("src/features/paywall/MonetizationCatalog.ts");
+const weather = read("src/services/WeatherService.ts");
+
+check("RevenueCat startup rejection guarded", app.includes("configureRevenueCat().catch"));
+check("purchase result handles cancellation", app.includes('result.status === "cancelled"'));
+check("purchase result handles unavailable configuration", app.includes('result.status === "not_configured"') && app.includes('result.status === "not_available"'));
+check("restore errors are user-visible and guarded", app.includes("handleRestorePurchases") && app.includes("Restore could not be completed"));
+check("entitlement refresh follows purchases", app.includes("await refreshEntitlement()"));
+
+const liveTabs = [...rootTabs.matchAll(/<Tab\.Screen name="([^"]+)" component=\{(\w+Screen)\}/g)].map((match) => ({
+  name: match[1],
+  component: match[2]
+}));
+check("live navigation has five tabs", liveTabs.length === 5, liveTabs.map((tab) => tab.name).join(", "));
+check("live navigation matches launch tabs", JSON.stringify(liveTabs.map((tab) => tab.name)) === JSON.stringify(["Home", "Sky", "Learn", "Vault", "Settings"]));
+for (const tab of liveTabs) {
+  check(`live screen present: ${tab.component}`, exists(`src/screens/${tab.component}.tsx`));
+}
+
+check("Home uses real ephemeris", home.includes("computeTonightSky"));
+check("Home weather request is guarded", home.includes("fetchCurrentWeather(location).then(setWeather).catch"));
+check("Home tonight score uses live inputs", home.includes("computeTonightScore(sky, weather, settings.skyQuality)"));
+check("Home notification scheduling is guarded", home.includes("scheduleSkyEventNotifications") && home.includes(".catch(() => {})"));
+check("Home hardcoded moonrise is absent", !home.includes("Moonrise 8:12 PM"));
+
+check("weather service uses Open-Meteo", weather.includes("api.open-meteo.com"));
+check("weather service has safe fallback", weather.includes("const FALLBACK") && weather.includes("return FALLBACK"));
+check("weather service sends no API key", !weather.includes("appid=") && !weather.includes("openweathermap"));
+
+const ephemeris = read("src/features/sky-lens/ephemeris/SkyEphemerisService.ts");
+check("ephemeris uses astronomy-engine", ephemeris.includes('from "astronomy-engine"'));
+check("ephemeris computes horizontal coordinates", ephemeris.includes("Horizon(") && ephemeris.includes("Equator("));
+check("ephemeris self-test exists", exists("scripts/ephemeris-selftest.js"));
+check("astronomy-engine dependency declared", packageJson.includes('"astronomy-engine"'));
+
+check("Sky screen routes to Sky Lens", sky.includes("<SkyLensScreen"));
+check("Sky screen wraps Sky Lens in ErrorBoundary", sky.includes("<ErrorBoundary>") && sky.includes("<SkyLensScreen"));
+check("Sky screen routes to accurate Birth Sky", sky.includes("<BirthSkyScreen"));
+check("Sky screen restores tab bar after full-screen destinations", sky.includes("TAB_BAR_STYLE"));
+
+check("Sky Lens is planetarium-only", skyLens.includes("const planetarium = true"));
+check("Sky Lens camera feed removed", !skyLens.includes("CameraView"));
+check("Sky Lens uses cinematic background image", skyLens.includes("SolidSkyBackgroundLayer"));
+check("Sky Lens uses image-backed nebulae", skyLens.includes("NebulaImageLayer"));
+check("Sky Lens aurora bands disabled", skyLens.includes("visible={false}") && skyLens.includes("intensity={0}"));
+check("Sky Lens projection module exists", exists("src/features/sky-lens/ar/SkyLensProjection.ts"));
+check("Sky Lens orientation module exists", exists("src/features/sky-lens/ar/SkyLensOrientation.ts"));
+check("Sky Lens self-test exists", exists("scripts/skylens-selftest.js"));
+
+check("Birth Sky does not use current observer location", !birthSky.includes("useObserverLocation"));
+check("Birth Sky geocodes birthplace", birthSky.includes("findBirthplace") && birthSky.includes("geocoding-api.open-meteo.com"));
+check("Birth Sky birthplace search ranks state or country", birthSky.includes("scorePlace") && birthSky.includes("US_STATE_NAMES"));
+check("Birth Sky accepts AM/PM input", birthSky.includes("meridiemMatch"));
+check("Birth Sky accepts 24-hour input", birthSky.includes("twentyFourHourMatch"));
+check("Birth Sky rejects invalid times", birthSky.includes("return null") && birthSky.includes("Enter a valid birth time"));
+check("Birth Sky converts local time with birthplace timezone", birthSky.includes("localBirthMomentToUtc") && birthSky.includes("savedPlace.timezone"));
+check("Birth Sky saves local date separately from UTC instant", birthSky.includes("BIRTH_DATE_LOCAL_STORAGE_KEY"));
+check("Birth Sky saves local time separately from UTC instant", birthSky.includes("BIRTH_TIME_LOCAL_STORAGE_KEY"));
+check("Birth Sky chart uses resolved location", birthSky.includes("location={profile.location}"));
+check("Birth Sky unknown time is labeled approximate", birthSky.includes('"Approx. eastern sky"'));
+check("Birth Sky network failure is user-visible", birthSky.includes("We couldn't find that birthplace"));
+
+check("onboarding birth sky is explicitly a date-only preview", onboarding.includes("DATE-ONLY PREVIEW"));
+check("onboarding avoids exact horizon claims", !onboarding.includes("Above the horizon:"));
+check("onboarding explains birthplace and birth time are needed", onboarding.includes("birthplace") && onboarding.includes("birth time"));
+check("onboarding no longer advertises camera AR", !onboarding.includes("Point your phone at the sky"));
+
+check("current monthly price is $9.99", monetization.includes("$9.99/month"));
+check("current annual price is $49.99", monetization.includes("$49.99/year"));
+check("current lifetime price is $129.99", monetization.includes("$129.99"));
+// The old "No free trials on any plan" claim is retired: a 7-day Apple intro trial may be
+// offered to eligible new subscribers. Guard that the trial is described as CONDITIONAL
+// (eligibility-gated), never as an unconditional promise every user receives.
+check(
+  "trial copy is conditional (eligibility-gated), not unconditional",
+  monetization.includes("may be available to eligible new subscribers") &&
+    !/No free trials on any plan/.test(monetization)
+);
+check("lifetime package identifier is correct", monetization.includes('"$rc_lifetime"'));
+check("entitlement identifier is exact", monetization.includes('"AuraLunis Premium"'));
+check("retired founder pricing is absent", !monetization.includes("$24.99") && !monetization.includes("FOUNDER OFFER"));
+
 const satellite = read("src/features/aura-pro/SatelliteFeedService.ts");
 check("satellite cache read guarded", satellite.includes("async function readCachedElements"));
 check("satellite cache write guarded", satellite.includes("async function writeCachedElements"));
 check("satellite cached elements sanitized", satellite.includes("function isElementSet"));
-check("satellite cache expiry date validated", satellite.includes("Number.isFinite(Date.parse(parsed.expiresAtISO))"));
-check("satellite uses SGP4 via satellite.js", satellite.includes('from "satellite.js"') && satellite.includes("twoline2satrec") && satellite.includes("ecfToLookAngles"));
-check("satellite shows only above-horizon objects", satellite.includes("elevationDegrees <= 0"));
-check("satellite overlay no longer hash-positioned", !satellite.includes("hash % 256"));
-check("satellite.js declared in package.json", read("package.json").includes('"satellite.js"'));
-check("satellite self-test script present", fs.existsSync(path.join(root, "scripts/satellite-selftest.js")));
-
-const satellitePanel = read("src/features/aura-pro/SatelliteThermalOverlayPanel.tsx");
-check("satellite panel refresh guarded", satellitePanel.includes("Orbital overlay unavailable"));
-
-const app = read("App.tsx");
-check("RevenueCat startup rejection guarded", app.includes("configureRevenueCat().catch"));
-
-const sigil = read("src/features/future/SovereignSigilPreview.tsx");
-check("Sigil generation rejection guarded", sigil.includes(".catch(() =>"));
-check("Sigil error state visible", sigil.includes("preview unavailable"));
-
-const timeService = read("src/features/aura-pro/TimeScrubMatrixService.ts");
-check("Time-Scrub Matrix local date formatter", timeService.includes("function formatLocalDate"));
-check("Time-Scrub Matrix avoids UTC date slice", !timeService.includes("toISOString().slice(0, 10)"));
-
-const timePanel = read("src/features/aura-pro/TimeScrubMatrixPanel.tsx");
-check("Time-Scrub Matrix disambiguates Mercury and Mars", timePanel.includes('return "Me"') && timePanel.includes('return "Ma"'));
-
-const sovereignWidget = read("native-handoff/widgetkit/SovereignSigilWidget.swift");
-check("Sovereign widget provider included", sovereignWidget.includes("SovereignSigilWidgetProvider"));
-check("Sovereign widget configuration included", sovereignWidget.includes("struct SovereignSigilWidget: Widget"));
-check("Sovereign widget timeline included", sovereignWidget.includes("getTimeline"));
-
-const bootstrap = read("scripts/bootstrap-native-device.sh");
-for (const step of ["1/8", "2/8", "3/8", "4/8", "5/8", "6/8", "7/8", "8/8"]) {
-  check(`bootstrap step ${step}`, bootstrap.includes(step));
-}
-
-const readme = read("README.md");
-check("README approved navigation", readme.includes("Home") && readme.includes("Sky") && readme.includes("Watch") && readme.includes("Learn") && readme.includes("Settings"));
-check("README current pricing", readme.includes("$4.99/month") && readme.includes("$29.99/year") && readme.includes("$24.99"));
-check("README Aura Pro labeled coming later", readme.includes("coming later"));
-check("README founder annual price present", readme.includes("$24.99") || readme.includes("founder"));
-
-const ephemeris = read("src/features/sky-lens/ephemeris/SkyEphemerisService.ts");
-check("ephemeris uses astronomy-engine", ephemeris.includes('from "astronomy-engine"'));
-check("ephemeris computes horizontal coords", ephemeris.includes("Horizon(") && ephemeris.includes("Equator("));
-check("ephemeris exposes computeTonightSky", ephemeris.includes("export function computeTonightSky"));
-check("astronomy-engine declared in package.json", read("package.json").includes('"astronomy-engine"'));
-check("location hook present", fs.existsSync(path.join(root, "src/features/sky-lens/ephemeris/useObserverLocation.ts")));
-check("ephemeris self-test script present", fs.existsSync(path.join(root, "scripts/ephemeris-selftest.js")));
-
-const home = read("src/screens/HomeScreen.tsx");
-check("Home uses live sky", home.includes("computeTonightSky"));
-check("Home hardcoded moonrise removed", !home.includes("Moonrise 8:12 PM"));
-
-const appRoot = read("App.tsx");
-check("app wrapped in GestureHandlerRootView", appRoot.includes("GestureHandlerRootView"));
-const screenShell = read("src/components/ScreenShell.tsx");
-check("ScreenShell respects top safe-area inset", screenShell.includes("useSafeAreaInsets") && screenShell.includes("insets.top"));
-
-const skyScreen = read("src/screens/SkyScreen.tsx");
-check("Sky screen has live Tonight's Sky panel", skyScreen.includes("TONIGHT") && skyScreen.includes("computeTonightSky"));
-check("Find Mode no longer says ephemeris is missing", !skyScreen.includes("Production connects real ephemeris and device orientation"));
-
-const skyLens = read("src/features/sky-lens/SkyLensPlaceholder.tsx");
-check("Sky Lens overlay uses live device pointing", skyLens.includes("useDevicePointing") && skyLens.includes("projectTarget"));
-check("Sky Lens overlay is no longer a static placeholder", !skyLens.includes("AR overlay placeholder"));
-check("Sky Lens projection module present", fs.existsSync(path.join(root, "src/features/sky-lens/ar/SkyLensProjection.ts")));
-check("Sky Lens orientation module present", fs.existsSync(path.join(root, "src/features/sky-lens/ar/SkyLensOrientation.ts")));
-check("Sky Lens AR self-test script present", fs.existsSync(path.join(root, "scripts/skylens-selftest.js")));
+check("satellite cache expiry validated", satellite.includes("Number.isFinite(Date.parse(parsed.expiresAtISO))"));
+check("satellite uses SGP4", satellite.includes('from "satellite.js"') && satellite.includes("twoline2satrec") && satellite.includes("ecfToLookAngles"));
+check("satellite filters below-horizon objects", satellite.includes("elevationDegrees <= 0"));
+check("satellite self-test exists", exists("scripts/satellite-selftest.js"));
 
 const vault = read("src/state/AuraLunisVaultContext.tsx");
+const vaultEncryption = read("src/services/VaultEncryption.ts");
 check("vault uses encrypted storage", vault.includes("encryptVault") && vault.includes("decryptVault"));
-check("vault migration from unencrypted", vault.includes("isEncrypted"));
-check("vault encryption module present", fs.existsSync(path.join(root, "src/services/VaultEncryption.ts")));
+check("vault migration handles legacy data", vault.includes("isEncrypted"));
+check("vault encryption uses NaCl secretbox", vaultEncryption.includes("nacl.secretbox"));
+check("vault key is stored securely", vaultEncryption.includes("SecureStore") || vaultEncryption.includes("SecureStorage"));
 
-const vaultEnc = read("src/services/VaultEncryption.ts");
-check("vault encryption uses NaCl secretbox", vaultEnc.includes("nacl.secretbox"));
-check("vault key stored in SecureStore", vaultEnc.includes("SecureStorage.setItemAsync"));
+const screenShell = read("src/components/ScreenShell.tsx");
+check("ScreenShell respects safe-area inset", screenShell.includes("useSafeAreaInsets") && screenShell.includes("insets.top"));
+check("app is wrapped in GestureHandlerRootView", app.includes("GestureHandlerRootView"));
+check("app has root ErrorBoundary", app.includes("<ErrorBoundary>"));
+check("privacy policy exists", exists("docs/PRIVACY_POLICY.md"));
+check("App Store listing exists", exists("docs/APP_STORE_LISTING.md"));
+check("app version is not prototype version", !read("app.json").includes('"version": "0.1.0"'));
 
-const homeScreen = read("src/screens/HomeScreen.tsx");
-check("Home tonight score computed from real data", homeScreen.includes("computeTonightScore") && !homeScreen.includes("useState(91)"));
-check("Home fetches weather", homeScreen.includes("fetchCurrentWeather"));
-check("Home schedules notifications", homeScreen.includes("scheduleSkyEventNotifications"));
-
-check("weather service present", fs.existsSync(path.join(root, "src/services/WeatherService.ts")));
-check("tonight score service present", fs.existsSync(path.join(root, "src/services/TonightScoreService.ts")));
-check("notification service present", fs.existsSync(path.join(root, "src/services/NotificationService.ts")));
-check("weather API key placeholder in app.json", read("app.json").includes("openWeatherMapApiKey"));
-
-check("skyQuality setting in defaults", read("src/features/settings/SettingsTypes.ts").includes("skyQuality"));
-check("privacy policy draft present", fs.existsSync(path.join(root, "docs/PRIVACY_POLICY.md")));
-check("app store listing draft present", fs.existsSync(path.join(root, "docs/APP_STORE_LISTING.md")));
-check("version bumped from 0.1.0", read("app.json").includes('"1.0.0"'));
-
-check("CLAUDE.md present", fs.existsSync(path.join(root, "CLAUDE.md")));
-check("CLAUDE.md has Horizon+ only paywall note", read("CLAUDE.md").includes("Horizon+ only"));
-check("LEGAL_PRIVACY_LAUNCH_TODO.md present", fs.existsSync(path.join(root, "docs/LEGAL_PRIVACY_LAUNCH_TODO.md")));
-check("NATIVE_EXTENSION_TODO.md present", fs.existsSync(path.join(root, "docs/NATIVE_EXTENSION_TODO.md")));
-check("PREMIUM_FEATURE_STATUS.md present", fs.existsSync(path.join(root, "docs/PREMIUM_FEATURE_STATUS.md")));
-check("paywall uses plan cards", read("src/features/paywall/ThreeTierPaywallModal.tsx").includes("planCard") && read("src/features/paywall/ThreeTierPaywallModal.tsx").includes("FOUNDER OFFER"));
-check("Aura Pro labeled Coming Later in catalog", read("src/features/paywall/MonetizationCatalog.ts").includes('"COMING LATER"'));
-check("onboarding flow present", fs.existsSync(path.join(root, "src/features/onboarding/OnboardingFlow.tsx")));
-check("onboarding wired in App", read("App.tsx").includes("OnboardingFlow") && read("App.tsx").includes("onboardingVisible"));
-
-const mock = read("src/features/sky-lens/accuracy/SkyLensMockTargets.ts");
-check("fabricated mock targets replaced by overlay simulator", !mock.includes("mockExpectedTargets") && mock.includes("simulateCalibratedOverlay"));
-
-// Derive the live navigation from RootTabs instead of a hand-maintained list,
-// then verify every registered screen file actually exists. This prevents the
-// saved result report from drifting out of sync with the real app (the cause of
-// the old report still listing retired Now/Explore/Time/Insights/More tabs).
-const rootTabs = read("src/navigation/RootTabs.tsx");
-const liveScreens = [...rootTabs.matchAll(/component=\{(\w+Screen)\}/g)].map((m) => m[1]);
-const screenFiles = liveScreens.map((name) => {
-  const rel = `src/screens/${name}.tsx`;
-  const exists = fs.existsSync(path.join(root, rel));
-  check(`live screen present: ${name}`, exists, exists ? "" : "registered in RootTabs but file missing");
-  return { file: rel, exists };
-});
-
-// Guard against orphaned screen files that are no longer wired into navigation.
-const allScreenFiles = fs
-  .readdirSync(path.join(root, "src/screens"))
-  .filter((f) => f.endsWith(".tsx"))
-  .map((f) => f.replace(/\.tsx$/, ""));
-const orphanScreens = allScreenFiles.filter((name) => !liveScreens.includes(name));
-check("no orphaned screen files", orphanScreens.length === 0, orphanScreens.join(", "));
+// Dev-only "Preview Paywall" button in Settings — lets QA inspect trial/pricing states
+// without altering release behavior. It MUST stay guarded by __DEV__ so it is stripped
+// from production builds, and it MUST open the real paywall (openPaywall), not a stub.
+const settingsScreen = read("src/screens/SettingsScreen.tsx");
+const devPaywallGuarded = /__DEV__\s*&&\s*\(\s*<Pressable[^>]*onPress=\{openPaywall\}[\s\S]*?Preview Paywall \(Dev Only\)/.test(settingsScreen);
+check(
+  "dev Preview Paywall button is guarded by __DEV__ and opens the real paywall",
+  devPaywallGuarded,
+  "expected a __DEV__-guarded <Pressable onPress={openPaywall}> labeled 'Preview Paywall (Dev Only)' in SettingsScreen"
+);
+check(
+  "dev Preview Paywall button does not appear outside a __DEV__ guard",
+  !/Preview Paywall \(Dev Only\)/.test(settingsScreen) || devPaywallGuarded,
+  "the 'Preview Paywall (Dev Only)' label must only exist inside the __DEV__ block"
+);
 
 console.log("");
 console.log(`Fresh bug check: ${passes.length} pass, ${failures.length} fail.`);
 
-// Write the result report straight from this run so it is always accurate.
 const result = {
   generated_at: new Date().toISOString().replace(/\.\d+Z$/, "Z"),
-  package: "chronaura_native_test_build",
-  overall_status: failures.length ? "FAIL" : "PASS WITH KNOWN LIMITATIONS",
+  package: "auralunis",
+  overall_status: failures.length ? "FAIL" : "PASS WITH DEVICE VERIFICATION REQUIRED",
   checks_passed: passes.length,
   checks_failed: failures.length,
-  live_navigation: liveScreens,
-  screen_files: screenFiles,
+  live_navigation: liveTabs.map((tab) => tab.name),
+  screen_files: liveTabs.map((tab) => ({ file: `src/screens/${tab.component}.tsx`, exists: exists(`src/screens/${tab.component}.tsx`) })),
   failures,
   native_limitations: [
-    "Ephemeris is real: astronomy-engine computes live Sun/Moon/planet positions (see scripts/ephemeris-selftest.js).",
-    "Satellite overlay is real: satellite.js propagates CelesTrak elements with SGP4 (see scripts/satellite-selftest.js).",
-    "Sky Lens AR alignment is implemented: accelerometer+magnetometer orientation + projection. Needs outdoor calibration per device.",
-    "Vault is encrypted with NaCl secretbox; key in SecureStore. Legacy data migrates seamlessly.",
-    "Tonight Score computed from weather + moon + sky quality (needs OpenWeatherMap API key for live cloud data).",
-    "Sunset + moonrise notifications via expo-notifications (needs notification permission on device).",
-    "RevenueCat purchase flow is fully wired; needs API key in app.json extra + App Store Connect products.",
-    "Apple Watch, WidgetKit/StandBy, visionOS are handoff scaffolds, not compiled native targets (post-v1).",
-    "Audio playback and Oracle backend remain future features."
+    "The cinematic Sky Lens is implemented and statically tested; final sensor motion, gestures, haptics, and image composition still require an iPhone run.",
+    "Ephemeris positions are calculated by astronomy-engine and covered by the ephemeris self-test.",
+    "Satellite positions use satellite.js SGP4 and are covered by the satellite self-test.",
+    "Birth Sky uses birthplace geocoding and local timezone conversion; network and historical timezone edge cases require device testing.",
+    "Vault encryption uses NaCl secretbox with its key in secure device storage.",
+    "Weather uses keyless Open-Meteo and falls back safely when offline.",
+    "RevenueCat flows are guarded in code; StoreKit sandbox purchase and restore still require an iPhone/TestFlight environment.",
+    "Notifications require device permission and should be verified on physical hardware."
   ]
 };
-fs.writeFileSync(
-  path.join(root, "qa/FRESH_BUG_CHECK_RESULTS.json"),
-  JSON.stringify(result, null, 2) + "\n"
-);
+
+fs.writeFileSync(path.join(root, "qa/FRESH_BUG_CHECK_RESULTS.json"), JSON.stringify(result, null, 2) + "\n");
 console.log("Wrote qa/FRESH_BUG_CHECK_RESULTS.json from this run.");
 
 if (failures.length) {

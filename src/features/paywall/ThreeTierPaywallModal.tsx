@@ -2,7 +2,12 @@
 // Optimized three-tier paywall: Annual (default), Monthly, Lifetime.
 // Annual is selected by default and displayed prominently — monthly is secondary.
 // Lifetime acts as anchor price ($129.99) making annual feel like a steal.
-// No free trials on any plan — direct subscribe.
+//
+// FREE TRIAL: the monthly/annual subscriptions may carry an Apple-configured introductory
+// free trial. The app does NOT invent it — usePaywallOffers() reads the real StoreKit offer
+// and this account's eligibility, and trial copy renders ONLY when both are confirmed
+// (trial.status === "eligible"). Ineligible/unavailable → normal pricing + "Continue".
+// Lifetime is a one-time purchase and never shows trial wording.
 
 import React, { useState } from "react";
 import {
@@ -16,6 +21,7 @@ import {
   lifetimeFeatures,
   type PlanOption,
 } from "./MonetizationCatalog";
+import { usePaywallOffers, type PlanOffer } from "./usePaywallOffers";
 import { tapLight, tapSuccess } from "@/services/HapticService";
 import { Starfield } from "@/components/Starfield";
 import { TermsScreen } from "@/screens/TermsScreen";
@@ -28,9 +34,50 @@ type Props = {
   onRestore: () => void;
 };
 
+// "month" for a monthly plan, "year" for annual — the "/{period}" half of a price line.
+function periodWord(interval: PlanOption["interval"]): string {
+  return interval === "annual" ? "year" : "month";
+}
+
+// Localized price line, live store price preferred over the catalog fallback. Subscriptions
+// read "$9.99/month"; lifetime reads "$129.99 one-time".
+function priceLine(plan: PlanOption, offer?: PlanOffer): string {
+  if (plan.interval === "lifetime") {
+    return `${offer?.localizedPrice ?? plan.displayPrice} one-time`;
+  }
+  if (offer?.localizedPrice) return `${offer.localizedPrice}/${periodWord(plan.interval)}`;
+  return plan.displayPrice; // catalog fallback already includes the period, e.g. "$9.99/month"
+}
+
+// The line under each plan name. Trial framing only when the store confirms eligibility;
+// while loading or when unavailable, the plan's normal marketing subtitle / price shows —
+// so "free trial" never flashes before eligibility resolves.
+function detailLine(plan: PlanOption, offer?: PlanOffer): string {
+  if (plan.interval !== "lifetime" && offer?.trial.status === "eligible") {
+    return `${offer.trial.durationText} free, then ${priceLine(plan, offer)}`;
+  }
+  return plan.subtitle;
+}
+
+// "7 days" → "7-day"; "1 month" → "1-month".
+function trialAdjective(durationText: string): string {
+  return durationText.replace(/^(\d+)\s+(day|week|month|year)s?$/i, "$1-$2");
+}
+
+// "7-day" → "7-Day" (title-cased for the button label).
+function titleCaseAdjective(adjective: string): string {
+  return adjective
+    .split("-")
+    .map((word, i) => (i === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
+    .join("-");
+}
+
 export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore }: Props) {
   const [selected, setSelected] = useState<string>("premium_annual");
   const [legal, setLegal] = useState<"terms" | "privacy" | null>(null);
+
+  // Live prices + per-account trial eligibility. Only loads while the paywall is visible.
+  const { offers } = usePaywallOffers(visible);
 
   const annual   = plans.find(p => p.id === "premium_annual")!;
   const monthly  = plans.find(p => p.id === "premium_monthly")!;
@@ -47,6 +94,33 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
   }
 
   const selectedPlan = plans.find(p => p.id === selected) ?? annual;
+  const selectedOffer = offers[selected];
+  const selectedTrial = selectedOffer?.trial;
+  const selectedEligible = selectedTrial?.status === "eligible";
+  const trialAdj = selectedEligible ? trialAdjective(selectedTrial.durationText) : "";
+
+  // Headline follows the SELECTED plan: a confirmed trial leads with the offer.
+  const headline = selectedEligible
+    ? `Start your ${trialAdj} free trial`
+    : "Unlock the Living Universe";
+
+  // Primary button: trial → "Start 7-Day Free Trial"; lifetime → "Unlock Lifetime";
+  // ineligible / unavailable / still loading → "Continue".
+  const ctaLabel =
+    selectedPlan.interval === "lifetime"
+      ? "Unlock Lifetime"
+      : selectedEligible
+        ? `Start ${titleCaseAdjective(trialAdj)} Free Trial`
+        : "Continue";
+
+  // Renewal disclosure near the button. The "after the free trial" wording is used ONLY for
+  // a confirmed eligible offer; lifetime (one-time) shows none.
+  const disclosure =
+    selectedPlan.interval === "lifetime"
+      ? null
+      : selectedEligible
+        ? "After the free trial, your subscription renews automatically at the displayed price unless canceled at least 24 hours before the trial ends. Manage or cancel in your Apple ID subscription settings."
+        : "Your subscription renews automatically at the displayed price unless canceled at least 24 hours before the end of the period. Manage or cancel in your Apple ID subscription settings.";
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
@@ -61,9 +135,9 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
 
         <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={styles.content}>
 
-            {/* Header */}
+            {/* Header — headline leads with the trial only when the store confirms one. */}
             <Text style={styles.eyebrow}>AURALUNIS PREMIUM</Text>
-            <Text style={styles.headline}>Unlock the Living Universe</Text>
+            <Text style={styles.headline}>{headline}</Text>
             <Text style={styles.sub}>
               You're not paying to unlock the sky. You're paying to see it in a way you've never seen before.
             </Text>
@@ -71,38 +145,38 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
             {/* Plan selector — Annual first (default) */}
             <PlanCard
               plan={annual}
+              offer={offers[annual.id]}
               selected={selected === annual.id}
               onPress={() => handleSelect(annual)}
               highlight
             />
             <PlanCard
               plan={monthly}
+              offer={offers[monthly.id]}
               selected={selected === monthly.id}
               onPress={() => handleSelect(monthly)}
             />
             <PlanCard
               plan={lifetime}
+              offer={offers[lifetime.id]}
               selected={selected === lifetime.id}
               onPress={() => handleSelect(lifetime)}
             />
 
-            {/* CTA — wording follows the selected tier:
-                lifetime → "Unlock Forever", subscription → "Subscribe". */}
+            {/* CTA — wording follows the selected tier and its confirmed trial state. */}
             <TouchableOpacity
               style={styles.cta}
               onPress={handlePurchase}
               accessibilityRole="button"
-              accessibilityLabel={
-                selectedPlan.interval === "lifetime" ? "Unlock Forever" : "Subscribe"
-              }
+              accessibilityLabel={ctaLabel}
             >
-              <Text style={styles.ctaText}>
-                {selectedPlan.interval === "lifetime" ? "Unlock Forever" : "Subscribe"}
-              </Text>
-              <Text style={styles.ctaSub}>
-                {selectedPlan.subtitle}
-              </Text>
+              <Text style={styles.ctaText}>{ctaLabel}</Text>
+              <Text style={styles.ctaSub}>{detailLine(selectedPlan, selectedOffer)}</Text>
             </TouchableOpacity>
+
+            {/* Renewal disclosure — required near the purchase button. Trial wording only
+                for a confirmed eligible offer; omitted entirely for one-time lifetime. */}
+            {disclosure && <Text style={styles.disclosure}>{disclosure}</Text>}
 
             {/* Feature list */}
             <Text style={styles.sectionLabel}>What you get</Text>
@@ -144,13 +218,15 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
 }
 
 function PlanCard({
-  plan, selected, onPress, highlight,
+  plan, offer, selected, onPress, highlight,
 }: {
   plan: PlanOption;
+  offer?: PlanOffer;
   selected: boolean;
   onPress: () => void;
   highlight?: boolean;
 }) {
+  const eligible = plan.interval !== "lifetime" && offer?.trial.status === "eligible";
   return (
     <TouchableOpacity
       style={[
@@ -162,11 +238,15 @@ function PlanCard({
     >
       <View style={styles.planLeft}>
         <View style={[styles.radio, selected && styles.radioSelected]} />
-        <View>
+        <View style={styles.planTextCol}>
           <Text style={[styles.planName, selected && { color: AuraLunisColors.gold2 }]}>
             {plan.name}
           </Text>
-          <Text style={styles.planSubtitle}>{plan.subtitle}</Text>
+          {/* Trial framing only for a store-confirmed eligible offer; otherwise the plan's
+              normal subtitle. Highlighted gold when a trial is active. */}
+          <Text style={[styles.planSubtitle, eligible && styles.planSubtitleTrial]}>
+            {detailLine(plan, offer)}
+          </Text>
         </View>
       </View>
       <View style={styles.planRight}>
@@ -174,7 +254,7 @@ function PlanCard({
           <Text style={styles.anchorPrice}>{plan.anchorPrice}</Text>
         )}
         <Text style={[styles.planPrice, selected && { color: AuraLunisColors.gold }]}>
-          {plan.displayPrice}
+          {priceLine(plan, offer)}
         </Text>
         {plan.badge && (
           <View style={styles.badge}>
@@ -204,18 +284,23 @@ const styles = StyleSheet.create({
   planCardSelected: { borderColor: AuraLunisColors.gold, backgroundColor: "rgba(217,168,78,0.1)" },
   planCardHighlight: { borderColor: AuraLunisColors.borderGold },
   planLeft: { flexDirection: "row", alignItems: "flex-start", gap: 12, flex: 1 },
+  planTextCol: { flexShrink: 1 },
   radio: { width: 18, height: 18, borderRadius: 9, borderWidth: 2, borderColor: AuraLunisColors.faint, marginTop: 2, flexShrink: 0 },
   radioSelected: { borderColor: AuraLunisColors.gold, backgroundColor: AuraLunisColors.gold },
   planName: { fontFamily: DISPLAY, color: AuraLunisColors.silver, fontSize: 14, fontWeight: "700" },
   planSubtitle: { fontFamily: BODY, color: AuraLunisColors.faint, fontSize: 11, marginTop: 2 },
-  planRight: { alignItems: "flex-end", gap: 4 },
+  // Trial framing ("7 days free, then …") reads as a benefit, so lift it to gold.
+  planSubtitleTrial: { color: AuraLunisColors.gold2 },
+  planRight: { alignItems: "flex-end", gap: 4, flexShrink: 0, marginLeft: 8 },
   anchorPrice: { fontFamily: BODY, color: AuraLunisColors.faint, fontSize: 11, textDecorationLine: "line-through" },
   planPrice: { fontFamily: DISPLAY, color: AuraLunisColors.silver, fontSize: 15, fontWeight: "800" },
   badge: { backgroundColor: "rgba(217,168,78,0.2)", borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2 },
   badgeText: { fontFamily: DISPLAY, color: AuraLunisColors.gold, fontSize: 8, fontWeight: "800", letterSpacing: 1 },
-  cta: { backgroundColor: AuraLunisColors.gold, borderRadius: 16, padding: 16, alignItems: "center", marginVertical: 20 },
+  cta: { backgroundColor: AuraLunisColors.gold, borderRadius: 16, padding: 16, alignItems: "center", marginTop: 20, marginBottom: 10 },
   ctaText: { fontFamily: DISPLAY, color: AuraLunisColors.cosmicBlack, fontSize: 16, fontWeight: "900", letterSpacing: 0.5 },
   ctaSub: { fontFamily: BODY, color: "rgba(11,11,18,0.7)", fontSize: 11, marginTop: 3 },
+  // Auto-renewal / trial-renewal disclosure directly beneath the CTA (Apple requirement).
+  disclosure: { fontFamily: BODY, color: AuraLunisColors.faint, fontSize: 10, lineHeight: 15, textAlign: "center", marginBottom: 14, paddingHorizontal: 4 },
   sectionLabel: { fontFamily: DISPLAY, color: AuraLunisColors.faint, fontSize: 9, fontWeight: "700", letterSpacing: 2, textTransform: "uppercase", marginBottom: 10 },
   featureRow: { flexDirection: "row", gap: 10, paddingVertical: 6, borderTopWidth: 1, borderTopColor: AuraLunisColors.borderFaint },
   featureCheck: { color: AuraLunisColors.gold, fontSize: 11, marginTop: 1 },

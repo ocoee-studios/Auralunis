@@ -1,0 +1,76 @@
+name: AuraLunis Branch Audit
+
+on:
+  push:
+    branches:
+      - visual/sacred-sky-polish
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: auralunis-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci --ignore-scripts
+
+      - name: TypeScript
+        run: npm run typecheck
+
+      - name: Static QA
+        run: npm run qa:static
+
+      - name: Sky Lens accuracy QA
+        run: npm run qa:sky
+
+      - name: Whole-app QA
+        run: npm run qa:whole
+
+      - name: Fresh bug regression checks
+        run: npm run qa:fresh-bugs
+
+      - name: RevenueCat preflight
+        run: npm run qa:revenuecat
+
+      - name: Premium feature preflight
+        run: npm run qa:aura-pro
+
+      - name: Ephemeris self-test
+        run: npm run qa:ephemeris
+
+      - name: Satellite self-test
+        run: npm run qa:satellite
+
+      - name: Sky Lens self-test
+        run: npm run qa:skylens
+
+      - name: Expo Doctor
+        run: npx expo-doctor
+
+      - name: Upload QA report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: auralunis-qa-report
+          path: qa/FRESH_BUG_CHECK_RESULTS.json
+          if-no-files-found: warn

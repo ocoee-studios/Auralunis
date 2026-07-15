@@ -100,30 +100,33 @@ function humanizeOffset(min: number): string {
 }
 
 const styles = StyleSheet.create({
+  // Trimmed ~23% (≈79pt → ≈61pt) after device review: when open, the panel shoved the
+  // whole dock — and the Moon prompt with it — up into the sky. Same controls, same hit
+  // targets, less air.
   wrap: {
     alignSelf: "center",
     width: "86%",
-    paddingVertical: 8,
+    paddingVertical: 5,
     paddingHorizontal: 14,
-    borderRadius: 16,
+    borderRadius: 14,
     backgroundColor: "rgba(7,10,19,0.55)",
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: "rgba(217,168,78,0.22)",
   },
   header: { flexDirection: "row", alignItems: "baseline", justifyContent: "center", gap: 8 },
-  time: { fontSize: 17, fontWeight: "800", letterSpacing: 0.5 },
-  meta: { fontSize: 11, color: "rgba(233,236,245,0.7)", fontWeight: "600" },
-  track: { height: 22, justifyContent: "center", marginTop: 6 },
+  time: { fontSize: 21, fontWeight: "800", letterSpacing: 0.5 },
+  meta: { fontSize: 15, color: "rgba(233,236,245,0.8)", fontWeight: "600" },
+  track: { height: 16, justifyContent: "center", marginTop: 4 },
   fill: { position: "absolute", left: 0, right: 0, height: 2, borderRadius: 1, opacity: 0.35 },
-  nowTick: { position: "absolute", left: "50%", width: 1.5, height: 12, top: 5 },
+  nowTick: { position: "absolute", left: "50%", width: 1.5, height: 10, top: 3 },
   thumb: {
     position: "absolute",
-    width: 16,
-    height: 16,
-    borderRadius: 8,
-    marginLeft: -8,
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    marginLeft: -7,
     backgroundColor: "rgba(7,10,19,0.95)",
     borderWidth: 2,
   },
-  hint: { fontSize: 9.5, color: "rgba(233,236,245,0.45)", textAlign: "center", marginTop: 3, letterSpacing: 0.3 },
+  hint: { fontSize: 14, color: "rgba(233,236,245,0.6)", textAlign: "center", marginTop: 3, letterSpacing: 0.3 },
 });

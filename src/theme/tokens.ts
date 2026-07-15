@@ -89,11 +89,15 @@ export const AuraLunisThemes: Record<string, AuraLunisThemePalette> = {
 };
 
 export const AuraLunisPricing = {
-  // Monthly — direct charge nudges users toward annual. No free trial.
+  // Fallback prices only — the paywall prefers live localized StoreKit prices when
+  // available (see usePaywallOffers.ts). A 7-day introductory trial may be available to
+  // eligible new subscribers on monthly/annual; it is an Apple-configured intro offer, not
+  // defined here, and the app shows it only when StoreKit confirms eligibility.
+  // Monthly — direct charge nudges users toward annual.
   monthly: "$9.99/month",
   monthlySubtitle: "Billed monthly · Cancel anytime",
 
-  // Annual — best recurring value. No free trial.
+  // Annual — best recurring value.
   annual: "$49.99/year",
   annualMonthly: "$4.17/month",
   annualSavings: "Save 58%",

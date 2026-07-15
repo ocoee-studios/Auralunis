@@ -4,8 +4,11 @@ import type { HorizontalConstellation } from "../ephemeris/StarPositions";
 import { type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
 import type { LabelPlacer } from "../labelLayout";
 
-// AuraLunis brand gold — every other star app uses blue/white lines; we use gold.
-const GOLD = "#D9A84E"; // rgb(217, 168, 78)
+const GOLD = "#D9A84E";
+// Constellation NAMES get a softer, warmer gold than the line work. The saturated
+// #D9A84E reads as UI chrome when set as text; this is closer to engraved brass — it
+// sits back into the sky instead of sitting on top of it.
+const CON_LABEL_GOLD = "#C9A468";
 
 type Props = {
   constellations: HorizontalConstellation[];
@@ -14,38 +17,118 @@ type Props = {
   palette: SkyPalette;
   nightMode: boolean;
   placeLabel?: LabelPlacer;
-  showLabels?: boolean; // false in cinematic Immersive Sky mode → gold threads only
-  showNodes?: boolean; // premium: gold junction nodes + tapered glow lines. free: thin plain lines.
-  fullSphere?: boolean; // Planetarium: show below-horizon figures at full brightness
+  showLabels?: boolean;
+  showNodes?: boolean;
+  fullSphere?: boolean;
+  // LABEL-PRIORITY SPLIT. The shared label placer is first-come-first-served, and z-order
+  // forces the constellation FIGURES to render before the stars (lines belong under star
+  // discs). If this layer also placed its labels in that early pass, constellation names
+  // (priority 3) would claim slots before star names (priority 2) — inverting the ladder.
+  //   • labelsOnly=false (default): render FIGURES only (lines + nodes), never labels.
+  //   • labelsOnly=true: render LABELS only — mounted LATE (after stars & planets) so the
+  //     names claim their slots in correct priority order.
+  labelsOnly?: boolean;
   onSelect: (object: SelectedObject) => void;
 };
 
-export function ConstellationLayer({ constellations, project, box, palette, nightMode, placeLabel, showLabels = true, showNodes = true, fullSphere = false, onSelect }: Props) {
+export function ConstellationLayer({
+  constellations,
+  project,
+  box,
+  palette,
+  nightMode,
+  placeLabel,
+  showLabels = true,
+  showNodes = true,
+  fullSphere = false,
+  labelsOnly = false,
+  onSelect,
+}: Props) {
+  // Render one constellation's NAME through the shared placer. Returns null when labels are
+  // off, the centroid is off-screen/behind, or the placer finds no clean slot (priority-3
+  // suppression). Kept identical to the pre-split behavior — only WHEN it runs changed.
+  const renderLabel = (c: HorizontalConstellation) => {
+    if (!showLabels) return null;
+    const centroid = project(c.centroid.azimuthDegrees, c.centroid.altitudeDegrees);
+    const labelVisible =
+      !centroid.behind &&
+      centroid.x > 14 &&
+      centroid.x < box.width - 14 &&
+      centroid.y > 38 &&
+      centroid.y < box.height - 110;
+    if (!labelVisible) return null;
+
+    // A REGION name, not an object name — so it sits BELOW star and planet labels. Because
+    // `centered` = true, the placer treats x as the CENTRE (matches textAnchor="middle").
+    const label = c.name.toUpperCase();
+    const position = placeLabel
+      ? placeLabel(centroid.x, centroid.y, label, 13, undefined, true)
+      : { x: centroid.x, y: centroid.y };
+    // No clean slot → dropped (priority 3, below planets and named stars).
+    if (!Number.isFinite(position.x)) return null;
+
+    return (
+      <G key={`${c.id}-label`}>
+        {/* Dark outline keeps the brass name legible over the bright band. */}
+        <SvgText x={position.x} y={position.y} fill="none" stroke="#05070F" strokeWidth={1.6} strokeOpacity={0.45} fontSize={13} fontWeight="500" letterSpacing={1.6} textAnchor="middle">
+          {label}
+        </SvgText>
+        <SvgText
+          x={position.x}
+          y={position.y}
+          fill={nightMode ? palette.conLabel : CON_LABEL_GOLD}
+          fontSize={13}
+          fontWeight="500"
+          letterSpacing={1.6}
+          opacity={0.55}
+          textAnchor="middle"
+        >
+          {label}
+        </SvgText>
+        <Circle
+          cx={position.x}
+          cy={position.y - 3}
+          r={26}
+          fill="transparent"
+          onPress={() =>
+            onSelect({
+              kind: "constellation",
+              id: c.id,
+              name: c.name,
+              subtitle: "Constellation",
+              facts: [{ label: "Best season", value: c.season }],
+              description: c.myth,
+            })
+          }
+        />
+      </G>
+    );
+  };
+
+  // LABELS-ONLY pass: cheap (projects centroids only), mounted late for correct priority.
+  if (labelsOnly) {
+    return <G>{constellations.map((c) => renderLabel(c))}</G>;
+  }
+
+  // FIGURES pass: lines + nodes. Labels are handled by the separate labels-only mount, so
+  // this pass never draws them (renderLabel short-circuits on !showLabels when the canvas
+  // passes showLabels={false} here).
   return (
     <G>
       {constellations.map((c) => {
         const projected = c.points.map((pt) => project(pt.azimuthDegrees, pt.altitudeDegrees));
-        // Brand gold for every figure (Night Mode stays dark-adapted red) — no
-        // rainbow tints, no box shapes, just gold lines connecting the stars.
         const lineColor = nightMode ? palette.line : GOLD;
 
-        // Only draw a segment when both endpoints are in front of the camera AND
-        // above the horizon — otherwise lines streak across the view or dive into
-        // the ground for stars that have already set.
         const usedPts = new Set<number>();
         const segments = c.lines
           .filter(([i, j]) => {
             const a = projected[i];
             const b = projected[j];
             if (!a || !b || a.behind || b.behind) return false;
-            // Projection-distortion guard: near zenith (alt > ~75°) the flat-screen
-            // projection stretches lines into "rubber bands". Drop segments whose
-            // endpoints fall far off-screen, or that span an absurd length — they're
-            // artifacts of the projection, not real constellation figures.
-            const M = 100;
-            if (a.x < -M || a.x > box.width + M || a.y < -M || a.y > box.height + M) return false;
-            if (b.x < -M || b.x > box.width + M || b.y < -M || b.y > box.height + M) return false;
-            if (Math.hypot(b.x - a.x, b.y - a.y) > 300) return false;
+            const margin = 70;
+            if (a.x < -margin || a.x > box.width + margin || a.y < -margin || a.y > box.height + margin) return false;
+            if (b.x < -margin || b.x > box.width + margin || b.y < -margin || b.y > box.height + margin) return false;
+            if (Math.hypot(b.x - a.x, b.y - a.y) > 260) return false;
             return true;
           })
           .map(([i, j], idx) => {
@@ -53,99 +136,56 @@ export function ConstellationLayer({ constellations, project, box, palette, nigh
             usedPts.add(j);
             const a = projected[i];
             const b = projected[j];
-            const belowH = !(c.points[i]?.aboveHorizon && c.points[j]?.aboveHorizon);
-            // TAPERED THREAD — a fine full-length line (fading at the joints) under a
-            // thicker INSET centre segment, so each stroke is wide in the middle and
-            // fine where it meets a star. Reads handcrafted, not a uniform CAD line.
-            const ix0 = a.x + (b.x - a.x) * 0.16, iy0 = a.y + (b.y - a.y) * 0.16;
-            const ix1 = a.x + (b.x - a.x) * 0.84, iy1 = a.y + (b.y - a.y) * 0.84;
-            // Free tier: a single thin, plain gold line — a clean star-map figure
-            // without the handcrafted glow/taper that premium gets.
+            const belowHorizon = !(c.points[i]?.aboveHorizon && c.points[j]?.aboveHorizon);
+            const ix0 = a.x + (b.x - a.x) * 0.18;
+            const iy0 = a.y + (b.y - a.y) * 0.18;
+            const ix1 = a.x + (b.x - a.x) * 0.82;
+            const iy1 = a.y + (b.y - a.y) * 0.82;
+
+            // LINE WORK STEPS BACK (−15% opacity, thinner). The figures were still reading
+            // as a diagram drawn ON the sky rather than a constellation felt WITHIN it.
+            // The stars are the heroes; the lines are only a hint that joins them.
             if (!showNodes) {
               return (
-                <G key={`${c.id}-l${idx}`} opacity={belowH && !fullSphere ? 0.2 : 1}>
-                  <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.8} strokeOpacity={0.5} strokeLinecap="round" />
+                <G key={`${c.id}-l${idx}`} opacity={belowHorizon && !fullSphere ? 0.15 : 1}>
+                  <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.55} strokeOpacity={0.29} strokeLinecap="round" />
                 </G>
               );
             }
+
             return (
-              <G key={`${c.id}-l${idx}`} opacity={belowH && !fullSphere ? 0.2 : 1}>
-                {/* soft gold glow behind the line (subtle so it doesn't compete) */}
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={4} strokeOpacity={0.06} strokeLinecap="round" />
-                {/* fine tapered endpoints */}
-                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.6} strokeOpacity={0.4} strokeLinecap="round" />
-                {/* fuller centre */}
-                <Line x1={ix0} y1={iy0} x2={ix1} y2={iy1} stroke={lineColor} strokeWidth={1.6} strokeOpacity={0.5} strokeLinecap="round" />
+              <G key={`${c.id}-l${idx}`} opacity={belowHorizon && !fullSphere ? 0.15 : 1}>
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={3} strokeOpacity={0.022} strokeLinecap="round" />
+                <Line x1={a.x} y1={a.y} x2={b.x} y2={b.y} stroke={lineColor} strokeWidth={0.45} strokeOpacity={0.22} strokeLinecap="round" />
+                <Line x1={ix0} y1={iy0} x2={ix1} y2={iy1} stroke={lineColor} strokeWidth={1} strokeOpacity={0.29} strokeLinecap="round" />
               </G>
             );
           });
 
         if (segments.length === 0) return null;
 
-        // GOLD NODES — a tiny luminous dot at each star where lines meet, with a soft
-        // glow, so the figure reads as a luxury instrument panel rather than a diagram.
-        // Premium only; free tier shows the bare lines.
-        const nodes = showNodes ? [...usedPts].map((pi) => {
-          const pt = projected[pi];
-          if (!pt || pt.behind) return null;
-          const dim = !c.points[pi]?.aboveHorizon;
-          return (
-            <G key={`${c.id}-n${pi}`} opacity={dim && !fullSphere ? 0.2 : 1}>
-              <Circle cx={pt.x} cy={pt.y} r={6} fill={lineColor} opacity={0.1} />
-              <Circle cx={pt.x} cy={pt.y} r={1.5} fill={lineColor} opacity={0.9} />
-            </G>
-          );
-        }) : null;
-
-        const centroid = project(c.centroid.azimuthDegrees, c.centroid.altitudeDegrees);
-        const labelVisible =
-          showLabels &&
-          !centroid.behind &&
-          centroid.x > -40 &&
-          centroid.x < box.width + 40 &&
-          centroid.y > -20 &&
-          centroid.y < box.height + 20;
+        const nodes = showNodes
+          ? [...usedPts].map((pointIndex) => {
+              const point = projected[pointIndex];
+              if (!point || point.behind) return null;
+              const dim = !c.points[pointIndex]?.aboveHorizon;
+              return (
+                <G key={`${c.id}-n${pointIndex}`} opacity={dim && !fullSphere ? 0.15 : 1}>
+                  <Circle cx={point.x} cy={point.y} r={4.5} fill={lineColor} opacity={0.055} />
+                  <Circle cx={point.x} cy={point.y} r={1.2} fill={lineColor} opacity={0.72} />
+                </G>
+              );
+            })
+          : null;
 
         return (
           <G key={c.id}>
             {segments}
             {nodes}
-            {labelVisible && (() => {
-              const lp = placeLabel ? placeLabel(centroid.x, centroid.y, c.name.toUpperCase(), 13) : { x: centroid.x, y: centroid.y };
-              return (
-                <>
-                  <SvgText
-                    x={lp.x}
-                    y={lp.y}
-                    fill={nightMode ? palette.conLabel : GOLD}
-                    fontSize={13}
-                    fontWeight="400"
-                    letterSpacing={3.5}
-                    opacity={0.5}
-                    textAnchor="middle"
-                  >
-                    {c.name.toUpperCase()}
-                  </SvgText>
-                  {/* generous transparent tap target over the label (≈20px hit area) */}
-                  <Circle
-                    cx={lp.x}
-                    cy={lp.y - 3}
-                    r={32}
-                    fill="transparent"
-                    onPress={() =>
-                      onSelect({
-                        kind: "constellation",
-                        id: c.id,
-                        name: c.name,
-                        subtitle: "Constellation",
-                        facts: [{ label: "Best season", value: c.season }],
-                        description: c.myth
-                      })
-                    }
-                  />
-                </>
-              );
-            })()}
+            {/* Labels are drawn by the separate labels-only pass (correct priority order);
+                this only fires for a hypothetical combined-mode caller (showLabels + not
+                labelsOnly). The canvas figures mount passes showLabels={false}. */}
+            {renderLabel(c)}
           </G>
         );
       })}

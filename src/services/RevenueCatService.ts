@@ -23,7 +23,25 @@ if (__DEV__) {
 
 // Dynamic require — react-native-purchases is not available in Expo Go
 type CustomerInfo = { entitlements: { active: Record<string, unknown> }; managementURL?: string | null };
-type PurchasesPackage = { product: { priceString: string; price: number; identifier: string }; identifier: string };
+// StoreKit-reported introductory offer (e.g. Apple's "1 week free trial"). This is data
+// the STORE owns — the app only reflects it, never fabricates it.
+type StoreIntroPrice = {
+  priceString: string;
+  price: number;
+  periodUnit: string; // DAY | WEEK | MONTH | YEAR, as StoreKit reports it
+  periodNumberOfUnits: number;
+  cycles: number;
+};
+type PurchasesPackage = {
+  product: {
+    priceString: string;
+    price: number;
+    identifier: string;
+    subscriptionPeriod?: string | null; // ISO-8601, e.g. "P1M" / "P1Y"
+    introPrice?: StoreIntroPrice | null;
+  };
+  identifier: string;
+};
 
 let Purchases: {
   configure: (opts: { apiKey: string }) => void;
@@ -31,6 +49,10 @@ let Purchases: {
   getOfferings: () => Promise<{ current: { availablePackages: PurchasesPackage[] } | null }>;
   purchasePackage: (pkg: PurchasesPackage) => Promise<{ customerInfo: CustomerInfo }>;
   restorePurchases: () => Promise<CustomerInfo>;
+  // iOS: per-account eligibility for each product's introductory offer.
+  checkTrialOrIntroductoryPriceEligibility?: (
+    productIdentifiers: string[]
+  ) => Promise<Record<string, { status: number; description?: string }>>;
 } | null = null;
 
 try {
@@ -237,6 +259,99 @@ export async function openAuraLunisSubscriptionManagement(): Promise<{
   } catch {
     // RC error or Linking.openURL rejection — fail gracefully instead of throwing.
     return { status: "not_configured" };
+  }
+}
+
+// ── Introductory offer (7-day free trial) support ──────────────────────────────
+// Apple owns the actual trial: it is configured as an INTRODUCTORY OFFER on the monthly
+// and annual products in App Store Connect. StoreKit (via RevenueCat) reports both the
+// offer details (introPrice) and per-account eligibility. The app NEVER creates a trial,
+// timer, or local entitlement — it only mirrors what the store returns. No offer, or an
+// ineligible account, means the app shows normal pricing and a plain "Continue".
+
+export type IntroOfferEligibility = "eligible" | "ineligible" | "unknown" | "no_offer";
+
+export type IntroOfferInfo = {
+  priceString: string; // localized, typically "Free" / "$0.00" for a free trial
+  price: number; // 0 for a free trial
+  periodUnit: string; // DAY | WEEK | MONTH | YEAR
+  periodNumberOfUnits: number;
+  cycles: number;
+};
+
+export type LivePackage = {
+  packageId: string;
+  productId: string;
+  priceString: string; // localized recurring price, e.g. "$9.99"
+  price: number;
+  subscriptionPeriod: string | null; // ISO-8601, e.g. "P1M" / "P1Y"
+  introOffer: IntroOfferInfo | null;
+};
+
+// RevenueCat's INTRO_ELIGIBILITY_STATUS enum has stable, documented numeric values:
+//   0 UNKNOWN · 1 INELIGIBLE · 2 ELIGIBLE · 3 NO_INTRO_OFFER_EXISTS
+// Mapped by number so we don't statically import the SDK enum — react-native-purchases is
+// dynamically required so the app survives Expo Go (where the native module is absent).
+function mapEligibilityStatus(status: number): IntroOfferEligibility {
+  switch (status) {
+    case 2:
+      return "eligible";
+    case 1:
+      return "ineligible";
+    case 3:
+      return "no_offer";
+    default:
+      return "unknown";
+  }
+}
+
+// Live packages with localized prices and any StoreKit-reported intro offer. Returns []
+// when RevenueCat isn't configured / no offering exists (pre-launch, Expo Go) — callers
+// then fall back to the catalog's static prices. Localized store prices are the source of
+// truth whenever they're available.
+export async function getLivePackages(): Promise<LivePackage[]> {
+  const packages = await getCurrentPackages();
+  return packages.map((p) => ({
+    packageId: p.identifier,
+    productId: p.product.identifier,
+    priceString: p.product.priceString,
+    price: p.product.price,
+    subscriptionPeriod: p.product.subscriptionPeriod ?? null,
+    introOffer: p.product.introPrice
+      ? {
+          priceString: p.product.introPrice.priceString,
+          price: p.product.introPrice.price,
+          periodUnit: p.product.introPrice.periodUnit,
+          periodNumberOfUnits: p.product.introPrice.periodNumberOfUnits,
+          cycles: p.product.introPrice.cycles,
+        }
+      : null,
+  }));
+}
+
+// Per-product introductory-offer eligibility. Returns {} when RevenueCat isn't configured
+// or the lookup fails — a failed eligibility lookup must NEVER block purchasing, so callers
+// treat a missing entry as "no trial promise, normal pricing".
+export async function getIntroOfferEligibility(
+  productIds: string[]
+): Promise<Record<string, IntroOfferEligibility>> {
+  const configuration = await configureRevenueCat();
+  if (configuration.status !== "configured" || !Purchases) return {};
+
+  const check = Purchases.checkTrialOrIntroductoryPriceEligibility;
+  if (typeof check !== "function") return {}; // older/native-less SDK surface
+
+  try {
+    const raw = await check.call(Purchases, productIds);
+    const out: Record<string, IntroOfferEligibility> = {};
+    for (const id of productIds) {
+      const status = raw?.[id]?.status;
+      out[id] = typeof status === "number" ? mapEligibilityStatus(status) : "unknown";
+    }
+    return out;
+  } catch {
+    // Network / StoreKit error — degrade to normal pricing, never throw or block purchase.
+    return {};
   }
 }
 

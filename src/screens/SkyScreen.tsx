@@ -6,7 +6,6 @@ import type { FocusTarget } from "@/features/sky-lens/SkyLensScreen";
 import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { GlassPanel } from "@/components/GlassPanel";
-import { SkyLensPermissionGate } from "@/features/permissions/SkyLensPermissionGate";
 import { SkyLensScreen } from "@/features/sky-lens/SkyLensScreen";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { ManualSkyMap } from "@/features/sky-lens/ManualSkyMap";
@@ -30,7 +29,6 @@ import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 export function SkyScreen() {
   const { isPremium } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
-  const [showPermission, setShowPermission] = useState(false);
   const [skyLensOpen, setSkyLensOpen] = useState(false);
   const [manualMapOpen, setManualMapOpen] = useState(false);
   const [galaxyModeOn, setGalaxyModeOn] = useState(false);
@@ -68,24 +66,8 @@ export function SkyScreen() {
     }
   }, [route.params?.focusTarget, navigation]);
 
-  if (showPermission && !skyLensOpen && !manualMapOpen) {
-    return (
-      <SkyLensPermissionGate
-        onGranted={() => {
-          setShowPermission(false);
-          setSkyLensOpen(true);
-        }}
-        onDenied={() => setShowPermission(false)}
-        onManualMap={() => {
-          setShowPermission(false);
-          setManualMapOpen(true);
-        }}
-      />
-    );
-  }
-
-  // The Sky Lens takes over the full screen (camera + AR overlay), so render it
-  // as a standalone screen rather than an embedded card.
+  // Sky Lens is a sensor-aligned cinematic planetarium (no camera feed), so it opens
+  // directly and takes over the full screen — no camera-permission gate.
   if (skyLensOpen) {
     return (
       // Outer boundary catches crashes in the sensor manager / hooks (which run in
@@ -138,10 +120,10 @@ export function SkyScreen() {
       <CelestialCalendarScreen
         onClose={() => setCalendarOpen(false)}
         onSeeInSky={() => {
-          // Events have no precise coords yet — open the lens (AR) so the user can
-          // pan to the event's described direction. Coordinate deep-link is a TODO.
+          // Events have no precise coords yet — open the planetarium so the user can pan
+          // to the event's described direction. Coordinate deep-link is a TODO.
           setCalendarOpen(false);
-          setShowPermission(true);
+          setSkyLensOpen(true);
         }}
       />
     );
@@ -153,14 +135,14 @@ export function SkyScreen() {
 
       <FeatureCard
         title="AuraLunis Sky Lens"
-        description="Privacy-safe AR-style viewer with gold overlays, Find Mode, X-Ray Lens, Birth Overlay, guided tour, and capture."
+        description="Sensor-aligned live planetarium with celestial overlays, Find Mode, Birth Overlay, guided exploration, and capture."
         actionLabel="Open Sky Lens"
-        onPress={() => setShowPermission(true)}
+        onPress={() => setSkyLensOpen(true)}
       />
 
       <FeatureCard
         title="Manual Sky Map"
-        description="Explore a privacy-safe fallback map without camera access. Ideal when indoors or when camera permission is declined."
+        description="Explore the sky manually without using device orientation. Ideal when indoors or when you prefer a still map."
         actionLabel="Open Manual Map"
         onPress={() => setManualMapOpen(true)}
       />

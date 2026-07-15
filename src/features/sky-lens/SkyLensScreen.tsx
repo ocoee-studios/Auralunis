@@ -15,7 +15,6 @@ try {
 }
 import { Horizon, Observer } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
-import { CameraView } from "expo-camera";
 import { LinearGradient } from "expo-linear-gradient";
 import Slider from "@react-native-community/slider";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -36,23 +35,29 @@ import { computeAzimuthElevation } from "@/utils/alignmentEngine";
 import type { SkyLensSatellite } from "./layers/SatelliteLayer";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
+import { SolidSkyBackgroundLayer } from "./SolidSkyBackgroundLayer";
+import { NebulaImageLayer } from "./layers/NebulaImageLayer";
+import { ClusterLayer } from "./layers/ClusterLayer";
 import { SkyVignette } from "./SkyVignette";
 import { PremiumSkyBloomLayer } from "./layers/PremiumSkyBloomLayer";
 import { AstralBreathingLayer } from "./layers/AstralBreathingLayer";
-import { LuxuryStarfieldFXLayer } from "./layers/LuxuryStarfieldFXLayer";
+import { stardustGlints } from "./layers/CosmicDustLayer";
+// LuxuryStarfieldFXLayer stays retired — see the note at its old mount point below.
 import { LunarGodRayLayer } from "./layers/LunarGodRayLayer";
 import { OrbitalGhostTrailsLayer } from "./layers/OrbitalGhostTrailsLayer";
 import { AuroraCurtainLayer } from "./layers/AuroraCurtainLayer";
 import { ConstellationForgeLayer, type ForgePoint, type ForgeSegment } from "./layers/ConstellationForgeLayer";
-import { SkyLensLayerBar } from "./SkyLensLayerBar";
+import { SkyLensLayerBar, LAYER_BAR_HEIGHT } from "./SkyLensLayerBar";
+import { SkyLensLayersSheet } from "./SkyLensLayersSheet";
 import { SkyLensInfoCard } from "./SkyLensInfoCard";
 import { SkyLensErrorBoundary } from "./SkyLensErrorBoundary";
 import { TwinkleOverlay, type TwinkleTarget } from "./TwinkleOverlay";
 import { TimeScrubBar } from "./TimeScrubBar";
 import { TargetPulse } from "./TargetPulse";
+import { SelectionRing } from "./SelectionRing";
 import { HeroSpotlight } from "./HeroSpotlight";
-import { DEFAULT_ACTIVE_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
-import { projectTarget, DEFAULT_FOV } from "./ar/SkyLensProjection";
+import { DEFAULT_ACTIVE_LAYERS, SKY_LENS_LAYERS, type LayerDef, type LayerKey } from "./SkyLensLayerCatalog";
+import { projectTarget, DEFAULT_FOV, type CameraPointing } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { getVisualGate } from "./PremiumVisualGating";
 
@@ -73,7 +78,7 @@ type LayoutEvent = { nativeEvent: { layout: { width: number; height: number } } 
 const ARROWS = ["→", "↘", "↓", "↙", "←", "↖", "↑", "↗"];
 const arrowFor = (bearingDegrees: number) => ARROWS[Math.round(bearingDegrees / 45) % 8];
 
-// Full-screen AR Sky Lens (Phase 1): live camera feed with the Stars,
+// Full-screen Sky Lens: a sensor-aligned cinematic planetarium (no camera feed) with the Stars,
 // Constellations, Planets, Moon, and Grid layers projected over it, a toggle
 // bar, tap-to-reveal Info Card, and Night Mode. Phase-2 layers appear locked.
 export function SkyLensScreen({ onClose, focusTarget }: Props) {
@@ -85,17 +90,93 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   zoomRef.current = zoom;
   // Ramp EMA smoothing DOWN (steadier, more damped) as zoom climbs, because a
   // narrow FOV amplifies hand-shake: ~0.32 at 1× → 0.10 at 12×.
+  // Requested EMA smoothing: less at low zoom, more as you zoom in. NOTE: useDevicePointing
+  // caps this at 0.16 (a stability ceiling), so values above 0.16 (roughly zoom 1×–9×)
+  // resolve to 0.16 in practice — see the cap comment there. Kept as a request, not a lie.
   const smoothAlpha = Math.max(0.1, 0.32 - (zoom - 1) * 0.02);
-  const { pointing, available } = useDevicePointing(120, 0, smoothAlpha);
+  const { pointing: sensorPointing, available } = useDevicePointing(120, 0, smoothAlpha);
   const parallax = useParallaxOffset();
   // Time Scrub: when the scrub bar is dragged, freeze the sky to the offset instant.
   const [timeOffsetMin, setTimeOffsetMin] = useState(0);
   const [scrubVisible, setScrubVisible] = useState(false);
-  const observerTime = useMemo(
-    () => (timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000)),
-    [timeOffsetMin]
-  );
+  // The secondary overlays live in a sheet, not on the bottom bar. Nebulae is the one
+  // that ships ON (it's part of the default beauty set now — max 2 curated heroes at low
+  // opacity); Zodiac / Grid / Satellites / Ecliptic all still start OFF and stay off
+  // until the user asks for them.
+  const [layersSheet, setLayersSheet] = useState(false);
+
+  // DEV-ONLY COLD-START ASSERTION.
+  // We spent a round chasing a "cluttered default" that turned out to be four analytical
+  // overlays switched on by stray taps. This logs the ACTUAL layer state at mount, so a
+  // genuine cold-start anomaly (a real persistence path, say) is immediately obvious
+  // instead of being inferred from screenshots. Stripped in production; no UI impact.
+  const mountLogged = useRef(false);
+  useEffect(() => {
+    if (!__DEV__ || mountLogged.current) return;
+    mountLogged.current = true;
+    const analytical = SKY_LENS_LAYERS.filter((l) => !l.primary && !l.defaultOn);
+    const analyticalOn = analytical.filter((l) => active.has(l.key)).map((l) => l.key);
+    // eslint-disable-next-line no-console
+    console.log("[SkyLens] cold-start layer state", {
+      defaults: DEFAULT_ACTIVE_LAYERS,
+      activeNow: [...active],
+      analyticalOnCount: analyticalOn.length, // MUST be 0 on a clean launch
+      analyticalOn,
+      layersSheetOpen: layersSheet,           // MUST be false on a clean launch
+      scrubVisible,                            // MUST be false on a clean launch
+    });
+    if (analyticalOn.length > 0 || layersSheet || scrubVisible) {
+      // eslint-disable-next-line no-console
+      console.warn(
+        "[SkyLens] UNEXPECTED cold-start state — analytical overlays / sheet / time panel " +
+          "should all start off. If this fires on a genuine fresh launch, there IS a " +
+          "persistence path and the 'stray tap' explanation is wrong.",
+        { analyticalOn, layersSheet, scrubVisible }
+      );
+    }
+    // Mount-only snapshot by design — deps intentionally empty.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  // Sky brightness lives behind a top-bar button now. It used to be a permanently-mounted
+  // slider bar sitting directly above the pills — 62pt of chrome, always on, and (being a
+  // dark rounded bar with a slider in it) routinely mistaken for the time-travel panel.
+  // It is a set-once control; it does not deserve permanent residency over the sky.
+  const [brightnessVisible, setBrightnessVisible] = useState(false);
+  // ── DETERMINISTIC REVIEW MODE (dev + no compass only) ─────────────────────────
+  //
+  // The whole review loop has been broken: a simulator has no magnetometer, so `available`
+  // is false and the sky freezes at a meaningless heading. That made Orion impossible to
+  // inspect anywhere except by physically hunting for it with a real phone — which is not
+  // a testing process, it's a scavenger hunt.
+  //
+  // So when a DEV build finds no compass (i.e. a simulator), we stop pretending to point
+  // and instead aim deliberately: fix the clock to a night when Orion is high, and aim the
+  // camera straight at M42. The scene becomes reproducible, screenshot-able, and diffable.
+  //
+  // GATING: explicit opt-in only. Enable with `EXPO_PUBLIC_SKYLENS_REVIEW_MODE=1` when
+  // building for a simulator (which has no magnetometer to point with). It is off unless
+  // that flag is set AND this is a dev build, so it can never surprise-activate — not in a
+  // release build (__DEV__ false) and not transiently on a physical dev build (the old
+  // `!available` gate was briefly true at cold start before the first magnetometer sample,
+  // which flashed the review scene on real devices).
+  const reviewMode = __DEV__ && process.env.EXPO_PUBLIC_SKYLENS_REVIEW_MODE === "1";
+  // Orion high in the south (matches scripts/orion-selftest.js exactly).
+  const REVIEW_TIME = useMemo(() => new Date("2026-01-15T22:00:00-08:00"), []);
+
+  const observerTime = useMemo(() => {
+    if (reviewMode) return REVIEW_TIME;
+    return timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000);
+  }, [reviewMode, REVIEW_TIME, timeOffsetMin]);
   const sky = useSkyData(location, undefined, observerTime);
+
+  // Aim at the review target, so it lands dead centre.
+  const REVIEW_TARGET = "m42";
+  const pointing = useMemo<CameraPointing>(() => {
+    if (!reviewMode) return sensorPointing;
+    const t = sky.nebulae.find((n) => n.id === REVIEW_TARGET);
+    if (!t) return sensorPointing;
+    return { azimuthDegrees: t.azimuthDegrees, altitudeDegrees: t.altitudeDegrees, rollDegrees: 0 };
+  }, [reviewMode, sensorPointing, sky.nebulae]);
 
   // Photo capture — captureScreen grabs the full rendered screen including SVG
   const sceneRef = useRef<View>(null);
@@ -107,7 +188,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       // Expo Go / module unavailable — point the user at the system screenshot.
       Alert.alert(
         "Tip: Use iOS Screenshot",
-        "Press Power + Volume Up for the best sky photos. Captures everything perfectly including the camera feed."
+        "Press Power + Volume Up for the best sky photos. Captures the whole planetarium scene perfectly."
       );
       return;
     }
@@ -127,7 +208,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       setCapturing(false);
       Alert.alert(
         "Tip: Use iOS Screenshot",
-        "Press Power + Volume Up for the best sky photos. Captures everything perfectly including the camera feed."
+        "Press Power + Volume Up for the best sky photos. Captures the whole planetarium scene perfectly."
       );
     }
   }, [capturing]);
@@ -140,16 +221,18 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const { addItem } = useAuraLunisVault();
 
   const [box, setBox] = useState({ width: 360, height: 720 });
+  // The default scene is FIVE layers: Stars, Constellations, Milky Way, Planets, and
+  // Nebulae — the entries with defaultOn: true (Nebulae ships on as a curated 2-hero
+  // accent; see the note above). The four analytical overlays (zodiac/grid/satellites/
+  // ecliptic) stay off, and nothing may switch them on automatically.
+  //
+  // Deep Sky used to auto-enable the moment entitlement resolved to premium ("they paid
+  // for it, give it to them"), which meant a premium user's first impression of Sky Lens
+  // silently included Nebulae — a fifth active layer nobody asked for, and a busier
+  // opening scene than the free user's. Premium value stays in HOW layers render
+  // (PremiumVisualGating: spectral stars, hero moon, shooting stars); Nebulae is now an
+  // opt-in tap for everyone, so the calm four-pill first impression is universal.
   const [active, setActive] = useState<Set<LayerKey>>(() => new Set(DEFAULT_ACTIVE_LAYERS));
-  // Deep Sky is premium and starts OFF (so free users never get the paywalled nebulae for
-  // free). Once entitlement resolves to premium, turn it on by default — what they paid for.
-  const deepSkyApplied = useRef(false);
-  useEffect(() => {
-    if (isPremium && !deepSkyApplied.current) {
-      deepSkyApplied.current = true;
-      setActive((prev) => (prev.has("deepsky") ? prev : new Set(prev).add("deepsky")));
-    }
-  }, [isPremium]);
 
   // Live satellite tracking for the AR "Satellites" layer — reuses the Orbital fleet
   // service (live-TLE-backed positions → absolute observer az/alt). Refreshed every
@@ -211,11 +294,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   useEffect(() => {
     setNightMode(gate.nightVision && settings.nightVision);
   }, [gate.nightVision, settings.nightVision]);
-  // Three sky modes cycled by the half-moon button: AR (camera, 45% dim) → Immersive
-  // (camera, 75% dim — screenshot mode) → Planetarium (camera off, 95% dim) → AR.
-  const [skyMode, setSkyMode] = useState<"ar" | "immersive" | "planetarium">("ar");
-  const planetarium = skyMode === "planetarium";
-  const immersive = skyMode === "immersive";
+  // Sky Lens now uses a permanent full-screen planetarium presentation.
+  // The live camera AR mode was removed so the visual experience stays cinematic.
+  const planetarium = true;
+  const immersive = false;
   // Cinematic "Immersive Sky" (Week 4) — the no-UI mode for screenshots & wonder. All
   // chrome and labels vanish; only the sky remains, darkened to ~85%. Enter via a
   // triple-tap or a long-press on the mode button; a single tap anywhere restores the UI.
@@ -277,7 +359,6 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     }),
     [zoom]
   );
-  const cameraZoom = Math.min(0.5, (zoom - 1) * 0.05);
 
   // Tap-to-select. SVG onPress does NOT fire inside an RNGH GestureDetector on iOS, so we
   // hit-test the tap point against projected object positions ourselves and open the info
@@ -411,20 +492,6 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     () => getSeasonalTint((observerTime ?? new Date()).getMonth(), location?.latitudeDegrees ?? 0),
     [observerTime, location?.latitudeDegrees]
   );
-  const cycleSkyMode = useCallback(() => {
-    // Half-moon button cycles AR → Immersive → Planetarium → AR. Entering Planetarium
-    // turns the Milky Way layer on. Both state updates stay at the TOP LEVEL of the
-    // handler — never nest a setState inside another's updater (React runs updaters
-    // during render → "Cannot update a component while rendering" throw).
-    // Immersive (75% dim screenshot mode) is premium — free users skip straight
-    // from AR to Planetarium and back.
-    const next = skyMode === "ar"
-      ? (gate.immersiveMode ? "immersive" : "planetarium")
-      : skyMode === "immersive" ? "planetarium" : "ar";
-    if (next === "planetarium") setActive((prev) => (prev.has("milkyway") ? prev : new Set(prev).add("milkyway")));
-    setSkyMode(next);
-  }, [skyMode, gate.immersiveMode]);
-
   const onLayout = useCallback((e: LayoutEvent) => {
     const { width, height } = e.nativeEvent.layout;
     setBox({ width, height });
@@ -512,7 +579,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   const moonFinder = useMemo(() => {
     const moon = sky.bodies.find((b) => b.id === "moon");
     if (!moon) return null;
-    if (!moon.aboveHorizon) return "☾  The Moon is below the horizon right now";
+    // Below the horizon → say nothing. A permanent "the Moon is below the horizon" banner
+    // is a nag, not guidance: there is no action the user can take.
+    if (!moon.aboveHorizon) return null;
     const p = projectTarget(pointing, moon.azimuthDegrees, moon.altitudeDegrees, fov, box);
     if (p.onScreen) return null; // it's in view — no need to point you to it
     return p.behind ? "☾  Turn around for the Moon ↻" : `☾  Pan ${arrowFor(p.bearingDegrees)} to the Moon`;
@@ -585,10 +654,42 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         magnitude: s.magnitude
       });
     }
-    return out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 10);
-  }, [sky.stars, pointing, fov, box]);
+    const brightest = out.sort((a, b) => a.magnitude - b.magnitude).slice(0, 10);
+    if (nightMode) return brightest;
+    // The stardust's SHIMMER rides this same overlay. TwinkleOverlay is the only
+    // crash-safe animator in the stack (View opacity on one shared clock), and it was
+    // driving just 10 dots — adding ~14 sky-locked dust glints costs one clock, no new
+    // animation system, and keeps the sparkle in lockstep with the star twinkle.
+    // The glints sit on the real galactic plane, exactly like CosmicDustLayer's motes.
+    const project = (az: number, alt: number) => projectTarget(pointing, az, alt, fov, box);
+    // `false` mirrors SkyLensCanvas's horizonCorrect: the sky below the horizon stays
+    // unpainted. This MUST match the flag the canvas hands CosmicDustLayer, or the
+    // glints would shimmer below the horizon in places the dust itself isn't drawn.
+    return [...brightest, ...stardustGlints(sky.milkyWay, project, box, false)];
+  }, [sky.stars, sky.milkyWay, pointing, fov, box, nightMode]);
 
   const accent = nightMode ? "#C24A4A" : AuraLunisColors.gold;
+
+  // ── THE DOCK ────────────────────────────────────────────────────────────────────
+  // One number, derived from what is actually mounted. Everything that must sit clear of
+  // the bottom chrome — the Moon prompt, the shutter, and the LABEL EXCLUSION ZONE — is
+  // computed from this, so nothing can drift out of sync with a magic constant again.
+  // (The old code hard-coded `bottom: insets.bottom + 168/175` for the shutter and the
+  // Moon prompt, numbers that assumed a layout which no longer exists.)
+  const BRIGHTNESS_H = 62; // slider bar (8+36+8) + its 10pt margin — exact
+  // The time panel was TRIMMED ~23% (TimeScrubBar) and this figure corrected: it was 70,
+  // but the panel really measured ~89pt, so the exclusion zone ran 19pt short and labels
+  // could slide under it. Now ~61pt of panel + 10pt margin = 71.
+  const SCRUB_H = 71;
+  const dockHeight =
+    LAYER_BAR_HEIGHT +
+    6 +
+    (brightnessVisible && !selected ? BRIGHTNESS_H : 0) +
+    (scrubVisible && !selected ? SCRUB_H : 0);
+  // Top edge of the bottom chrome, in screen px — the exclusion line for labels/artwork.
+  const dockTop = box.height - dockHeight - insets.bottom - 12;
+  // Where floating controls perch: just above the dock, never on top of it.
+  const floatAbove = insets.bottom + dockHeight + 16;
 
   // Hero Object Spotlight: reverse-map the selected object's id to its LIVE az/alt
   // (one place, no per-layer wiring), then project it so the spotlight dims the
@@ -630,7 +731,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // the spotlighted region literally intensifies (not just dims around it).
   const focusZone = useMemo<FocusZone>(() => {
     if (!focusProj || !focusProj.onScreen) return null;
-    return { x: focusProj.x, y: focusProj.y, r: Math.min(box.width, box.height) * 0.34 };
+    // 0.34 → 0.22: a tighter selection spotlight, so the focused star sits in a crisp
+    // ring rather than a large colored bubble. Showcase (auto-Orion) is a separate zone.
+    return { x: focusProj.x, y: focusProj.y, r: Math.min(box.width, box.height) * 0.22 };
   }, [focusProj, box]);
 
   // Permanent HERO REGIONS — focal zones where everything reinforces, so the sky isn't
@@ -721,8 +824,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
     <View style={styles.root} onLayout={onLayout}>
       <GestureDetector gesture={sceneGesture}>
         <View ref={sceneRef} collapsable={false} style={StyleSheet.absoluteFill}>
-          {/* Planetarium Mode = camera off → the living atmospheric sky fills the screen */}
-          {!planetarium && <CameraView style={StyleSheet.absoluteFillObject} facing="back" zoom={cameraZoom} />}
+          {/* Permanent cinematic planetarium background — no live camera feed. */}
 
           {/* Cosmic dark overlay */}
           <View
@@ -753,7 +855,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               pointerEvents="none"
             />
           )}
-          {/* Atmospheric depth over the camera feed: transparent at the top,
+          {/* Atmospheric depth over the planetarium background: transparent at the top,
               deepening to ground-glow at the bottom for a sense of depth. */}
           {!nightMode && !planetarium && (
             <LinearGradient
@@ -767,29 +869,73 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           )}
           {nightMode && <View style={styles.nightFilter} pointerEvents="none" />}
 
-          {/* Ambient atmosphere (Gemini's refined pair): breathing sky bloom +
-              shimmering luxury starfield, above the background and below the star
-              canvas + labels/cards. Crash-safe (Animated.View + useAnimatedStyle). */}
+          <SolidSkyBackgroundLayer
+            visible={planetarium && !nightMode && active.has("milkyway")}
+          />
+
+          {/* THE nebula renderer. `fullSphere={false}` — normal viewing is horizon-correct,
+              so nothing below the horizon is ever painted, matching every other layer.
+              (It used to receive `planetarium` here, which is permanently true, meaning
+              below-horizon nebulae would have been drawn into the visible sky.) */}
+          <NebulaImageLayer
+            nebulae={sky.nebulae}
+            pointing={pointing}
+            fov={fov}
+            box={box}
+            visible={!nightMode && active.has("deepsky")}
+            fullSphere={false}
+            uiBottom={box.height - dockTop}
+            onSelect={setSelected}
+          />
+
+          {/* Star clusters, rendered as STARS — a swarm of individual suns, not a cloud.
+              Disjoint from NebulaImageLayer's object set (clusters vs emission heroes),
+              so no object is ever drawn by two renderers. Galaxies stay unrendered. */}
+          <ClusterLayer
+            nebulae={sky.nebulae}
+            pointing={pointing}
+            fov={fov}
+            box={box}
+            visible={!nightMode && active.has("deepsky")}
+            fullSphere={false}
+            uiBottom={box.height - dockTop}
+            onSelect={setSelected}
+          />
+
+          {/* Ambient atmosphere: breathing sky bloom, above the background and below the
+              star canvas + labels/cards. Crash-safe (Animated.View + useAnimatedStyle).
+              COORDINATED WITH THE STARDUST: both of these are flat full-screen gradients
+              — they add glow, but they also VEIL, and it's contrast that lets stardust
+              and nebulae read. Now that CosmicDustLayer carries the atmosphere with
+              sky-locked texture (and its old dark #0A0806 wash is gone), these two step
+              back ~18% so the dust and the nebulae are what you actually see. Total
+              ambient light is roughly conserved; it's just better distributed. */}
           <PremiumSkyBloomLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
             moonVisible={sky.bodies.find((b) => b.id === "moon")?.aboveHorizon ?? false}
             milkyWayVisible={active.has("milkyway")}
-            intensity={(planetarium ? 0.9 : 0.55) * horizonFade}
+            intensity={(planetarium ? 0.74 : 0.45) * horizonFade}
           />
-          {/* AstralBreathingLayer — re-enabled at LOW intensity (Path-to-10 §6): a
-              barely-perceptible 22s breathing swell so the sky feels alive, not static.
-              Crash-safe (single Animated.View + useAnimatedStyle over a static Svg).
-              Faded out below the horizon with the other screen-fixed FX. */}
+          {/* AstralBreathingLayer — a barely-perceptible 22s breathing swell so the sky
+              feels alive, not static. Crash-safe (single Animated.View + useAnimatedStyle
+              over a static Svg). Faded out below the horizon with the other screen-fixed
+              FX. This is the layer that makes the whole sky "breathe"; the per-mote
+              sparkle is TwinkleOverlay's job. Two scales of motion, one calm result. */}
           <AstralBreathingLayer
             width={box.width}
             height={box.height}
             nightVision={nightMode}
-            intensity={(planetarium ? 0.55 : 0.4) * horizonFade}
+            intensity={(planetarium ? 0.44 : 0.32) * horizonFade}
           />
-          {/* LuxuryStarfieldFXLayer disabled — 110 particles + shimmer animation
-              is expensive. Re-enable when performance budget allows. */}
+          {/* LuxuryStarfieldFXLayer stays RETIRED — and is no longer even imported.
+              It rendered 90 screen-fixed particles on its own shimmer clock, plus two
+              hardcoded "diffraction spike" stars pinned at (0.18, 0.24) and (0.82, 0.42)
+              — fake objects glued to the screen that slid over the real sky as you
+              panned. CosmicDustLayer now does this properly: sky-locked, galactic-plane
+              weighted, static SVG, with its shimmer riding TwinkleOverlay's existing
+              clock. Nothing here to re-enable. */}
           {moonProj && (
             <LunarGodRayLayer
               width={box.width}
@@ -815,11 +961,13 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               is pointerEvents="none"). v1 shows it only in Planetarium ("fantasy /
               preview") mode; realistic camera mode stays off until an enable toggle /
               live AuroraForecastService gate is wired. */}
+          {/* Aurora curtains disabled — they created visible vertical bands
+              over the new cinematic full-background sky. */}
           <AuroraCurtainLayer
             width={box.width}
             height={box.height}
-            visible={planetarium}
-            intensity={0.55}
+            visible={false}
+            intensity={0}
             variant="cosmic"
             nightVision={nightMode}
           />
@@ -844,6 +992,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               satellites={satellites}
               cinematic={cinematic}
               fullSphere={planetarium}
+              bottomInset={box.height - dockTop}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>
@@ -867,6 +1016,12 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           {/* Hero Object Spotlight — dims the field around the selected object so it
               becomes the star of the scene. Above the field, below the forge + HUD. */}
           {focusProj && <HeroSpotlight x={focusProj.x} y={focusProj.y} box={box} nightMode={nightMode} />}
+          {/* Selected-object marker: a steady ring + gentle pulse on the object whose
+              info card is open, so it's obvious WHICH object was tapped. Only while a
+              card is showing and the object is on screen. */}
+          {selected && focusProj?.onScreen && (
+            <SelectionRing x={focusProj.x} y={focusProj.y} color={nightMode ? "#C24A4A" : accent} />
+          )}
           {/* Constellation Forge — gold ink-draw on identify (above canvas, below HUD) */}
           <ConstellationForgeLayer
             width={box.width}
@@ -930,20 +1085,31 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         </TouchableOpacity>
 
         <View style={styles.hudPill} pointerEvents="none">
-          <Text style={[styles.hudText, { color: accent }]}>{hud}</Text>
+          {/* numberOfLines={1} on every line: the HUD must stay a compact strip, never
+              grow into a tall text card that covers Betelgeuse and the nearby sky. */}
+          <Text style={[styles.hudText, { color: accent }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>{hud}</Text>
           {planetarium ? (
-            <Text style={styles.hudSub}>🔭 Planetarium — pan to explore</Text>
+            <Text style={styles.hudSub} numberOfLines={1}>🔭 Planetarium — pan to explore</Text>
           ) : immersive ? (
-            <Text style={styles.hudSub}>🌌 Immersive — dimmed for photos</Text>
+            <Text style={styles.hudSub} numberOfLines={1}>🌌 Immersive — dimmed for photos</Text>
           ) : status === "fallback" ? (
-            <Text style={styles.hudSub}>Default location</Text>
+            <Text style={styles.hudSub} numberOfLines={1}>Default location</Text>
           ) : null}
           {satellitesActive && (
-            <Text style={styles.hudSub}>◈ Satellites · {satellitesLive ? "LIVE TLE" : "Simulated"}</Text>
+            <Text style={styles.hudSubSmall} numberOfLines={1}>◈ Satellites · {satellitesLive ? "LIVE TLE" : "Simulated"}</Text>
           )}
         </View>
 
         <View style={styles.toggleRow} pointerEvents="box-none">
+          <TouchableOpacity
+            style={[styles.iconBtn, brightnessVisible && { backgroundColor: "rgba(217,168,78,0.32)" }]}
+            onPress={() => setBrightnessVisible((v) => !v)}
+            accessibilityRole="button"
+            accessibilityLabel="Sky brightness"
+            activeOpacity={0.8}
+          >
+            <Text style={styles.iconBtnText}>☀</Text>
+          </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconBtn, scrubVisible && { backgroundColor: "rgba(217,168,78,0.32)" }]}
             onPress={() => {
@@ -957,15 +1123,6 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>🕐</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.iconBtn, skyMode !== "ar" && { backgroundColor: "rgba(217,168,78,0.32)" }]}
-            onPress={cycleSkyMode}
-            onLongPress={enterCinematic}
-            delayLongPress={400}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.iconBtnText}>{planetarium ? "🔭" : immersive ? "🌌" : "📷"}</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={[styles.iconBtn, nightMode && { backgroundColor: "rgba(139,32,32,0.5)" }]}
@@ -983,13 +1140,15 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
       {/* Find-Mode target banner (from a Learn lesson) takes priority */}
       {!cinematic && !selected && targetFinder && (
-        <View style={[styles.finder, { bottom: insets.bottom + 175 }]} pointerEvents="none">
+        <View style={[styles.finder, { bottom: floatAbove + 72 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{targetFinder}</Text>
         </View>
       )}
-      {/* Moon finder banner (hidden while an info card is open or a target is set) */}
-      {!cinematic && !selected && !targetFinder && moonFinder && (
-        <View style={[styles.finder, { bottom: insets.bottom + 175 }]} pointerEvents="none">
+      {/* Moon finder banner (hidden while an info card is open or a target is set).
+          +72 clears the 60pt shutter that sits at floatAbove — at +52 the prompt was
+          crossing it. Derived, so it also rides up when the time panel opens. */}
+      {!cinematic && !selected && !scrubVisible && !targetFinder && moonFinder && (
+        <View style={[styles.finder, { bottom: floatAbove + 72 }]} pointerEvents="none">
           <Text style={[styles.finderText, { color: accent }]}>{moonFinder}</Text>
         </View>
       )}
@@ -998,7 +1157,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           Premium only (gate.photoCapture). */}
       {!cinematic && !selected && gate.photoCapture && (
         <TouchableOpacity
-          style={[styles.shutterBtn, { bottom: insets.bottom + 168, borderColor: accent }]}
+          style={[styles.shutterBtn, { bottom: floatAbove, borderColor: accent }]}
           onPress={captureSky}
           disabled={capturing}
           activeOpacity={0.8}
@@ -1012,7 +1171,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       <View style={[styles.bottom, { paddingBottom: insets.bottom + 6 }]} pointerEvents="box-none">
         {/* Sky brightness — slide to lighten/darken the backdrop. Hidden while an info
             card is open so they don't overlap. */}
-        {!selected && (
+        {brightnessVisible && !selected && (
           <View style={styles.skySliderWrap}>
             <Text style={styles.skySliderLabel}>☾ Dark</Text>
             <Slider
@@ -1046,21 +1205,38 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
         ) : (
           <SkyLensLayerBar
             active={active}
-            isPremium={isPremium}
             nightMode={nightMode}
             onToggle={toggleLayer}
-            onLockedPress={onLockedPress}
+            onOpenLayers={() => setLayersSheet(true)}
           />
         )}
       </View>
       )}
+
+      {/* The analytical overlays. Off the sky, one tap away. */}
+      <SkyLensLayersSheet
+        visible={layersSheet}
+        active={active}
+        isPremium={isPremium}
+        nightMode={nightMode}
+        onToggle={toggleLayer}
+        onLockedPress={(def) => {
+          // The locked-layer flow PREVIEWS the premium layer on the live sky for ~2s and
+          // then raises the paywall prompt. That whole moment happens behind this modal,
+          // so the sheet has to get out of the way first or the user would just see a
+          // dimmed sheet and no sky.
+          setLayersSheet(false);
+          onLockedPress(def);
+        }}
+        onClose={() => setLayersSheet(false)}
+      />
 
       {/* THE CONVERSION MOMENT — after a 2s preview of the premium beauty, the scene
           gently fades and the unlock prompt rises. Tap anywhere on it → the paywall. */}
       {preview?.phase === "prompt" && (
         <Pressable style={StyleSheet.absoluteFill} onPress={() => { endPreview(); openPaywall(); }}>
           <Animated.View style={[StyleSheet.absoluteFill, styles.previewScrim, { opacity: previewFade }]} pointerEvents="none" />
-          <Animated.View style={[styles.previewPrompt, { bottom: insets.bottom + 132, opacity: previewFade }]} pointerEvents="none">
+          <Animated.View style={[styles.previewPrompt, { bottom: floatAbove + 8, opacity: previewFade }]} pointerEvents="none">
             <Text style={styles.previewTitle}>✦ Unlock the living universe</Text>
             <Text style={styles.previewSub}>Tap to see {preview.label} like never before</Text>
           </Animated.View>
@@ -1083,10 +1259,12 @@ const styles = StyleSheet.create({
     paddingVertical: 6
   },
   zoomText: { fontSize: 12, fontWeight: "800", fontVariant: ["tabular-nums"] },
-  toggleRow: { flexDirection: "row", gap: 8 },
+  // Three circular buttons now (brightness / time / night). 42→38 and a tighter gap so
+  // the cluster stops crowding the HUD pill beside it.
+  toggleRow: { flexDirection: "row", gap: 6 },
   shutterBtn: {
     position: "absolute",
-    right: 16,
+    right: 20,
     width: 60,
     height: 60,
     borderRadius: 30,
@@ -1101,8 +1279,10 @@ const styles = StyleSheet.create({
   watermarkSub: { color: "rgba(244,227,184,0.75)", fontSize: 11, fontWeight: "600", marginTop: 1 },
   finder: { position: "absolute", left: 0, right: 0, alignItems: "center" },
   finderText: {
-    backgroundColor: "rgba(7,18,37,0.78)",
-    fontSize: 13,
+    backgroundColor: "rgba(7,18,37,0.82)",
+    fontSize: 17,
+    textShadowColor: "rgba(0,0,0,0.6)",
+    textShadowRadius: 3,
     fontWeight: "800",
     paddingHorizontal: 16,
     paddingVertical: 9,
@@ -1120,22 +1300,27 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14
   },
   iconBtn: {
-    width: 42,
-    height: 42,
-    borderRadius: 21,
-    backgroundColor: "rgba(7,18,37,0.8)",
-    borderWidth: 1,
-    borderColor: "rgba(217,168,78,0.34)",
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(7,18,37,0.58)",
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(217,168,78,0.24)",
     alignItems: "center",
     justifyContent: "center"
   },
-  iconBtnText: { color: "#FFF", fontSize: 16, fontWeight: "800" },
+  iconBtnText: { color: "#FFF", fontSize: 15, fontWeight: "800" },
+  // UI CHROME — lightened. The panels were dense enough to read as opaque slabs sitting
+  // ON the sky. Dropping the fills and adding a hairline gold edge lets the sky show
+  // through, so the chrome reads as GLASS resting over the scene rather than as a lid.
   hudPill: {
     flex: 1,
-    marginHorizontal: 10,
-    backgroundColor: "rgba(7,18,37,0.6)",
-    borderRadius: 14,
-    paddingVertical: 8,
+    marginHorizontal: 8,
+    backgroundColor: "rgba(7,18,37,0.42)",
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: "rgba(217,168,78,0.14)",
+    paddingVertical: 6,
     paddingHorizontal: 12,
     alignItems: "center"
   },
@@ -1172,8 +1357,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
   },
-  hudText: { fontSize: 13, fontWeight: "900", fontVariant: ["tabular-nums"] },
-  hudSub: { color: AuraLunisColors.muted, fontSize: 10, marginTop: 1 },
+  hudText: { fontSize: 17, fontWeight: "800", fontVariant: ["tabular-nums"], textShadowColor: "rgba(0,0,0,0.55)", textShadowRadius: 2 },
+  hudSub: { color: AuraLunisColors.muted, fontSize: 13, fontWeight: "500", marginTop: 1, opacity: 0.82 },
+  hudSubSmall: { color: AuraLunisColors.muted, fontSize: 13, fontWeight: "500", marginTop: 0, opacity: 0.72 },
   bottom: { position: "absolute", left: 0, right: 0, bottom: 0 },
   skySliderWrap: {
     flexDirection: "row",

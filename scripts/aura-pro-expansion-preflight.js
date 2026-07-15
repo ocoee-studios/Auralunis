@@ -23,18 +23,14 @@ function check(label, condition, detail = "") {
   }
 }
 
+// Only the Aura Pro pieces that actually ship or have real native-handoff scaffolds.
+// The never-built "future luxury" modules were pruned (see note further down).
 const required = [
   "src/features/aura-pro/AuraProUtilityTypes.ts",
   "src/features/aura-pro/SatelliteFeedService.ts",
   "src/features/aura-pro/SatelliteThermalOverlayPanel.tsx",
   "src/features/aura-pro/AstrophotographyPredictorService.ts",
   "src/features/aura-pro/AstrophotographyPredictorPanel.tsx",
-  "src/features/aura-pro/TimeScrubMatrixService.ts",
-  "src/features/aura-pro/TimeScrubMatrixPanel.tsx",
-  "src/features/future/SovereignSigilService.ts",
-  "src/features/future/SovereignSigilPreview.tsx",
-  "src/features/future/DeskObeliskPreview.tsx",
-  "src/features/future/FutureLuxuryModulesPanel.tsx",
   "native-handoff/widgetkit/DeskObeliskWidget.swift",
   "native-handoff/widgetkit/SovereignSigilWidget.swift",
   "native-handoff/watchos/TapticAstrolabeCrownView.swift",
@@ -63,22 +59,16 @@ const sky = read("src/screens/SkyScreen.tsx");
 check("Sky includes satellite overlay", sky.includes("<SatelliteThermalOverlayPanel />"));
 check("Sky includes predictor", sky.includes("<AstrophotographyPredictorPanel />"));
 
-const home = read("src/screens/HomeScreen.tsx");
-check("Home includes Time-Scrub Matrix", home.includes("<TimeScrubMatrixPanel />"));
-
-const watch = read("src/screens/WatchScreen.tsx");
-check("Watch includes Desk Obelisk preview", watch.includes("<DeskObeliskPreview />"));
-check("Watch includes Sovereign Sigil preview", watch.includes("<SovereignSigilPreview />"));
-
-const sigil = read("src/features/future/SovereignSigilService.ts");
-check("Sovereign Sigil SHA-256", sigil.includes("CryptoDigestAlgorithm.SHA256"));
-check("Sovereign Sigil local-safe seed", sigil.includes("localSalt") && sigil.includes("normalizedBirthSkyHash"));
+// TimeScrubMatrix / SovereignSigil / DeskObelisk / FutureLuxury and the Watch screen
+// were on an abandoned "future luxury" roadmap and were never built (absent on main and
+// every branch). Their audits are removed; the native-handoff Swift SCAFFOLDS that DO
+// exist are still checked below.
 
 const taptic = read("native-handoff/watchos/TapticAstrolabeCrownView.swift");
 check("watchOS crown scaffold", taptic.includes("digitalCrownRotation") && taptic.includes("isHapticFeedbackEnabled: true"));
 
 const portal = read("native-handoff/visionos/StellarPortalImmersiveSpace.swift");
-check("visionOS immersive scaffold", portal.includes("RealityView") && portal.includes("ChronauraStellarPortalRoot"));
+check("visionOS immersive scaffold", portal.includes("RealityView") && portal.includes("AuraLunisStellarPortalRoot"));
 
 const obelisk = read("native-handoff/widgetkit/DeskObeliskWidget.swift");
 check("WidgetKit StandBy-oriented scaffold", obelisk.includes(".systemSmall") && obelisk.includes("containerBackground"));

@@ -35,10 +35,21 @@ function satColor(id: string, name: string): string {
   return "#C0C6D4";
 }
 
-// Tracked satellites on the live camera feed at their real sky positions. A short
-// trailing line shows the orbital motion over the last tick (drawn from the previous
-// tick's projected position to the current one), persisting across the cheap
-// re-renders between 1 s ticks. Crash-safe: static SVG, refs for the trail.
+// How long a satellite's motion trail may be, in px. The trail used to be drawn as a
+// literal line from the previous tick's projected position to the current one. Between
+// 1 s ticks a LEO satellite can sweep a long way — and if a sample was stale, or the
+// projection wrapped across the seam, that line could stretch clean across the screen as
+// a bright streak. Now the trail only carries the DIRECTION of motion; its LENGTH is
+// clamped here, so it reads as a short local wake behind the object.
+const TRAIL_PX = 22;
+// Beyond this, the two samples aren't a plausible one-tick motion (stale sample, seam
+// wrap, layer just toggled on) — draw no trail at all rather than a wrong one.
+const TRAIL_SANE_MAX_PX = 160;
+// Only a few satellites may carry a label at once. The fleet can put a dozen objects on
+// screen, and a dozen tiny captions is exactly the technical clutter we're removing.
+const MAX_LABELS = 3;
+
+// Tracked satellites at their real sky positions. Crash-safe: static SVG, refs for the trail.
 export function SatelliteLayer({ satellites, project, palette, nightMode, placeLabel, onSelect }: Props) {
   const lastRef = useRef<Map<string, { az: number; alt: number }>>(new Map());
   const prevRef = useRef<Map<string, { az: number; alt: number }>>(new Map());
@@ -50,10 +61,26 @@ export function SatelliteLayer({ satellites, project, palette, nightMode, placeL
     lastRef.current = next;
   }, [satellites]);
 
+  // Label budget: the ISS always earns one; the rest go to the highest satellites in the
+  // sky (the ones actually worth pointing at). Everything else renders as a quiet dot.
+  const labelled = new Set(
+    [...satellites]
+      .filter((s) => s.elevationDegrees >= -2)
+      .sort((a, b) => {
+        if (a.id === "iss") return -1;
+        if (b.id === "iss") return 1;
+        return b.elevationDegrees - a.elevationDegrees;
+      })
+      .slice(0, MAX_LABELS)
+      .map((s) => s.id)
+  );
+
   return (
     <G>
       {satellites.map((s) => {
         if (s.elevationDegrees < -2) return null; // below horizon
+        // POSITION IS SACRED — projection unchanged; only the trail, stroke and label
+        // presentation are touched by this pass.
         const p = project(s.azimuthDegrees, s.elevationDegrees);
         if (!p.onScreen) return null;
 
@@ -89,20 +116,48 @@ export function SatelliteLayer({ satellites, project, palette, nightMode, placeL
               }
             />
 
-            {/* motion trail (previous tick → now) */}
-            {trail && !trail.behind && (
-              <Line x1={trail.x} y1={trail.y} x2={p.x} y2={p.y} stroke={color} strokeWidth={isISS ? 1.6 : 1} strokeOpacity={0.5} strokeLinecap="round" />
-            )}
+            {/* Motion trail — a SHORT LOCAL WAKE, not a line to wherever the object was a
+                tick ago. We take only the direction from the previous sample and draw a
+                fixed, clamped length back along it, so the trail can never streak across
+                the screen no matter how far the satellite moved or how stale the sample. */}
+            {(() => {
+              if (!trail || trail.behind) return null;
+              const dx = p.x - trail.x;
+              const dy = p.y - trail.y;
+              const d = Math.hypot(dx, dy);
+              // Too short to have a meaningful direction, or too long to be one real tick.
+              if (d < 0.5 || d > TRAIL_SANE_MAX_PX) return null;
+              const len = Math.min(TRAIL_PX, d);
+              const tailX = p.x - (dx / d) * len;
+              const tailY = p.y - (dy / d) * len;
+              return (
+                <Line
+                  x1={tailX}
+                  y1={tailY}
+                  x2={p.x}
+                  y2={p.y}
+                  stroke={color}
+                  strokeWidth={isISS ? 0.9 : 0.6}
+                  strokeOpacity={isISS ? 0.3 : 0.2}
+                  strokeLinecap="round"
+                />
+              );
+            })()}
 
             {/* soft glow (ISS hero gets a wider one) + dot */}
             <Circle cx={p.x} cy={p.y} r={r + (isISS ? 6 : 3.5)} fill={color} opacity={isISS ? 0.18 : 0.12} />
             <Circle cx={p.x} cy={p.y} r={r} fill={color} />
 
-            {/* label */}
-            {(() => {
-              const lp = placeLabel ? placeLabel(p.x + r + 4, p.y + 3, s.shortName, 9) : { x: p.x + r + 4, y: p.y + 3 };
+            {/* Label — only the few that earned one (see `labelled`). */}
+            {labelled.has(s.id) && (() => {
+              const avoid = { x: p.x, y: p.y, r: r + 5 };
+              const fx = p.x + r + 5;
+              const lp = placeLabel
+                ? placeLabel(fx, p.y + 3, s.shortName, 9, avoid)
+                : { x: fx, y: p.y + 3 };
+              if (!Number.isFinite(lp.x)) return null; // lowest priority — drop it
               return (
-                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={9} fontWeight="600" opacity={0.8}>
+                <SvgText x={lp.x} y={lp.y} fill={palette.starLabel} fontSize={9} fontWeight="600" opacity={0.62}>
                   {s.shortName}
                 </SvgText>
               );

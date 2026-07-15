@@ -14,7 +14,6 @@
       "bundleIdentifier": "com.ocoeestudios.auralunis",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
-        "NSCameraUsageDescription": "AuraLunis uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view.",
         "NSLocationWhenInUseUsageDescription": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you.",
         "NSPhotoLibraryAddUsageDescription": "AuraLunis saves sky captures and cosmic time-lapse exports only when you choose to save them.",
         "NSMotionUsageDescription": "AuraLunis uses motion sensors to align the sky lens with the direction your phone is pointing."
@@ -52,7 +51,6 @@
     "android": {
       "package": "com.ocoeestudios.auralunis",
       "permissions": [
-        "android.permission.CAMERA",
         "android.permission.ACCESS_FINE_LOCATION",
         "android.permission.ACCESS_COARSE_LOCATION",
         "android.permission.BODY_SENSORS",
@@ -67,12 +65,6 @@
       }
     },
     "plugins": [
-      [
-        "expo-camera",
-        {
-          "cameraPermission": "AuraLunis uses the camera to overlay stars, planets, constellations, and alignment guides onto your real sky view."
-        }
-      ],
       [
         "expo-location",
         {

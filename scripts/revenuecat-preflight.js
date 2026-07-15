@@ -38,21 +38,19 @@ check(
   "RevenueCat iOS public key placeholder",
   Boolean(app.expo.extra && app.expo.extra.revenueCatIosApiKey)
 );
-check(
-  "RevenueCat Android public key placeholder",
-  Boolean(app.expo.extra && app.expo.extra.revenueCatAndroidApiKey)
-);
+// (No Android RevenueCat key check — AuraLunis ships iOS-only; app.json carries only the
+// iOS key. Requiring an Android key audited a platform the app doesn't target.)
 
+// The pricing was migrated off the old `chronaura` Horizon/Aura/Sovereign product model
+// to the shipped AuraLunis Premium model. Assert the REAL product IDs + entitlement that
+// live in MonetizationCatalog.ts today (CLAUDE.md: premium monthly/annual + founders
+// lifetime, all unlocking one entitlement). This audits the pricing that ships — it does
+// not change it.
 for (const term of [
-  "com.ocoee.chronaura.horizon.monthly",
-  "com.ocoee.chronaura.horizon.annual",
-  "com.ocoee.chronaura.aura.monthly",
-  "com.ocoee.chronaura.aura.annual",
-  "com.ocoee.chronaura.sovereign.annual",
-  "horizon_plus",
-  "aura_pro",
-  "sovereign",
-  "chronaura_launch"
+  "com.ocoeestudios.auralunis.premium.monthly",
+  "com.ocoeestudios.auralunis.premium.annual",
+  "com.ocoeestudios.auralunis.lifetime",
+  "AuraLunis Premium"
 ]) {
   check(`catalog: ${term}`, catalog.includes(term));
 }
@@ -68,26 +66,83 @@ for (const term of [
   check(`RevenueCat service: ${term}`, service.includes(term));
 }
 
-check("paywall copy: Horizon free option", paywall.includes("Continue with Horizon Free"));
-check(
-  "paywall copy: trial eligibility",
-  paywall.includes("SEVEN_DAY_TRIAL_COPY") || paywall.includes("7-day")
-);
-check(
-  "paywall copy: Sovereign labeled Coming Later",
-  catalog.includes('"Waitlist · Coming Later"')
-);
+// Real three-tier paywall: Monthly, Annual, Lifetime, plus Restore Purchases. (The old
+// "Horizon Free / Aura Pro / Sovereign Coming Later" tier gating belonged to the retired
+// chronaura model and is no longer part of the shipped paywall.)
+check("paywall copy: Monthly tier", paywall.includes("Monthly"));
+check("paywall copy: Annual tier", paywall.includes("Annual"));
+check("paywall copy: Lifetime tier", paywall.includes("Lifetime"));
 check("paywall copy: Restore Purchases", paywall.includes("Restore Purchases"));
 
+// ── 7-day introductory trial wiring ────────────────────────────────────────────
+// The trial is Apple-owned (an introductory offer on the monthly/annual products). The app
+// must only REFLECT it — read the real offer + eligibility from StoreKit/RevenueCat, gate
+// all trial copy on confirmed eligibility, keep lifetime trial-free, and never fabricate a
+// local trial timer or locally granted entitlement. These assertions lock that contract.
+const offersHook = fs.readFileSync(
+  path.join(root, "src/features/paywall/usePaywallOffers.ts"),
+  "utf8"
+);
+
+// 1. Purchasing still goes through RevenueCat packages (no fake local unlock).
+check("purchase still uses RevenueCat packages", service.includes("Purchases.purchasePackage"));
+
+// 2. Eligibility is read from the supported RevenueCat API, not assumed.
 check(
-  "Aura Pro launch purchase disabled",
-  catalog.includes('tierId: "aura_pro"') &&
-    catalog.includes('"COMING LATER"')
+  "reads introductory-offer eligibility from RevenueCat",
+  service.includes("checkTrialOrIntroductoryPriceEligibility")
+);
+
+// 3. Offer details are read from live StoreKit product data (introPrice), and localized
+//    store prices remain the source of truth.
+check("reads intro offer from live product data (introPrice)", service.includes("introPrice"));
+check(
+  "localized StoreKit prices are the source of truth",
+  service.includes("priceString") && paywall.includes("localizedPrice")
+);
+
+// 4. A trial is promised ONLY when BOTH the store reports an offer AND the account is
+//    eligible — never on eligibility alone.
+check(
+  "trial requires an actual offer AND eligibility",
+  offersHook.includes('elig === "eligible" && pkg?.introOffer')
+);
+
+// 5. Trial copy is CONDITIONAL: every trial string in the paywall is gated on eligibility.
+check(
+  "paywall trial copy is gated on confirmed eligibility",
+  paywall.includes("selectedEligible") && paywall.includes('trial.status === "eligible"')
+);
+
+// 6. Lifetime never shows trial wording.
+check(
+  "lifetime is forced trial-free",
+  offersHook.includes('p.interval === "lifetime"') &&
+    offersHook.includes("lifetime is one-time — NEVER a trial")
+);
+
+// 7. No fabricated local trial: no timer, no locally granted entitlement, no fake unlock.
+const trialSurfaces = `${service}\n${offersHook}\n${paywall}`;
+check(
+  "no local trial timer",
+  !/setTimeout\s*\([^)]*trial/i.test(trialSurfaces) && !/trialEndsAt|trialExpires/i.test(trialSurfaces)
 );
 check(
-  "Sovereign launch purchase disabled",
-  catalog.includes('tierId: "sovereign"') &&
-    catalog.includes('availableAtLaunch: false')
+  "no locally granted premium entitlement for trials",
+  !/grantPremium|setPremium\s*\(\s*true|entitlements\.active\[[^\]]+\]\s*=/.test(trialSurfaces)
+);
+
+// 8. Failed eligibility must not block purchasing — the lookup degrades to {} / normal price.
+check(
+  "eligibility failure degrades gracefully (never blocks purchase)",
+  service.includes("return {}") && offersHook.includes('status: "unavailable"')
+);
+
+// 9. Renewal / trial-renewal disclosure is present near the CTA.
+check(
+  "renewal disclosure present",
+  paywall.includes("renews automatically") &&
+    paywall.includes("After the free trial")
 );
 
 console.log("");

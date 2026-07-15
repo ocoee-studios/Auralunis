@@ -58,7 +58,10 @@ export const NEBULAE: ReadonlyArray<Nebula> = [
     description: "A deep-red flower of gas with a cluster of hot young stars blooming at its center.", bestMonths: "December–March" },
 
   // ── Reflection nebula — scattered starlight ───────────────────────────────
-  { id: "m45", catalog: "M45", name: "Pleiades", raHours: 3.79, decDegrees: 24.12, type: "reflection", con: "Tau", constellation: "Taurus", coreColor: "#9FC0FF", hazeColor: "#6090FF", radius: 20, distanceLy: "444 ly", visibility: "Naked eye",
+  // M45 is an OPEN CLUSTER (with reflection nebulosity around it), and it was typed
+  // "reflection" — so the deep-sky renderer treated the Seven Sisters as a smooth blue
+  // cloud instead of the swarm of stars everyone actually recognises. Retyped.
+  { id: "m45", catalog: "M45", name: "Pleiades", raHours: 3.79, decDegrees: 24.12, type: "cluster", con: "Tau", constellation: "Taurus", coreColor: "#9FC0FF", hazeColor: "#6090FF", radius: 20, distanceLy: "444 ly", visibility: "Naked eye",
     description: "The Seven Sisters, wrapped in icy-blue nebulosity — the dust they happen to be drifting through.", bestMonths: "November–February" },
 
   // ── Galaxies — island universes ───────────────────────────────────────────

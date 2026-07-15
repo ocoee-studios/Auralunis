@@ -87,11 +87,11 @@ export function ZodiacLayer({ zodiac, project, palette, nightMode, sun, birthSig
                 }} />
                 {/* glyph (brighter + glow when it's the current Sun sign) */}
                 {isCurrent && <Circle cx={c.x} cy={c.y - 4} r={15} fill={GOLD} opacity={0.18} />}
-                <SvgText x={c.x} y={c.y} textAnchor="middle" fontSize={isCurrent ? 19 : 16}
+                <SvgText x={c.x} y={c.y} textAnchor="middle" fontSize={isCurrent ? 22 : 18}
                   fill={symbolColor} opacity={isCurrent ? 0.95 : 0.4}>
                   {sign.symbol}
                 </SvgText>
-                <SvgText x={c.x} y={c.y + 15} textAnchor="middle" fontSize={9} fontWeight="700"
+                <SvgText x={c.x} y={c.y + 20} textAnchor="middle" fontSize={15} fontWeight="600"
                   fill={symbolColor} opacity={isCurrent ? 0.9 : 0.5} letterSpacing={1}>
                   {sign.name.toUpperCase()}
                 </SvgText>

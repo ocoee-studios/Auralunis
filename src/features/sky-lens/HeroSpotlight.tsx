@@ -44,16 +44,20 @@ export function HeroSpotlight({ x, y, box, nightMode }: Props) {
             <Stop offset={c1} stopColor="#030816" stopOpacity={0.4} />
             <Stop offset="1" stopColor="#030816" stopOpacity={0.7} />
           </RadialGradient>
-          {/* luminous lift — the focused region reads brighter, not just less-dimmed */}
-          <RadialGradient id="heroLift" cx={x} cy={y} r={clear * 1.1} gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor="#FFF6E0" stopOpacity={0.1} />
-            <Stop offset="0.5" stopColor="#FFF6E0" stopOpacity={0.035} />
+          {/* Luminous lift — the remaining soft bright disc. Shrunk (1.1 → 0.7) and faded
+              (~50%) so the focused star reads as a crisp ring, not a glowing bubble. */}
+          <RadialGradient id="heroLift" cx={x} cy={y} r={clear * 0.7} gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor="#FFF6E0" stopOpacity={0.05} />
+            <Stop offset="0.5" stopColor="#FFF6E0" stopOpacity={0.02} />
             <Stop offset="1" stopColor="#FFF6E0" stopOpacity={0} />
           </RadialGradient>
-          {/* gold presence haze around the focused object */}
-          <RadialGradient id="heroHalo" cx={x} cy={y} r={clear * 1.4} gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor={gold} stopOpacity={0.14} />
-            <Stop offset="0.6" stopColor={gold} stopOpacity={0.05} />
+          {/* Gold presence haze — reduced ~40% and substantially faded. It used to read as
+              a large orange/gold translucent bubble around the selected star; the crisp
+              SelectionRing + soft pulse are the selection marker now, so this only needs to
+              be a whisper of warmth, not a disc. (The heroScrim DIMMING is unchanged.) */}
+          <RadialGradient id="heroHalo" cx={x} cy={y} r={clear * 0.85} gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor={gold} stopOpacity={0.06} />
+            <Stop offset="0.6" stopColor={gold} stopOpacity={0.02} />
             <Stop offset="1" stopColor={gold} stopOpacity={0} />
           </RadialGradient>
         </Defs>
