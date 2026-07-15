@@ -12,6 +12,8 @@ type Props = {
   nightMode: boolean;
   placeLabel?: LabelPlacer;
   showLabels?: boolean;
+  /** Labels-only pass: reserve discs + place labels (mount BEFORE StarLayer), no artwork. */
+  labelsOnly?: boolean;
   useIllustrations?: boolean;
   zoom?: number;
   fullSphere?: boolean;
@@ -61,6 +63,7 @@ export function PlanetLayer({
   nightMode,
   placeLabel,
   showLabels = true,
+  labelsOnly = false,
   useIllustrations = true,
   zoom = 1,
   onSelect,
@@ -86,12 +89,45 @@ export function PlanetLayer({
     })
     .filter((v): v is NonNullable<typeof v> => v !== null);
 
-  if (placeLabel) {
+  // Reserve planet DISCS in the shared placer. Done in the labelsOnly / full pass so it
+  // runs BEFORE StarLayer places star labels (see the canvas), which is what lets a nearby
+  // star label yield to a planet.
+  if (placeLabel && (labelsOnly || showLabels)) {
     for (const v of visible) {
       // Reserve the DISC (plus a hair), not the whole glow — reserving the full halo
       // would be so greedy it would shove every nearby star label off screen.
       placeLabel.reserveCircle(v.point.x, v.point.y, v.disc * 1.15);
     }
+  }
+
+  // A planet's NAME, placed through the shared placer. PRIORITY 1: never dropped — if the
+  // placer finds no clean slot it falls back to the natural position rather than vanishing.
+  // Because planet labels now CLAIM before star labels (labelsOnly pass mounts first), a
+  // nearby named star (e.g. Aldebaran by Mars) yields its slot to the planet instead.
+  const renderLabel = (v: (typeof visible)[number]) => {
+    const { body, point, glow } = v;
+    const { x, y } = point;
+    const avoid = { x, y, r: glow * 0.8 };
+    const fallbackX = x + glow * 0.8 + 6;
+    const placed = placeLabel ? placeLabel(fallbackX, y + 4, body.name, 17, avoid) : null;
+    const labelPoint = placed && Number.isFinite(placed.x) ? placed : { x: fallbackX, y: y + 4 };
+    return (
+      <G key={`${body.id}-label`}>
+        {/* Outline + fill: legible over a bright nebula or the Milky Way without a plate. */}
+        <SvgText x={labelPoint.x} y={labelPoint.y} fill="none" stroke="#050914" strokeWidth={2.2} strokeOpacity={0.5} fontSize={17} fontWeight="700">
+          {body.name}
+        </SvgText>
+        <SvgText x={labelPoint.x} y={labelPoint.y} fill={palette.starLabel} fontSize={17} fontWeight="700" opacity={0.96}>
+          {body.name}
+        </SvgText>
+      </G>
+    );
+  };
+
+  // LABELS-ONLY pass: reserve discs (above) + claim/render labels. Mounted BEFORE StarLayer
+  // so planet names outrank star names in the placer. No artwork here.
+  if (labelsOnly) {
+    return <G>{visible.map((v) => renderLabel(v))}</G>;
   }
 
   return (
@@ -208,49 +244,7 @@ export function PlanetLayer({
 
             <Circle cx={x} cy={y} r={Math.max(disc + 14, 24)} fill="transparent" onPress={onPress} />
 
-            {showLabels && (() => {
-              // The label now ORBITS the planet rather than always sitting to its right,
-              // and the avoid radius is measured off the GLOW (×0.8 — the visibly bright
-              // part of the bloom), not the disc. Previously the offset was disc-based,
-              // so on a big-glow planet like Venus the label landed inside its own halo.
-              const avoid = { x, y, r: glow * 0.8 };
-              const fallbackX = x + glow * 0.8 + 6;
-              const placed = placeLabel ? placeLabel(fallbackX, y + 4, body.name, 17, avoid) : null;
-              // PRIORITY 1. A planet's name is never dropped — if the placer can't find a
-              // clean slot it falls back to the natural position rather than vanishing.
-              const labelPoint =
-                placed && Number.isFinite(placed.x) ? placed : { x: fallbackX, y: y + 4 };
-              return (
-                <G>
-                  {/* Contrast without a hard plate behind the text: the label is drawn
-                      twice — once as a soft dark outline, once as the fill on top. It
-                      stays legible against a bright nebula or the Milky Way without
-                      putting an opaque box on the sky. */}
-                  <SvgText
-                    x={labelPoint.x}
-                    y={labelPoint.y}
-                    fill="none"
-                    stroke="#050914"
-                    strokeWidth={2.2}
-                    strokeOpacity={0.5}
-                    fontSize={17}
-                    fontWeight="700"
-                  >
-                    {body.name}
-                  </SvgText>
-                  <SvgText
-                    x={labelPoint.x}
-                    y={labelPoint.y}
-                    fill={palette.starLabel}
-                    fontSize={17}
-                    fontWeight="700"
-                    opacity={0.96}
-                  >
-                    {body.name}
-                  </SvgText>
-                </G>
-              );
-            })()}
+            {showLabels && renderLabel({ body, point, disc, glow })}
           </G>
         );
       })}

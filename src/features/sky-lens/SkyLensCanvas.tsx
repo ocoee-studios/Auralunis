@@ -177,6 +177,27 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           />
         )}
 
+        {/* PLANET DISCS + LABELS claim their slots HERE, BEFORE the stars — this labels-only
+            pass reserves each planet's disc and places its name in the shared placer first,
+            so a nearby named star (e.g. Aldebaran beside Mars) yields its label slot to the
+            planet instead of stealing it. The artwork itself is drawn later, over the stars,
+            by the second PlanetLayer mount (showLabels={false}). No coordinates change — this
+            is purely label claim-order. */}
+        {activeLayers.has("planets") && showLabels && (
+          <PlanetLayer
+            bodies={sky.bodies}
+            project={project}
+            palette={palette}
+            nightMode={nightMode}
+            placeLabel={placeLabel}
+            showLabels
+            labelsOnly
+            useIllustrations={vg.planetIllustrations}
+            zoom={zoomLevel}
+            fullSphere={horizonCorrect}
+            onSelect={onSelect}
+          />
+        )}
         {activeLayers.has("stars") && (
           <DomeStarLayer stars={domeStars} project={project} palette={palette} nightMode={nightMode} focus={focus} showcase={showcase} extinction={extinction} useSpectralColors={vg.spectralColors} fullSphere={horizonCorrect} />
         )}
@@ -187,6 +208,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         )}
 
         {vg.shootingStars && <ShootingStarLayer width={box.width} height={box.height} nightMode={nightMode} />}
+        {/* PLANET ARTWORK — discs, halos, rings, illustrations. Drawn over the stars.
+            showLabels={false}: the names were already claimed + rendered by the labels-only
+            pass above (which runs before the stars), so planet labels outrank nearby star
+            labels. This mount reserves nothing new. */}
         {activeLayers.has("planets") && (
           <PlanetLayer
             bodies={sky.bodies}
@@ -194,7 +219,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
             palette={palette}
             nightMode={nightMode}
             placeLabel={placeLabel}
-            showLabels={showLabels}
+            showLabels={false}
             useIllustrations={vg.planetIllustrations}
             zoom={zoomLevel}
             fullSphere={horizonCorrect}
