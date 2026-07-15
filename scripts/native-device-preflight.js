@@ -43,8 +43,8 @@ check(
     eas.build.development.developmentClient === true &&
     eas.build.development.distribution === "internal"
 );
-check("iOS bundle identifier", app.expo.ios.bundleIdentifier === "com.ocoee.chronaura");
-check("iOS camera permission copy", Boolean(app.expo.ios.infoPlist.NSCameraUsageDescription));
+check("iOS bundle identifier", app.expo.ios.bundleIdentifier === "com.ocoeestudios.auralunis");
+// (No camera-permission check — Sky Lens is a camera-free planetarium.)
 check("iOS location permission copy", Boolean(app.expo.ios.infoPlist.NSLocationWhenInUseUsageDescription));
 check("iOS motion permission copy", Boolean(app.expo.ios.infoPlist.NSMotionUsageDescription));
 check("iOS photo-save permission copy", Boolean(app.expo.ios.infoPlist.NSPhotoLibraryAddUsageDescription));
@@ -57,7 +57,6 @@ check(
   settings.includes("Open Device Diagnostics") && settings.includes("<DeviceDiagnosticsPanel />")
 );
 for (const term of [
-  "requestCameraPermission",
   "requestLocationPermission",
   "requestPermissionsAsync",
   "getHeadingAsync",
