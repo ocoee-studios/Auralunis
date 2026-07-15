@@ -723,7 +723,9 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // the spotlighted region literally intensifies (not just dims around it).
   const focusZone = useMemo<FocusZone>(() => {
     if (!focusProj || !focusProj.onScreen) return null;
-    return { x: focusProj.x, y: focusProj.y, r: Math.min(box.width, box.height) * 0.34 };
+    // 0.34 → 0.22: a tighter selection spotlight, so the focused star sits in a crisp
+    // ring rather than a large colored bubble. Showcase (auto-Orion) is a separate zone.
+    return { x: focusProj.x, y: focusProj.y, r: Math.min(box.width, box.height) * 0.22 };
   }, [focusProj, box]);
 
   // Permanent HERO REGIONS — focal zones where everything reinforces, so the sky isn't

@@ -50,10 +50,13 @@ export function HeroSpotlight({ x, y, box, nightMode }: Props) {
             <Stop offset="0.5" stopColor="#FFF6E0" stopOpacity={0.035} />
             <Stop offset="1" stopColor="#FFF6E0" stopOpacity={0} />
           </RadialGradient>
-          {/* gold presence haze around the focused object */}
-          <RadialGradient id="heroHalo" cx={x} cy={y} r={clear * 1.4} gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor={gold} stopOpacity={0.14} />
-            <Stop offset="0.6" stopColor={gold} stopOpacity={0.05} />
+          {/* Gold presence haze — reduced ~40% and substantially faded. It used to read as
+              a large orange/gold translucent bubble around the selected star; the crisp
+              SelectionRing + soft pulse are the selection marker now, so this only needs to
+              be a whisper of warmth, not a disc. (The heroScrim DIMMING is unchanged.) */}
+          <RadialGradient id="heroHalo" cx={x} cy={y} r={clear * 0.85} gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor={gold} stopOpacity={0.06} />
+            <Stop offset="0.6" stopColor={gold} stopOpacity={0.02} />
             <Stop offset="1" stopColor={gold} stopOpacity={0} />
           </RadialGradient>
         </Defs>
