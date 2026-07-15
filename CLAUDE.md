@@ -35,11 +35,13 @@ Home · Sky · Watch · Learn · Settings
 
 ## Pricing (locked — source of truth)
 - **Horizon Free** — always free
-- **AuraLunis Premium monthly** — $6.99/month (no trial)
-- **AuraLunis Premium annual** — $39.99/year (7-day free trial, annual only)
-- **Founders Lifetime** — $99.99 one-time purchase
+- **AuraLunis Premium monthly** — $9.99/month
+- **AuraLunis Premium annual** — $49.99/year
+- **Founders Lifetime** — $129.99 one-time purchase
 - **Aura Pro** — Coming Later (do NOT enable purchase flows)
 - **Sovereign** — Waitlist, Coming Later (do NOT enable purchase flows)
+
+A 7-day introductory free trial may be available to eligible new subscribers on the monthly and annual plans. Apple determines eligibility, so trial wording must appear only when StoreKit confirms both the introductory offer and the customer’s eligibility. Lifetime includes no trial.
 
 Bundle ID: `com.ocoeestudios.auralunis` (Ocoee Studios LLC). RevenueCat product IDs
 (must match App Store Connect exactly):
