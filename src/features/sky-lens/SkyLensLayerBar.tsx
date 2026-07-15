@@ -107,8 +107,8 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignSelf: "stretch",
     height: LAYER_BAR_HEIGHT,
-    marginHorizontal: 6,
-    paddingHorizontal: 4,
+    marginHorizontal: 4,
+    paddingHorizontal: 3,
     borderRadius: 22,
     backgroundColor: "rgba(2,8,20,0.52)",
     borderWidth: StyleSheet.hairlineWidth,
@@ -123,9 +123,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     height: 44, // comfortable tap target
-    flexShrink: 1,
-    marginHorizontal: 3, // → 6pt visible gap between controls
-    paddingHorizontal: 9,
+    flexShrink: 0, // size to content — text can never be ellipsized
+    marginHorizontal: 2, // ~4pt gap between controls
+    paddingHorizontal: 6,
     borderRadius: 20,
     borderWidth: 1,
     backgroundColor: "rgba(5,13,29,0.38)",
@@ -135,14 +135,14 @@ const styles = StyleSheet.create({
   divider: {
     width: StyleSheet.hairlineWidth,
     height: 24,
-    marginHorizontal: 6, // clear space on both sides — never touches the Planets pill
+    marginHorizontal: 5, // clear space on both sides — never touches the Planets pill
     backgroundColor: "rgba(217,168,78,0.2)",
   },
   // Fixed 44x44 icon button (not a text pill). The menu glyph communicates its function
   // and opens a labelled sheet, so it needs no "Layers" word. Fixed size so the badge
   // appearing/disappearing can't shift it.
   layersPill: {
-    width: 44,
+    width: 40,
     height: 44,
     flexShrink: 0,
     justifyContent: "center",
