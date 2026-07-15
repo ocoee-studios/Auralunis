@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Pressable, StyleSheet, Text, View } from "react-native";
-import { useCameraPermissions } from "expo-camera";
 import * as Location from "expo-location";
 import * as MediaLibrary from "expo-media-library";
 import * as Haptics from "expo-haptics";
@@ -15,7 +14,6 @@ type DiagnosticState = {
 };
 
 type DiagnosticKey =
-  | "camera"
   | "location"
   | "heading"
   | "photos"
@@ -25,7 +23,6 @@ type DiagnosticKey =
   | "haptics";
 
 const initialState: Record<DiagnosticKey, DiagnosticState> = {
-  camera: { status: "idle", detail: "Not checked yet." },
   location: { status: "idle", detail: "Not checked yet." },
   heading: { status: "idle", detail: "Not checked yet." },
   photos: { status: "idle", detail: "Not checked yet." },
@@ -76,7 +73,6 @@ function DiagnosticRow({ title, value }: { title: string; value: DiagnosticState
 }
 
 export function DeviceDiagnosticsPanel() {
-  const [cameraPermission, requestCameraPermission] = useCameraPermissions();
   const [locationPermission, requestLocationPermission] =
     Location.useForegroundPermissions();
   const [diagnostics, setDiagnostics] =
@@ -101,14 +97,6 @@ export function DeviceDiagnosticsPanel() {
       ]);
 
       setResult(
-        "camera",
-        cameraPermission?.granted ? "pass" : "warn",
-        cameraPermission?.granted
-          ? "Camera permission granted."
-          : "Camera permission has not been granted yet."
-      );
-
-      setResult(
         "location",
         locationStatus.granted && servicesEnabled ? "pass" : "warn",
         locationStatus.granted
@@ -129,21 +117,6 @@ export function DeviceDiagnosticsPanel() {
       setResult("location", "fail", "Permission status could not be read on this device.");
     } finally {
       setRunning(false);
-    }
-  }
-
-  async function requestCamera() {
-    try {
-      const result = await requestCameraPermission();
-      setResult(
-        "camera",
-        result.granted ? "pass" : "warn",
-        result.granted
-          ? "Camera permission granted."
-          : "Camera permission declined. Manual Sky Map remains available."
-      );
-    } catch {
-      setResult("camera", "fail", "Camera permission prompt could not open.");
     }
   }
 
@@ -267,7 +240,6 @@ export function DeviceDiagnosticsPanel() {
         prompts are intentionally separate so the user stays in control.
       </Text>
 
-      <DiagnosticRow title="Camera permission" value={diagnostics.camera} />
       <DiagnosticRow title="Location permission" value={diagnostics.location} />
       <DiagnosticRow title="Compass heading" value={diagnostics.heading} />
       <DiagnosticRow title="Photo-save permission" value={diagnostics.photos} />
@@ -281,9 +253,6 @@ export function DeviceDiagnosticsPanel() {
       </Pressable>
 
       <View style={styles.buttonGrid}>
-        <Pressable style={styles.secondary} onPress={requestCamera}>
-          <Text style={styles.secondaryText}>Request Camera</Text>
-        </Pressable>
         <Pressable style={styles.secondary} onPress={requestLocation}>
           <Text style={styles.secondaryText}>Request Location</Text>
         </Pressable>

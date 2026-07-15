@@ -268,7 +268,7 @@ export function HomeScreen() {
       {/* ── Mode Shortcuts ── */}
       <View style={styles.modeRow}>
         <ModeShortcut icon="◎" label="Constellations" sub="Overlay" onPress={() => navigation.navigate("Sky")} />
-        <ModeShortcut icon="⊹" label="AR Sky" sub="Point & find" onPress={() => navigation.navigate("Sky")} />
+        <ModeShortcut icon="⊹" label="Sky Lens" sub="Point & find" onPress={() => navigation.navigate("Sky")} />
         <ModeShortcut icon="◈" label="Fleet" sub="Satellites" onPress={() => navigation.navigate("Sky")} />
       </View>
 

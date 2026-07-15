@@ -116,7 +116,7 @@ export function LearnDetailScreen({
         <View style={styles.nudge}>
           <Text style={styles.nudgeTitle}>✦  Go deeper with Premium</Text>
           <Text style={styles.nudgeBody}>
-            Every lesson is free. Premium adds Sky Lens AR over your live sky, your Birth
+            Every lesson is free. Premium adds the Sky Lens planetarium aligned to your sky, your Birth
             Sky chart, the major constellations with mythology, and the full deep-sky catalogue.
           </Text>
           <Pressable style={styles.nudgeBtn} onPress={() => { tapLight(); openPaywall(); }}>

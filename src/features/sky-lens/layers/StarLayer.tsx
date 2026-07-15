@@ -68,7 +68,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
 
         return (
           <G key={star.id} opacity={belowHorizon && !fullSphere ? 0.25 : 1}>
-            {/* Bigger invisible hit target — 24px minimum for easy tapping with AR jitter */}
+            {/* Bigger invisible hit target — 24px minimum for easy tapping with sensor jitter */}
             <Circle
               cx={p.x}
               cy={p.y}

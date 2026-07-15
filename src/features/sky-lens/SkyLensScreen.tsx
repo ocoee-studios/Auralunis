@@ -78,7 +78,7 @@ type LayoutEvent = { nativeEvent: { layout: { width: number; height: number } } 
 const ARROWS = ["→", "↘", "↓", "↙", "←", "↖", "↑", "↗"];
 const arrowFor = (bearingDegrees: number) => ARROWS[Math.round(bearingDegrees / 45) % 8];
 
-// Full-screen AR Sky Lens (Phase 1): live camera feed with the Stars,
+// Full-screen Sky Lens: a sensor-aligned cinematic planetarium (no camera feed) with the Stars,
 // Constellations, Planets, Moon, and Grid layers projected over it, a toggle
 // bar, tap-to-reveal Info Card, and Night Mode. Phase-2 layers appear locked.
 export function SkyLensScreen({ onClose, focusTarget }: Props) {
@@ -188,7 +188,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       // Expo Go / module unavailable — point the user at the system screenshot.
       Alert.alert(
         "Tip: Use iOS Screenshot",
-        "Press Power + Volume Up for the best sky photos. Captures everything perfectly including the camera feed."
+        "Press Power + Volume Up for the best sky photos. Captures the whole planetarium scene perfectly."
       );
       return;
     }
@@ -208,7 +208,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       setCapturing(false);
       Alert.alert(
         "Tip: Use iOS Screenshot",
-        "Press Power + Volume Up for the best sky photos. Captures everything perfectly including the camera feed."
+        "Press Power + Volume Up for the best sky photos. Captures the whole planetarium scene perfectly."
       );
     }
   }, [capturing]);
@@ -855,7 +855,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               pointerEvents="none"
             />
           )}
-          {/* Atmospheric depth over the camera feed: transparent at the top,
+          {/* Atmospheric depth over the planetarium background: transparent at the top,
               deepening to ground-glow at the bottom for a sense of depth. */}
           {!nightMode && !planetarium && (
             <LinearGradient

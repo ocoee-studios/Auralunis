@@ -15,17 +15,11 @@ export function PrivacyScreen() {
       <Text style={styles.heading}>Data That Stays on Your Device</Text>
       <Text style={styles.body}>
         • Observations, notes, and vault entries — stored locally with NaCl encryption{"\n"}
-        • Sky Lens camera feed — used live for AR overlay, never recorded or transmitted{"\n"}
         • Device motion and compass data — used to determine which direction your phone points, never stored{"\n"}
         • Location — used on-device to compute your sky; only approximate coordinates are sent to Open-Meteo for the weather forecast (see Third-Party Services)
       </Text>
 
       <Text style={styles.heading}>Data We Access</Text>
-
-      <Text style={styles.subheading}>Camera</Text>
-      <Text style={styles.body}>
-        Sky Lens uses your rear camera to overlay constellation lines, planet labels, and satellite tracks on the live sky. The camera feed is displayed on-screen only and is never recorded, stored, or transmitted.
-      </Text>
 
       <Text style={styles.subheading}>Location</Text>
       <Text style={styles.body}>
@@ -34,7 +28,7 @@ export function PrivacyScreen() {
 
       <Text style={styles.subheading}>Motion Sensors</Text>
       <Text style={styles.body}>
-        Accelerometer, gyroscope, and magnetometer data determine which direction your phone is pointing for the AR Sky Lens overlay. This data is used in real-time only and is never stored or transmitted.
+        Accelerometer, gyroscope, and magnetometer data determine which direction your phone is pointing so the Sky Lens planetarium aligns with the real sky. This data is used in real-time only and is never stored or transmitted.
       </Text>
 
       <Text style={styles.heading}>Third-Party Services</Text>

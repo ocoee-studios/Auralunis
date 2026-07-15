@@ -68,7 +68,6 @@ const required = [
   "src/features/device-qa/DeviceDiagnosticsPanel.tsx",
   "src/components/LogoMark.tsx",
   "src/components/ScreenShell.tsx",
-  "src/features/permissions/SkyLensPermissionGate.tsx",
   "src/features/sky-lens/ManualSkyMap.tsx",
   "src/features/archive/DeepSkyCatalog.ts",
   "src/state/AuraLunisSettingsContext.tsx",
@@ -105,17 +104,7 @@ if (tabs) {
   }
 }
 
-// ── 3. Sky Lens camera permission uses the modern expo-camera hook ──────────────
-const gate = read("src/features/permissions/SkyLensPermissionGate.tsx");
-if (gate) {
-  if (!gate.includes('import { useCameraPermissions } from "expo-camera";')) {
-    fail("SkyLensPermissionGate", "named useCameraPermissions hook missing");
-  } else if (gate.includes("Camera.useCameraPermissions()")) {
-    fail("SkyLensPermissionGate", "legacy Camera.useCameraPermissions remains");
-  } else {
-    pass("expo-camera permission hook");
-  }
-}
+// (Sky Lens is a camera-free planetarium — no camera-permission gate to audit.)
 
 // ── 4. Sky screen scaffold ──────────────────────────────────────────────────────
 const sky = read("src/screens/SkyScreen.tsx");
@@ -154,7 +143,6 @@ if (vaultContext) {
 const deviceDiagnostics = read("src/features/device-qa/DeviceDiagnosticsPanel.tsx");
 if (deviceDiagnostics) {
   for (const term of [
-    "requestCameraPermission",
     "requestLocationPermission",
     "requestPermissionsAsync",
     "getHeadingAsync",

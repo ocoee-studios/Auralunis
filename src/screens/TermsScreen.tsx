@@ -14,13 +14,13 @@ export function TermsScreen() {
 
       <Text style={styles.heading}>Description</Text>
       <Text style={styles.body}>
-        AuraLunis is a premium interactive astronomy app that transforms your iPhone into a living celestial instrument. Features include an AR sky overlay, satellite tracking, constellation charts, and astrophotography planning. Your observations stay on your device.
+        AuraLunis is a premium interactive astronomy app that transforms your iPhone into a living celestial instrument. Features include a sensor-aligned sky planetarium, satellite tracking, constellation charts, and astrophotography planning. Your observations stay on your device.
       </Text>
 
       <Text style={styles.heading}>Subscriptions</Text>
       <Text style={styles.body}>
         Free: Celestial Dial, basic sky view, 10 constellations, ISS tracking, Learn section.{"\n\n"}
-        Premium ($9.99/month or $49.99/year): Full Sky Lens AR, 35 major constellations with mythology, live satellite tracking, Birth Sky, Astro Weather, Astrophotography Planner, Night Vision, sky-quality presets, encrypted vault.{"\n\n"}
+        Premium ($9.99/month or $49.99/year): Full Sky Lens planetarium, 35 major constellations with mythology, live satellite tracking, Birth Sky, Astro Weather, Astrophotography Planner, Night Vision, sky-quality presets, encrypted vault.{"\n\n"}
         Lifetime ($129.99 one-time): all Premium features permanently, including future updates. No subscription.
       </Text>
 
@@ -35,7 +35,7 @@ export function TermsScreen() {
 
       <Text style={styles.heading}>Accuracy & Safety</Text>
       <Text style={styles.body}>
-        AuraLunis provides astronomical data for educational and recreational purposes. Celestial positions, satellite predictions, and weather forecasts are approximations and should not be relied upon for navigation, aviation, or safety-critical decisions. Always be aware of your surroundings when using the AR camera feature outdoors, especially at night.
+        AuraLunis provides astronomical data for educational and recreational purposes. Celestial positions, satellite predictions, and weather forecasts are approximations and should not be relied upon for navigation, aviation, or safety-critical decisions. Always be aware of your surroundings when using Sky Lens outdoors, especially at night.
       </Text>
 
       <Text style={styles.heading}>Your Content</Text>
