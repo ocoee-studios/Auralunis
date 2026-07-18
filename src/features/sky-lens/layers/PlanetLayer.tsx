@@ -114,7 +114,7 @@ export function PlanetLayer({
     const reach = Math.max(glow * 0.8, ringReach);
     const avoid = { x, y, r: reach };
     const fallbackX = x + reach + (body.id === "saturn" ? 12 : 6);
-    const placed = placeLabel ? placeLabel(fallbackX, y + 4, body.name, 17, avoid) : null;
+    const placed = placeLabel ? placeLabel(fallbackX, y + 4, body.name, 17, avoid, false, { weight: 700 }) : null;
     const labelPoint = placed && Number.isFinite(placed.x) ? placed : { x: fallbackX, y: y + 4 };
     return (
       <G key={`${body.id}-label`}>

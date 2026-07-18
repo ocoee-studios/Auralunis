@@ -62,7 +62,7 @@ export function ConstellationLayer({
     // `centered` = true, the placer treats x as the CENTRE (matches textAnchor="middle").
     const label = c.name.toUpperCase();
     const position = placeLabel
-      ? placeLabel(centroid.x, centroid.y, label, 13, undefined, true)
+      ? placeLabel(centroid.x, centroid.y, label, 13, undefined, true, { weight: 500, letterSpacing: 1.6 })
       : { x: centroid.x, y: centroid.y };
     // No clean slot → dropped (priority 3, below planets and named stars).
     if (!Number.isFinite(position.x)) return null;
