@@ -1,39 +1,201 @@
-// Sky Lens AR regression test. Mirrors the math in
-// src/features/sky-lens/ar/SkyLensProjection.ts and SkyLensOrientation.ts and
-// asserts known reference outputs, so an accidental change to the algorithm is
-// caught. Keep in sync with those modules.
+// Sky Lens projection self-test.
+//
+// Projection is verified against the REAL shipping implementation in
+// src/features/sky-lens/ar/SkyLensProjection.ts. The .ts file is transpiled to CommonJS at
+// runtime (with the repo's own `typescript` dependency) and executed directly, so there is
+// NO second copy of the projection math and a regression in the shipping `projectTarget`
+// is caught here. Runtime transpile — rather than Node's native TS type-stripping — keeps
+// this working on CI's Node 20, which does not strip types.
+//
+// Orientation (`pointingFromSensors`) is outside the scope of this projection test; those
+// three cases are retained unchanged so orientation coverage is not lost.
+
+const fs = require("fs");
+const path = require("path");
+const ts = require("typescript");
+const Module = require("module");
+
+// Load a .ts module by transpiling it to CommonJS in memory and executing it — this runs
+// the ACTUAL source on disk, not a copy. No type-check (behaviour is not type-dependent).
+function requireTs(absPath) {
+  const source = fs.readFileSync(absPath, "utf8");
+  const { outputText } = ts.transpileModule(source, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2019 },
+    fileName: absPath
+  });
+  const m = new Module(absPath, module);
+  m.filename = absPath;
+  m.paths = Module._nodeModulePaths(path.dirname(absPath));
+  m._compile(outputText, absPath);
+  return m.exports;
+}
+
+const PROJ_PATH = path.resolve(__dirname, "../src/features/sky-lens/ar/SkyLensProjection.ts");
+const { projectTarget, DEFAULT_FOV } = requireTs(PROJ_PATH);
 
 const toRad = (d) => (d * Math.PI) / 180;
 const toDeg = (r) => (r * 180) / Math.PI;
 const signed = (d) => ((((d + 180) % 360) + 360) % 360) - 180;
 
-function projectTarget(pointing, az, alt, fov, box) {
-  const dAz = signed(az - pointing.azimuthDegrees);
-  const dAlt = alt - pointing.altitudeDegrees;
-  const meanAlt = (alt + pointing.altitudeDegrees) / 2;
-  const h = dAz * Math.cos(toRad(Math.max(-89, Math.min(89, meanAlt))));
-  const v = dAlt;
-  const r = toRad(pointing.rollDegrees);
-  const hRot = h * Math.cos(r) + v * Math.sin(r);
-  const vRot = -h * Math.sin(r) + v * Math.cos(r);
-  const halfH = fov.horizontalDegrees / 2;
-  const halfV = fov.verticalDegrees / 2;
-  const behind = Math.abs(dAz) > 90;
-  return {
-    x: box.width / 2 + (hRot / halfH) * (box.width / 2),
-    y: box.height / 2 - (vRot / halfV) * (box.height / 2),
-    behind,
-    onScreen: !behind && Math.abs(hRot) <= halfH && Math.abs(vRot) <= halfV
-  };
+let failed = 0;
+function assert(label, ok, detail) {
+  const line = label + (detail ? " — " + detail : "");
+  if (ok) console.log("PASS", line);
+  else {
+    failed += 1;
+    console.error("FAIL", line);
+  }
+}
+const near = (a, b, eps) => Math.abs(a - b) <= eps;
+
+// Representative screen dimensions (logical points).
+const IP16PM = { width: 430, height: 932 }; // iPhone 16 Pro Max
+const IPSE = { width: 375, height: 667 }; // iPhone SE (smaller width)
+
+console.log("Sky Lens projection self-test — real ENU projectTarget\n");
+
+// ── 0. We are exercising the real module, not the old flat approximation ──────────
+assert(
+  "loaded the real SkyLensProjection.ts (projectTarget + DEFAULT_FOV exported)",
+  typeof projectTarget === "function" &&
+    DEFAULT_FOV &&
+    DEFAULT_FOV.horizontalDegrees === 60 &&
+    DEFAULT_FOV.verticalDegrees === 45
+);
+const P = (pointing, az, alt, box, fov = DEFAULT_FOV) => projectTarget(pointing, az, alt, fov, box);
+
+// ── 1. Target aligned with view center maps to screen center (both screen sizes) ──
+for (const box of [IP16PM, IPSE]) {
+  const r = P({ azimuthDegrees: 180, altitudeDegrees: 20, rollDegrees: 0 }, 180, 20, box);
+  assert(
+    `center maps to screen center @${box.width}x${box.height}`,
+    near(r.x, box.width / 2, 0.01) && near(r.y, box.height / 2, 0.01) && r.onScreen && !r.behind,
+    `x=${r.x.toFixed(2)} y=${r.y.toFixed(2)}`
+  );
 }
 
-// vector helpers
+// ── 2. Target behind the viewing hemisphere is rejected/off-screen ────────────────
+{
+  const r = P({ azimuthDegrees: 180, altitudeDegrees: 0, rollDegrees: 0 }, 0, 0, IP16PM); // 180° away
+  assert("target behind viewing hemisphere is rejected", r.behind === true && r.onScreen === false);
+}
+
+// ── 3. Target above / outside the configured FOV is clipped ───────────────────────
+{
+  const r = P(
+    { azimuthDegrees: 180, altitudeDegrees: 20, rollDegrees: 0 },
+    180,
+    20 + DEFAULT_FOV.verticalDegrees, // one full vertical-FOV above the axis
+    IP16PM
+  );
+  assert(
+    "target above vertical FOV is clipped (off-screen, above center)",
+    r.onScreen === false && r.y < IP16PM.height / 2 && r.behind === false,
+    `y=${r.y.toFixed(1)}`
+  );
+}
+{
+  const r = P(
+    { azimuthDegrees: 180, altitudeDegrees: 0, rollDegrees: 0 },
+    180 + DEFAULT_FOV.horizontalDegrees, // one full horizontal-FOV to the side
+    0,
+    IP16PM
+  );
+  assert(
+    "target beyond horizontal FOV is clipped (off-screen)",
+    r.onScreen === false && Math.abs(r.x - IP16PM.width / 2) > 1 && r.behind === false,
+    `x=${r.x.toFixed(1)}`
+  );
+}
+
+// ── 4. Roll rotates screen-space orientation correctly ────────────────────────────
+// Use a square box + equal FOV so the angle→pixel scale is identical on both axes; then a
+// pure rotation is directly checkable. A target 10° above the optical axis:
+//   roll   0° → straight above center,
+//   roll  90° → same magnitude, now a horizontal offset (y back at center),
+//   roll 180° → mirrored straight below center.
+{
+  const SQ = { width: 400, height: 400 };
+  const SQFOV = { horizontalDegrees: 60, verticalDegrees: 60 };
+  const cx = 200;
+  const cy = 200;
+  const up = projectTarget({ azimuthDegrees: 180, altitudeDegrees: 0, rollDegrees: 0 }, 180, 10, SQFOV, SQ);
+  const r90 = projectTarget({ azimuthDegrees: 180, altitudeDegrees: 0, rollDegrees: 90 }, 180, 10, SQFOV, SQ);
+  const r180 = projectTarget({ azimuthDegrees: 180, altitudeDegrees: 0, rollDegrees: 180 }, 180, 10, SQFOV, SQ);
+  const dV = up.y - cy; // negative: above center
+  assert("roll 0°: target above axis renders above center", dV < -1 && near(up.x, cx, 0.5), `dy=${dV.toFixed(2)}`);
+  assert(
+    "roll 90°: 'above' rotates to a horizontal offset of equal magnitude",
+    near(r90.y, cy, 0.5) && near(Math.abs(r90.x - cx), Math.abs(dV), 0.5),
+    `x-off=${(r90.x - cx).toFixed(2)}`
+  );
+  assert(
+    "roll 180°: 'above' flips to below center, same magnitude",
+    near(r180.x, cx, 0.5) && near(r180.y - cy, -dV, 0.5),
+    `dy=${(r180.y - cy).toFixed(2)}`
+  );
+}
+
+// ── 5. Zenith and near-zenith behave (no dead zone; azimuth degenerate but handled) ─
+{
+  // Both view direction and target AT the zenith — azimuth is undefined there; must still center.
+  const zc = P({ azimuthDegrees: 0, altitudeDegrees: 90, rollDegrees: 0 }, 137, 90, IP16PM);
+  assert(
+    "zenith: target at zenith maps to center regardless of azimuth",
+    near(zc.x, IP16PM.width / 2, 0.5) && near(zc.y, IP16PM.height / 2, 0.5) && zc.onScreen,
+    `x=${zc.x.toFixed(2)} y=${zc.y.toFixed(2)}`
+  );
+  // Near zenith, small true separation across a large azimuth gap must stay on-screen/finite.
+  const nz = P({ azimuthDegrees: 0, altitudeDegrees: 89, rollDegrees: 0 }, 120, 89, IP16PM);
+  assert(
+    "near-zenith: small angular separation across wide azimuth stays on-screen & finite",
+    nz.onScreen && Number.isFinite(nz.x) && Number.isFinite(nz.y) && nz.behind === false
+  );
+}
+
+// ── 6. Near-North azimuth wraparound (values around 359°/0°) ───────────────────────
+{
+  const rRight = P({ azimuthDegrees: 359, altitudeDegrees: 0, rollDegrees: 0 }, 1, 0, IP16PM); // 2° across north
+  assert(
+    "wraparound 359°→1°: 2° across north stays near center, on-screen, not behind",
+    rRight.onScreen &&
+      rRight.behind === false &&
+      Math.abs(rRight.x - IP16PM.width / 2) > 0.5 &&
+      Math.abs(rRight.x - IP16PM.width / 2) < 40,
+    `x-off=${(rRight.x - IP16PM.width / 2).toFixed(2)}`
+  );
+  const rLeft = P({ azimuthDegrees: 1, altitudeDegrees: 0, rollDegrees: 0 }, 359, 0, IP16PM);
+  assert(
+    "wraparound 1°→359°: symmetric small offset on the opposite side (no seam discontinuity)",
+    rLeft.onScreen &&
+      rLeft.behind === false &&
+      Math.sign(rLeft.x - IP16PM.width / 2) === -Math.sign(rRight.x - IP16PM.width / 2)
+  );
+}
+
+// ── 7. A case where the OLD flat approximation and the real ENU implementation diverge ─
+// Two points near the zenith, 180° apart in azimuth, are only ~4° apart on the sky, so the
+// real projection keeps the target on-screen. The retired approximation used
+// `behind = |Δazimuth| > 90`, which misclassifies this as behind the view direction. We assert the
+// REAL result and record the legacy predicate purely as a divergence witness (a single
+// boolean, not the projection math).
+{
+  const pointing = { azimuthDegrees: 0, altitudeDegrees: 88, rollDegrees: 0 };
+  const r = P(pointing, 180, 88, IP16PM);
+  const legacyWouldSayBehind = Math.abs(signed(180 - pointing.azimuthDegrees)) > 90; // old |Δaz|>90 gate
+  assert(
+    "divergence: near-zenith 180°-azimuth target is on-screen in real ENU (old |Δaz|>90 said 'behind')",
+    r.onScreen === true && r.behind === false && legacyWouldSayBehind === true,
+    `real onScreen=${r.onScreen} behind=${r.behind}; legacy-behind=${legacyWouldSayBehind}`
+  );
+}
+
+// ── Orientation (retained, unchanged — out of scope for #160, kept for coverage) ──
 const dot = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
 const sub = (a, b) => ({ x: a.x - b.x, y: a.y - b.y, z: a.z - b.z });
 const scale = (a, k) => ({ x: a.x * k, y: a.y * k, z: a.z * k });
 const cross = (a, b) => ({ x: a.y * b.z - a.z * b.y, y: a.z * b.x - a.x * b.z, z: a.x * b.y - a.y * b.x });
 const norm = (a) => scale(a, 1 / (Math.sqrt(dot(a, a)) || 1));
-
 function pointingFromSensors(accel, mag) {
   const up = norm(accel);
   const north = norm(sub(mag, scale(up, dot(mag, up))));
@@ -43,38 +205,21 @@ function pointingFromSensors(accel, mag) {
   const alt = toDeg(Math.asin(Math.max(-1, Math.min(1, dot(cam, up)))));
   return { azimuthDegrees: az, altitudeDegrees: alt, rollDegrees: toDeg(Math.atan2(accel.x, accel.y)) };
 }
-
-let failed = 0;
-function assert(label, ok) {
-  if (ok) console.log("PASS", label);
-  else { failed += 1; console.error("FAIL", label); }
+{
+  const dip = toRad(60);
+  const flat = pointingFromSensors({ x: 0, y: 0, z: 1 }, { x: 0, y: 1, z: 0 });
+  assert("flat screen-up -> view altitude ~ -90", Math.abs(flat.altitudeDegrees + 90) < 1);
+  const zenith = pointingFromSensors({ x: 0, y: 0, z: -1 }, { x: 0, y: 1, z: 0 });
+  assert("tilted back -> view altitude ~ +90", Math.abs(zenith.altitudeDegrees - 90) < 1);
+  const north = pointingFromSensors({ x: 0, y: 1, z: 0 }, { x: 0, y: -Math.sin(dip), z: -Math.cos(dip) });
+  assert("vertical facing north -> azimuth ~ 0", Math.abs(signed(north.azimuthDegrees)) < 1);
 }
-
-const fov = { horizontalDegrees: 60, verticalDegrees: 45 };
-const box = { width: 300, height: 360 };
-const pointing = { azimuthDegrees: 180, altitudeDegrees: 20, rollDegrees: 0 };
-
-const center = projectTarget(pointing, 180, 20, fov, box);
-assert("target ahead maps to center", Math.abs(center.x - 150) < 0.5 && Math.abs(center.y - 180) < 0.5 && center.onScreen);
-const behind = projectTarget(pointing, 300, 20, fov, box);
-assert("target behind is off-screen", behind.behind && !behind.onScreen);
-const above = projectTarget(pointing, 180, 50, fov, box);
-assert("target above FOV is off-screen", !above.onScreen && above.y < 0);
-
-const dip = toRad(60);
-const flat = pointingFromSensors({ x: 0, y: 0, z: 1 }, { x: 0, y: 1, z: 0 });
-assert("flat screen-up -> camera altitude ~ -90", Math.abs(flat.altitudeDegrees + 90) < 1);
-const zenith = pointingFromSensors({ x: 0, y: 0, z: -1 }, { x: 0, y: 1, z: 0 });
-assert("tilted back -> camera altitude ~ +90", Math.abs(zenith.altitudeDegrees - 90) < 1);
-const north = pointingFromSensors(
-  { x: 0, y: 1, z: 0 },
-  { x: 0, y: -Math.sin(dip), z: -Math.cos(dip) }
-);
-assert("vertical facing north -> azimuth ~ 0", Math.abs(signed(north.azimuthDegrees)) < 1);
 
 console.log("");
 if (failed) {
-  console.error(`Sky Lens AR self-test: ${failed} failure(s).`);
+  console.error(`Sky Lens projection self-test: ${failed} failure(s).`);
   process.exit(1);
 }
-console.log("Sky Lens AR self-test passed: projection and orientation math correct.");
+console.log(
+  "Sky Lens projection self-test passed: real ENU projectTarget verified (center, behind, FOV clip, roll, zenith, wraparound, divergence) + orientation."
+);
