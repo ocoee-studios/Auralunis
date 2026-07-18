@@ -64,6 +64,9 @@ jobs:
       - name: Sky Lens self-test
         run: npm run qa:skylens
 
+      - name: Planet render self-test
+        run: npm run qa:planets
+
       - name: Expo Doctor
         run: npx expo-doctor
 

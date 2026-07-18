@@ -17,6 +17,15 @@ import type {
 
 export interface SkyBody extends CelestialTarget {
   aboveHorizon: boolean;
+  /**
+   * Fraction of the disc lit by the Sun, 0..1, from astronomy-engine's Illumination().
+   * Undefined for the Sun (and if the ephemeris call fails). Drives Venus's phase-aware
+   * artwork in the planetarium — it is a read-only derived quantity and has NO effect on
+   * position (ra/dec/az/alt are computed exactly as before).
+   */
+  illuminationFraction?: number;
+  /** Phase angle in degrees (0 = full, 180 = new). Same source and caveats as above. */
+  phaseAngleDegrees?: number;
 }
 
 // Neutral default (geographic center of the contiguous US) used before a GPS fix
@@ -67,11 +76,25 @@ function toObserver(location: ObserverLocation): Observer {
   );
 }
 
-function safeMagnitude(body: Body, when: Date): number | undefined {
+type Illum = {
+  magnitude: number | undefined;
+  illuminationFraction: number | undefined;
+  phaseAngleDegrees: number | undefined;
+};
+
+// Single Illumination() read that yields magnitude AND phase, so no extra ephemeris
+// work is done. The Sun has no defined illumination phase (astronomy-engine throws),
+// so everything degrades to undefined — callers already treat these as optional.
+function safeIllumination(body: Body, when: Date): Illum {
   try {
-    return round(Illumination(body, when).mag, 1);
+    const info = Illumination(body, when);
+    return {
+      magnitude: round(info.mag, 1),
+      illuminationFraction: round(info.phase_fraction, 3),
+      phaseAngleDegrees: round(info.phase_angle, 1)
+    };
   } catch {
-    return undefined;
+    return { magnitude: undefined, illuminationFraction: undefined, phaseAngleDegrees: undefined };
   }
 }
 
@@ -93,6 +116,7 @@ export function computeSkyBody(
 ): SkyBody {
   const equatorial = Equator(entry.body, when, observer, true, true);
   const horizontal = Horizon(when, observer, equatorial.ra, equatorial.dec, "normal");
+  const illum = safeIllumination(entry.body, when);
 
   return {
     id: entry.id,
@@ -101,7 +125,9 @@ export function computeSkyBody(
     declinationDegrees: round(equatorial.dec, 3),
     azimuthDegrees: round(horizontal.azimuth, 2),
     altitudeDegrees: round(horizontal.altitude, 2),
-    magnitude: safeMagnitude(entry.body, when),
+    magnitude: illum.magnitude,
+    illuminationFraction: illum.illuminationFraction,
+    phaseAngleDegrees: illum.phaseAngleDegrees,
     aboveHorizon: horizontal.altitude > 0
   };
 }

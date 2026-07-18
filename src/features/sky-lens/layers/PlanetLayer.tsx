@@ -1,5 +1,5 @@
 import React from "react";
-import { Circle, Defs, Ellipse, G, RadialGradient, Stop, Text as SvgText } from "react-native-svg";
+import { Circle, Defs, G, RadialGradient, Stop, Text as SvgText } from "react-native-svg";
 import type { SkyBody } from "../ephemeris/SkyEphemerisService";
 import { PLANET_COLORS, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
 import type { LabelPlacer } from "../labelLayout";
@@ -105,10 +105,15 @@ export function PlanetLayer({
   // Because planet labels now CLAIM before star labels (labelsOnly pass mounts first), a
   // nearby named star (e.g. Aldebaran by Mars) yields its slot to the planet instead.
   const renderLabel = (v: (typeof visible)[number]) => {
-    const { body, point, glow } = v;
+    const { body, point, glow, disc } = v;
     const { x, y } = point;
-    const avoid = { x, y, r: glow * 0.8 };
-    const fallbackX = x + glow * 0.8 + 6;
+    // Saturn's rings reach well past its glow (aRx ≈ 2×disc); push its label clear of the
+    // ring tips so the planet and its name breathe. Every other planet keeps the original
+    // spacing. This only shifts the label's starting slot — positions are untouched.
+    const ringReach = body.id === "saturn" ? disc * 2.0 : 0;
+    const reach = Math.max(glow * 0.8, ringReach);
+    const avoid = { x, y, r: reach };
+    const fallbackX = x + reach + (body.id === "saturn" ? 12 : 6);
     const placed = placeLabel ? placeLabel(fallbackX, y + 4, body.name, 17, avoid) : null;
     const labelPoint = placed && Number.isFinite(placed.x) ? placed : { x: fallbackX, y: y + 4 };
     return (
@@ -191,48 +196,27 @@ export function PlanetLayer({
               <Circle cx={x} cy={y} r={disc * 1.75} fill={`url(#${haloId})`} opacity={0.55} />
             )}
 
-            {body.id === "saturn" && useIllustrations && (
-              <G>
-                <Ellipse
-                  cx={x}
-                  cy={y}
-                  rx={disc * 2.1}
-                  ry={disc * 0.62}
-                  fill="none"
-                  stroke={color}
-                  strokeWidth={1.1}
-                  strokeOpacity={0.72}
-                  rotation={-18}
-                  originX={x}
-                  originY={y}
-                />
-                <Ellipse
-                  cx={x}
-                  cy={y}
-                  rx={disc * 1.68}
-                  ry={disc * 0.5}
-                  fill="none"
-                  stroke="#FFF2CF"
-                  strokeWidth={0.55}
-                  strokeOpacity={0.5}
-                  rotation={-18}
-                  originX={x}
-                  originY={y}
-                />
-              </G>
-            )}
-
+            {/* Saturn's ring system is drawn inside SaturnIllustration now (tilt, ring
+                shadow on the globe, Cassini division, near-side pass-in-front) — the old
+                duplicate ring ellipses that used to live here were removed so the rings
+                aren't drawn twice. */}
             {(() => {
               if (useIllustrations) {
-                const illustration = renderPlanetIllustration(body.id, x, y, disc, nightMode);
+                // POSITION IS SACRED: x, y, disc come straight from the projection above.
+                // Only ephemeris-derived phase (Venus) and cap gating (Mars) are passed in.
+                const illustration = renderPlanetIllustration(body.id, x, y, disc, nightMode, {
+                  illumination: body.illuminationFraction
+                });
                 if (illustration) return illustration;
               }
               return <Circle cx={x} cy={y} r={disc} fill={color} />;
             })()}
 
             {/* Specular highlight, softened 0.42 → 0.26. A hard white dot on a small disc
-                is a big part of what read as "cartoon sticker" on device. */}
-            {!nightMode && (
+                is a big part of what read as "cartoon sticker" on device. Suppressed for
+                Venus, whose phase artwork owns its own shading — a highlight could otherwise
+                land on the unlit limb. */}
+            {!nightMode && body.id !== "venus" && (
               <Circle
                 cx={x - disc * 0.3}
                 cy={y - disc * 0.3}

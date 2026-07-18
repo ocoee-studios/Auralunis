@@ -1,134 +1,290 @@
-// SVG planet illustrations — smooth gradient halos, no visible rings
+// Procedural planet artwork for the Sky Lens planetarium.
+//
+// SCOPE (locked): this file draws planets with react-native-svg primitives only. It does
+// NOT touch astronomy, projection, time, sensors, or the camera. Every function is pure —
+// given (cx, cy, r) and optional ephemeris-derived phase it returns deterministic SVG.
+// No <Image>, no PNG stickers, no CameraView. Sky Lens stays a fully rendered,
+// sensor-aligned planetarium; this only makes the discs inside it look like real planets.
+//
+// The small geometry helpers at the top are exported so the deterministic render self-test
+// (scripts/planet-render-selftest.js) can verify the artwork math without a device.
 import React from "react";
-import { Circle, Defs, Ellipse, G, RadialGradient, Stop, ClipPath, Rect } from "react-native-svg";
+import { Circle, Defs, Ellipse, G, RadialGradient, Rect, Stop, ClipPath } from "react-native-svg";
 
 type Props = { cx: number; cy: number; r: number; nightMode: boolean };
 
+// ── Deterministic geometry helpers (pure) ───────────────────────────────────────
+
+/** Venus phase, driven by the real illuminated fraction f∈[0,1] (astronomy-engine). */
+export type VenusPhaseSpec =
+  | { hasPhase: false }
+  | { hasPhase: true; crescent: boolean; terminatorRx: number };
+
+/**
+ * Terminator geometry for a phase. The lit disc is a full circle of radius r; the unlit
+ * region is the far half-plane UNION (crescent) / MINUS (gibbous) a terminator ellipse
+ * whose semi-minor axis is r·|1−2f|. f<0.5 → crescent, f>0.5 → gibbous, f≈1 → full disc.
+ * Returns hasPhase:false when there is no usable fraction, so the caller renders the plain
+ * disc and never fakes a phase.
+ */
+export function venusPhaseSpec(r: number, illumination?: number): VenusPhaseSpec {
+  if (typeof illumination !== "number" || !Number.isFinite(illumination)) return { hasPhase: false };
+  const f = Math.min(1, Math.max(0, illumination));
+  if (f >= 0.995) return { hasPhase: false }; // effectively full — draw the plain lit disc
+  return { hasPhase: true, crescent: f < 0.5, terminatorRx: r * Math.abs(1 - 2 * f) };
+}
+
+/** Jupiter belt/zone bands as fractions of r (y-offset from centre, half-height). */
+export const JUPITER_BANDS: ReadonlyArray<{ y: number; h: number; fill: string; opacity: number }> = [
+  { y: -0.74, h: 0.09, fill: "#A9814A", opacity: 0.5 },
+  { y: -0.5, h: 0.07, fill: "#E9D6AE", opacity: 0.32 },
+  { y: -0.28, h: 0.1, fill: "#8A6430", opacity: 0.5 },
+  { y: -0.04, h: 0.11, fill: "#C8A45E", opacity: 0.4 },
+  { y: 0.22, h: 0.09, fill: "#7E5A2C", opacity: 0.5 },
+  { y: 0.46, h: 0.08, fill: "#CBAA66", opacity: 0.38 },
+  { y: 0.66, h: 0.1, fill: "#9A7238", opacity: 0.46 }
+];
+
+// ── Shared bits ──────────────────────────────────────────────────────────────────
+
+/** Limb darkening — a transparent-centre → dark-edge overlay that makes the disc spherical. */
+function LimbShade({ cx, cy, r, id }: Props & { id: string }) {
+  return (
+    <>
+      <Defs>
+        <RadialGradient id={id} cx="42%" cy="38%" r="62%">
+          <Stop offset="0%" stopColor="#000000" stopOpacity={0} />
+          <Stop offset="70%" stopColor="#000000" stopOpacity={0} />
+          <Stop offset="100%" stopColor="#0A0A12" stopOpacity={0.42} />
+        </RadialGradient>
+      </Defs>
+      <Circle cx={cx} cy={cy} r={r} fill={`url(#${id})`} />
+    </>
+  );
+}
+
+// ── Jupiter ────────────────────────────────────────────────────────────────────
+
 export function JupiterIllustration({ cx, cy, r, nightMode }: Props) {
+  const key = `jup-${cx.toFixed(1)}-${cy.toFixed(1)}`;
   return (
     <G>
       <Defs>
-        <RadialGradient id={`jupGlow-${cx}`} cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#D4A44C" stopOpacity={0.25} />
-          <Stop offset="40%" stopColor="#D4A44C" stopOpacity={0.08} />
-          <Stop offset="100%" stopColor="#D4A44C" stopOpacity={0} />
+        <RadialGradient id={`${key}-body`} cx="40%" cy="34%" r="60%">
+          <Stop offset="0%" stopColor="#F4E8CC" />
+          <Stop offset="58%" stopColor="#C89A52" />
+          <Stop offset="100%" stopColor="#7E5B2A" />
         </RadialGradient>
-        <RadialGradient id={`jupBody-${cx}`} cx="40%" cy="35%" r="55%">
-          <Stop offset="0%" stopColor="#F2E6C8" />
-          <Stop offset="60%" stopColor="#C89A52" />
-          <Stop offset="100%" stopColor="#8B6830" />
-        </RadialGradient>
-        <ClipPath id={`jupClip-${cx}`}><Circle cx={cx} cy={cy} r={r} /></ClipPath>
+        <ClipPath id={`${key}-clip`}>
+          <Circle cx={cx} cy={cy} r={r} />
+        </ClipPath>
       </Defs>
-      <Circle cx={cx} cy={cy} r={r * 1.8} fill={`url(#jupGlow-${cx})`} />
-      <Circle cx={cx} cy={cy} r={r} fill={`url(#jupBody-${cx})`} />
-      <G clipPath={`url(#jupClip-${cx})`}>
-        <Rect x={cx - r} y={cy - r * 0.75} width={r * 2} height={r * 0.15} fill="#A07838" opacity={0.5} />
-        <Rect x={cx - r} y={cy - r * 0.4} width={r * 2} height={r * 0.1} fill="#C8A058" opacity={0.35} />
-        <Rect x={cx - r} y={cy - r * 0.08} width={r * 2} height={r * 0.18} fill="#8B6028" opacity={0.45} />
-        <Rect x={cx - r} y={cy + r * 0.28} width={r * 2} height={r * 0.12} fill="#B89048" opacity={0.4} />
-        <Rect x={cx - r} y={cy + r * 0.55} width={r * 2} height={r * 0.15} fill="#A07838" opacity={0.45} />
-        <Ellipse cx={cx + r * 0.25} cy={cy + r * 0.15} rx={r * 0.18} ry={r * 0.1} fill="#C06838" opacity={0.6} />
+      <Circle cx={cx} cy={cy} r={r} fill={`url(#${key}-body)`} />
+      <G clipPath={`url(#${key}-clip)`}>
+        {/* Cloud belts & zones. Ellipses (not rects) so the banding curves with the globe. */}
+        {JUPITER_BANDS.map((b, i) => (
+          <Ellipse
+            key={i}
+            cx={cx}
+            cy={cy + r * b.y}
+            rx={r * 1.02}
+            ry={r * b.h}
+            fill={b.fill}
+            opacity={b.opacity}
+          />
+        ))}
+        {/* One restrained Great Red Spot — muted brick, soft, south of the equator. */}
+        <Ellipse cx={cx + r * 0.28} cy={cy + r * 0.24} rx={r * 0.2} ry={r * 0.12} fill="#B4512B" opacity={0.62} />
+        <Ellipse cx={cx + r * 0.28} cy={cy + r * 0.24} rx={r * 0.12} ry={r * 0.07} fill="#D07548" opacity={0.5} />
       </G>
+      <LimbShade cx={cx} cy={cy} r={r} nightMode={nightMode} id={`${key}-limb`} />
     </G>
   );
 }
+
+// ── Saturn ───────────────────────────────────────────────────────────────────────
+
+const SATURN_TILT = -18; // degrees; near side of the ring plane dips to the bottom
 
 export function SaturnIllustration({ cx, cy, r, nightMode }: Props) {
-  const ringW = r * 2.4;
-  const ringH = r * 0.6;
+  const key = `sat-${cx.toFixed(1)}-${cy.toFixed(1)}`;
+  // Ring radii. Outer A-ring extent stays restrained and collision-safe — this is ≤ the
+  // previous outer reach (bands are now thinner), so nothing grows. Every ring shares one
+  // tilted plane via scale(), so tilt and depth ordering are preserved exactly.
+  const aRx = r * 2.0; // outer A-ring
+  const aRy = r * 0.56;
+  const scale = (rx: number) => (aRy * rx) / aRx;
+  const divRx = r * 1.75; // Cassini division, between A and B rings
+  const bRx = r * 1.5; // inner B-ring
   return (
     <G>
       <Defs>
-        <RadialGradient id={`satGlow-${cx}`} cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#D4A44C" stopOpacity={0.15} />
-          <Stop offset="50%" stopColor="#D4A44C" stopOpacity={0.04} />
-          <Stop offset="100%" stopColor="#D4A44C" stopOpacity={0} />
-        </RadialGradient>
-        <RadialGradient id={`satBody-${cx}`} cx="40%" cy="35%" r="55%">
-          <Stop offset="0%" stopColor="#F0E0B8" />
+        <RadialGradient id={`${key}-body`} cx="40%" cy="34%" r="60%">
+          <Stop offset="0%" stopColor="#F2E4BC" />
           <Stop offset="60%" stopColor="#C8A868" />
-          <Stop offset="100%" stopColor="#907838" />
+          <Stop offset="100%" stopColor="#836C33" />
         </RadialGradient>
+        <ClipPath id={`${key}-globe`}>
+          <Circle cx={cx} cy={cy} r={r} />
+        </ClipPath>
+        {/* Front half of the rings = the near (bottom) portion, drawn over the globe. */}
+        <ClipPath id={`${key}-front`}>
+          <Rect x={cx - aRx} y={cy} width={aRx * 2} height={aRy + r} />
+        </ClipPath>
       </Defs>
-      <Circle cx={cx} cy={cy} r={r * 2} fill={`url(#satGlow-${cx})`} />
-      <Ellipse cx={cx} cy={cy} rx={ringW} ry={ringH} fill="none" stroke="#C8B078" strokeWidth={r * 0.3} strokeOpacity={0.2} />
-      <Ellipse cx={cx} cy={cy} rx={ringW * 0.85} ry={ringH * 0.85} fill="none" stroke="#030816" strokeWidth={r * 0.05} strokeOpacity={0.35} />
-      <Circle cx={cx} cy={cy} r={r} fill={`url(#satBody-${cx})`} />
-    </G>
-  );
-}
 
-export function MarsIllustration({ cx, cy, r, nightMode }: Props) {
-  return (
-    <G>
-      <Defs>
-        <RadialGradient id={`marsGlow-${cx}`} cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#C84828" stopOpacity={0.2} />
-          <Stop offset="50%" stopColor="#C84828" stopOpacity={0.06} />
-          <Stop offset="100%" stopColor="#C84828" stopOpacity={0} />
-        </RadialGradient>
-        <RadialGradient id={`marsBody-${cx}`} cx="40%" cy="35%" r="55%">
-          <Stop offset="0%" stopColor="#E8A070" />
-          <Stop offset="50%" stopColor="#C86040" />
-          <Stop offset="100%" stopColor="#883020" />
-        </RadialGradient>
-        <ClipPath id={`marsClip-${cx}`}><Circle cx={cx} cy={cy} r={r} /></ClipPath>
-      </Defs>
-      <Circle cx={cx} cy={cy} r={r * 1.6} fill={`url(#marsGlow-${cx})`} />
-      <Circle cx={cx} cy={cy} r={r} fill={`url(#marsBody-${cx})`} />
-      <G clipPath={`url(#marsClip-${cx})`}>
-        <Ellipse cx={cx + r * 0.15} cy={cy - r * 0.1} rx={r * 0.35} ry={r * 0.2} fill="#702818" opacity={0.35} />
-        <Circle cx={cx} cy={cy - r * 0.75} r={r * 0.3} fill="#F0E8E0" opacity={0.4} />
+      {/* BACK of the rings — behind the globe. Thinner, more opaque bands read crisper than
+          the old fat soft strokes, and a wider, darker Cassini gap separates A from B. */}
+      <G rotation={SATURN_TILT} originX={cx} originY={cy}>
+        <Ellipse cx={cx} cy={cy} rx={aRx} ry={aRy} fill="none" stroke="#CDB682" strokeWidth={r * 0.22} strokeOpacity={0.78} />
+        <Ellipse cx={cx} cy={cy} rx={bRx} ry={scale(bRx)} fill="none" stroke="#ECDAA6" strokeWidth={r * 0.3} strokeOpacity={0.74} />
+        <Ellipse cx={cx} cy={cy} rx={divRx} ry={scale(divRx)} fill="none" stroke="#0A0803" strokeWidth={r * 0.09} strokeOpacity={0.9} />
+      </G>
+
+      {/* GLOBE with limb shading. */}
+      <Circle cx={cx} cy={cy} r={r} fill={`url(#${key}-body)`} />
+      {/* Ring shadow cast across the globe, along the ring plane. */}
+      <G clipPath={`url(#${key}-globe)`}>
+        <G rotation={SATURN_TILT} originX={cx} originY={cy}>
+          <Ellipse cx={cx} cy={cy - r * 0.08} rx={r * 0.98} ry={r * 0.14} fill="#20180A" opacity={0.36} />
+        </G>
+      </G>
+      <LimbShade cx={cx} cy={cy} r={r} nightMode={nightMode} id={`${key}-limb`} />
+
+      {/* FRONT of the rings — near (bottom) portion passes in front of the globe. Slightly
+          brighter than the back, with the same crisp Cassini gap. */}
+      <G clipPath={`url(#${key}-front)`}>
+        <G rotation={SATURN_TILT} originX={cx} originY={cy}>
+          <Ellipse cx={cx} cy={cy} rx={aRx} ry={aRy} fill="none" stroke="#DAC290" strokeWidth={r * 0.22} strokeOpacity={0.88} />
+          <Ellipse cx={cx} cy={cy} rx={bRx} ry={scale(bRx)} fill="none" stroke="#F2E2AE" strokeWidth={r * 0.3} strokeOpacity={0.82} />
+          <Ellipse cx={cx} cy={cy} rx={divRx} ry={scale(divRx)} fill="none" stroke="#0A0803" strokeWidth={r * 0.09} strokeOpacity={0.9} />
+        </G>
       </G>
     </G>
   );
 }
 
-export function VenusIllustration({ cx, cy, r, nightMode }: Props) {
+// ── Mars ───────────────────────────────────────────────────────────────────────
+
+export function MarsIllustration({ cx, cy, r, nightMode, polarCap = true }: Props & { polarCap?: boolean }) {
+  const key = `mars-${cx.toFixed(1)}-${cy.toFixed(1)}`;
   return (
     <G>
       <Defs>
-        <RadialGradient id={`venGlow-${cx}`} cx="50%" cy="50%" r="50%">
-          <Stop offset="0%" stopColor="#FFFFF0" stopOpacity={0.3} />
-          <Stop offset="30%" stopColor="#FFFFF0" stopOpacity={0.1} />
-          <Stop offset="100%" stopColor="#FFFFF0" stopOpacity={0} />
+        <RadialGradient id={`${key}-body`} cx="40%" cy="35%" r="58%">
+          <Stop offset="0%" stopColor="#E9A472" />
+          <Stop offset="52%" stopColor="#C25E38" />
+          <Stop offset="100%" stopColor="#7E2C1A" />
         </RadialGradient>
-        <RadialGradient id={`venBody-${cx}`} cx="40%" cy="35%" r="55%">
-          <Stop offset="0%" stopColor="#FFFFF0" />
-          <Stop offset="50%" stopColor="#E8E0C8" />
-          <Stop offset="100%" stopColor="#C0B898" />
-        </RadialGradient>
+        <ClipPath id={`${key}-clip`}>
+          <Circle cx={cx} cy={cy} r={r} />
+        </ClipPath>
       </Defs>
-      {/* venGlow removed — the single venusBloom gradient (PlanetLayer) is the only
-          halo now, so Venus can't read as two stacked concentric glows. */}
-      <Circle cx={cx} cy={cy} r={r} fill={`url(#venBody-${cx})`} />
+      <Circle cx={cx} cy={cy} r={r} fill={`url(#${key}-body)`} />
+      <G clipPath={`url(#${key}-clip)`}>
+        {/* Rusty albedo variation — restrained dark maria (e.g. Syrtis Major-like). */}
+        <Ellipse cx={cx + r * 0.2} cy={cy - r * 0.05} rx={r * 0.34} ry={r * 0.22} fill="#6E2814" opacity={0.34} />
+        <Ellipse cx={cx - r * 0.32} cy={cy + r * 0.3} rx={r * 0.24} ry={r * 0.16} fill="#8A3A1E" opacity={0.28} />
+        {/* Conditional north polar cap — only when geometrically appropriate (caller-gated). */}
+        {polarCap && <Ellipse cx={cx} cy={cy - r * 0.78} rx={r * 0.34} ry={r * 0.2} fill="#F1ECE4" opacity={0.5} />}
+      </G>
+      <LimbShade cx={cx} cy={cy} r={r} nightMode={nightMode} id={`${key}-limb`} />
     </G>
   );
 }
 
-export function MercuryIllustration({ cx, cy, r, nightMode }: Props) {
+// ── Venus (phase-aware) ──────────────────────────────────────────────────────────
+
+export function VenusIllustration({
+  cx,
+  cy,
+  r,
+  nightMode,
+  illumination
+}: Props & { illumination?: number }) {
+  const key = `ven-${cx.toFixed(1)}-${cy.toFixed(1)}`;
+  const phase = venusPhaseSpec(r, illumination);
+  const SHADOW = "#0A1020";
   return (
     <G>
       <Defs>
-        <RadialGradient id={`mercBody-${cx}`} cx="40%" cy="35%" r="55%">
+        <RadialGradient id={`${key}-body`} cx="40%" cy="35%" r="58%">
+          <Stop offset="0%" stopColor="#FFFDF2" />
+          <Stop offset="52%" stopColor="#EBE1C4" />
+          <Stop offset="100%" stopColor="#C3B892" />
+        </RadialGradient>
+        <ClipPath id={`${key}-clip`}>
+          <Circle cx={cx} cy={cy} r={r} />
+        </ClipPath>
+      </Defs>
+      {/* Full lit disc. When no ephemeris fraction is available this is all that renders —
+          the current geometry is preserved and no phase is invented. */}
+      <Circle cx={cx} cy={cy} r={r} fill={`url(#${key}-body)`} />
+      {phase.hasPhase && (
+        <G clipPath={`url(#${key}-clip)`}>
+          {/* Unlit (left) half. Lit-from-right is a fixed, honest stylisation of orientation;
+              the SHAPE of the terminator is the real illuminated fraction. */}
+          <Rect x={cx - r} y={cy - r} width={r} height={r * 2} fill={SHADOW} opacity={0.82} />
+          {phase.crescent ? (
+            // Shadow bulges into the lit half → thin crescent on the far limb.
+            <Ellipse cx={cx} cy={cy} rx={phase.terminatorRx} ry={r} fill={SHADOW} opacity={0.82} />
+          ) : (
+            // Light bulges back into the dark half → gibbous.
+            <Ellipse cx={cx} cy={cy} rx={phase.terminatorRx} ry={r} fill={`url(#${key}-body)`} />
+          )}
+        </G>
+      )}
+      {!phase.hasPhase && <LimbShade cx={cx} cy={cy} r={r} nightMode={nightMode} id={`${key}-limb`} />}
+    </G>
+  );
+}
+
+// ── Mercury (unchanged — small, plain, intentionally shy) ─────────────────────────
+
+export function MercuryIllustration({ cx, cy, r, nightMode }: Props) {
+  const key = `merc-${cx.toFixed(1)}-${cy.toFixed(1)}`;
+  return (
+    <G>
+      <Defs>
+        <RadialGradient id={`${key}-body`} cx="40%" cy="35%" r="55%">
           <Stop offset="0%" stopColor="#C0B8A8" />
           <Stop offset="60%" stopColor="#888078" />
           <Stop offset="100%" stopColor="#585048" />
         </RadialGradient>
       </Defs>
-      <Circle cx={cx} cy={cy} r={r} fill={`url(#mercBody-${cx})`} />
+      <Circle cx={cx} cy={cy} r={r} fill={`url(#${key}-body)`} />
+      <LimbShade cx={cx} cy={cy} r={r} nightMode={nightMode} id={`${key}-limb`} />
     </G>
   );
 }
 
-export function renderPlanetIllustration(id: string, cx: number, cy: number, r: number, nightMode: boolean) {
+export type PlanetArtOptions = {
+  /** Venus: real illuminated fraction 0..1 from ephemeris. Omit → plain lit disc. */
+  illumination?: number;
+  /** Mars: show the polar cap only when geometrically appropriate. Defaults to true. */
+  polarCap?: boolean;
+};
+
+export function renderPlanetIllustration(
+  id: string,
+  cx: number,
+  cy: number,
+  r: number,
+  nightMode: boolean,
+  opts: PlanetArtOptions = {}
+) {
   switch (id) {
-    case "jupiter": return <JupiterIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} />;
-    case "saturn": return <SaturnIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} />;
-    case "mars": return <MarsIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} />;
-    case "venus": return <VenusIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} />;
-    case "mercury": return <MercuryIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} />;
-    default: return null;
+    case "jupiter":
+      return <JupiterIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} />;
+    case "saturn":
+      return <SaturnIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} />;
+    case "mars":
+      return <MarsIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} polarCap={opts.polarCap} />;
+    case "venus":
+      return <VenusIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} illumination={opts.illumination} />;
+    case "mercury":
+      return <MercuryIllustration cx={cx} cy={cy} r={r} nightMode={nightMode} />;
+    default:
+      return null;
   }
 }

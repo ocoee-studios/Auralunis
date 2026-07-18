@@ -13,7 +13,7 @@ try {
 } catch {
   // unavailable (e.g. Expo Go) — capture degrades gracefully.
 }
-import { Horizon, Observer } from "astronomy-engine";
+import { Body, Horizon, Observer, SearchHourAngle } from "astronomy-engine";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import { LinearGradient } from "expo-linear-gradient";
 import Slider from "@react-native-community/slider";
@@ -60,6 +60,17 @@ import { DEFAULT_ACTIVE_LAYERS, SKY_LENS_LAYERS, type LayerDef, type LayerKey } 
 import { projectTarget, DEFAULT_FOV, type CameraPointing } from "./ar/SkyLensProjection";
 import { skyGradient, starColor, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { getVisualGate } from "./PremiumVisualGating";
+
+// Dev-only Sky Lens review targets. Aiming at one of these pins the clock to the planet's
+// next meridian transit so it can be inspected on a physical device without waiting for it
+// to rise. Purely a review convenience — it is only ever consulted behind the reviewMode
+// gate (dev build + explicit env flag) and has no bearing on production behaviour.
+const REVIEW_PLANET_BODY: Record<string, Body> = {
+  jupiter: Body.Jupiter,
+  saturn: Body.Saturn,
+  mars: Body.Mars,
+  venus: Body.Venus
+};
 
 // A Find-Mode target handed in from Learn ("See in Sky Lens") — RA/Dec + lesson copy.
 export type FocusTarget = {
@@ -160,23 +171,52 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // `!available` gate was briefly true at cold start before the first magnetometer sample,
   // which flashed the review scene on real devices).
   const reviewMode = __DEV__ && process.env.EXPO_PUBLIC_SKYLENS_REVIEW_MODE === "1";
-  // Orion high in the south (matches scripts/orion-selftest.js exactly).
+
+  // Optional planet review target — dev + review mode ONLY. Reading the env var is gated
+  // behind `reviewMode` (which is itself `__DEV__ && REVIEW_MODE === "1"`), so in a release
+  // build `reviewTarget` is always "" and `reviewPlanet` is always null: the planet aid
+  // cannot activate in production, and the default M42 scene and live sky are untouched.
+  const reviewTarget = reviewMode ? (process.env.EXPO_PUBLIC_SKYLENS_REVIEW_TARGET ?? "").toLowerCase() : "";
+  const reviewPlanet = REVIEW_PLANET_BODY[reviewTarget] ? reviewTarget : null;
+
+  // Orion high in the south (matches scripts/orion-selftest.js exactly) — the default M42
+  // review scene when no planet target is set.
   const REVIEW_TIME = useMemo(() => new Date("2026-01-15T22:00:00-08:00"), []);
 
+  // For a planet target, pin the clock to that planet's NEXT meridian transit at the
+  // current location: its highest point, so it is reliably above the horizon regardless of
+  // when the review is run. The position math is astronomy-engine's own (unchanged) — this
+  // only chooses a review timestamp.
+  const reviewPlanetTime = useMemo(() => {
+    if (!reviewPlanet) return null;
+    try {
+      const obs = new Observer(location.latitudeDegrees, location.longitudeDegrees, location.altitudeMeters ?? 0);
+      return SearchHourAngle(REVIEW_PLANET_BODY[reviewPlanet], obs, 0, new Date()).time.date;
+    } catch {
+      return null;
+    }
+  }, [reviewPlanet, location]);
+
   const observerTime = useMemo(() => {
+    if (reviewPlanet && reviewPlanetTime) return reviewPlanetTime;
     if (reviewMode) return REVIEW_TIME;
     return timeOffsetMin === 0 ? null : new Date(Date.now() + timeOffsetMin * 60_000);
-  }, [reviewMode, REVIEW_TIME, timeOffsetMin]);
+  }, [reviewMode, reviewPlanet, reviewPlanetTime, REVIEW_TIME, timeOffsetMin]);
   const sky = useSkyData(location, undefined, observerTime);
 
-  // Aim at the review target, so it lands dead centre.
-  const REVIEW_TARGET = "m42";
+  // Aim at the review target so it lands dead centre — a planet from sky.bodies when a
+  // planet target is set, otherwise the default M42 nebula.
   const pointing = useMemo<CameraPointing>(() => {
     if (!reviewMode) return sensorPointing;
-    const t = sky.nebulae.find((n) => n.id === REVIEW_TARGET);
+    if (reviewPlanet) {
+      const b = sky.bodies.find((body) => body.id === reviewPlanet && body.aboveHorizon);
+      if (b) return { azimuthDegrees: b.azimuthDegrees, altitudeDegrees: b.altitudeDegrees, rollDegrees: 0 };
+      return sensorPointing;
+    }
+    const t = sky.nebulae.find((n) => n.id === "m42");
     if (!t) return sensorPointing;
     return { azimuthDegrees: t.azimuthDegrees, altitudeDegrees: t.altitudeDegrees, rollDegrees: 0 };
-  }, [reviewMode, sensorPointing, sky.nebulae]);
+  }, [reviewMode, reviewPlanet, sensorPointing, sky.nebulae, sky.bodies]);
 
   // Photo capture — captureScreen grabs the full rendered screen including SVG
   const sceneRef = useRef<View>(null);
