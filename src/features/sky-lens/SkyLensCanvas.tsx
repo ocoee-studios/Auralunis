@@ -19,6 +19,7 @@ import { SatelliteLayer, type SkyLensSatellite } from "./layers/SatelliteLayer";
 import { DAY_PALETTE, NIGHT_PALETTE, type ProjectFn, type SelectedObject, type FocusZone } from "./SkyLensVisual";
 import { type LayerKey } from "./SkyLensLayerCatalog";
 import { makeLabelPlacer } from "./labelLayout";
+import { type ChromeRect } from "./skyLensChromeLayout";
 import type { SkyData } from "./hooks/useSkyProjection";
 import type { ParallaxOffset } from "./ar/useParallaxOffset";
 import { getVisualGate, type VisualGateConfig } from "./PremiumVisualGating";
@@ -45,13 +46,17 @@ type Props = {
   fullSphere?: boolean;
   /** Height of the bottom control dock (px). Labels are kept out of it. */
   bottomInset?: number;
+  /** Top exclusion band (px), derived from safe-area + HUD height by the screen. */
+  topInset?: number;
+  /** UI-chrome rectangles (shutter, guidance banner, zoom chip) labels must avoid. */
+  reservedRects?: ChromeRect[];
   onSelect: (object: SelectedObject) => void;
 };
 
 // Composes the enabled celestial layers over the cinematic sky. The presentation may
 // look like a planetarium, but normal viewing remains horizon-correct: objects beneath
 // the observer are never painted into the visible sky.
-export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, bottomInset = 120, onSelect }: Props) {
+export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode, milkyWayBoost, domeStarMultiplier = 1, nebulaOpacity = 1, extinction = false, isPremium, focus, showcase, parallax, satellites, cinematic = false, gate, bottomInset = 120, topInset = 108, reservedRects = [], onSelect }: Props) {
   const palette = nightMode ? NIGHT_PALETTE : DAY_PALETTE;
   const vg = gate ?? getVisualGate(isPremium);
   const horizonCorrect = false;
@@ -68,7 +73,13 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
   // bottom figure is now DERIVED from the dock the screen actually rendered (it shrinks
   // when brightness/time-travel are collapsed), rather than a fixed 176 that assumed the
   // tall stack — so compacting the UI genuinely hands the reclaimed space back to labels.
-  const placeLabel = makeLabelPlacer(box, { top: 108, bottom: bottomInset });
+  const placeLabel = makeLabelPlacer(box, { top: topInset, bottom: bottomInset });
+  // Reserve on-screen UI chrome (shutter, guidance banner, zoom chip) BEFORE any layer
+  // places a label, so chrome always wins: a label that can't find a clear slot is
+  // suppressed rather than drawn under a control. The top HUD and bottom dock are already
+  // excluded by the top/bottom safe bands above; these are the floating controls the bands
+  // don't cover. Rects come from skyLensChromeLayout (the shared geometry source).
+  for (const r of reservedRects) placeLabel.reserve(r.x, r.y, r.w, r.h);
   const depth = (d: number) => `translate(${(parallax.x * d).toFixed(2)} ${(parallax.y * d).toFixed(2)})`;
   const constellations = sky.constellations;
 
@@ -166,6 +177,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           </G>
         )}
 
+        {/* Zodiac ARTWORK (figure lines, star dots, glyph markers) — under the stars. Names
+            are NOT drawn here (placeLabel is passed, so inline names are off); they are
+            placed in the labels-only pass below, after every higher-priority layer has
+            claimed, so sign names correctly yield in the shared ladder. */}
         {activeLayers.has("zodiac") && !cinematic && (
           <ZodiacLayer
             zodiac={sky.zodiac}
@@ -173,6 +188,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
             palette={palette}
             nightMode={nightMode}
             sun={sky.bodies.find((b) => b.id === "sun") ?? null}
+            placeLabel={placeLabel}
             onSelect={onSelect}
           />
         )}
@@ -249,6 +265,23 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         )}
         {activeLayers.has("satellites") && !cinematic && (
           <SatelliteLayer satellites={satellites} project={project} palette={palette} nightMode={nightMode} placeLabel={placeLabel} onSelect={onSelect} />
+        )}
+
+        {/* Zodiac NAMES — placed LAST (lowest priority), so a sign name yields to planet,
+            Moon, star, constellation and satellite names and to UI chrome, and is suppressed
+            when no clean slot exists. Same shared placer; figure/glyph positions above are
+            untouched. */}
+        {activeLayers.has("zodiac") && showLabels && !cinematic && (
+          <ZodiacLayer
+            zodiac={sky.zodiac}
+            project={project}
+            palette={palette}
+            nightMode={nightMode}
+            sun={sky.bodies.find((b) => b.id === "sun") ?? null}
+            placeLabel={placeLabel}
+            labelsOnly
+            onSelect={onSelect}
+          />
         )}
       </G>
 

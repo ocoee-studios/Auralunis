@@ -191,6 +191,50 @@ check(
   "the 'Preview Paywall (Dev Only)' label must only exist inside the __DEV__ block"
 );
 
+// Sky Lens label-avoidance for UI chrome (#161) — labels must never render under/behind
+// on-screen controls, sourced from centralized geometry, and covered by a self-test.
+const chromeLayout = exists("src/features/sky-lens/skyLensChromeLayout.ts")
+  ? read("src/features/sky-lens/skyLensChromeLayout.ts")
+  : "";
+const skyLensCanvas = read("src/features/sky-lens/SkyLensCanvas.tsx");
+check("chrome-avoidance geometry module exists", exists("src/features/sky-lens/skyLensChromeLayout.ts"));
+check(
+  "chrome geometry is a single source of truth (exports rect + top-inset helpers)",
+  /export function chromeAvoidRects/.test(chromeLayout) && /export function chromeTopInset/.test(chromeLayout)
+);
+check(
+  "canvas reserves UI-chrome rects before placing labels",
+  /reservedRects/.test(skyLensCanvas) && /placeLabel\.reserve\(/.test(skyLensCanvas)
+);
+check(
+  "screen sources chrome avoid-rects from the shared geometry and passes them down",
+  /chromeAvoidRects/.test(skyLens) && /chromeTopInset/.test(skyLens) && /reservedRects=\{/.test(skyLens)
+);
+check("Sky Lens label-avoidance self-test exists", exists("scripts/skylens-label-selftest.js"));
+check("label-avoidance self-test is wired into qa:all", /qa:labels/.test(packageJson) && /skylens-label-selftest\.js/.test(packageJson));
+check(
+  "chrome layout uses no AR / camera-feed framing",
+  !/\bAR\b|augmented reality|CameraView|live camera|camera feed/i.test(chromeLayout)
+);
+
+// Zodiac labels must participate in the shared placer (avoid chrome + higher-priority
+// labels, suppress when blocked) — not draw independently.
+const zodiacLayer = exists("src/features/sky-lens/layers/ZodiacLayer.tsx")
+  ? read("src/features/sky-lens/layers/ZodiacLayer.tsx")
+  : "";
+check(
+  "ZodiacLayer routes sign names through the shared placer",
+  /placeLabel\?:\s*LabelPlacer/.test(zodiacLayer) && /labelsOnly/.test(zodiacLayer) && /placeLabel\(/.test(zodiacLayer)
+);
+check(
+  "ZodiacLayer suppresses a sign name when the placer returns no slot",
+  /!Number\.isFinite\(placed\.x\)/.test(zodiacLayer)
+);
+check(
+  "SkyLensCanvas mounts a zodiac labels-only pass through the shared placer",
+  /<ZodiacLayer[\s\S]*labelsOnly/.test(skyLensCanvas) && /<ZodiacLayer[\s\S]*placeLabel=\{placeLabel\}/.test(skyLensCanvas)
+);
+
 console.log("");
 console.log(`Fresh bug check: ${passes.length} pass, ${failures.length} fail.`);
 
