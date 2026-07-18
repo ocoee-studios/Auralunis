@@ -75,7 +75,7 @@ export function MilkyWayCoreLayer({ band, project, fov, box, nightMode, boost }:
   // visible, brightest at the galactic core (the radial mask centers there). Pushed up
   // (~43% over the camera, brighter in Planetarium) so the real ESO texture carries the
   // band, with the saturated procedural gold/rose washes warming its naturally-grey tone.
-  const op = Math.min(0.6, 0.43 * boost);
+  const op = Math.min(0.48, 0.36 * boost);
 
   return (
     <G>
