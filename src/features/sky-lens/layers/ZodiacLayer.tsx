@@ -2,6 +2,7 @@ import React from "react";
 import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { ZodiacData } from "../ephemeris/Zodiac";
 import { magnitudeToRadius, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
+import { type LabelPlacer } from "../labelLayout";
 
 type Props = {
   zodiac: ZodiacData;
@@ -10,6 +11,19 @@ type Props = {
   nightMode: boolean;
   sun?: { azimuthDegrees: number; altitudeDegrees: number; aboveHorizon: boolean } | null;
   birthSignId?: string | null;
+  /**
+   * Shared label placer. When provided, the sign NAME labels are routed through it so they
+   * avoid UI chrome and higher-priority labels (planets/Moon/stars/constellations) and are
+   * suppressed when no clean slot exists — exactly like every other labelled layer. The
+   * constellation FIGURE (lines/dots) and the glyph marker stay at the true sky position.
+   */
+  placeLabel?: LabelPlacer;
+  /**
+   * Split-render flag mirroring ConstellationLayer: the artwork pass (lines/dots/glyph)
+   * mounts UNDER the stars; a second `labelsOnly` pass mounts LAST so sign names yield in
+   * the shared priority ladder. With no placer, everything renders inline (legacy).
+   */
+  labelsOnly?: boolean;
   onSelect: (object: SelectedObject) => void;
 };
 
@@ -21,10 +35,59 @@ const cardinalFor = (az: number) => CARDINALS[Math.round(((az % 360) + 360) % 36
 // Gold lines (brighter for the sign the Sun is in), magnitude-sized star dots, the
 // zodiac glyph + name at each center, faint boundary ticks between bands, a ☀ marker
 // on the Sun, and an optional "Your sign" marker. Tap opens the sign's info card.
-export function ZodiacLayer({ zodiac, project, palette, nightMode, sun, birthSignId, onSelect }: Props) {
+export function ZodiacLayer({ zodiac, project, palette, nightMode, sun, birthSignId, placeLabel, labelsOnly = false, onSelect }: Props) {
   const lineColor = nightMode ? palette.line : GOLD;
   const symbolColor = nightMode ? palette.conLabel : GOLD;
+  // Names render inline (at the raw center) only when there is no placer to route them
+  // through; with a placer they are drawn in the dedicated labelsOnly pass instead.
+  const inlineNames = !placeLabel && !labelsOnly;
 
+  // The glyph + name + contextual markers, anchored on the NAME baseline (ay). Keeps the
+  // exact stacking of the original: glyph 20px above the name, "Sun is here" 7px below,
+  // "Your sign" 42px above — so placing the name simply carries the unit with it.
+  const labelUnit = (key: string, ax: number, ay: number, sign: ZodiacData["signs"][number], isCurrent: boolean, isBirth: boolean) => (
+    <G key={key}>
+      {isCurrent && <Circle cx={ax} cy={ay - 24} r={15} fill={GOLD} opacity={0.18} />}
+      <SvgText x={ax} y={ay - 20} textAnchor="middle" fontSize={isCurrent ? 22 : 18} fill={symbolColor} opacity={isCurrent ? 0.95 : 0.4}>
+        {sign.symbol}
+      </SvgText>
+      <SvgText x={ax} y={ay} textAnchor="middle" fontSize={15} fontWeight="600" fill={symbolColor} opacity={isCurrent ? 0.9 : 0.5} letterSpacing={1}>
+        {sign.name.toUpperCase()}
+      </SvgText>
+      {isCurrent && (
+        <SvgText x={ax} y={ay + 7} textAnchor="middle" fontSize={8} fontWeight="800" fill={GOLD} opacity={0.85}>
+          ☀ Sun is here · {sign.name} season
+        </SvgText>
+      )}
+      {isBirth && (
+        <SvgText x={ax} y={ay - 42} textAnchor="middle" fontSize={8} fontWeight="800" fill="#FFE9B0" opacity={0.9}>
+          ✦ Your sign
+        </SvgText>
+      )}
+    </G>
+  );
+
+  // ── LABELS-ONLY pass: sign names via the shared placer, lowest priority, suppressible ──
+  if (labelsOnly) {
+    if (!placeLabel) return null;
+    return (
+      <G>
+        {zodiac.signs.map((sign, idx) => {
+          const c = project(sign.center.azimuthDegrees, sign.center.altitudeDegrees);
+          if (c.behind || !sign.center.aboveHorizon) return null;
+          const isCurrent = !nightMode && idx === zodiac.sunSignIndex;
+          const isBirth = !!birthSignId && sign.id === birthSignId;
+          // Centered label: the placer nudges it vertically off collisions while keeping it
+          // horizontally over its sign, and returns {NaN} when there is no clean slot.
+          const placed = placeLabel(c.x, c.y + 20, sign.name, 15, undefined, true);
+          if (!Number.isFinite(placed.x)) return null; // no room (chrome / crowding) → suppress
+          return labelUnit(sign.id, placed.x, placed.y, sign, isCurrent, isBirth);
+        })}
+      </G>
+    );
+  }
+
+  // ── ARTWORK pass (default): boundary ticks, figure lines, star dots, hit target ──
   return (
     <G>
       {/* Boundary ticks — perpendicular to the ecliptic, very subtle */}
@@ -69,7 +132,7 @@ export function ZodiacLayer({ zodiac, project, palette, nightMode, sun, birthSig
             {dots}
             {centerVisible && (
               <G>
-                {/* hit target */}
+                {/* hit target — stays on the constellation centre regardless of label slot */}
                 <Circle cx={c.x} cy={c.y} r={26} fill="transparent" onPress={() => {
                   const where = sign.center.aboveHorizon ? `Visible (${cardinalFor(sign.center.azimuthDegrees)} sky)` : "Below horizon";
                   onSelect({
@@ -85,26 +148,9 @@ export function ZodiacLayer({ zodiac, project, palette, nightMode, sun, birthSig
                     description: sign.myth,
                   });
                 }} />
-                {/* glyph (brighter + glow when it's the current Sun sign) */}
-                {isCurrent && <Circle cx={c.x} cy={c.y - 4} r={15} fill={GOLD} opacity={0.18} />}
-                <SvgText x={c.x} y={c.y} textAnchor="middle" fontSize={isCurrent ? 22 : 18}
-                  fill={symbolColor} opacity={isCurrent ? 0.95 : 0.4}>
-                  {sign.symbol}
-                </SvgText>
-                <SvgText x={c.x} y={c.y + 20} textAnchor="middle" fontSize={15} fontWeight="600"
-                  fill={symbolColor} opacity={isCurrent ? 0.9 : 0.5} letterSpacing={1}>
-                  {sign.name.toUpperCase()}
-                </SvgText>
-                {isCurrent && (
-                  <SvgText x={c.x} y={c.y + 27} textAnchor="middle" fontSize={8} fontWeight="800" fill={GOLD} opacity={0.85}>
-                    ☀ Sun is here · {sign.name} season
-                  </SvgText>
-                )}
-                {isBirth && (
-                  <SvgText x={c.x} y={c.y - 22} textAnchor="middle" fontSize={8} fontWeight="800" fill="#FFE9B0" opacity={0.9}>
-                    ✦ Your sign
-                  </SvgText>
-                )}
+                {/* Legacy inline names only when no placer is wired; otherwise the labelsOnly
+                    pass renders them so they participate in the shared priority ladder. */}
+                {inlineNames && labelUnit(`${sign.id}-inline`, c.x, c.y + 20, sign, isCurrent, isBirth)}
               </G>
             )}
           </G>

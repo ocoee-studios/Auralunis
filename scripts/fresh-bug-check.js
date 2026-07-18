@@ -217,6 +217,24 @@ check(
   !/\bAR\b|augmented reality|CameraView|live camera|camera feed/i.test(chromeLayout)
 );
 
+// Zodiac labels must participate in the shared placer (avoid chrome + higher-priority
+// labels, suppress when blocked) — not draw independently.
+const zodiacLayer = exists("src/features/sky-lens/layers/ZodiacLayer.tsx")
+  ? read("src/features/sky-lens/layers/ZodiacLayer.tsx")
+  : "";
+check(
+  "ZodiacLayer routes sign names through the shared placer",
+  /placeLabel\?:\s*LabelPlacer/.test(zodiacLayer) && /labelsOnly/.test(zodiacLayer) && /placeLabel\(/.test(zodiacLayer)
+);
+check(
+  "ZodiacLayer suppresses a sign name when the placer returns no slot",
+  /!Number\.isFinite\(placed\.x\)/.test(zodiacLayer)
+);
+check(
+  "SkyLensCanvas mounts a zodiac labels-only pass through the shared placer",
+  /<ZodiacLayer[\s\S]*labelsOnly/.test(skyLensCanvas) && /<ZodiacLayer[\s\S]*placeLabel=\{placeLabel\}/.test(skyLensCanvas)
+);
+
 console.log("");
 console.log(`Fresh bug check: ${passes.length} pass, ${failures.length} fail.`);
 

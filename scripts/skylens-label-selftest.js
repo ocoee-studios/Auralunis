@@ -180,6 +180,68 @@ for (const d of DEVICES) {
   assert("no visible chrome → no floating rects reserved", none.length === 0);
 }
 
+// ── 8. Zodiac labels (centered, LOWEST priority) route through the same placer ────
+// In production ZodiacLayer places its sign name via placeLabel(cx, cy, name, 15, /*avoid*/
+// undefined, /*centered*/ true) in a labels-only pass mounted after every higher-priority
+// layer — so the test exercises the exact same call shape.
+{
+  const d = DEVICES[0];
+  const setup = chromeSetup(d.box, d.insets, DOCK_H, ALL_VISIBLE);
+  const zsign = "Sagittarius";
+  const zlabel = (placer, cx, cy) => placer(cx, cy, zsign, 15, undefined, true);
+  const zrect = (res) => labelRect(res.x, res.y, zsign, 15, true);
+
+  // 8a. A zodiac label whose sign center falls on chrome must not overlap chrome.
+  {
+    const shutter = setup.floating[0];
+    const cx = shutter.x + shutter.w / 2;
+    const cy = shutter.y + shutter.h / 2;
+    const res = zlabel(makePlacer(d.box, setup), cx, cy);
+    const ok = !Number.isFinite(res.x) || !setup.allChrome.some((c) => overlaps(c, zrect(res)));
+    assert("zodiac label over chrome is suppressed or moved clear of all chrome", ok, Number.isFinite(res.x) ? "moved clear" : "suppressed");
+  }
+
+  // 8b. Zodiac yields to a higher-priority planet/Moon label claimed first.
+  {
+    const placer = makePlacer(d.box, setup);
+    const px = 215;
+    const py = 520;
+    const planet = placer(px, py, "Jupiter", 17); // planet claims first (canvas order)
+    const planetRect = labelRect(planet.x, planet.y, "Jupiter", 17, false);
+    const moon = placer(px + 60, py, "Moon", 17); // Moon also outranks zodiac
+    const moonRect = labelRect(moon.x, moon.y, "Moon", 17, false);
+    const z1 = zlabel(placer, px, py); // same spot as Jupiter
+    const z2 = zlabel(placer, px + 60, py); // same spot as Moon
+    const clears = (res, rect) => !Number.isFinite(res.x) || !overlaps(rect, zrect(res));
+    assert("zodiac label yields to a planet label (moved off or suppressed)", clears(z1, planetRect));
+    assert("zodiac label yields to the Moon label (moved off or suppressed)", clears(z2, moonRect));
+  }
+
+  // 8c. Zodiac suppresses when there is no valid slot.
+  {
+    const placer = makePlacer(d.box, setup);
+    placer.reserve(0, 0, d.box.width, d.box.height); // block the whole interior
+    const res = zlabel(placer, 215, 500);
+    assert("zodiac label suppresses (NaN) when no clean slot exists", !Number.isFinite(res.x));
+  }
+
+  // 8d. Dense zodiac/constellation cluster stays collision-safe (no label overlaps another
+  //     or any chrome). Twelve centered labels crowded into one small region.
+  {
+    const placer = makePlacer(d.box, setup);
+    const placedRects = [];
+    let overlapsFound = 0;
+    for (let i = 0; i < 12; i += 1) {
+      const res = placer(200 + (i % 3) * 8, 460 + Math.floor(i / 3) * 6, i % 2 ? "Sagittarius" : "Ophiuchus", 15, undefined, true);
+      if (!Number.isFinite(res.x)) continue;
+      const rect = zrect(res);
+      if (placedRects.some((r) => overlaps(r, rect)) || setup.allChrome.some((c) => overlaps(c, rect))) overlapsFound += 1;
+      placedRects.push(rect);
+    }
+    assert("dense zodiac/constellation cluster: no placed label overlaps another or chrome", overlapsFound === 0, `${placedRects.length} placed, ${overlapsFound} overlaps`);
+  }
+}
+
 console.log("");
 if (failed) {
   console.error(`Sky Lens label-avoidance self-test: ${failed} failure(s).`);

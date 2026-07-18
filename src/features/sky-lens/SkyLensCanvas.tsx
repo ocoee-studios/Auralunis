@@ -177,6 +177,10 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
           </G>
         )}
 
+        {/* Zodiac ARTWORK (figure lines, star dots, glyph markers) — under the stars. Names
+            are NOT drawn here (placeLabel is passed, so inline names are off); they are
+            placed in the labels-only pass below, after every higher-priority layer has
+            claimed, so sign names correctly yield in the shared ladder. */}
         {activeLayers.has("zodiac") && !cinematic && (
           <ZodiacLayer
             zodiac={sky.zodiac}
@@ -184,6 +188,7 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
             palette={palette}
             nightMode={nightMode}
             sun={sky.bodies.find((b) => b.id === "sun") ?? null}
+            placeLabel={placeLabel}
             onSelect={onSelect}
           />
         )}
@@ -260,6 +265,23 @@ export function SkyLensCanvas({ box, pointing, sky, fov, activeLayers, nightMode
         )}
         {activeLayers.has("satellites") && !cinematic && (
           <SatelliteLayer satellites={satellites} project={project} palette={palette} nightMode={nightMode} placeLabel={placeLabel} onSelect={onSelect} />
+        )}
+
+        {/* Zodiac NAMES — placed LAST (lowest priority), so a sign name yields to planet,
+            Moon, star, constellation and satellite names and to UI chrome, and is suppressed
+            when no clean slot exists. Same shared placer; figure/glyph positions above are
+            untouched. */}
+        {activeLayers.has("zodiac") && showLabels && !cinematic && (
+          <ZodiacLayer
+            zodiac={sky.zodiac}
+            project={project}
+            palette={palette}
+            nightMode={nightMode}
+            sun={sky.bodies.find((b) => b.id === "sun") ?? null}
+            placeLabel={placeLabel}
+            labelsOnly
+            onSelect={onSelect}
+          />
         )}
       </G>
 
