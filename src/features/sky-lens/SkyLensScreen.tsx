@@ -35,6 +35,7 @@ import { computeAzimuthElevation } from "@/utils/alignmentEngine";
 import type { SkyLensSatellite } from "./layers/SatelliteLayer";
 import { useSkyData } from "./hooks/useSkyProjection";
 import { SkyLensCanvas } from "./SkyLensCanvas";
+import { chromeAvoidRects, chromeTopInset } from "./skyLensChromeLayout";
 import { SolidSkyBackgroundLayer } from "./SolidSkyBackgroundLayer";
 import { NebulaImageLayer } from "./layers/NebulaImageLayer";
 import { ClusterLayer } from "./layers/ClusterLayer";
@@ -731,6 +732,24 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
   // Where floating controls perch: just above the dock, never on top of it.
   const floatAbove = insets.bottom + dockHeight + 16;
 
+  // LABEL AVOIDANCE FOR UI CHROME. The top HUD and bottom dock are already excluded by the
+  // placer's top/bottom safe bands (topInset / bottomInset). These are the floating controls
+  // those bands don't cover — the shutter, the guidance banner, the zoom chip — reserved so
+  // no celestial label renders under or behind them. Visibility mirrors the render
+  // conditions below exactly, so hidden chrome never suppresses a label. Geometry comes from
+  // skyLensChromeLayout (shared source of truth), not per-call magic numbers.
+  const labelTopInset = chromeTopInset(insets);
+  const chromeRects = chromeAvoidRects({
+    box,
+    insets,
+    dockHeight,
+    visible: {
+      shutter: !cinematic && !selected && gate.photoCapture,
+      finder: !cinematic && !selected && (!!targetFinder || (!scrubVisible && !!moonFinder)),
+      zoomChip: !cinematic && zoom > 1.05
+    }
+  });
+
   // Hero Object Spotlight: reverse-map the selected object's id to its LIVE az/alt
   // (one place, no per-layer wiring), then project it so the spotlight dims the
   // field around whatever you've focused and tracks it as you pan.
@@ -1033,6 +1052,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               cinematic={cinematic}
               fullSphere={planetarium}
               bottomInset={box.height - dockTop}
+              topInset={labelTopInset}
+              reservedRects={chromeRects}
               onSelect={setSelected}
             />
           </SkyLensErrorBoundary>

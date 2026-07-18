@@ -64,6 +64,9 @@ jobs:
       - name: Sky Lens self-test
         run: npm run qa:skylens
 
+      - name: Sky Lens label-avoidance self-test
+        run: npm run qa:labels
+
       - name: Planet render self-test
         run: npm run qa:planets
 

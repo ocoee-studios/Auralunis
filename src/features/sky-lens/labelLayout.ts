@@ -33,10 +33,23 @@ export type LabelPlacer = ((
   reserveCircle: (x: number, y: number, r: number) => void;
 };
 
-type Rect = { x: number; y: number; w: number; h: number };
+export type Rect = { x: number; y: number; w: number; h: number };
 
-function overlaps(a: Rect, b: Rect): boolean {
+export function overlaps(a: Rect, b: Rect): boolean {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
+}
+
+// Deterministic label box + rect. Exported as the single source of truth so tests can
+// check the exact on-screen rectangle the placer used (no duplicated formula).
+export function labelBoxSize(text: string, fontSize: number): { w: number; h: number } {
+  return { w: Math.max(8, text.length * fontSize * 0.58), h: fontSize * 1.25 };
+}
+
+export function labelRect(x: number, y: number, text: string, fontSize: number, centered?: boolean): Rect {
+  const { w, h } = labelBoxSize(text, fontSize);
+  // `x` is the LEFT edge for left-anchored labels, the CENTRE for textAnchor="middle";
+  // `y` is the text baseline, so the box top is y - h.
+  return { x: centered ? x - w / 2 : x, y: y - h, w, h };
 }
 
 export function makeLabelPlacer(
@@ -61,16 +74,14 @@ export function makeLabelPlacer(
     avoid?: AvoidCircle,
     centered?: boolean
   ): { x: number; y: number } => {
-    const w = Math.max(8, text.length * fontSize * 0.58);
-    const h = fontSize * 1.25;
+    const { w, h } = labelBoxSize(text, fontSize);
 
     // BUG FIX. `x` means different things to different callers: for a star label it's the
     // LEFT edge of the text, but ConstellationLayer draws with textAnchor="middle", so for
     // it `x` is the CENTRE. The placer always treated x as the left edge — so every
     // constellation label claimed (and collision-tested) a box sitting half a label-width
     // to the right of where it actually drew. Half its collision detection was fiction.
-    const leftOf = (x: number) => (centered ? x - w / 2 : x);
-    const rectAt = (x: number, y: number): Rect => ({ x: leftOf(x), y: y - h, w, h });
+    const rectAt = (x: number, y: number): Rect => labelRect(x, y, text, fontSize, centered);
 
     const candidates: Array<[number, number]> = [];
 
