@@ -5,8 +5,9 @@ import Svg, {
   Rect, Circle, Path, G,
 } from "react-native-svg";
 import Animated, {
-  Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
+  cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming,
 } from "react-native-reanimated";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface PremiumSkyBloomLayerProps {
   width: number;
@@ -22,13 +23,16 @@ export const PremiumSkyBloomLayer = memo(function PremiumSkyBloomLayer({
   milkyWayVisible = true, intensity = 1,
 }: PremiumSkyBloomLayerProps) {
   const breathe = useSharedValue(0);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    if (reduced) { cancelAnimation(breathe); breathe.value = 0.5; return; } // static bloom
     breathe.value = withRepeat(
       withTiming(1, { duration: 14000, easing: Easing.inOut(Easing.sin) }),
       -1, true
     );
-  }, [breathe]);
+    return () => cancelAnimation(breathe);
+  }, [breathe, reduced]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: 0.78 + breathe.value * 0.16,

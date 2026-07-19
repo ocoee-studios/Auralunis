@@ -5,6 +5,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { G, Line } from "react-native-svg";
 import { onRareEvent } from "@/services/HapticDiscoveryService";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 type Props = {
   width: number;
@@ -33,8 +34,16 @@ export function ShootingStarLayer({ width, height, nightMode }: Props) {
   const aliveRef = useRef(true);
   const sizeRef = useRef({ width, height });
   sizeRef.current = { width, height };
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    if (reduced) {
+      // Reduced Motion: no shooting stars — clear any active streak and schedule nothing.
+      // (A live toggle here re-runs the effect; the prior run's cleanup already cancelled
+      // its timer/frame.)
+      setMeteor(null);
+      return;
+    }
     aliveRef.current = true;
 
     function scheduleMeteor() {
@@ -61,7 +70,7 @@ export function ShootingStarLayer({ width, height, nightMode }: Props) {
       if (timerRef.current) clearTimeout(timerRef.current);
       if (frameRef.current) cancelAnimationFrame(frameRef.current);
     };
-  }, []);
+  }, [reduced]);
 
   function fireMeteor() {
     if (!aliveRef.current) return;
@@ -98,7 +107,7 @@ export function ShootingStarLayer({ width, height, nightMode }: Props) {
     frameRef.current = requestAnimationFrame(animate);
   }
 
-  if (!meteor || meteor.opacity <= 0) return null;
+  if (reduced || !meteor || meteor.opacity <= 0) return null;
 
   const t = meteor.progress;
   // The streak moves: head at progress point, tail trails behind
