@@ -56,6 +56,14 @@ const media = pluginConfig("expo-media-library");
 check("expo-media-library full-read photos suppressed (save-only app)", !!media && media.photosPermission === false);
 check("expo-media-library save permission present", !!media && typeof media.savePhotosPermission === "string");
 
+// ── EAS submit profile: iOS submit fields must be nested under `ios` (eas-cli schema).
+//    A flat submit.production.ascAppId is rejected by every EAS command, which silently
+//    blocked a build. Pin the correct nested shape + the exact ascAppId value. ──
+const easSubmit = ((JSON.parse(read("eas.json")).submit || {}).production) || {};
+check("eas.json: no flat submit.production.ascAppId", !("ascAppId" in easSubmit));
+check("eas.json: submit.production.ios.ascAppId present as string", !!easSubmit.ios && typeof easSubmit.ios.ascAppId === "string");
+check("eas.json: submit.production.ios.ascAppId is exactly 6784049770", !!easSubmit.ios && easSubmit.ios.ascAppId === "6784049770");
+
 console.log("");
 if (failed) {
   console.error(`Release-config guard: ${failed} FAILED.`);
