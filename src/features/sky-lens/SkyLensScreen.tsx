@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { formatMediumDate } from "@/utils/formatting";
 import { Alert, Animated, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import * as Sharing from "expo-sharing";
 
@@ -1100,7 +1101,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             <View style={[styles.watermark, { bottom: insets.bottom + 16 }]} pointerEvents="none">
               <Text style={styles.watermarkBrand}>✦ AuraLunis</Text>
               <Text style={styles.watermarkSub}>
-                {(observerTime ?? new Date()).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                {formatMediumDate(observerTime ?? new Date())}
               </Text>
             </View>
           )}

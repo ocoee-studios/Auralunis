@@ -16,6 +16,7 @@ import { SatelliteThermalOverlayPanel } from "@/features/aura-pro/SatelliteTherm
 import { AstrophotographyPredictorPanel } from "@/features/aura-pro/AstrophotographyPredictorPanel";
 import { computeTonightSky, findBody } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
+import { displaySeasonLabel } from "@/utils/seasons";
 import { OrbitalAlignmentScreen } from "@/screens/OrbitalAlignmentScreen";
 import { BirthSkyScreen } from "@/screens/BirthSkyScreen";
 import { AstroWeatherScreen } from "@/screens/AstroWeatherScreen";
@@ -249,7 +250,7 @@ export function SkyScreen() {
         <FeatureCard
           key={object.id}
           title={object.name}
-          description={`${object.summary}\n\nLayer: ${object.skyLensLayer.replace("_", " ")} · Best season: ${object.bestSeason ?? "Varies"} · Naked-eye: ${object.visibleToNakedEye ? "sometimes" : "usually no"}`}
+          description={`${object.summary}\n\nLayer: ${object.skyLensLayer.replace("_", " ")} · Best season: ${displaySeasonLabel(object.bestSeason ?? "Varies", location?.latitudeDegrees)} · Naked-eye: ${object.visibleToNakedEye ? "sometimes" : "usually no"}`}
           actionLabel="Save + Find"
           onPress={() => {
             addItem({ type: "archive", title: object.name, detail: object.summary });
