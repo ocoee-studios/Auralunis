@@ -91,6 +91,9 @@ jobs:
       - name: Paywall / restore-truthfulness self-test
         run: npm run qa:paywall-restore
 
+      - name: Release-candidate hardening self-test
+        run: npm run qa:release-candidate
+
       - name: Expo Doctor
         run: npx expo-doctor
 

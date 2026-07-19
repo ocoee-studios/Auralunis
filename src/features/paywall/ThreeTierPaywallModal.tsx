@@ -250,9 +250,6 @@ function PlanCard({
         </View>
       </View>
       <View style={styles.planRight}>
-        {plan.anchorPrice && (
-          <Text style={styles.anchorPrice}>{plan.anchorPrice}</Text>
-        )}
         <Text style={[styles.planPrice, selected && { color: AuraLunisColors.gold }]}>
           {priceLine(plan, offer)}
         </Text>
@@ -292,7 +289,6 @@ const styles = StyleSheet.create({
   // Trial framing ("7 days free, then …") reads as a benefit, so lift it to gold.
   planSubtitleTrial: { color: AuraLunisColors.gold2 },
   planRight: { alignItems: "flex-end", gap: 4, flexShrink: 0, marginLeft: 8 },
-  anchorPrice: { fontFamily: BODY, color: AuraLunisColors.faint, fontSize: 11, textDecorationLine: "line-through" },
   planPrice: { fontFamily: DISPLAY, color: AuraLunisColors.silver, fontSize: 15, fontWeight: "800" },
   badge: { backgroundColor: "rgba(217,168,78,0.2)", borderRadius: 5, paddingHorizontal: 6, paddingVertical: 2 },
   badgeText: { fontFamily: DISPLAY, color: AuraLunisColors.gold, fontSize: 8, fontWeight: "800", letterSpacing: 1 },

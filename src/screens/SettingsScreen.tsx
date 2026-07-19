@@ -265,21 +265,26 @@ export function SettingsScreen() {
       <LearnPreferencesModal visible={learnPrefsOpen} onClose={() => setLearnPrefsOpen(false)} />
 
 
-      <SettingsSection title="Native Device QA">
-        <Text style={styles.infoCopy}>
-          Run location, compass, motion-sensor, photo-save, and haptic
-          checks on a physical iPhone before outdoor Sky Lens calibration.
-        </Text>
-        <Pressable
-          style={styles.secondaryButton}
-          onPress={() => setDeviceDiagnosticsOpen((previous) => !previous)}
-        >
-          <Text style={styles.secondaryButtonText}>
-            {deviceDiagnosticsOpen ? "Hide Device Diagnostics" : "Open Device Diagnostics"}
+      {/* Developer-only on-device QA. __DEV__ compiles to false in release builds, so this
+          section is completely absent from production / TestFlight / App Store binaries;
+          the panel code is preserved for local development. */}
+      {__DEV__ && (
+        <SettingsSection title="Native Device QA">
+          <Text style={styles.infoCopy}>
+            Run location, compass, motion-sensor, photo-save, and haptic
+            checks on a physical iPhone before outdoor Sky Lens calibration.
           </Text>
-        </Pressable>
-        {deviceDiagnosticsOpen ? <DeviceDiagnosticsPanel /> : null}
-      </SettingsSection>
+          <Pressable
+            style={styles.secondaryButton}
+            onPress={() => setDeviceDiagnosticsOpen((previous) => !previous)}
+          >
+            <Text style={styles.secondaryButtonText}>
+              {deviceDiagnosticsOpen ? "Hide Device Diagnostics" : "Open Device Diagnostics"}
+            </Text>
+          </Pressable>
+          {deviceDiagnosticsOpen ? <DeviceDiagnosticsPanel /> : null}
+        </SettingsSection>
+      )}
 
       <SettingsSection title="Help + About">
         <View style={styles.aboutCard}>

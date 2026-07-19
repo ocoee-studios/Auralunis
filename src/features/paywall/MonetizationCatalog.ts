@@ -44,8 +44,6 @@ export interface PlanOption {
   badge?: string;
   /** Effective monthly price for an annual plan — e.g. "$4.17/mo" */
   effectiveMonthly?: string;
-  /** Anchor price shown as strikethrough on lifetime card */
-  anchorPrice?: string;
 }
 
 export const plans: PlanOption[] = [
@@ -78,7 +76,6 @@ export const plans: PlanOption[] = [
     subtitle: "Pay once. Own the sky forever.",
     revenueCatPackageId: RevenueCatIds.packages.lifetime,
     badge: "Best value",
-    anchorPrice: "$239.76", // 24 months of monthly billing ($9.99 × 24) — anchor comparison
   },
 ];
 
