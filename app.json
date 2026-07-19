@@ -68,19 +68,28 @@
       [
         "expo-location",
         {
-          "locationWhenInUsePermission": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you."
+          "locationWhenInUsePermission": "AuraLunis uses your location to calculate the sky, moon, planets, and visible events above you.",
+          "locationAlwaysAndWhenInUsePermission": false,
+          "locationAlwaysPermission": false
         }
       ],
       [
         "expo-media-library",
         {
-          "savePhotosPermission": "AuraLunis saves sky captures and cosmic time-lapse exports only when you choose to save them."
+          "savePhotosPermission": "AuraLunis saves sky captures and cosmic time-lapse exports only when you choose to save them.",
+          "photosPermission": false
         }
       ],
       [
         "expo-sensors",
         {
           "motionPermission": "AuraLunis uses motion sensors to align Sky Lens with the direction your phone is pointing."
+        }
+      ],
+      [
+        "expo-av",
+        {
+          "microphonePermission": false
         }
       ],
       "expo-notifications"

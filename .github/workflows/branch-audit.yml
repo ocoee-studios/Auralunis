@@ -70,6 +70,9 @@ jobs:
       - name: Planet render self-test
         run: npm run qa:planets
 
+      - name: Release-config guard (permissions / managed prebuild)
+        run: npm run qa:release-config
+
       - name: Expo Doctor
         run: npx expo-doctor
 

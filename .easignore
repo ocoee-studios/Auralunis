@@ -7,6 +7,14 @@ qa/typescript-stub-harness
 *.html
 .DS_Store
 
+# Managed / CNG workflow: ios/ and android/ are LOCAL PREBUILD ARTIFACTS (gitignored,
+# 0 tracked files). The source of truth for native config is app.json + its config plugins.
+# .easignore overrides .gitignore for the EAS upload archive, so without these lines EAS
+# would upload the stale local prebuild and skip prebuild — shipping an outdated Info.plist
+# instead of app.json's config. Exclude them so EAS regenerates native config from app.json.
+ios/
+android/
+
 # Design references & QA artifacts — keep in the repo, never ship in the build.
 docs/
 qa/

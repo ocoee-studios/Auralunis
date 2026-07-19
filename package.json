@@ -1,6 +1,6 @@
 {
-  "name": "auralunis-native-test-build",
-  "version": "0.1.0",
+  "name": "auralunis",
+  "version": "1.0.0",
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -17,7 +17,7 @@
     "qa:sky": "node ./qa/sky-lens-accuracy-check.js",
     "qa:whole": "node ./qa/whole-app-qa-check.js",
     "qa:native-device": "node ./scripts/native-device-preflight.js",
-    "qa:all": "npm run qa:static && npm run qa:sky && npm run qa:whole && npm run qa:native-device && npm run qa:revenuecat && npm run qa:aura-pro && npm run qa:fresh-bugs && npm run qa:ephemeris && npm run qa:satellite && npm run qa:skylens && npm run qa:labels && npm run qa:orion && npm run qa:planets",
+    "qa:all": "npm run qa:static && npm run qa:sky && npm run qa:whole && npm run qa:native-device && npm run qa:revenuecat && npm run qa:aura-pro && npm run qa:fresh-bugs && npm run qa:ephemeris && npm run qa:satellite && npm run qa:skylens && npm run qa:labels && npm run qa:orion && npm run qa:planets && npm run qa:release-config",
     "eas:dev:ios": "npx eas-cli@latest build --platform ios --profile development",
     "eas:sim:ios": "npx eas-cli@latest build --platform ios --profile development-simulator",
     "eas:preview:ios": "npx eas-cli@latest build --platform ios --profile preview",
@@ -29,7 +29,8 @@
     "qa:skylens": "node ./scripts/skylens-selftest.js",
     "qa:labels": "node ./scripts/skylens-label-selftest.js",
     "qa:orion": "node ./scripts/orion-selftest.js",
-    "qa:planets": "node ./scripts/planet-render-selftest.js"
+    "qa:planets": "node ./scripts/planet-render-selftest.js",
+    "qa:release-config": "node ./scripts/release-config-guard.js"
   },
   "dependencies": {
     "@expo-google-fonts/cinzel": "^0.2.3",
