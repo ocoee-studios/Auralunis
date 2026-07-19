@@ -73,6 +73,9 @@ jobs:
       - name: Release-config guard (permissions / managed prebuild)
         run: npm run qa:release-config
 
+      - name: Sky Lens accessibility-controls self-test
+        run: npm run qa:a11y
+
       - name: Expo Doctor
         run: npx expo-doctor
 
