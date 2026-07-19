@@ -1,6 +1,16 @@
 import { Linking, LogBox, Platform } from "react-native";
 import Constants from "expo-constants";
 import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
+import {
+  classifyAuraLunisMembership,
+  hasAuraLunisEntitlement,
+  type MembershipKind,
+} from "@/features/paywall/entitlementStatus";
+
+// Re-exported so existing importers keep working now that the pure entitlement logic
+// lives in a node-testable module with no react-native imports.
+export { classifyAuraLunisMembership, hasAuraLunisEntitlement };
+export type { MembershipKind };
 
 // RevenueCat's SDK logs "Invalid API Key" / offerings errors to the console in Expo Go
 // (it can't validate against StoreKit in dev). Even though we already swallow the thrown
@@ -22,7 +32,7 @@ if (__DEV__) {
 }
 
 // Dynamic require — react-native-purchases is not available in Expo Go
-type CustomerInfo = { entitlements: { active: Record<string, unknown> }; managementURL?: string | null };
+type CustomerInfo = { entitlements: { active: Record<string, unknown> }; activeSubscriptions?: string[]; managementURL?: string | null };
 // StoreKit-reported introductory offer (e.g. Apple's "1 week free trial"). This is data
 // the STORE owns — the app only reflects it, never fabricates it.
 type StoreIntroPrice = {
@@ -215,9 +225,10 @@ export async function purchaseAuraLunisPackage(
 }
 
 export async function restoreAuraLunisPurchases(): Promise<{
-  status: "restored" | "not_configured";
+  status: "restored" | "not_configured" | "error";
   customerInfo?: CustomerInfo;
   entitled?: boolean;
+  membership?: MembershipKind;
 }> {
   const configuration = await configureRevenueCat();
 
@@ -228,13 +239,16 @@ export async function restoreAuraLunisPurchases(): Promise<{
 
   try {
     const customerInfo = await Purchases.restorePurchases();
-    // Report whether the restore actually granted the entitlement — callers should gate
-    // on `entitled`, not the bare "restored" status (which only means the call succeeded).
+    // Report whether the restore actually granted the entitlement — callers MUST gate the
+    // success message on `entitled`, not the bare "restored" status (which only means the
+    // call completed). `membership` separates an active subscription from lifetime.
     const entitled = hasAuraLunisEntitlement(customerInfo, RevenueCatIds.entitlement);
-    return { status: "restored", customerInfo, entitled };
+    const membership = classifyAuraLunisMembership(customerInfo);
+    return { status: "restored", customerInfo, entitled, membership };
   } catch {
-    // Network / StoreKit / Expo Go error — never let it become an unhandled rejection.
-    return { status: "not_configured" };
+    // A genuine StoreKit / RevenueCat / network failure. This is NOT "not configured" —
+    // callers must show a distinct failure message, never "available after launch".
+    return { status: "error" };
   }
 }
 
@@ -355,12 +369,6 @@ export async function getIntroOfferEligibility(
   }
 }
 
-export function hasAuraLunisEntitlement(
-  customerInfo: CustomerInfo,
-  entitlementId:
-    | typeof RevenueCatIds.entitlement
-    | typeof RevenueCatIds.entitlement
-    | typeof RevenueCatIds.entitlement
-) {
-  return Boolean(customerInfo.entitlements.active[entitlementId]);
-}
+// hasAuraLunisEntitlement + classifyAuraLunisMembership now live in
+// @/features/paywall/entitlementStatus (pure, node-testable) and are re-exported at the
+// top of this file.

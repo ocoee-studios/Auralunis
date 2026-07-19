@@ -7,9 +7,10 @@
 import React, { createContext, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { AppState, type AppStateStatus } from "react-native";
 import { RevenueCatIds } from "@/features/paywall/MonetizationCatalog";
+import { classifyAuraLunisMembership, type MembershipKind } from "@/features/paywall/entitlementStatus";
 
 let Purchases: {
-  getCustomerInfo: () => Promise<{ entitlements: { active: Record<string, unknown> } }>;
+  getCustomerInfo: () => Promise<{ entitlements: { active: Record<string, unknown> }; activeSubscriptions?: string[] }>;
 } | null = null;
 
 try {
@@ -35,25 +36,28 @@ const devPremium = (): boolean => __DEV__ && ALLOW_DEV_PREMIUM;
 // when the preview demo is no longer needed.
 const FORCE_PREMIUM = process.env.EXPO_PUBLIC_FORCE_PREMIUM === "1";
 
-async function fetchIsPremium(): Promise<boolean> {
+async function fetchMembership(): Promise<{ isPremium: boolean; kind: MembershipKind }> {
   // DEV BYPASS: in a dev build, unlock premium unconditionally so every gated feature
   // is visible/testable on device without a purchase. Short-circuits BEFORE RevenueCat
   // — previously the bypass only fired when RC was unavailable/errored, so on a working
   // dev build getCustomerInfo() succeeded, returned false, and the app stayed locked.
   // Double-guarded (__DEV__ compiles to false in release), so it can never ship the
   // App Store app unlocked. Flip ALLOW_DEV_PREMIUM to false to exercise the paywall.
-  if (devPremium() || FORCE_PREMIUM) return true; // dev build, or internal preview demo
-  if (!Purchases) return false; // RevenueCat unavailable in a release build
+  if (devPremium() || FORCE_PREMIUM) return { isPremium: true, kind: "subscription" }; // dev/preview demo shows the full subscriber UI
+  if (!Purchases) return { isPremium: false, kind: "none" }; // RevenueCat unavailable in a release build
   try {
     const info = await Purchases.getCustomerInfo();
-    return Boolean(info.entitlements.active[RevenueCatIds.entitlement]);
+    const isPremium = Boolean(info.entitlements.active[RevenueCatIds.entitlement]);
+    return { isPremium, kind: classifyAuraLunisMembership(info) };
   } catch {
-    return false; // RC configured but errored — fail CLOSED in production
+    return { isPremium: false, kind: "none" }; // RC configured but errored — fail CLOSED in production
   }
 }
 
 export interface EntitlementValue {
   isPremium: boolean;
+  /** "none" | "subscription" | "lifetime" — derived from the store's CustomerInfo. */
+  membershipKind: MembershipKind;
   isLoading: boolean;
   refresh: () => Promise<void>;
 }
@@ -70,6 +74,7 @@ export async function refreshEntitlement(): Promise<void> {
 
 export function EntitlementProvider({ children }: { children: ReactNode }) {
   const [isPremium, setIsPremium] = useState(false);
+  const [membershipKind, setMembershipKind] = useState<MembershipKind>("none");
   const [isLoading, setIsLoading] = useState(true);
   const appStateRef = useRef<AppStateStatus>(AppState.currentState);
 
@@ -78,9 +83,10 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
-    const premium = await fetchIsPremium();
+    const { isPremium: premium, kind } = await fetchMembership();
     if (!mountedRef.current) return; // guard: don't setState after unmount
     setIsPremium(premium);
+    setMembershipKind(kind);
     setIsLoading(false);
   }, []);
 
@@ -109,7 +115,7 @@ export function EntitlementProvider({ children }: { children: ReactNode }) {
   }, [refresh]);
 
   return (
-    <EntitlementContext.Provider value={{ isPremium, isLoading, refresh }}>
+    <EntitlementContext.Provider value={{ isPremium, membershipKind, isLoading, refresh }}>
       {children}
     </EntitlementContext.Provider>
   );

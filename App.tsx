@@ -142,11 +142,22 @@ export default function App() {
         );
         return;
       }
+      if (result.status === "error") {
+        Alert.alert(
+          "Restore could not be completed",
+          "We couldn't reach the App Store to restore your purchases. Please check your connection and try again."
+        );
+        return;
+      }
 
       await refreshEntitlement(); // reflect any restored entitlement app-wide
+      // Success message ONLY when the active AuraLunis Premium entitlement is present — a
+      // completed restore that granted nothing must tell the truth, not claim success.
       Alert.alert(
-        "Purchases restored",
-        "AuraLunis refreshed the membership status for this App Store account."
+        "Restore Purchases",
+        result.entitled
+          ? "Your AuraLunis Premium membership has been restored."
+          : "No active AuraLunis purchase was found on this Apple ID."
       );
     } catch {
       Alert.alert(

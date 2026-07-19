@@ -11,7 +11,7 @@
 import { useContext } from "react";
 import { EntitlementContext, type EntitlementValue } from "@/context/EntitlementContext";
 
-const SAFE_DEFAULT: EntitlementValue = { isPremium: false, isLoading: false, refresh: async () => {} };
+const SAFE_DEFAULT: EntitlementValue = { isPremium: false, membershipKind: "none", isLoading: false, refresh: async () => {} };
 
 export function useEntitlement(): EntitlementValue {
   // Fails closed to a non-premium default if ever rendered outside the provider.
