@@ -1,13 +1,19 @@
 import React, { memo, useEffect } from "react";
 import { StyleSheet } from "react-native";
 import Svg, { Defs, RadialGradient, Stop, Rect, Circle } from "react-native-svg";
-import Animated, { Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
+import Animated, { cancelAnimation, Easing, useAnimatedStyle, useSharedValue, withRepeat, withTiming } from "react-native-reanimated";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface Props { width: number; height: number; nightVision?: boolean; intensity?: number; }
 
 export const AstralBreathingLayer = memo(function AstralBreathingLayer({ width, height, nightVision = false, intensity = 1 }: Props) {
   const breath = useSharedValue(0);
-  useEffect(() => { breath.value = withRepeat(withTiming(1, { duration: 22000, easing: Easing.inOut(Easing.sin) }), -1, true); }, [breath]);
+  const reduced = useReducedMotion();
+  useEffect(() => {
+    if (reduced) { cancelAnimation(breath); breath.value = 0.5; return; } // static mid-breath
+    breath.value = withRepeat(withTiming(1, { duration: 22000, easing: Easing.inOut(Easing.sin) }), -1, true);
+    return () => cancelAnimation(breath);
+  }, [breath, reduced]);
   const style = useAnimatedStyle(() => ({ opacity: 0.28 + breath.value * 0.18, transform: [{ scale: 1 + breath.value * 0.018 }] }));
   const gold = nightVision ? "#FF453A" : "#D9A84E";
   const starlight = nightVision ? "#FFB3AA" : "#FFF6D6";

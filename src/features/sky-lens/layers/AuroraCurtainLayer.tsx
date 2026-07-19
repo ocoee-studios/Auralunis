@@ -16,12 +16,14 @@ import Svg, {
   G,
 } from "react-native-svg";
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withTiming,
 } from "react-native-reanimated";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 interface AuroraCurtainLayerProps {
   width: number;
@@ -41,8 +43,10 @@ export const AuroraCurtainLayer = memo(function AuroraCurtainLayer({
   variant = "cosmic",
 }: AuroraCurtainLayerProps) {
   const drift = useSharedValue(0);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    if (reduced) { cancelAnimation(drift); drift.value = 0; return; } // static neutral curtain frame
     drift.value = withRepeat(
       withTiming(1, {
         duration: 18000,
@@ -51,7 +55,8 @@ export const AuroraCurtainLayer = memo(function AuroraCurtainLayer({
       -1,
       true
     );
-  }, [drift]);
+    return () => cancelAnimation(drift);
+  }, [drift, reduced]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: visible ? 0.72 + drift.value * 0.18 : 0,

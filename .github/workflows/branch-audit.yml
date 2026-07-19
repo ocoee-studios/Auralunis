@@ -79,6 +79,9 @@ jobs:
       - name: Time-zone / DST self-test (9-zone matrix)
         run: npm run qa:timezone
 
+      - name: Reduced-motion self-test
+        run: npm run qa:reduced-motion
+
       - name: Expo Doctor
         run: npx expo-doctor
 

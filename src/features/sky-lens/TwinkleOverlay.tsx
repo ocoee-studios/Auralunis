@@ -9,6 +9,7 @@ import Animated, {
   cancelAnimation,
   type SharedValue
 } from "react-native-reanimated";
+import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export type TwinkleKind = "star" | "dust";
 
@@ -47,16 +48,19 @@ function TwinkleDot({
   clock,
   t,
   base,
-  amp
+  amp,
+  reduced
 }: {
   clock: SharedValue<number>;
   t: TwinkleTarget;
   base: number;
   amp: number;
+  reduced: boolean;
 }) {
   const offset = t.offset;
   const style = useAnimatedStyle(() => ({
-    opacity: base + amp * Math.sin((clock.value + offset) * Math.PI * 2)
+    // Reduced Motion: hold the base (static) brightness — no scintillation.
+    opacity: reduced ? base : base + amp * Math.sin((clock.value + offset) * Math.PI * 2)
   }));
   return (
     <Animated.View
@@ -81,15 +85,24 @@ function TwinkleDot({
 export function TwinkleOverlay({ targets, nightMode }: { targets: TwinkleTarget[]; nightMode: boolean }) {
   const starClock = useSharedValue(0);
   const dustClock = useSharedValue(0);
+  const reduced = useReducedMotion();
 
   useEffect(() => {
+    if (reduced) {
+      // Reduced Motion: stop and freeze both clocks so twinkle holds a static base frame.
+      cancelAnimation(starClock);
+      cancelAnimation(dustClock);
+      starClock.value = 0;
+      dustClock.value = 0;
+      return;
+    }
     starClock.value = withRepeat(withTiming(1, { duration: STAR_PERIOD_MS, easing: Easing.linear }), -1, false);
     dustClock.value = withRepeat(withTiming(1, { duration: DUST_PERIOD_MS, easing: Easing.linear }), -1, false);
     return () => {
       cancelAnimation(starClock);
       cancelAnimation(dustClock);
     };
-  }, [starClock, dustClock]);
+  }, [starClock, dustClock, reduced]);
 
   if (nightMode) return null;
 
@@ -98,10 +111,10 @@ export function TwinkleOverlay({ targets, nightMode }: { targets: TwinkleTarget[
       {targets.map((t) =>
         t.kind === "dust" ? (
           // Slow, deep swell: 0.10 → 0.62. A glint that nearly vanishes, then returns.
-          <TwinkleDot key={t.id} clock={dustClock} t={t} base={0.36} amp={0.26} />
+          <TwinkleDot key={t.id} clock={dustClock} t={t} base={0.36} amp={0.26} reduced={reduced} />
         ) : (
           // Quick, shallow scintillation around near-full opacity.
-          <TwinkleDot key={t.id} clock={starClock} t={t} base={0.88} amp={0.12} />
+          <TwinkleDot key={t.id} clock={starClock} t={t} base={0.88} amp={0.12} reduced={reduced} />
         )
       )}
     </View>
