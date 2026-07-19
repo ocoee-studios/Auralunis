@@ -38,7 +38,7 @@ Module._resolveFilename = function (request, ...rest) {
   return origResolve.call(this, request, ...rest);
 };
 
-const { hasAuraLunisEntitlement, classifyAuraLunisMembership } = require(path.join(SRC, "features/paywall/entitlementStatus.ts"));
+const { hasAuraLunisEntitlement, classifyAuraLunisMembership, resolveMembershipCta } = require(path.join(SRC, "features/paywall/entitlementStatus.ts"));
 const { RevenueCatIds } = require(path.join(SRC, "features/paywall/MonetizationCatalog.ts"));
 
 let pass = 0, fail = 0;
@@ -87,8 +87,9 @@ has(app, 'result.status === "error"', "App.tsx shows a distinct restore error me
 hasnt(app, "refreshed the membership status for this App Store account", "App.tsx no longer claims vague success");
 
 console.log("\n── Manage Subscription visibility ──");
-has(settings, 'membershipKind === "subscription"', "Manage Subscription shown only for an active subscription");
-has(settings, 'membershipKind === "lifetime"', "Lifetime gets a no-subscription-to-manage note, not a manage button");
+// Gating now flows through the resolver's ctaKind (see the state-matrix section below).
+has(settings, 'membershipCta.ctaKind === "manage"', "Manage Subscription shown only for the resolver's manage state");
+has(settings, 'membershipCta.ctaKind === "lifetime"', "Lifetime renders its own non-recurring state, not a manage button");
 // The manage button must not be rendered purely from isPremium anymore.
 hasnt(settings, "isPremium ? styles.actionButton : styles.secondaryButton", "Manage Subscription no longer rendered for every premium/non-premium user");
 
@@ -106,6 +107,51 @@ has(catalog, 'entitlement: "AuraLunis Premium"', "entitlement constant unchanged
 has(catalog, '"com.ocoeestudios.auralunis.premium.monthly"', "monthly product id unchanged");
 has(catalog, '"com.ocoeestudios.auralunis.premium.annual"', "annual product id unchanged");
 has(catalog, '"com.ocoeestudios.auralunis.lifetime"', "lifetime product id unchanged");
+
+console.log("\n── Settings membership CTA resolver (state matrix A–E) ──");
+const SUB_MONTHLY = { entitlements: { active: { [ENT]: {} } }, activeSubscriptions: [MONTHLY] };
+const SUB_ANNUAL = { entitlements: { active: { [ENT]: {} } }, activeSubscriptions: [ANNUAL] };
+const LIFETIME_INFO = { entitlements: { active: { [ENT]: {} } }, activeSubscriptions: [] };
+const NONE_INFO = { entitlements: { active: {} }, activeSubscriptions: [] };
+const ctaFor = (info) => resolveMembershipCta(classifyAuraLunisMembership(info));
+
+// A. no entitlement → non-subscriber, paywall CTA, never manage
+const none = resolveMembershipCta("none");
+eq("A none → ctaKind paywall", none.ctaKind, "paywall");
+eq("A none → label 'View Memberships'", none.ctaLabel, "View Memberships");
+eq("A none → not a manage action", none.ctaKind !== "manage", true);
+eq("A none (from CustomerInfo) → paywall", ctaFor(NONE_INFO).ctaKind, "paywall");
+// E. loading/unknown/error fail-closed: EntitlementContext yields "none"; unexpected values default to non-subscriber
+eq("E unknown/loading value → paywall (fail-closed)", resolveMembershipCta("loading").ctaKind, "paywall");
+eq("E unknown value → never manage", resolveMembershipCta("weird") .ctaKind !== "manage", true);
+// B. active monthly → manage
+eq("B monthly → ctaKind manage", ctaFor(SUB_MONTHLY).ctaKind, "manage");
+eq("B monthly → label 'Manage Subscription'", ctaFor(SUB_MONTHLY).ctaLabel, "Manage Subscription");
+// C. active annual → manage
+eq("C annual → ctaKind manage", ctaFor(SUB_ANNUAL).ctaKind, "manage");
+eq("C annual → label 'Manage Subscription'", ctaFor(SUB_ANNUAL).ctaLabel, "Manage Subscription");
+// D. lifetime → non-recurring active state, never manage
+const life = resolveMembershipCta("lifetime");
+eq("D lifetime → ctaKind lifetime", life.ctaKind, "lifetime");
+eq("D lifetime → never manage", life.ctaKind !== "manage", true);
+eq("D lifetime → truthful active label", life.ctaLabel, "Lifetime Access");
+eq("D lifetime (from CustomerInfo) → lifetime", ctaFor(LIFETIME_INFO).ctaKind, "lifetime");
+// manage ONLY for subscription; paywall ONLY for non-subscriber
+eq("manage kind only for subscription states", [none, life].every((c) => c.ctaKind !== "manage"), true);
+eq("paywall kind only for non-subscriber", resolveMembershipCta("subscription").ctaKind !== "paywall" && life.ctaKind !== "paywall", true);
+
+console.log("\n── SettingsScreen renders from the resolver (no unconditional subscriber copy) ──");
+const set = read("src/screens/SettingsScreen.tsx");
+hasnt(set, "Subscribe when you're ready", "no unconditional 'Subscribe when you're ready' copy");
+has(set, "resolveMembershipCta(membershipKind)", "SettingsScreen derives the card from resolveMembershipCta");
+has(set, "membershipCta.statusCopy", "card copy comes from the resolver (never contradictory)");
+has(set, 'membershipCta.ctaKind === "manage"', "Manage action gated on ctaKind manage");
+has(set, 'membershipCta.ctaKind === "paywall"', "paywall action gated on ctaKind paywall");
+has(set, 'membershipCta.ctaKind === "lifetime"', "lifetime renders its own non-recurring state");
+// lifetime block must not invoke subscription management
+const lifeIdx = set.indexOf('membershipCta.ctaKind === "lifetime"');
+const lifeWindow = lifeIdx >= 0 ? set.slice(lifeIdx, lifeIdx + 220) : "";
+hasnt(lifeWindow, "handleManageSubscription", "lifetime state never calls handleManageSubscription");
 
 console.log(`\nPaywall/restore self-test: ${pass} passed, ${fail} failed.`);
 process.exit(fail === 0 ? 0 : 1);
