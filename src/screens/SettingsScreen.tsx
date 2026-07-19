@@ -3,6 +3,7 @@ import { Alert, Image, Linking, Modal, Pressable, StyleSheet, Switch, Text, View
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
+import { resolveMembershipCta } from "@/features/paywall/entitlementStatus";
 import { TermsScreen } from "@/screens/TermsScreen";
 import { PrivacyScreen } from "@/screens/PrivacyScreen";
 import { GlassPanel } from "@/components/GlassPanel";
@@ -52,8 +53,11 @@ function SettingsSection({ title, children }: { title: string; children: React.R
 
 export function SettingsScreen() {
   const { settings, hydrated, updateSetting, resetSettings } = useAuraLunisSettings();
-  const { isPremium, membershipKind, refresh } = useEntitlement();
+  const { membershipKind, refresh } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
+  // Single source of truth for the membership card's copy, label, and action — derived
+  // from the RevenueCat-backed membershipKind (loading/unknown/error fail closed to "none").
+  const membershipCta = resolveMembershipCta(membershipKind);
   const { items, clearPrototypeVault } = useAuraLunisVault();
   const [deviceDiagnosticsOpen, setDeviceDiagnosticsOpen] = useState(false);
   const [legalModal, setLegalModal] = useState<"terms" | "privacy" | null>(null);
@@ -132,24 +136,25 @@ export function SettingsScreen() {
           <Text style={styles.infoCopy}>
             AuraLunis Premium: {AuraLunisPricing.monthly} or {AuraLunisPricing.annual}. Lifetime {AuraLunisPricing.lifetime} one-time.
           </Text>
-          <Text style={styles.infoCopy}>
-            Subscribe when you're ready. Cancel anytime.
-          </Text>
-          {!isPremium && (
+          {/* Copy + primary CTA come from resolveMembershipCta(membershipKind), so the card
+              can never show contradictory subscriber/non-subscriber states. Non-subscriber
+              (incl. loading/unknown/error) → paywall; active sub → Apple management; lifetime
+              → a non-recurring active badge that never opens subscription management. */}
+          <Text style={styles.infoCopy}>{membershipCta.statusCopy}</Text>
+          {membershipCta.ctaKind === "paywall" && (
             <Pressable style={styles.actionButton} onPress={openPaywall}>
-              <Text style={styles.actionButtonText}>Upgrade to Premium</Text>
+              <Text style={styles.actionButtonText}>{membershipCta.ctaLabel}</Text>
             </Pressable>
           )}
-          {/* Manage Subscription is shown ONLY for an active auto-renewing subscription
-              (monthly/annual). Lifetime owners have nothing to manage, and non-premium
-              users get the Upgrade CTA above instead. Derived from CustomerInfo, never copy. */}
-          {membershipKind === "subscription" && (
+          {membershipCta.ctaKind === "manage" && (
             <Pressable style={styles.actionButton} onPress={handleManageSubscription}>
-              <Text style={styles.actionButtonText}>Manage Subscription</Text>
+              <Text style={styles.actionButtonText}>{membershipCta.ctaLabel}</Text>
             </Pressable>
           )}
-          {membershipKind === "lifetime" && (
-            <Text style={styles.infoCopy}>Lifetime access — no subscription to manage.</Text>
+          {membershipCta.ctaKind === "lifetime" && (
+            <View style={styles.actionButton} accessibilityRole="text">
+              <Text style={styles.actionButtonText}>{membershipCta.ctaLabel}</Text>
+            </View>
           )}
           <Pressable
             style={styles.secondaryButton}

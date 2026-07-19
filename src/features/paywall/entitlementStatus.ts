@@ -42,3 +42,44 @@ export function classifyAuraLunisMembership(customerInfo: EntitlementCustomerInf
     active.includes(RevenueCatIds.products.premiumAnnual);
   return hasActiveSubscription ? "subscription" : "lifetime";
 }
+
+/** What the Settings membership card should render and do, per membership state. */
+export type MembershipCtaKind = "paywall" | "manage" | "lifetime";
+export type MembershipCta = {
+  /** Truthful one-line status describing the current membership state. */
+  statusCopy: string;
+  /** The single primary CTA label for this state. */
+  ctaLabel: string;
+  /** What tapping the primary CTA should do (or `lifetime` = non-actionable active badge). */
+  ctaKind: MembershipCtaKind;
+};
+
+/**
+ * Single deterministic mapping from membership state → Settings card presentation.
+ * Pure and total: any unexpected value (loading / unknown / error, all of which surface
+ * as `membershipKind === "none"` from the fail-closed EntitlementContext) resolves to the
+ * non-subscriber state — never a false active claim, never subscription management.
+ */
+export function resolveMembershipCta(membershipKind: MembershipKind): MembershipCta {
+  switch (membershipKind) {
+    case "subscription":
+      return {
+        statusCopy: "Your AuraLunis Premium membership is active.",
+        ctaLabel: "Manage Subscription",
+        ctaKind: "manage",
+      };
+    case "lifetime":
+      return {
+        statusCopy: "Lifetime Access — your AuraLunis Premium membership is active for good.",
+        ctaLabel: "Lifetime Access",
+        ctaKind: "lifetime",
+      };
+    case "none":
+    default:
+      return {
+        statusCopy: "Unlock the full sky with AuraLunis Premium — subscribe or own it for life.",
+        ctaLabel: "View Memberships",
+        ctaKind: "paywall",
+      };
+  }
+}
