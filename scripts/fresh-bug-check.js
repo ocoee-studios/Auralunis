@@ -38,6 +38,11 @@ check("RevenueCat startup rejection guarded", app.includes("configureRevenueCat(
 check("purchase result handles cancellation", app.includes('result.status === "cancelled"'));
 check("purchase result handles unavailable configuration", app.includes('result.status === "not_configured"') && app.includes('result.status === "not_available"'));
 check("restore errors are user-visible and guarded", app.includes("handleRestorePurchases") && app.includes("Restore could not be completed"));
+check(
+  "purchase/restore error copy is user-facing (no StoreKit/RevenueCat dev jargon)",
+  !/StoreKit sandbox|RevenueCat offering|offering configuration|sandbox account/.test(app),
+  "purchase/restore failure Alerts must not surface StoreKit/RevenueCat/sandbox internals to users"
+);
 check("entitlement refresh follows purchases", app.includes("await refreshEntitlement()"));
 
 const liveTabs = [...rootTabs.matchAll(/<Tab\.Screen name="([^"]+)" component=\{(\w+Screen)\}/g)].map((match) => ({
