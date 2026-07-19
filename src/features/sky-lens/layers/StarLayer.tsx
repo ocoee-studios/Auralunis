@@ -141,7 +141,7 @@ export function StarLayer({ stars, project, palette, nightMode, focus = null, sh
               // 12 → 18pt, semibold: readable on a moving sky at arm's length. The bigger
               // font also enlarges the placer's collision box (it keys off fontSize), so
               // labels claim the room they actually occupy.
-              const lp = placeLabel ? placeLabel(p.x + r + 5, p.y + 5, star.name ?? "", 16) : { x: p.x + r + 5, y: p.y + 5 };
+              const lp = placeLabel ? placeLabel(p.x + r + 5, p.y + 5, star.name ?? "", 16, undefined, false, { weight: 600 }) : { x: p.x + r + 5, y: p.y + 5 };
               // PRIORITY 2. No clean slot → SUPPRESS rather than clip or overlap.
               if (!Number.isFinite(lp.x)) return null;
               return (

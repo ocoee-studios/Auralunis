@@ -21,13 +21,22 @@ export type AvoidCircle = { x: number; y: number; r: number };
 // display — which is exactly the clipped-label problem on device. 26px gives real air.
 export const LABEL_SAFE_INSET = 26;
 
+// Optional per-label metrics so the reserved box matches what actually renders.
+//   * `weight` widens the box for bold text (planet/star/zodiac labels are 600–700).
+//   * `letterSpacing` adds the inter-glyph gap the caller actually draws with.
+//   * `footprint` lets a multi-part label (e.g. a zodiac glyph + name + context line) claim
+//     its COMPLETE bounding box as one collision object, not just its primary line.
+export type LabelFootprint = { w: number; top: number; bottom: number };
+export type LabelMetrics = { weight?: number; letterSpacing?: number; footprint?: LabelFootprint };
+
 export type LabelPlacer = ((
   cx: number,
   cy: number,
   text: string,
   fontSize: number,
   avoid?: AvoidCircle,
-  centered?: boolean
+  centered?: boolean,
+  metrics?: LabelMetrics
 ) => { x: number; y: number }) & {
   reserve: (x: number, y: number, w: number, h: number) => void;
   reserveCircle: (x: number, y: number, r: number) => void;
@@ -39,17 +48,54 @@ export function overlaps(a: Rect, b: Rect): boolean {
   return a.x < b.x + b.w && a.x + a.w > b.x && a.y < b.y + b.h && a.y + a.h > b.y;
 }
 
-// Deterministic label box + rect. Exported as the single source of truth so tests can
-// check the exact on-screen rectangle the placer used (no duplicated formula).
-export function labelBoxSize(text: string, fontSize: number): { w: number; h: number } {
-  return { w: Math.max(8, text.length * fontSize * 0.58), h: fontSize * 1.25 };
+// Small horizontal air so two labels sized right at the estimate still can't kiss. Kept
+// modest so it does not "blindly overinflate" — the weight-aware factor does the real work.
+const LABEL_H_PAD = 4;
+
+// Deterministic label box. Single source of truth so tests, the placer, and the zodiac
+// unit-footprint all use the same width math. The per-char factor is weight-aware: regular
+// text ≈ 0.58 em/char, and bold renders wider (up to ≈ 0.63 at weight 700), which is why
+// bold planet/star labels previously overran their reserved box. `letterSpacing` adds the
+// inter-glyph gap the caller draws with (constellation/zodiac labels are letter-spaced).
+export function labelBoxSize(text: string, fontSize: number, metrics: LabelMetrics = {}): { w: number; h: number } {
+  const { weight = 400, letterSpacing = 0 } = metrics;
+  const weightFactor = 0.58 + (Math.max(0, Math.min(300, weight - 400)) / 300) * 0.05; // 400→0.58 … 700→0.63
+  const w = text.length * fontSize * weightFactor + Math.max(0, text.length - 1) * letterSpacing + LABEL_H_PAD;
+  return { w: Math.max(8, w), h: fontSize * 1.25 };
 }
 
-export function labelRect(x: number, y: number, text: string, fontSize: number, centered?: boolean): Rect {
-  const { w, h } = labelBoxSize(text, fontSize);
+export function labelRect(
+  x: number,
+  y: number,
+  text: string,
+  fontSize: number,
+  centered?: boolean,
+  metrics?: LabelMetrics
+): Rect {
+  const { w, h } = labelBoxSize(text, fontSize, metrics);
   // `x` is the LEFT edge for left-anchored labels, the CENTRE for textAnchor="middle";
   // `y` is the text baseline, so the box top is y - h.
   return { x: centered ? x - w / 2 : x, y: y - h, w, h };
+}
+
+// Full footprint of a MULTI-PART label around its primary (name) baseline. Each part is drawn
+// with a vertical offset `dy` from that baseline (negative = above it). Returns the widest
+// part's width and the vertical extents above (`top`) and below (`bottom`) the baseline, so
+// the placer can reserve and collision-check the WHOLE unit — glyph, name, and any context
+// line — as one object rather than just the name.
+export function unitFootprint(
+  parts: Array<{ text: string; fontSize: number; dy: number; weight?: number; letterSpacing?: number }>
+): LabelFootprint {
+  let w = 0;
+  let top = 0;
+  let bottom = 0;
+  for (const p of parts) {
+    const { w: pw, h: ph } = labelBoxSize(p.text, p.fontSize, { weight: p.weight, letterSpacing: p.letterSpacing });
+    w = Math.max(w, pw);
+    top = Math.max(top, ph - p.dy); // box top = baseline + dy - ph → extent above the baseline
+    bottom = Math.max(bottom, p.dy); // box bottom = baseline + dy → extent below the baseline
+  }
+  return { w, top, bottom };
 }
 
 export function makeLabelPlacer(
@@ -72,16 +118,25 @@ export function makeLabelPlacer(
     text: string,
     fontSize: number,
     avoid?: AvoidCircle,
-    centered?: boolean
+    centered?: boolean,
+    metrics?: LabelMetrics
   ): { x: number; y: number } => {
-    const { w, h } = labelBoxSize(text, fontSize);
+    const footprint = metrics?.footprint;
+    // The candidate-offset math and the reserved rect use the FULL footprint when one is
+    // given (a multi-part unit), otherwise the single-line weight/letter-spacing-aware box.
+    const { w, h } = footprint
+      ? { w: footprint.w, h: footprint.top + footprint.bottom }
+      : labelBoxSize(text, fontSize, metrics);
 
     // BUG FIX. `x` means different things to different callers: for a star label it's the
     // LEFT edge of the text, but ConstellationLayer draws with textAnchor="middle", so for
     // it `x` is the CENTRE. The placer always treated x as the left edge — so every
     // constellation label claimed (and collision-tested) a box sitting half a label-width
     // to the right of where it actually drew. Half its collision detection was fiction.
-    const rectAt = (x: number, y: number): Rect => labelRect(x, y, text, fontSize, centered);
+    const rectAt = (x: number, y: number): Rect =>
+      footprint
+        ? { x: centered ? x - footprint.w / 2 : x, y: y - footprint.top, w: footprint.w, h: footprint.top + footprint.bottom }
+        : labelRect(x, y, text, fontSize, centered, metrics);
 
     const candidates: Array<[number, number]> = [];
 

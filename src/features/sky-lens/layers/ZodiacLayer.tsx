@@ -2,7 +2,7 @@ import React from "react";
 import { Circle, G, Line, Text as SvgText } from "react-native-svg";
 import type { ZodiacData } from "../ephemeris/Zodiac";
 import { magnitudeToRadius, type ProjectFn, type SkyPalette, type SelectedObject } from "../SkyLensVisual";
-import { type LabelPlacer } from "../labelLayout";
+import { unitFootprint, type LabelPlacer } from "../labelLayout";
 
 type Props = {
   zodiac: ZodiacData;
@@ -77,9 +77,20 @@ export function ZodiacLayer({ zodiac, project, palette, nightMode, sun, birthSig
           if (c.behind || !sign.center.aboveHorizon) return null;
           const isCurrent = !nightMode && idx === zodiac.sunSignIndex;
           const isBirth = !!birthSignId && sign.id === birthSignId;
-          // Centered label: the placer nudges it vertically off collisions while keeping it
-          // horizontally over its sign, and returns {NaN} when there is no clean slot.
-          const placed = placeLabel(c.x, c.y + 20, sign.name, 15, undefined, true);
+          // Reserve the WHOLE unit, not just the name: glyph 20px above the name baseline, the
+          // name itself, an optional current-sign context line 7px below, and an optional
+          // "Your sign" line 42px above. Offsets mirror labelUnit() exactly, so the placed
+          // anchor carries every part with it.
+          const footprint = unitFootprint([
+            { text: sign.symbol, fontSize: isCurrent ? 22 : 18, dy: -20 },
+            { text: sign.name, fontSize: 15, dy: 0, weight: 600, letterSpacing: 1 },
+            ...(isCurrent ? [{ text: `☀ Sun is here · ${sign.name} season`, fontSize: 8, dy: 7, weight: 800 }] : []),
+            ...(isBirth ? [{ text: "✦ Your sign", fontSize: 8, dy: -42, weight: 800 }] : [])
+          ]);
+          // Centered unit: the placer nudges it vertically off collisions (chrome + higher
+          // priority labels) while keeping it horizontally over its sign, and returns {NaN}
+          // when the full footprint has no clean slot.
+          const placed = placeLabel(c.x, c.y + 20, sign.name, 15, undefined, true, { weight: 600, letterSpacing: 1, footprint });
           if (!Number.isFinite(placed.x)) return null; // no room (chrome / crowding) → suppress
           return labelUnit(sign.id, placed.x, placed.y, sign, isCurrent, isBirth);
         })}

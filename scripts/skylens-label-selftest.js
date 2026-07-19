@@ -29,7 +29,7 @@ function requireTs(absPath) {
 }
 
 const R = (rel) => path.resolve(__dirname, "..", rel);
-const { makeLabelPlacer, labelRect, overlaps } = requireTs(R("src/features/sky-lens/labelLayout.ts"));
+const { makeLabelPlacer, labelRect, overlaps, unitFootprint } = requireTs(R("src/features/sky-lens/labelLayout.ts"));
 const { chromeAvoidRects, chromeTopInset } = requireTs(R("src/features/sky-lens/skyLensChromeLayout.ts"));
 const { projectTarget, DEFAULT_FOV } = requireTs(R("src/features/sky-lens/ar/SkyLensProjection.ts"));
 
@@ -240,6 +240,83 @@ for (const d of DEVICES) {
     }
     assert("dense zodiac/constellation cluster: no placed label overlaps another or chrome", overlapsFound === 0, `${placedRects.length} placed, ${overlapsFound} overlaps`);
   }
+}
+
+// ── 9. #165 device-reproduced collisions (TEST-FIRST — these FAIL until the fix lands) ──
+// Conservative model of ACTUAL rendered text width — a fixed reference the placer's reserved
+// box must cover: bold ≈ 0.615 em/char, regular ≈ 0.60, plus letterSpacing between glyphs.
+// `labelBoxSize` currently uses 0.58 with no weight/letterSpacing term, so bold and
+// letter-spaced labels render WIDER than the box the placer reserved for them.
+function renderedRect(x, y, text, fontSize, { bold = false, ls = 0, centered = false } = {}) {
+  const w = text.length * fontSize * (bold ? 0.615 : 0.6) + Math.max(0, text.length - 1) * ls;
+  const h = fontSize * 1.25;
+  return { x: centered ? x - w / 2 : x, y: y - h, w, h };
+}
+// The FULL zodiac label unit as it actually renders: glyph 20px ABOVE the name baseline and a
+// long context banner 7px BELOW it. Today only the name box is reserved, so the glyph and
+// context escape collision checking. This models the whole footprint that must be covered.
+function zodiacUnitRects(ax, ay, name, contextText) {
+  return [
+    renderedRect(ax, ay - 20, "♏", 18, { centered: true }), // glyph (single symbol)
+    renderedRect(ax, ay, name, 15, { ls: 1, centered: true }), // name (letterSpacing 1)
+    ...(contextText ? [renderedRect(ax, ay + 7, contextText, 8, { bold: true, centered: true })] : [])
+  ];
+}
+
+// 9a. Planet label adjacent to a bright-star label must not overlap at TRUE (bold) width.
+// Callers pass their real weights (planet 700, star 600), as production now does.
+{
+  const box = { width: 430, height: 932 };
+  const placer = makeLabelPlacer(box, { top: 100, bottom: 150 });
+  const merc = placer(160, 300, "Mercury", 17, undefined, false, { weight: 700 }); // planet label, bold 700
+  const mBox = labelRect(merc.x, merc.y, "Mercury", 17, false, { weight: 700 });
+  const proc = placer(mBox.x + mBox.w + 1, 300, "Procyon", 16, undefined, false, { weight: 600 }); // star label, bold 600
+  const mR = renderedRect(merc.x, merc.y, "Mercury", 17, { bold: true });
+  const pR = renderedRect(proc.x, proc.y, "Procyon", 16, { bold: true });
+  assert(
+    "[#165-1] planet & star labels do not overlap at true rendered (bold) width",
+    !overlaps(mR, pR),
+    `rendered gap ${(pR.x - (mR.x + mR.w)).toFixed(2)}px`
+  );
+}
+
+// 9b. Zodiac current-sign unit (incl. its long context banner) must clear the shutter.
+{
+  const box = { width: 430, height: 932 };
+  const insets = { top: 59, bottom: 34, left: 0, right: 0 };
+  const dock = 58;
+  const chrome = chromeAvoidRects({ box, insets, dockHeight: dock, visible: { shutter: true, finder: false, zoomChip: true } });
+  const shutter = chrome[0];
+  const placer = makeLabelPlacer(box, { top: chromeTopInset(insets), bottom: dock + insets.bottom + 12 });
+  for (const r of chrome) placer.reserve(r.x, r.y, r.w, r.h);
+  const cx = shutter.x - 40;
+  const cy = shutter.y + 12; // sign center just left of + into the shutter's vertical band
+  // Production reserves the WHOLE unit footprint (glyph + name + context), not just the name.
+  const fp = unitFootprint([
+    { text: "♋", fontSize: 22, dy: -20 },
+    { text: "Cancer", fontSize: 15, dy: 0, weight: 600, letterSpacing: 1 },
+    { text: "☀ Sun is here · Cancer season", fontSize: 8, dy: 7, weight: 800 }
+  ]);
+  const placed = placer(cx, cy, "Cancer", 15, undefined, true, { weight: 600, letterSpacing: 1, footprint: fp });
+  const unit = Number.isFinite(placed.x) ? zodiacUnitRects(placed.x, placed.y, "Cancer", "☀ Sun is here · Cancer season") : [];
+  const hit = unit.some((r) => overlaps(r, shutter));
+  assert("[#165-2] zodiac current-sign unit (name+glyph+context) clears the screenshot button", !Number.isFinite(placed.x) || !hit);
+}
+
+// 9c. Zodiac unit (incl. glyph) must yield FULLY to a higher-priority constellation label.
+{
+  const box = { width: 430, height: 932 };
+  const placer = makeLabelPlacer(box, { top: 100, bottom: 150 });
+  const con = placer(215, 500, "VIRGO", 13, undefined, true, { weight: 500, letterSpacing: 1.6 }); // constellation first
+  const conBox = labelRect(con.x, con.y, "VIRGO", 13, true, { weight: 500, letterSpacing: 1.6 });
+  const fp = unitFootprint([
+    { text: "♍", fontSize: 18, dy: -20 },
+    { text: "Virgo", fontSize: 15, dy: 0, weight: 600, letterSpacing: 1 }
+  ]);
+  const placed = placer(215, 520, "Virgo", 15, undefined, true, { weight: 600, letterSpacing: 1, footprint: fp }); // name anchor (c.y+20)
+  const unit = Number.isFinite(placed.x) ? zodiacUnitRects(placed.x, placed.y, "Virgo", null) : [];
+  const hit = unit.some((r) => overlaps(r, conBox));
+  assert("[#165-3] zodiac unit (incl. glyph) does not overlap a higher-priority constellation label", !Number.isFinite(placed.x) || !hit);
 }
 
 console.log("");
