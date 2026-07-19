@@ -18,6 +18,7 @@ import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
 import { DeviceDiagnosticsPanel } from "@/features/device-qa/DeviceDiagnosticsPanel";
 import { LearnPreferencesModal } from "@/features/learn/LearnPreferencesModal";
 import { openAuraLunisSubscriptionManagement, restoreAuraLunisPurchases } from "@/services/RevenueCatService";
+import { requestNotificationPermission } from "@/services/NotificationService";
 
 type SettingRowProps = {
   title: string;
@@ -90,6 +91,21 @@ export function SettingsScreen() {
     } catch {
       Alert.alert("Restore Purchases", "Restore could not be completed. Please try again from a signed-in Apple ID.");
     }
+  }
+
+  // Explicit, user-initiated notification permission request. This is the ONLY place the app
+  // asks for notification authorization — turning the master Notifications switch on. Automatic
+  // paths (startup, onboarding, Home mount-time scheduling) never prompt. Denial still records
+  // the preference; scheduling simply no-ops until permission is granted.
+  async function handleNotificationsToggle(value: boolean) {
+    if (value) {
+      try {
+        await requestNotificationPermission();
+      } catch {
+        // Never block the toggle on a permission-API failure.
+      }
+    }
+    updateSetting("notificationsEnabled", value);
   }
 
   async function handleManageSubscription() {
@@ -201,7 +217,7 @@ export function SettingsScreen() {
       </SettingsSection>
 
       <SettingsSection title="Notifications + Alarms">
-        <SettingRow title="Notifications" description="Master switch for reminders and celestial alerts." value={settings.notificationsEnabled} onValueChange={(value) => updateSetting("notificationsEnabled", value)} />
+        <SettingRow title="Notifications" description="Master switch for reminders and celestial alerts." value={settings.notificationsEnabled} onValueChange={handleNotificationsToggle} />
         <SettingRow title="Celestial Alarms" description="Sunrise, moonrise, Venus visible, and stargazing-window alerts." value={settings.celestialAlarmsEnabled} onValueChange={(value) => updateSetting("celestialAlarmsEnabled", value)} />
         <SettingRow title="Tonight’s Ritual Reminders" description="Gentle evening ritual reminders." value={settings.tonightRitualRemindersEnabled} onValueChange={(value) => updateSetting("tonightRitualRemindersEnabled", value)} />
       </SettingsSection>

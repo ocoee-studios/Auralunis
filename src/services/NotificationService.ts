@@ -27,6 +27,26 @@ const Notifs = Notifications as unknown as {
 
 const LEAD_TIME_MS = 30 * 60 * 1000;
 
+/**
+ * Check-only permission read — NEVER shows the iOS authorization prompt. Automatic,
+ * non-user-initiated code paths (e.g. Home's mount-time scheduling) must use this so a
+ * fresh launch / onboarding never triggers "…Would Like to Send You Notifications". Returns
+ * true only when the user has ALREADY granted notification permission.
+ */
+export async function hasNotificationPermission(): Promise<boolean> {
+  try {
+    const { status } = await Notifs.getPermissionsAsync();
+    return status === "granted";
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Explicit permission request — MAY show the iOS authorization prompt. Only call this from a
+ * deliberate, contextual user action (e.g. turning Notifications on in Settings), never on
+ * app startup, provider init, onboarding, or navigation mount.
+ */
 export async function requestNotificationPermission(): Promise<boolean> {
   try {
     const { status: existing } = await Notifs.getPermissionsAsync();
@@ -55,7 +75,8 @@ export function configureNotificationHandler(): void {
 export async function scheduleSkyEventNotifications(
   sky: TonightSky
 ): Promise<number> {
-  const granted = await requestNotificationPermission();
+  // Check-only: schedule for already-authorized users; NEVER prompt from this automatic path.
+  const granted = await hasNotificationPermission();
   if (!granted) return 0;
 
   // Cancel previous schedules to avoid duplicates across refreshes.
@@ -110,7 +131,8 @@ export async function scheduleCelestialEventNotifications(
   events: Array<{ id: string; name: string; date: string; type: string; bestTime: string; rating: number }>,
   maxEvents = 6
 ): Promise<number> {
-  const granted = await requestNotificationPermission();
+  // Check-only: schedule for already-authorized users; NEVER prompt from this automatic path.
+  const granted = await hasNotificationPermission();
   if (!granted) return 0;
 
   const now = Date.now();
