@@ -1141,7 +1141,14 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       {/* Top HUD (hidden in cinematic Immersive Sky) */}
       {!cinematic && (
       <View style={[styles.topBar, { paddingTop: insets.top + 8 }]} pointerEvents="box-none">
-        <TouchableOpacity style={styles.iconBtn} onPress={onClose} activeOpacity={0.8}>
+        <TouchableOpacity
+          style={styles.iconBtn}
+          onPress={onClose}
+          activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Close Sky Lens"
+          hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+        >
           <Text style={styles.iconBtnText}>✕</Text>
         </TouchableOpacity>
 
@@ -1167,6 +1174,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
             onPress={() => setBrightnessVisible((v) => !v)}
             accessibilityRole="button"
             accessibilityLabel="Sky brightness"
+            accessibilityState={{ selected: brightnessVisible }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>☀</Text>
@@ -1181,6 +1190,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               if (scrubVisible && timeOffsetMin !== 0) setTimeOffsetMin(0);
               setScrubVisible((v) => !v);
             }}
+            accessibilityRole="button"
+            accessibilityLabel="Time travel"
+            accessibilityState={{ selected: scrubVisible }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>🕐</Text>
@@ -1191,6 +1204,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
               if (!gate.nightVision) { openPaywall(); return; } // red dark-adapt mode is premium
               const next = !nightMode; setNightMode(next); updateSetting("nightVision", next);
             }}
+            accessibilityRole="button"
+            accessibilityLabel="Night vision"
+            accessibilityState={{ selected: nightMode }}
+            hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
             activeOpacity={0.8}
           >
             <Text style={styles.iconBtnText}>{nightMode ? "🌙" : "◐"}</Text>
@@ -1222,6 +1239,10 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
           onPress={captureSky}
           disabled={capturing}
           activeOpacity={0.8}
+          accessibilityRole="button"
+          accessibilityLabel="Capture a photo of the sky"
+          accessibilityHint="Saves and shares an image of the current sky view."
+          accessibilityState={{ disabled: capturing, busy: capturing }}
         >
           <Text style={styles.shutterIcon}>{capturing ? "…" : "📷"}</Text>
         </TouchableOpacity>

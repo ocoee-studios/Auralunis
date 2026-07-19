@@ -50,7 +50,12 @@ export function SkyLensInfoCard({ object, nightMode, saved, showPoetry = true, o
           <Text style={[styles.name, { color: accent }]}>{object.name}</Text>
           {object.subtitle ? <Text style={styles.subtitle}>{object.subtitle}</Text> : null}
         </View>
-        <TouchableOpacity onPress={onClose} hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}>
+        <TouchableOpacity
+          onPress={onClose}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          accessibilityRole="button"
+          accessibilityLabel="Close"
+        >
           <Text style={styles.close}>✕</Text>
         </TouchableOpacity>
       </View>
