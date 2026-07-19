@@ -91,7 +91,8 @@ check("Birth Sky birthplace search ranks state or country", birthSky.includes("s
 check("Birth Sky accepts AM/PM input", birthSky.includes("meridiemMatch"));
 check("Birth Sky accepts 24-hour input", birthSky.includes("twentyFourHourMatch"));
 check("Birth Sky rejects invalid times", birthSky.includes("return null") && birthSky.includes("Enter a valid birth time"));
-check("Birth Sky converts local time with birthplace timezone", birthSky.includes("localBirthMomentToUtc") && birthSky.includes("savedPlace.timezone"));
+check("Birth Sky converts local time with birthplace timezone", birthSky.includes("resolveBirthMoment") && birthSky.includes("savedPlace.timezone"));
+check("Birth Sky never guesses a chart from a missing time zone or DST-edge time", birthSky.includes("nonexistent-local-time") && birthSky.includes("ambiguous-local-time") && !birthSky.includes('|| "UTC"'));
 check("Birth Sky saves local date separately from UTC instant", birthSky.includes("BIRTH_DATE_LOCAL_STORAGE_KEY"));
 check("Birth Sky saves local time separately from UTC instant", birthSky.includes("BIRTH_TIME_LOCAL_STORAGE_KEY"));
 check("Birth Sky chart uses resolved location", birthSky.includes("location={profile.location}"));

@@ -76,6 +76,9 @@ jobs:
       - name: Sky Lens accessibility-controls self-test
         run: npm run qa:a11y
 
+      - name: Time-zone / DST self-test (9-zone matrix)
+        run: npm run qa:timezone
+
       - name: Expo Doctor
         run: npx expo-doctor
 

@@ -110,7 +110,8 @@ check("Birth Sky does not use current device location", !birthSky.includes("useO
 check("Birth Sky requires a birthplace", birthSky.includes("BIRTHPLACE") && birthSky.includes("findBirthplace"));
 check("Birth Sky accepts AM/PM time", birthSky.includes("parseBirthTime") && birthSky.includes("meridiemMatch"));
 check("Birth Sky supports 24-hour time", birthSky.includes("twentyFourHourMatch"));
-check("Birth Sky converts local time using birthplace timezone", birthSky.includes("localBirthMomentToUtc") && birthSky.includes("savedPlace.timezone"));
+check("Birth Sky converts local time using birthplace timezone", birthSky.includes("resolveBirthMoment") && birthSky.includes("savedPlace.timezone"));
+check("Birth Sky handles DST-edge / missing-timezone without guessing a chart", birthSky.includes("nonexistent-local-time") && birthSky.includes("ambiguous-local-time") && birthSky.includes("invalid-time-zone"));
 check("Birth Sky renders chart from resolved birthplace", birthSky.includes("location={profile.location}"));
 check("Birth Sky stores local date and time separately", birthSky.includes("BIRTH_DATE_LOCAL_STORAGE_KEY") && birthSky.includes("BIRTH_TIME_LOCAL_STORAGE_KEY"));
 check("Birth Sky labels unknown-time horizon as approximate", birthSky.includes('"Approx. eastern sky"') && birthSky.includes("approximationNote"));
