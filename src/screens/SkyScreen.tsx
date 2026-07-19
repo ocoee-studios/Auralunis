@@ -43,7 +43,7 @@ export function SkyScreen() {
   const [focusTarget, setFocusTarget] = useState<FocusTarget | null>(null);
   const { addItem } = useAuraLunisVault();
 
-  const { location, status } = useObserverLocation();
+  const { location, status, enableLocation } = useObserverLocation();
   const sky = useMemo(() => computeTonightSky(location), [location]);
 
   // Hide the (absolute-positioned) bottom tab bar during full-screen immersive
@@ -169,7 +169,15 @@ export function SkyScreen() {
           </View>
         ))}
         {status === "fallback" ? (
-          <Text style={styles.skyHint}>Default location · enable location for your exact sky.</Text>
+          // Explicit, user-initiated location enable — the ONLY path that may show the iOS
+          // location prompt. Automatic/mount paths only check existing permission.
+          <TouchableOpacity
+            onPress={enableLocation}
+            accessibilityRole="button"
+            accessibilityLabel="Use my location for your exact sky"
+          >
+            <Text style={styles.skyHint}>Default location · tap Use My Location for your exact sky.</Text>
+          </TouchableOpacity>
         ) : null}
       </GlassPanel>
 

@@ -1,58 +1,51 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Location from "expo-location";
 import type { ObserverLocation } from "../accuracy/SkyLensAccuracyTypes";
 import { DEFAULT_OBSERVER } from "./SkyEphemerisService";
+import { resolveObserverLocation, type LocationPermissionApi } from "./observerLocationResolver";
 
 export { DEFAULT_OBSERVER };
 
-// Expo SDK 51 location surface used here. Typed locally because strict `tsc`
-// under classic module resolution can mis-resolve this package's bundled types;
-// the runtime API matches the Expo SDK 51 documentation exactly.
-const ExpoLocation = Location as unknown as {
-  requestForegroundPermissionsAsync: () => Promise<{ status: string }>;
-  getCurrentPositionAsync: (
-    options?: Record<string, unknown>
-  ) => Promise<{ coords: { latitude: number; longitude: number; altitude: number | null } }>;
-};
+// Expo location surface used here. Typed locally because strict `tsc` under classic module
+// resolution can mis-resolve this package's bundled types; the runtime API matches the Expo
+// docs exactly. `getForegroundPermissionsAsync` is the CHECK-ONLY read (never prompts) used
+// by the passive/mount path; `requestForegroundPermissionsAsync` may prompt and is reached
+// ONLY via the explicit enableLocation() action.
+const ExpoLocation = Location as unknown as LocationPermissionApi;
 
 export type LocationStatus = "loading" | "granted" | "fallback";
 
 export interface ObserverLocationState {
   location: ObserverLocation;
   status: LocationStatus;
+  /** Passive re-check — NEVER prompts; re-reads a fix only if already authorized. */
   refresh: () => void;
+  /**
+   * Explicit, user-initiated enable — MAY show the iOS location prompt. Call this ONLY from a
+   * deliberate contextual action (e.g. a "Use My Location" button), never on mount/onboarding.
+   */
+  enableLocation: () => void;
 }
 
 export function useObserverLocation(): ObserverLocationState {
   const [location, setLocation] = useState<ObserverLocation>(DEFAULT_OBSERVER);
   const [status, setStatus] = useState<LocationStatus>("loading");
   const [nonce, setNonce] = useState(0);
+  // Consumed once per resolution. false = passive (mount/refresh, check-only, never prompts);
+  // true = an explicit enableLocation() request that may prompt.
+  const shouldPromptRef = useRef(false);
 
   useEffect(() => {
     let active = true;
+    const prompt = shouldPromptRef.current;
+    shouldPromptRef.current = false;
 
     async function resolve() {
       setStatus("loading");
-      try {
-        const permission = await ExpoLocation.requestForegroundPermissionsAsync();
-        if (!active) return;
-        if (permission.status !== "granted") {
-          setStatus("fallback");
-          return;
-        }
-
-        const fix = await ExpoLocation.getCurrentPositionAsync({});
-        if (!active) return;
-        setLocation({
-          latitudeDegrees: fix.coords.latitude,
-          longitudeDegrees: fix.coords.longitude,
-          altitudeMeters: fix.coords.altitude ?? 0
-        });
-        setStatus("granted");
-      } catch {
-        // Keep the neutral default usable if location services are unavailable.
-        if (active) setStatus("fallback");
-      }
+      const result = await resolveObserverLocation(ExpoLocation, prompt);
+      if (!active) return;
+      if (result.status === "granted") setLocation(result.location);
+      setStatus(result.status);
     }
 
     void resolve();
@@ -61,5 +54,13 @@ export function useObserverLocation(): ObserverLocationState {
     };
   }, [nonce]);
 
-  return { location, status, refresh: () => setNonce((n) => n + 1) };
+  return {
+    location,
+    status,
+    refresh: () => setNonce((n) => n + 1),
+    enableLocation: () => {
+      shouldPromptRef.current = true;
+      setNonce((n) => n + 1);
+    },
+  };
 }
