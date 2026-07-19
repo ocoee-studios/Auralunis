@@ -10,10 +10,11 @@ export function ManualSkyMap({ onClose }: Props) {
   return (
     <View style={styles.wrap}>
       <Text style={styles.tag}>MANUAL SKY MAP</Text>
-      <Text style={styles.title}>Explore without camera access</Text>
+      <Text style={styles.title}>A simple sky reference</Text>
       <Text style={styles.copy}>
-        Browse a privacy-safe sky map fallback. Production will connect this map
-        to location, time, ephemeris calculations, Find Mode, and object cards.
+        Get oriented with a quick manual map — cardinal directions and bright
+        landmarks like Orion and the Milky Way band. For live positions of the
+        Sun, Moon, planets, and deep-sky objects, open Sky Lens.
       </Text>
 
       <View style={styles.map}>

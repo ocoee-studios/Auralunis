@@ -10,7 +10,7 @@
       "assets/**/*"
     ],
     "ios": {
-      "supportsTablet": true,
+      "supportsTablet": false,
       "bundleIdentifier": "com.ocoeestudios.auralunis",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
