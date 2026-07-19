@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
+import { formatClockTime, formatWeekdayDay } from "@/utils/formatting";
 
 type Props = {
   offsetMinutes: number;          // current scrub offset from real "now", in minutes
@@ -59,8 +60,8 @@ export function TimeScrubBar({ offsetMinutes, onChange, accent }: Props) {
   const gesture = Gesture.Race(doubleTap, pan);
 
   const scrubbed = new Date(Date.now() + offsetMinutes * 60_000);
-  const timeLabel = scrubbed.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
-  const dayLabel = scrubbed.toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  const timeLabel = formatClockTime(scrubbed);
+  const dayLabel = formatWeekdayDay(scrubbed);
   const isNow = offsetMinutes === 0;
   const offsetLabel =
     isNow ? "NOW" : `${offsetMinutes > 0 ? "+" : "−"}${humanizeOffset(Math.abs(offsetMinutes))}`;

@@ -4,6 +4,7 @@
 // AuraLunisVaultContext — saving happens elsewhere (Home notes, Sky "Save + Find",
 // lessons) via addItem/addNote.
 import React, { useMemo, useState } from "react";
+import { formatMediumDate } from "@/utils/formatting";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { AuraLunisColors } from "@/theme/tokens";
@@ -23,7 +24,7 @@ const TYPE_LABEL: Record<VaultItemType, string> = {
 function formatDate(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "";
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  return formatMediumDate(d);
 }
 
 export function VaultScreen() {

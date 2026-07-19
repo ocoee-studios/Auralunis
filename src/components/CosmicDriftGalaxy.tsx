@@ -5,6 +5,7 @@
 // The galaxy rotates slowly via Reanimated so it feels alive even when still.
 
 import React, { useEffect, useState, useRef } from "react";
+import { formatDateTime } from "@/utils/formatting";
 import {
   View,
   Text,
@@ -58,13 +59,7 @@ export function CosmicDriftGalaxy({ refreshTrigger = 0 }: CosmicDriftGalaxyProps
   }));
 
   function formatDate(iso: string): string {
-    return new Date(iso).toLocaleString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-      hour: "numeric",
-      minute: "2-digit",
-    });
+    return formatDateTime(new Date(iso));
   }
 
   if (entries.length === 0) {

@@ -7,6 +7,7 @@
 // ephemeris for astronomical darkness calculations.
 
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
+import { formatHour } from "@/utils/formatting";
 
 export interface AstroWeatherHour {
   time: string;             // ISO 8601
@@ -150,7 +151,7 @@ export async function fetchAstroWeather(
 
     return {
       time: w.time,
-      hourLabel: t.toLocaleTimeString("en-US", { hour: "numeric" }),
+      hourLabel: formatHour(t),
       cloudCoverPercent: Math.round(w.cloud),
       humidityPercent: Math.round(w.humidity),
       windSpeedKmh: Math.round(w.wind),

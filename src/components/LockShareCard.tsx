@@ -7,6 +7,7 @@
 // azimuth/elevation, AuraLunis branding, and the target's radar color.
 
 import React, { useRef } from "react";
+import { formatDateTime } from "@/utils/formatting";
 import {
   View, Text, StyleSheet, TouchableOpacity, Share, Platform, Alert,
 } from "react-native";
@@ -49,10 +50,7 @@ function MiniRadar({ color }: { color: string }) {
 
 function formatTimestamp(iso: string): string {
   try {
-    return new Date(iso).toLocaleString("en-US", {
-      month: "short", day: "numeric", year: "numeric",
-      hour: "numeric", minute: "2-digit",
-    });
+    return formatDateTime(new Date(iso));
   } catch {
     return iso;
   }

@@ -5,6 +5,7 @@
 // catalog; local notifications scheduled on mount.
 
 import React, { useMemo } from "react";
+import { formatWeekdayDay } from "@/utils/formatting";
 import { Pressable, StyleSheet, Text, View } from "react-native";
 import { ScreenShell } from "@/components/ScreenShell";
 import { Starfield } from "@/components/Starfield";
@@ -37,11 +38,7 @@ const TYPE_ICON: Record<EventType, string> = {
 };
 
 function formatDate(iso: string): string {
-  return new Date(`${iso}T12:00:00`).toLocaleDateString("en-US", {
-    weekday: "short",
-    month: "short",
-    day: "numeric",
-  });
+  return formatWeekdayDay(new Date(`${iso}T12:00:00`));
 }
 
 function EventRow({ event, onSeeInSky }: { event: CelestialEvent; onSeeInSky?: (e: CelestialEvent) => void }) {

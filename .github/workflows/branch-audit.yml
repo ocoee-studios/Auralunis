@@ -85,6 +85,9 @@ jobs:
       - name: Release-cleanup self-test (deleted assets/modules stay gone)
         run: npm run qa:release-cleanup
 
+      - name: Locale-formatting & Southern-Hemisphere-season self-test
+        run: npm run qa:locale-seasons
+
       - name: Expo Doctor
         run: npx expo-doctor
 

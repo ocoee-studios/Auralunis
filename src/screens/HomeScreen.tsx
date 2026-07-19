@@ -7,6 +7,7 @@
 // All data from existing services (SkyEphemerisService, TonightScoreService, etc.)
 
 import React, { useEffect, useMemo, useState } from "react";
+import { formatClockTime, formatFullWeekdayDate } from "@/utils/formatting";
 import {
   Alert, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View,
 } from "react-native";
@@ -155,9 +156,7 @@ export function HomeScreen() {
 
       {/* Date */}
       <Text style={styles.dateText}>
-        {new Date().toLocaleDateString("en-US", {
-          weekday: "long", month: "long", day: "numeric",
-        }).toUpperCase()}
+        {formatFullWeekdayDate(new Date()).toUpperCase()}
       </Text>
 
       {/* ── Tonight's hero insight — the ONE most interesting thing in the sky.
@@ -197,8 +196,8 @@ export function HomeScreen() {
       <View style={styles.timeRow}>
         <Text style={styles.timeValue}>
           {scrubOffset === 0
-            ? new Date().toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
-            : new Date(Date.now() + scrubOffset * 60_000).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" })
+            ? formatClockTime(new Date())
+            : formatClockTime(new Date(Date.now() + scrubOffset * 60_000))
           }
         </Text>
         <Text style={styles.timeDot}>·</Text>

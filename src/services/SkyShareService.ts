@@ -4,6 +4,7 @@
 // Uses expo-sharing + ViewShot to capture and share as images.
 
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
+import { formatLongDate, formatClockTime } from "@/utils/formatting";
 
 export interface SkyObservation {
   id: string;
@@ -55,8 +56,8 @@ export function buildShareCard(
   config: ShareConfig = DEFAULT_CONFIG,
 ): ShareCard {
   const date = new Date(observation.timestamp);
-  const dateStr = date.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
-  const timeStr = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const dateStr = formatLongDate(date);
+  const timeStr = formatClockTime(date);
 
   // Build headline from objects
   let headline: string;

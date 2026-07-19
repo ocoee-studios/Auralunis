@@ -8,6 +8,7 @@
 // Size: 260×260 to fit comfortably above the tab bar on all iPhones.
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { formatClockTime } from "@/utils/formatting";
 import { View, StyleSheet, Text, TouchableOpacity } from "react-native";
 import { GestureDetector, Gesture } from "react-native-gesture-handler";
 import Svg, {
@@ -340,7 +341,7 @@ export function CelestialDial({ sky, tonightScore, tonightLabel, onTimeScrub, sc
 
 /** Format a date for scrub display */
 function formatScrubTime(date: Date): string {
-  return date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  return formatClockTime(date);
 }
 
 /** SVG arc path descriptor — for the scrub progress indicator */
