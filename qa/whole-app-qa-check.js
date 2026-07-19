@@ -116,7 +116,9 @@ check("Birth Sky stores local date and time separately", birthSky.includes("BIRT
 check("Birth Sky labels unknown-time horizon as approximate", birthSky.includes('"Approx. eastern sky"') && birthSky.includes("approximationNote"));
 
 const onboarding = read("src/features/onboarding/OnboardingFlow.tsx");
-check("onboarding labels date-only birth sky as preview", onboarding.includes("DATE-ONLY PREVIEW"));
+// First-run onboarding is now purely informational (no in-flow date-only birth-sky preview);
+// it must stay truthful that an unknown birth time limits the rising sign / time-sensitive detail.
+check("onboarding is truthful that unknown birth time limits time-sensitive detail", onboarding.includes("rising sign") && onboarding.includes("time-sensitive"));
 check("onboarding explains exact birthplace and time are still needed", onboarding.includes("birthplace") && onboarding.includes("birth time"));
 check("onboarding does not advertise removed camera AR", !onboarding.includes("Point your phone at the sky"));
 

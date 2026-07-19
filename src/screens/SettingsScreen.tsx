@@ -3,6 +3,7 @@ import { Alert, Image, Linking, Modal, Pressable, StyleSheet, Switch, Text, View
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
+import { useOnboarding } from "@/context/OnboardingContext";
 import { resolveMembershipCta } from "@/features/paywall/entitlementStatus";
 import { TermsScreen } from "@/screens/TermsScreen";
 import { PrivacyScreen } from "@/screens/PrivacyScreen";
@@ -55,6 +56,7 @@ export function SettingsScreen() {
   const { settings, hydrated, updateSetting, resetSettings } = useAuraLunisSettings();
   const { membershipKind, refresh } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
+  const { replayTutorial } = useOnboarding();
   // Single source of truth for the membership card's copy, label, and action — derived
   // from the RevenueCat-backed membershipKind (loading/unknown/error fail closed to "none").
   const membershipCta = resolveMembershipCta(membershipKind);
@@ -310,6 +312,17 @@ export function SettingsScreen() {
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => Alert.alert("About AuraLunis", `${AuraLunisBrand.name} · ${AuraLunisBrand.descriptor}\n${AuraLunisBrand.tagline}`)}>
           <Text style={styles.secondaryButtonText}>About AuraLunis</Text>
+        </Pressable>
+        {/* Re-opens the first-run onboarding from the beginning. Purely presentational: it
+            never erases birth data, clears entitlement/RevenueCat state, or marks the app as
+            a new install. */}
+        <Pressable
+          style={styles.secondaryButton}
+          onPress={replayTutorial}
+          accessibilityRole="button"
+          accessibilityLabel="Replay Tutorial"
+        >
+          <Text style={styles.secondaryButtonText}>Replay Tutorial</Text>
         </Pressable>
         <Pressable style={styles.secondaryButton} onPress={() => setLegalModal("privacy")}>
           <Text style={styles.secondaryButtonText}>Privacy Policy</Text>

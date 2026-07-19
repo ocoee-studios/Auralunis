@@ -99,7 +99,9 @@ check("Birth Sky chart uses resolved location", birthSky.includes("location={pro
 check("Birth Sky unknown time is labeled approximate", birthSky.includes('"Approx. eastern sky"'));
 check("Birth Sky network failure is user-visible", birthSky.includes("We couldn't find that birthplace"));
 
-check("onboarding birth sky is explicitly a date-only preview", onboarding.includes("DATE-ONLY PREVIEW"));
+// First-run onboarding is now informational (the date-only birth-sky preview lives in the
+// Birth Sky screen, not the intro); it must stay honest about what an unknown birth time limits.
+check("onboarding is truthful about unknown birth time limits", onboarding.includes("rising sign") && onboarding.includes("time-sensitive"));
 check("onboarding avoids exact horizon claims", !onboarding.includes("Above the horizon:"));
 check("onboarding explains birthplace and birth time are needed", onboarding.includes("birthplace") && onboarding.includes("birth time"));
 check("onboarding no longer advertises camera AR", !onboarding.includes("Point your phone at the sky"));
