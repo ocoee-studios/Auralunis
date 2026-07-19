@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { Alert } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
+import { Alert, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView as RNGestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 // react-native-gesture-handler's published types omit `children` on this
@@ -16,6 +17,15 @@ import { ThreeTierPaywallModal } from "@/features/paywall/ThreeTierPaywallModal"
 import { AuraLunisSettingsProvider } from "@/state/AuraLunisSettingsContext";
 import { AuraLunisVaultProvider } from "@/state/AuraLunisVaultContext";
 import { OnboardingFlow } from "@/features/onboarding/OnboardingFlow";
+import { LogoMark } from "@/components/LogoMark";
+import { OnboardingProvider, useOnboarding } from "@/context/OnboardingContext";
+import {
+  EXISTING_USER_DATA_KEYS,
+  hasExistingUserData,
+  resolveLaunchRoute,
+  shouldPersistMigration,
+  type LaunchRoute,
+} from "@/features/onboarding/onboardingRoute";
 import {
   configureRevenueCat,
   purchaseAuraLunisPackage,
@@ -41,8 +51,35 @@ function PaywallBridge({ onOpen }: { onOpen: () => void }) {
   return null;
 }
 
+// Bridges Settings → "Replay Tutorial" (OnboardingContext.replayNonce) to App's route state.
+// The initial mount is ignored; every later bump re-shows onboarding WITHOUT resetting the
+// persisted completion flag — a replay is never treated as a new install.
+function OnboardingBridge({ onReplay }: { onReplay: () => void }) {
+  const { replayNonce } = useOnboarding();
+  const first = useRef(true);
+  React.useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    onReplay();
+  }, [replayNonce]);
+  return null;
+}
+
+// Opaque boot cover shown while the persisted onboarding signals resolve, so the Birth Chart
+// / Home tab can never flash before the onboarding-vs-app decision is made.
+function BootSplash() {
+  return (
+    <View style={styles.bootSplash}>
+      <LogoMark size={96} />
+    </View>
+  );
+}
+
 export default function App() {
-  const [onboardingVisible, setOnboardingVisible] = useState(false);
+  // "loading" until the persisted flag + existing-user migration condition are resolved.
+  const [route, setRoute] = useState<LaunchRoute>("loading");
   const [paywallVisible, setPaywallVisible] = useState(false);
 
   useEffect(() => {
@@ -56,12 +93,30 @@ export default function App() {
         // Keep the free Horizon experience usable if purchase setup is unavailable.
       });
 
+      // Read the onboarding flag AND any durable prior-use data in one pass, then resolve the
+      // launch route with the pure resolver. On any storage failure, fail toward showing
+      // onboarding (treat as a fresh install) rather than skipping it silently.
+      let signals = { onboardingComplete: false, hasExistingUserData: false };
       try {
-        const seen = await AsyncStorage.getItem(ONBOARDING_SEEN_KEY);
-        if (active && !seen) setOnboardingVisible(true);
+        const keys = [ONBOARDING_SEEN_KEY, ...EXISTING_USER_DATA_KEYS];
+        const entries = await AsyncStorage.multiGet(keys);
+        const store: Record<string, string | null> = {};
+        for (const [key, value] of entries) store[key] = value;
+        signals = {
+          onboardingComplete: Boolean(store[ONBOARDING_SEEN_KEY]),
+          hasExistingUserData: hasExistingUserData(store),
+        };
       } catch {
-        if (active) setOnboardingVisible(true);
+        // Leave signals at the fail-open default (new install → onboarding).
       }
+
+      if (!active) return;
+
+      // Migrate existing Build 5 users (saved data, no flag) so they aren't forced through
+      // onboarding again — persist the flag once, without touching their birth data.
+      if (shouldPersistMigration(signals)) void markOnboardingSeen();
+
+      setRoute(resolveLaunchRoute(signals));
     }
 
     initialize();
@@ -79,15 +134,16 @@ export default function App() {
     }
   }
 
-  function handleOnboardingComplete() {
-    markOnboardingSeen();
-    setOnboardingVisible(false);
+  // Completing OR skipping onboarding (first run or replay) persists the flag and enters the
+  // app. Replay is safe here too: the flag is simply re-affirmed, never cleared.
+  function handleOnboardingDone() {
+    void markOnboardingSeen();
+    setRoute("app");
   }
 
-  function handleOnboardingOpenPaywall() {
-    markOnboardingSeen();
-    setOnboardingVisible(false);
-    setPaywallVisible(true);
+  // Settings → "Replay Tutorial": re-show onboarding over the running app.
+  function handleReplayTutorial() {
+    setRoute("onboarding");
   }
 
   // Also callable from Settings → Manage Membership
@@ -171,15 +227,18 @@ export default function App() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
       <ErrorBoundary>
       <EntitlementProvider>
       <PaywallNavigationProvider>
+      <OnboardingProvider>
         <AuraLunisSettingsProvider>
           <AuraLunisVaultProvider>
             <NavigationContainer>
               <RootTabs />
             </NavigationContainer>
             <PaywallBridge onOpen={() => setPaywallVisible(true)} />
+            <OnboardingBridge onReplay={handleReplayTutorial} />
 
             <ThreeTierPaywallModal
               visible={paywallVisible}
@@ -188,16 +247,30 @@ export default function App() {
               onRestore={handleRestorePurchases}
             />
 
-          <OnboardingFlow
-            visible={onboardingVisible}
-            onComplete={handleOnboardingComplete}
-            onOpenPaywall={handleOnboardingOpenPaywall}
-          />
+            <OnboardingFlow
+              visible={route === "onboarding"}
+              onDone={handleOnboardingDone}
+            />
+
+            {/* Opaque boot cover — keeps the Home/Birth Chart tab from flashing before the
+                onboarding-vs-app decision resolves. Rendered last so it sits on top. */}
+            {route === "loading" && <BootSplash />}
           </AuraLunisVaultProvider>
         </AuraLunisSettingsProvider>
+      </OnboardingProvider>
       </PaywallNavigationProvider>
       </EntitlementProvider>
       </ErrorBoundary>
+      </SafeAreaProvider>
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  bootSplash: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "#040611",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+});
