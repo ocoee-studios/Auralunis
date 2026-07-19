@@ -17,7 +17,7 @@
     "qa:sky": "node ./qa/sky-lens-accuracy-check.js",
     "qa:whole": "node ./qa/whole-app-qa-check.js",
     "qa:native-device": "node ./scripts/native-device-preflight.js",
-    "qa:all": "npm run qa:static && npm run qa:sky && npm run qa:whole && npm run qa:native-device && npm run qa:revenuecat && npm run qa:aura-pro && npm run qa:fresh-bugs && npm run qa:ephemeris && npm run qa:satellite && npm run qa:skylens && npm run qa:labels && npm run qa:orion && npm run qa:planets && npm run qa:release-config && npm run qa:a11y && npm run qa:timezone && npm run qa:reduced-motion",
+    "qa:all": "npm run qa:static && npm run qa:sky && npm run qa:whole && npm run qa:native-device && npm run qa:revenuecat && npm run qa:aura-pro && npm run qa:fresh-bugs && npm run qa:ephemeris && npm run qa:satellite && npm run qa:skylens && npm run qa:labels && npm run qa:orion && npm run qa:planets && npm run qa:release-config && npm run qa:a11y && npm run qa:timezone && npm run qa:reduced-motion && npm run qa:release-cleanup",
     "eas:dev:ios": "npx eas-cli@latest build --platform ios --profile development",
     "eas:sim:ios": "npx eas-cli@latest build --platform ios --profile development-simulator",
     "eas:preview:ios": "npx eas-cli@latest build --platform ios --profile preview",
@@ -33,7 +33,8 @@
     "qa:release-config": "node ./scripts/release-config-guard.js",
     "qa:a11y": "node ./scripts/a11y-controls-selftest.js",
     "qa:timezone": "node ./scripts/timezone-selftest.js",
-    "qa:reduced-motion": "node ./scripts/reduced-motion-selftest.js"
+    "qa:reduced-motion": "node ./scripts/reduced-motion-selftest.js",
+    "qa:release-cleanup": "node ./scripts/release-cleanup-selftest.js"
   },
   "dependencies": {
     "@expo-google-fonts/cinzel": "^0.2.3",

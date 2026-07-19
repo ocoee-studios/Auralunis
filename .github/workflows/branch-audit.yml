@@ -82,6 +82,9 @@ jobs:
       - name: Reduced-motion self-test
         run: npm run qa:reduced-motion
 
+      - name: Release-cleanup self-test (deleted assets/modules stay gone)
+        run: npm run qa:release-cleanup
+
       - name: Expo Doctor
         run: npx expo-doctor
 

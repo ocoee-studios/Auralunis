@@ -49,8 +49,7 @@ const required = [
   "src/components/LogoMark.tsx",
   "assets/logo/auralunis-app-icon.png",
   "assets/logo/auralunis-splash.png",
-  "assets/sky-backgrounds/sky-background-cool-violet.png",
-  "assets/nebula-baked/orion-nebula.png"
+  "assets/sky-backgrounds/sky-background-cool-violet.png"
 ];
 
 for (const rel of required) check(`required file: ${rel}`, exists(rel));

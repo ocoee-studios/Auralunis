@@ -9,7 +9,7 @@ Make the existing sky the most beautiful astronomy experience on iOS.
 
 ## Week 1: 🌌 The Most Beautiful Milky Way on Any Phone
 
-Reference: assets/sky/milkyway-reference.webp
+Reference: Bortle 1 Milky Way astrophoto (image removed from repo in release cleanup — was unreferenced)
 
 - Warm golden-pink core at Sagittarius (not white)
 - Dark Great Rift dramatically splitting the band (2-3× darker)
@@ -41,7 +41,7 @@ Reference: assets/sky/milkyway-reference.webp
 
 ## Week 3: ☁️ Nebulae That Look Like Their Names
 
-Reference: assets/sky/nebula-reference-trifid.jpg
+Reference: Trifid Nebula astrophoto (image removed from repo in release cleanup — was unreferenced)
 
 The Big Five get custom dual-color SVG shapes:
 | Nebula | Emission (warm) | Reflection (cool) | Signature shape |
