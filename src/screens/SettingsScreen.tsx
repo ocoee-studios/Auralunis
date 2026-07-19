@@ -52,7 +52,7 @@ function SettingsSection({ title, children }: { title: string; children: React.R
 
 export function SettingsScreen() {
   const { settings, hydrated, updateSetting, resetSettings } = useAuraLunisSettings();
-  const { isPremium, refresh } = useEntitlement();
+  const { isPremium, membershipKind, refresh } = useEntitlement();
   const { openPaywall } = usePaywallNavigation();
   const { items, clearPrototypeVault } = useAuraLunisVault();
   const [deviceDiagnosticsOpen, setDeviceDiagnosticsOpen] = useState(false);
@@ -67,8 +67,13 @@ export function SettingsScreen() {
         Alert.alert("Restore Purchases", "Purchases will be available once AuraLunis is live on the App Store.");
         return;
       }
+      if (result.status === "error") {
+        Alert.alert("Restore Purchases", "We couldn't reach the App Store to restore your purchases. Please check your connection and try again.");
+        return;
+      }
       // Re-fetch entitlement so the UI reflects the restore immediately (not just on
-      // next foreground), and tell the user the truth about what was found.
+      // next foreground), and tell the user the truth about what was found — success ONLY
+      // when the active AuraLunis Premium entitlement is present, never on a bare completion.
       await refresh();
       Alert.alert(
         "Restore Purchases",
@@ -128,19 +133,24 @@ export function SettingsScreen() {
             AuraLunis Premium: {AuraLunisPricing.monthly} or {AuraLunisPricing.annual}. Lifetime {AuraLunisPricing.lifetime} one-time.
           </Text>
           <Text style={styles.infoCopy}>
-            A 7-day introductory trial may be available to eligible new subscribers. Subscribe when you're ready. Cancel anytime.
+            Subscribe when you're ready. Cancel anytime.
           </Text>
           {!isPremium && (
             <Pressable style={styles.actionButton} onPress={openPaywall}>
               <Text style={styles.actionButtonText}>Upgrade to Premium</Text>
             </Pressable>
           )}
-          <Pressable
-            style={isPremium ? styles.actionButton : styles.secondaryButton}
-            onPress={handleManageSubscription}
-          >
-            <Text style={isPremium ? styles.actionButtonText : styles.secondaryButtonText}>Manage Subscription</Text>
-          </Pressable>
+          {/* Manage Subscription is shown ONLY for an active auto-renewing subscription
+              (monthly/annual). Lifetime owners have nothing to manage, and non-premium
+              users get the Upgrade CTA above instead. Derived from CustomerInfo, never copy. */}
+          {membershipKind === "subscription" && (
+            <Pressable style={styles.actionButton} onPress={handleManageSubscription}>
+              <Text style={styles.actionButtonText}>Manage Subscription</Text>
+            </Pressable>
+          )}
+          {membershipKind === "lifetime" && (
+            <Text style={styles.infoCopy}>Lifetime access — no subscription to manage.</Text>
+          )}
           <Pressable
             style={styles.secondaryButton}
             onPress={handleRestorePurchases}
@@ -284,7 +294,7 @@ export function SettingsScreen() {
 
         <Pressable style={styles.secondaryButton} onPress={() => Alert.alert(
           "Frequently Asked Questions",
-          "How do I use Sky Lens?\nPoint your phone at the sky. Stars, constellations, and planets align to the direction your phone is pointing.\n\nWhy can't I see the Milky Way?\nTurn toward the south (heading ~160-180°). The galactic core is brightest in Sagittarius.\n\nHow do I find a specific object?\nLook for the 'Pan to...' hint at the bottom of Sky Lens. It guides you to bright objects.\n\nIs there a free trial?\nA 7-day introductory trial may be available to eligible new subscribers on the monthly and annual plans. Apple determines eligibility, so the trial appears at checkout only when your account qualifies. Lifetime has no trial.\n\nHow do I restore my purchase?\nGo to Settings → Manage Subscription → Restore Purchases.\n\nNeed more help?\nTap 'Contact Support' below to email us."
+          "How do I use Sky Lens?\nPoint your phone at the sky. Stars, constellations, and planets align to the direction your phone is pointing.\n\nWhy can't I see the Milky Way?\nTurn toward the south (heading ~160-180°). The galactic core is brightest in Sagittarius.\n\nHow do I find a specific object?\nLook for the 'Pan to...' hint at the bottom of Sky Lens. It guides you to bright objects.\n\nIs there a free trial?\nThe monthly and annual plans support Apple's 7-day introductory trial for eligible new subscribers. Apple determines eligibility and shows the trial at checkout only when your account qualifies; otherwise standard pricing applies. Lifetime has no trial.\n\nHow do I restore my purchase?\nGo to Settings → Manage Subscription → Restore Purchases.\n\nNeed more help?\nTap 'Contact Support' below to email us."
         )}>
           <Text style={styles.secondaryButtonText}>FAQ / Help</Text>
         </Pressable>

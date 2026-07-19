@@ -88,6 +88,9 @@ jobs:
       - name: Locale-formatting & Southern-Hemisphere-season self-test
         run: npm run qa:locale-seasons
 
+      - name: Paywall / restore-truthfulness self-test
+        run: npm run qa:paywall-restore
+
       - name: Expo Doctor
         run: npx expo-doctor
 
