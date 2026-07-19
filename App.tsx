@@ -126,7 +126,7 @@ export default function App() {
     } catch {
       Alert.alert(
         "Purchase could not be completed",
-        "Please try again after confirming the StoreKit sandbox and RevenueCat offering configuration."
+        "Your purchase didn't go through. Please check your internet connection and try again. If you were charged, tap Restore Purchases to unlock Premium."
       );
     }
   }
@@ -151,7 +151,7 @@ export default function App() {
     } catch {
       Alert.alert(
         "Restore could not be completed",
-        "Please try again after confirming the StoreKit sandbox account."
+        "We couldn't reach the App Store to restore your purchases. Please check your connection and try again."
       );
     }
   }
