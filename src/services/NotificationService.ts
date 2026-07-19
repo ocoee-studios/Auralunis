@@ -4,6 +4,7 @@
 
 import * as Notifications from "expo-notifications";
 import type { TonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
+import { localDateKey } from "@/utils/localDate";
 
 // Typed accessor: expo-notifications' published types under classic resolution
 // may only surface a subset. Runtime API matches Expo SDK 51 docs.
@@ -113,7 +114,7 @@ export async function scheduleCelestialEventNotifications(
   if (!granted) return 0;
 
   const now = Date.now();
-  const todayISO = new Date(now).toISOString().slice(0, 10);
+  const todayISO = localDateKey(new Date(now)); // LOCAL calendar day, not UTC
   const upcoming = events
     .filter((e) => e.date > todayISO && e.rating >= 3)
     .sort((a, b) => a.date.localeCompare(b.date))

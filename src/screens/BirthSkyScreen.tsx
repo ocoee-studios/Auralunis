@@ -14,6 +14,21 @@ import { computeBirthSky, BIRTHDAY_STORAGE_KEY, type BirthSkyProfile } from "@/s
 import type { ObserverLocation } from "@/features/sky-lens/accuracy/SkyLensAccuracyTypes";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
+import { resolveBirthMoment } from "@/utils/birthTime";
+
+// Thrown by findBirthplace when a geocoded place has no IANA time zone — we must NOT guess
+// UTC (that silently produces a wrong chart), so generate() catches this and asks the user
+// to refine the birthplace instead.
+const NO_TIMEZONE = "BIRTHPLACE_NO_TIMEZONE";
+
+// User-facing, jargon-free recovery copy. We never quietly compute a chart from a time zone we
+// couldn't confirm, or from a birth time that DST made impossible or ambiguous.
+const TIMEZONE_ERROR_COPY =
+  "We found that place but couldn't confirm its time zone, which we need for an accurate chart. Please try a more specific birthplace — for example, the city with its state or country.";
+const DST_GAP_COPY =
+  "That birth time didn't occur on that date — clocks sprang forward for daylight saving time, skipping that hour. Please double-check the recorded birth time.";
+const DST_OVERLAP_COPY =
+  "That birth time happened twice on that date — clocks fell back for daylight saving time, so it occurred once before the change and once after. Please double-check the exact recorded time before we cast the chart.";
 
 interface Props {
   onClose: () => void;
@@ -173,10 +188,13 @@ async function findBirthplace(query: string): Promise<SavedBirthplace> {
   if (results.length === 0) throw new Error("Birthplace not found");
 
   const place = [...results].sort((a, b) => scorePlace(b, qualifiers) - scorePlace(a, qualifiers))[0];
+  // A birth chart is only correct if we know the birthplace's real time zone. If geocoding
+  // didn't return one, stop rather than silently assuming UTC (which yields a wrong chart).
+  if (!place.timezone) throw new Error(NO_TIMEZONE);
   return {
     query,
     displayName: buildPlaceName(place),
-    timezone: place.timezone || "UTC",
+    timezone: place.timezone,
     location: {
       latitudeDegrees: place.latitude,
       longitudeDegrees: place.longitude,
@@ -208,35 +226,6 @@ function parseBirthTime(input: string): ParsedBirthTime | null {
   if (hour > 23 || minute > 59) return null;
   const localTime24 = `${String(hour).padStart(2, "0")}:${String(minute).padStart(2, "0")}`;
   return { localTime24, exact: true, display: localTime24 };
-}
-
-function timeZoneOffsetMs(utcMs: number, timeZone: string): number {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone,
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-    hourCycle: "h23"
-  }).formatToParts(new Date(utcMs));
-
-  const values: Record<string, number> = {};
-  for (const part of parts) {
-    if (part.type !== "literal") values[part.type] = Number(part.value);
-  }
-
-  return Date.UTC(values.year, values.month - 1, values.day, values.hour, values.minute, values.second) - utcMs;
-}
-
-function localBirthMomentToUtc(dateText: string, timeText: string, timeZone: string): Date {
-  const [year, month, day] = dateText.split("-").map(Number);
-  const [hour, minute] = timeText.split(":").map(Number);
-  const localAsUtc = Date.UTC(year, month - 1, day, hour, minute, 0);
-  let utcMs = localAsUtc - timeZoneOffsetMs(localAsUtc, timeZone);
-  utcMs = localAsUtc - timeZoneOffsetMs(utcMs, timeZone);
-  return new Date(utcMs);
 }
 
 export function BirthSkyScreen({ onClose }: Props) {
@@ -305,7 +294,12 @@ export function BirthSkyScreen({ onClose }: Props) {
       const savedPlace = resolvedBirthplace && resolvedBirthplace.query.toLowerCase() === trimmedPlace.toLowerCase()
         ? resolvedBirthplace
         : await findBirthplace(trimmedPlace);
-      const birthMoment = localBirthMomentToUtc(trimmedDate, parsedTime.localTime24, savedPlace.timezone);
+      const resolved = resolveBirthMoment(trimmedDate, parsedTime.localTime24, savedPlace.timezone);
+      // Recoverable DST/timezone edges — explain, preserve entered data, never guess a chart.
+      if (resolved.kind === "nonexistent-local-time") { setError(DST_GAP_COPY); return; }
+      if (resolved.kind === "ambiguous-local-time") { setError(DST_OVERLAP_COPY); return; }
+      if (resolved.kind === "invalid-time-zone") { setError(TIMEZONE_ERROR_COPY); return; }
+      const birthMoment = resolved.utc;
       const nextProfile = computeBirthSky(birthMoment.toISOString(), savedPlace.location, savedPlace.displayName);
 
       setResolvedBirthplace(savedPlace);
@@ -322,8 +316,13 @@ export function BirthSkyScreen({ onClose }: Props) {
           : AsyncStorage.removeItem(BIRTH_TIME_LOCAL_STORAGE_KEY),
         AsyncStorage.setItem(BIRTHPLACE_STORAGE_KEY, JSON.stringify(savedPlace))
       ]);
-    } catch {
-      setError("We couldn't find that birthplace. Try entering the city and state or country, such as Austell, Georgia.");
+    } catch (e) {
+      if (e instanceof Error && e.message === NO_TIMEZONE) {
+        // Recoverable: entered date/time/place are preserved so the user can just refine the place.
+        setError(TIMEZONE_ERROR_COPY);
+      } else {
+        setError("We couldn't find that birthplace. Try entering the city and state or country, such as Austell, Georgia.");
+      }
     } finally {
       setIsGenerating(false);
     }

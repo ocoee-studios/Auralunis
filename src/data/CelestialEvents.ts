@@ -4,6 +4,8 @@
 // set of rare events (eclipses, notable conjunctions) that can't be cheaply computed.
 // Sources: Meeus "Astronomical Algorithms", IAU, NASA eclipse canon.
 
+import { localDateKey } from "@/utils/localDate";
+
 export type EventType = "meteor" | "eclipse" | "conjunction" | "opposition" | "supermoon" | "comet" | "equinox" | "solstice" | "transit" | "occultation";
 
 export interface CelestialEvent {
@@ -249,30 +251,30 @@ export function generateEvents(startYear: number, endYear: number): CelestialEve
 
 export const CELESTIAL_EVENTS: CelestialEvent[] = generateEvents(2026, 2035);
 
-// Helper: get upcoming events from today
-export function getUpcomingEvents(limit = 10): CelestialEvent[] {
-  const now = new Date().toISOString().slice(0, 10);
+// Helper: get upcoming events from today. `now` is the LOCAL calendar day (not UTC) so a
+// user far from Greenwich still sees tonight's event. Optional Date arg for deterministic tests.
+export function getUpcomingEvents(limit = 10, now: Date = new Date()): CelestialEvent[] {
+  const today = localDateKey(now);
   return CELESTIAL_EVENTS
-    .filter(e => e.date >= now || (e.endDate && e.endDate >= now))
+    .filter(e => e.date >= today || (e.endDate && e.endDate >= today))
     .sort((a, b) => a.date.localeCompare(b.date))
     .slice(0, limit);
 }
 
-// Helper: get this week's events
-export function getThisWeekEvents(): CelestialEvent[] {
-  const now = new Date();
+// Helper: get this week's events (local-calendar window)
+export function getThisWeekEvents(now: Date = new Date()): CelestialEvent[] {
   const weekEnd = new Date(now.getTime() + 7 * 86400000);
-  const start = now.toISOString().slice(0, 10);
-  const end = weekEnd.toISOString().slice(0, 10);
+  const start = localDateKey(now);
+  const end = localDateKey(weekEnd);
   // Overlaps the window: starts on/before week-end AND ends on/after today (so a
   // multi-day shower already in progress isn't dropped).
   return CELESTIAL_EVENTS.filter(e => e.date <= end && (e.endDate ?? e.date) >= start);
 }
 
 // Helper: get high-rated upcoming events
-export function getHighlightEvents(minRating = 4): CelestialEvent[] {
-  const now = new Date().toISOString().slice(0, 10);
+export function getHighlightEvents(minRating = 4, now: Date = new Date()): CelestialEvent[] {
+  const today = localDateKey(now);
   return CELESTIAL_EVENTS
-    .filter(e => e.date >= now && e.rating >= minRating)
+    .filter(e => e.date >= today && e.rating >= minRating)
     .sort((a, b) => a.date.localeCompare(b.date));
 }
