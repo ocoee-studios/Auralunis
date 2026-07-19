@@ -18,3 +18,8 @@ android/
 # Design references & QA artifacts — keep in the repo, never ship in the build.
 docs/
 qa/
+
+# Local source nebula artwork (gitignored, unreferenced at runtime — the live nebula
+# renderer is procedural SVG). .easignore overrides .gitignore for the EAS archive, so
+# without this line these ~19 MB of untracked PNGs would still upload/embed. Exclude them.
+assets/nebula-art/

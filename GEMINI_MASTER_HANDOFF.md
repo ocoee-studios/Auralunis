@@ -85,7 +85,7 @@ A premium iOS astronomy app — "The Interactive Astral Clock." Point your phone
 ### Brand Assets
 - **App icon:** `assets/icon.png` — crescent moon + compass rose, gold on black with starfield
 - **Also at:** `assets/logo/auralunis-app-icon.png`
-- **Splash:** `assets/splash.png` / `assets/logo/auralunis-splash.png`
+- **Splash:** `assets/logo/auralunis-splash.png` (duplicate `assets/splash.png` removed in release cleanup)
 - **LogoMark component:** `src/components/LogoMark.tsx` — loads the real PNG icon
 
 ---

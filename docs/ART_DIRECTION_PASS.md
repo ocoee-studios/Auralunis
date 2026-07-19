@@ -92,7 +92,7 @@ Each layer distinct. No layer competes with another.
 
 ---
 
-## NEBULA REFERENCE: assets/sky/nebula-reference-trifid.jpg
+## NEBULA REFERENCE: Trifid Nebula astrophoto (reference image removed from repo in release cleanup — was unshipped and unreferenced)
 
 This Trifid Nebula astrophoto is the target for nebula rendering.
 

@@ -102,7 +102,7 @@ Build on top of it:
 **Status:** PARTIALLY BUILT (texture + procedural band exist)
 
 Already done:
-- ✅ Photographic core texture (milkyway-core.png with radial mask)
+- ✅ Photographic core texture (milkyway-core.png removed in release cleanup — layer was dead code)
 - ✅ Procedural gold band (MilkyWayLayer.tsx polyline strokes)
 - ✅ Gold tint (warm amber, not blue)
 

@@ -14,7 +14,7 @@ creating an awe-inspiring, premium experience unique to AuraLunis.
 
 ## Current State
 
-- Photographic core texture (milkyway-core.png) at Sagittarius ✅
+- Photographic core texture at Sagittarius (milkyway-core.png removed in release cleanup — the MilkyWayCoreLayer that used it was dead code)
 - Procedural gold band wrapping full galactic plane ✅
 - 332 dust blobs (Great Rift, fractures, knots, scattered) ✅
 - 38 deep sky objects rendered as independent glows ✅
@@ -101,7 +101,7 @@ At every point, the Milky Way should:
 
 ---
 
-## REFERENCE IMAGE: assets/sky/milkyway-reference.webp
+## REFERENCE IMAGE: Bortle 1 Milky Way astrophoto (reference image removed from repo in release cleanup — was unreferenced)
 
 This Bortle 1 astrophoto is the EXACT target for AuraLunis MW rendering.
 
