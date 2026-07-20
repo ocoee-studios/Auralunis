@@ -1,5 +1,7 @@
 # AuraLunis Aura Pro Utility Expansion
 
+> **Aura Pro is a set of premium features under the single `AuraLunis Premium` entitlement — not a separate purchase tier.** The two shipping panels, **Satellite Thermal** and **AstroPhoto Predictor**, are premium features gated in the app today.
+
 ## Added phone-side utilities
 
 ### Satellite + Space-Junk Thermal Overlay
@@ -29,17 +31,11 @@
 ### Desk Obelisk
 - In-app preview
 - WidgetKit StandBy-oriented native scaffold
-
-### Sovereign Sigil
-- SHA-256-derived local-safe vector preview
-- does not expose raw birth coordinates or raw device IDs
-- WidgetKit handoff scaffold
+- Future / do-not-enable-until-ready (per CLAUDE.md)
 
 ### Stellar Portal
 - visionOS RealityKit ImmersiveSpace handoff scaffold
-
-### Taptic Astrolabe Crown
-- watchOS SwiftUI Digital Crown handoff scaffold with haptic detents
+- Future / do-not-enable-until-ready (per CLAUDE.md)
 
 ## Important launch boundary
-Only the interactive phone-side scaffolds are active in the React Native app. Apple-native WidgetKit, watchOS, and visionOS targets must be created and tested in Xcode before those modules are marketed as live features.
+Only the interactive phone-side scaffolds are active in the React Native app. Any Apple-native WidgetKit or visionOS targets are future work that must be created and tested in Xcode before those modules are marketed as live features. (The Sovereign tier and any watchOS "Astrolabe Crown" concept were removed and are no longer part of the product.)

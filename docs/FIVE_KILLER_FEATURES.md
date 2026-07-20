@@ -182,8 +182,8 @@ into the image. Instant Instagram/TikTok content.
 ```tsx
 import { captureRef } from "react-native-view-shot";
 
-async function captureSkySelfie() {
-  // Capture the entire Sky Lens view (camera + overlay)
+async function captureSkyImage() {
+  // Capture a screenshot of the rendered Sky Lens view (no camera involved)
   const uri = await captureRef(skyLensRef, {
     format: "jpg",
     quality: 0.95,
@@ -195,7 +195,7 @@ async function captureSkySelfie() {
 ```
 
 ### UI
-Add a camera shutter button in Sky Lens:
+Add a capture (screenshot) button in Sky Lens:
 - Small circle icon in bottom-right (above layer bar)
 - Tap: capture + brief flash animation
 - Long press: capture + open edit/share screen

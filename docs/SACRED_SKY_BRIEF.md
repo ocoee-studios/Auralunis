@@ -9,7 +9,7 @@ Do not add more UI.
 Do not add more menus.
 Do not add more data.
 
-Use the existing camera, stars, Milky Way, constellation, planet, moon, nebula,
+Use the existing rendered sky, stars, Milky Way, constellation, planet, moon, nebula,
 meteor, zodiac, and info-card layers.
 
 Upgrade the visual language so every object feels alive, dimensional, and premium.
@@ -48,7 +48,7 @@ OrbitalGhostTrailsLayer   → satellite trail memory
 ConstellationForgeLayer   → gold ink draw-in animation
 ```
 
-Mount above camera, below existing SVG layers.
+Mount within the rendered Sky Lens view, below the existing SVG layers.
 
 ## What this is NOT
 

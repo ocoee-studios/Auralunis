@@ -14,10 +14,10 @@ AuraLunis is designed to keep your data local. The app does not sell, trade, or 
 Your device location is used to calculate the real-time positions of the Sun, Moon, planets, satellites, and overhead orbital objects above your specific sky. Location is processed on-device for these astronomical calculations and is never sent to Ocoee Studios servers. The only exception is the Tonight Score weather lookup: approximate coordinates are sent to Open-Meteo (see "Weather" below). If you decline location access, AuraLunis uses a neutral default location and all features remain available with reduced accuracy.
 
 ### Motion Sensors (Accelerometer & Magnetometer)
-Rotational vector data — pitch, roll, and azimuth — is processed in real time to align the Sky Lens camera overlay and the Orbital Alignment radar with the direction your phone is pointing. Sensor data is ephemeral: it is never stored to disk or transmitted anywhere.
+Rotational vector data — pitch, roll, and azimuth — is processed in real time to align the rendered Sky Lens planetarium and the Orbital Alignment radar with the direction your phone is pointing. Sensor data is ephemeral: it is never stored to disk or transmitted anywhere.
 
-### Camera (Sky Lens)
-The camera is used only while Sky Lens is open. No camera frames are stored, analyzed, or transmitted unless you explicitly choose to save a capture to your Vault.
+### Camera
+AuraLunis does not access your device camera. Sky Lens is a fully rendered, sensor-aligned planetarium; it does not display a live camera feed or an AR camera overlay. When you save or share a Sky Lens image, the app exports a screenshot of the rendered on-screen view.
 
 ### Weather (Tonight Score)
 AuraLunis sends your approximate coordinates to Open-Meteo to retrieve current cloud cover, humidity, and temperature for the Tonight Score and Astro Weather forecast. Open-Meteo is a free, keyless service — no account, API key, or device identifier is sent, only approximate latitude and longitude. No other personal data is included.

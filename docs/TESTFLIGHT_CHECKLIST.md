@@ -12,12 +12,12 @@
 ### Functionality
 - [ ] App launches without crash
 - [ ] Onboarding flow completes (4 steps)
-- [ ] All 5 tabs load: Home, Sky, Watch, Learn, Settings
+- [ ] All 5 tabs load: Home, Sky, Learn, Vault, Settings
 - [ ] Tonight Score displays a number
 - [ ] Astrolabe renders
 - [ ] Live time updates
 - [ ] Location permission prompt appears
-- [ ] Camera permission prompt appears (Sky Lens)
+- [ ] No camera permission prompt (Sky Lens is fully rendered — the app does not use the camera)
 
 ### Subscriptions
 - [ ] Paywall opens from Settings → Manage Plan
@@ -41,7 +41,7 @@
 
 ### Permissions
 - [ ] App works without location (fallback mode)
-- [ ] App works without camera (Sky Lens shows manual mode)
+- [ ] Sky Lens renders without any camera; Manual Sky Map available as a still-map option
 - [ ] Notification permission prompt appears
 
 ### Settings

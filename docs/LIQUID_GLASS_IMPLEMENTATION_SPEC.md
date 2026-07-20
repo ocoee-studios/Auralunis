@@ -22,10 +22,6 @@ Glass makes surfaces float, not everything transparent.
 - **Paywall modal** — full glass overlay
 - **Toast confirmation** — glass card
 
-### Watch
-- **Astrolabe rings** — SwiftUI `glassEffect` on watchOS 26+
-- **Complications** — subtle glass backing
-
 ## Where NOT to apply
 - Central astrolabe illustration — stays crisp, no blur
 - Gold typography — stays sharp
@@ -39,12 +35,6 @@ Glass makes surfaces float, not everything transparent.
 ```
 expo-blur BlurView    → real iOS system blur (primary)
 Solid fallback        → reduced transparency / older iOS
-```
-
-### watchOS (SwiftUI)
-```
-.glassEffect()        → watchOS 26+ Liquid Glass
-Midnight Gold fallback → watchOS 11-25
 ```
 
 ### Accessibility
@@ -61,5 +51,5 @@ Midnight Gold fallback → watchOS 11-25
 ## Current GlassPanel locations
 - HomeScreen: Tonight Score (accent), Cosmic Notes
 - SkyScreen: Tonight's Sky (accent), Deep Sky
-- WatchScreen: Face Gallery, Complication Picker, Widget section
+- VaultScreen: entries and premium gate
 - SettingsScreen: Membership card (accent)

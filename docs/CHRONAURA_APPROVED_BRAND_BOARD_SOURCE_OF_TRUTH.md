@@ -18,7 +18,6 @@ Create or import:
 assets/brand/auralunis-logo-full.svg
 assets/brand/auralunis-lockup.svg
 assets/brand/auralunis-app-icon.svg
-assets/brand/watch/auralunis-watch-mark.svg
 ```
 
 ## Visual rules
@@ -44,12 +43,10 @@ The approved emblem should appear consistently in:
 - top app lockup
 - Home astrolabe experience
 - Sky Lens header
-- Watch companion screen
 - Learn header
+- Vault header
 - Settings header
 - app icon
-- watchOS astrolabe face
-- Watch complications / Smart Stack artwork where appropriate
 
 ## Do not do this
 

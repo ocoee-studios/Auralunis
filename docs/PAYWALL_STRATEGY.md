@@ -15,7 +15,7 @@ The best free astronomy app. Period.
 - ✨ All constellations (34 with gold lines)
 - 🪐 All planets (basic rendering)
 - 🌙 Moon (basic phase display)
-- 📷 Sky Lens AR (camera overlay)
+- 🔭 Basic Sky Lens planetarium (fully rendered, sensor-aligned — no camera/AR)
 - ♈ Zodiac layer
 - 🌠 Basic meteor showers
 - 📚 Learn tab (all free)
@@ -114,7 +114,7 @@ Currently premium but should be free (the basics):
 - Stars (the sky itself)
 - Basic planets (dots with labels)
 - The Moon (basic)
-- Basic AR camera overlay
+- Basic Sky Lens planetarium (rendered, sensor-aligned)
 - Learn content (conversion funnel)
 - Tonight Score
 

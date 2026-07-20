@@ -82,10 +82,9 @@ Crescent-C astrolabe — three concentric rings, compass needle, N/S/E/W points,
 
 - **Name:** AuraLunis — The Interactive Astral Clock
 - **Developer:** Ocoee Studios (Mrs. Pepper, founder)
-- **Bundle ID:** `com.ocoee.auralunis`
-- **GitHub:** `jamiebzzz-stack/auralunis` (private)
-- **Stack:** React Native / Expo SDK 51 / TypeScript
-- **Commits:** 60+
+- **Bundle ID:** `com.ocoeestudios.auralunis`
+- **GitHub:** `ocoee-studios/Auralunis` (private)
+- **Stack:** React Native / Expo SDK 54 / TypeScript
 
 ---
 
@@ -110,7 +109,7 @@ Typography: Cinzel serif (headings) + Playfair Display (body)
 
 ## Navigation (locked — 5 tabs, do not add more)
 
-**Home · Sky · Watch · Learn · Settings**
+**Home · Sky · Learn · Vault · Settings**
 
 OrbitalAlignmentScreen opens as a full-screen modal from the Sky tab — not a separate tab.
 
@@ -120,16 +119,20 @@ OrbitalAlignmentScreen opens as a full-screen modal from the Sky tab — not a s
 
 | Product | Price | Trial |
 |---|---|---|
-| AuraLunis Premium monthly | $6.99/mo | ❌ No trial — direct charge |
-| AuraLunis Premium annual | $39.99/yr | ✅ 7-day free trial (annual only) |
-| Founders Lifetime | $99.99 one-time | ❌ No trial |
+| AuraLunis Premium monthly | $9.99/mo | 7-day intro trial only when Apple confirms eligibility |
+| AuraLunis Premium annual | $49.99/yr | 7-day intro trial only when Apple confirms eligibility |
+| Lifetime | $129.99 one-time | No trial |
+
+A trial is never promised unconditionally — the offer is shown only when StoreKit reports both the introductory offer and the customer's eligibility.
 
 RevenueCat product IDs:
-- `com.ocoee.auralunis.premium.monthly`
-- `com.ocoee.auralunis.premium.annual`
-- `com.ocoee.auralunis.lifetime.founders`
+- `com.ocoeestudios.auralunis.premium.monthly`
+- `com.ocoeestudios.auralunis.premium.annual`
+- `com.ocoeestudios.auralunis.lifetime`
 
-Entitlement: `auralunis_premium` (all three products unlock this)
+RevenueCat package IDs: `premium_monthly`, `premium_annual`, `$rc_lifetime`
+
+Entitlement: `AuraLunis Premium` (all three products unlock this single entitlement)
 
 **Do not suggest changing these prices or adding more tiers.**
 
@@ -215,12 +218,10 @@ Gate implementation: `isModeGated(mode)` in `src/features/paywall/MonetizationCa
 
 ### Native modules (Swift)
 - `apple-native/iOS/AuraLunisHaptics/AuraLunisHapticsModule.swift` — Expo Module, CoreHaptics
-- `apple-native/watchOS/AuraLunisWatch/Haptics/AuraLunisWatchHapticsEngine.swift`
-- `src/modules/WatchHaptics.ts` — JS bridge
 
 ### Monetization
 - `src/features/paywall/MonetizationCatalog.ts` — three products, `isModeGated()`, feature lists
-- `src/features/paywall/ThreeTierPaywallModal.tsx` — three-tier paywall UI
+- `src/features/paywall/ThreeTierPaywallModal.tsx` — three-plan paywall UI (Monthly/Annual/Lifetime)
 - `src/hooks/useEntitlement.ts` — RevenueCat entitlement check + AppState refresh
 - `src/components/PremiumModeGate.tsx` — inline upgrade card for gated modes
 - `src/components/SatelliteDataCard.tsx` — retro data card (tap a radar blip)
@@ -245,7 +246,6 @@ Gate implementation: `isModeGated(mode)` in `src/features/paywall/MonetizationCa
 | ThreeTierPaywallModal navigation | "Unlock Premium" button in `PremiumModeGate` needs to open the modal — requires navigation context. |
 | Quantum Intercept | Needs real-time server — not buildable client-only. Deferred post-launch. |
 | iOS 26 Liquid Glass | Spec in `docs/LIQUID_GLASS_IMPLEMENTATION_SPEC.md`. Post-launch. |
-| watchOS Xcode target | Swift scaffolds exist in `apple-native/watchOS/` but not compiled into Xcode project yet. |
 
 ---
 
@@ -256,11 +256,11 @@ Gate implementation: `isModeGated(mode)` in `src/features/paywall/MonetizationCa
 | TLE propagation stays in service layer, never in `alignmentEngine.ts` | Engine is pure math — no network/format awareness |
 | `SpatialTarget` has no `tleLine1/tleLine2` fields | Propagation output (lat/lon/alt) is what the engine needs |
 | Reanimated shared values for radar blips | UI thread only — no JS bridge jank |
-| Expo Modules pattern for Swift native code | Matches existing `AuraLunisWatchSyncModule` pattern, auto-registers |
+| Expo Modules pattern for Swift native code | Matches existing `AuraLunisHapticsModule` pattern, auto-registers |
 | AsyncStorage for Cosmic Drift, not encrypted vault | Lock history is celebration data, not sensitive |
 | 2h Celestrak cache | TLEs update every few hours — more frequent = battery waste |
 | Daily chain seeded from date hash | Same challenge for all users without a server |
-| Trial on annual plan only | Prevents weekend trial-and-cancel on monthly |
+| 7-day intro trial on monthly and annual, only when Apple confirms eligibility | Trial is never promised unconditionally; lifetime has no trial |
 
 ---
 
@@ -280,12 +280,11 @@ src/
 ├── services/IonosphericAudioEngine.ts   ← expo-av two-deck crossfader
 ├── services/CosmicDriftService.ts       ← lock history, 5-event free cap
 ├── features/paywall/MonetizationCatalog.ts ← pricing, gates, feature lists
-├── features/paywall/ThreeTierPaywallModal.tsx ← three-tier paywall UI
+├── features/paywall/ThreeTierPaywallModal.tsx ← three-plan paywall UI
 └── theme/tokens.ts                      ← AuraLunisColors, AuraLunisPricing
 
 apple-native/
-├── iOS/AuraLunisHaptics/AuraLunisHapticsModule.swift
-└── watchOS/AuraLunisWatch/Haptics/AuraLunisWatchHapticsEngine.swift
+└── iOS/AuraLunisHaptics/AuraLunisHapticsModule.swift
 
 public/
 ├── PRIVACY.md

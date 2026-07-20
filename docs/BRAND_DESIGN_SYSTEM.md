@@ -3,7 +3,6 @@
 ## References
 - `docs/brand_reference/AuraLunis_Brand_Guide.png` — full brand bible
 - `docs/brand_reference/AuraLunis_All_Screens_Target.png` — all 5 screen targets
-- `docs/AuraLunis_Watch_Face_Target.png` — watch face design
 
 ## Logo
 The AuraLunis logo is a gold crescent "C" within an astrolabe compass:
