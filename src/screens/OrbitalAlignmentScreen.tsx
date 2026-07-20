@@ -177,7 +177,9 @@ export function OrbitalAlignmentScreen() {
 
   // Reentry tick
   useEffect(() => {
-    if (mode !== "reentry") return;
+    // Re-Entry is a PREMIUM mode: non-entitled users see the upgrade gate, never the live
+    // decay ticker or its urgent decay-alert vibration.
+    if (mode !== "reentry" || !isPremium) return;
     // Try live TIP data on mode entry
     initReEntryLive().catch(() => {});
     const id = setInterval(() => {
@@ -194,7 +196,7 @@ export function OrbitalAlignmentScreen() {
       });
     }, 1000);
     return () => clearInterval(id);
-  }, [mode, location, pointing]);
+  }, [mode, location, pointing, isPremium]);
 
   // Audio engine — init on mount, destroy on unmount
   useEffect(() => {
@@ -281,9 +283,10 @@ export function OrbitalAlignmentScreen() {
   const statusColor = isLocked ? AuraLunisColors.green : activeScore > 65 ? activeColor : AuraLunisColors.silver;
   const statusText = isLocked ? "LOCKED" : activeScore > 65 ? "ALIGNING" : "SEARCHING";
 
-  // Feed alignment score into audio engine whenever in static mode
+  // Feed alignment score into audio engine whenever in static mode.
+  // Static is a PREMIUM mode: a non-entitled user sees the upgrade gate, never the audio.
   useEffect(() => {
-    if (mode !== "static") {
+    if (mode !== "static" || !isPremium) {
       getIonosphericEngine().setMuted(true);
       return;
     }
@@ -291,11 +294,11 @@ export function OrbitalAlignmentScreen() {
     if (!audioMuted) {
       getIonosphericEngine().update(activeScore, isLocked);
     }
-  }, [mode, activeScore, isLocked, audioMuted]);
+  }, [mode, activeScore, isLocked, audioMuted, isPremium]);
 
   // Audio engine — sync with alignment state
   useEffect(() => {
-    if (mode !== "static") {
+    if (mode !== "static" || !isPremium) {
       destroyIonosphericEngine().catch(() => {});
       return;
     }
@@ -303,14 +306,17 @@ export function OrbitalAlignmentScreen() {
     if (!audioMuted) {
       getIonosphericEngine().update(activeScore, isLocked);
     }
-  }, [mode, activeScore, isLocked, audioMuted]);
+  }, [mode, activeScore, isLocked, audioMuted, isPremium]);
 
-  // Haptics
+  // Haptics. Premium modes (debris, reentry, train) must not produce haptics for a non-entitled
+  // user — they only see the upgrade gate. Free modes (fleet, deep-space, meteor) are unchanged.
   useEffect(() => {
-    if (mode === "fleet" || mode === "deep-space" || mode === "debris" || mode === "meteor" || mode === "reentry") {
+    const premiumModeBlocked = isModeGated(mode) && !isPremium;
+    if (mode === "fleet" || mode === "deep-space" || mode === "meteor" ||
+        ((mode === "debris" || mode === "reentry") && isPremium)) {
       hapticCtrl.current.update(activeScore, isLocked);
     }
-    if (mode === "train") {
+    if (mode === "train" && !premiumModeBlocked) {
       const act = trainBlips.find(b => b.isActive);
       const interval = trainHapticInterval(act?.totalAngularError ?? 999);
       if (trainHapticRef.current) clearInterval(trainHapticRef.current);
@@ -329,7 +335,7 @@ export function OrbitalAlignmentScreen() {
         trainHapticRef.current = null;
       }
     };
-  }, [activeScore, isLocked, mode, trainBlips, activeShowers]);
+  }, [activeScore, isLocked, mode, trainBlips, activeShowers, isPremium]);
 
   // Cosmic Drift lock recording + chain advance. Merged into ONE effect so the
   // shared `wasLockedRef` lock-transition is consumed once: previously the
