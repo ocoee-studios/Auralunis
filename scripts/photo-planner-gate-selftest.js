@@ -10,7 +10,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 let pass = 0, fail = 0;
@@ -59,22 +58,11 @@ has(pp, "useEntitlement()", "PhotoPlannerScreen reads entitlement via useEntitle
 hasnt(pp, "auralunis_premium", "no snake_case entitlement string introduced");
 has(read("src/features/paywall/MonetizationCatalog.ts"), 'entitlement: "AuraLunis Premium"', "canonical entitlement unchanged");
 
-console.log("\n── No pricing / RevenueCat / entitlement / other-premium-feature behavior change ──");
-const base = "9bb4053";
-for (const f of [
-  "src/features/paywall/MonetizationCatalog.ts",
-  "src/services/RevenueCatService.ts",
-  "src/context/EntitlementContext.tsx",
-  "src/features/paywall/ThreeTierPaywallModal.tsx",
-  "src/context/PaywallNavigationContext.tsx",
-  "src/context/paywallRelay.ts",
-  "src/screens/BirthSkyScreen.tsx",
-  "src/screens/OrbitalAlignmentScreen.tsx",
-  "src/screens/SettingsScreen.tsx",
-]) {
-  const changed = execSync(`git diff --name-only ${base} -- ${f} || true`, { cwd: ROOT }).toString().trim();
-  eq(`untouched: ${f}`, changed, "");
-}
+// NOTE: a hardcoded-base git "untouched files" assertion used to live here. It was removed because
+// it produced false failures as sibling premium-gate PRs legitimately modified listed files (e.g.
+// OrbitalAlignmentScreen for telemetry-mode gating) — the same rot that required hotfix PR #185 for
+// the Birth Sky test. Scope is guarded by the canonical-entitlement assertion above plus qa:all +
+// PR review, matching the newer gate self-tests (astro-weather, reminders, archive).
 
 console.log(`\nPhoto Planner premium-gate self-test: ${pass} passed, ${fail} failed.`);
 process.exit(fail === 0 ? 0 : 1);
