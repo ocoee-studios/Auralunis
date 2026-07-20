@@ -67,7 +67,8 @@ for (const f of [
   "src/context/EntitlementContext.tsx",
   "src/features/paywall/ThreeTierPaywallModal.tsx",
   "src/context/PaywallNavigationContext.tsx",
-  "src/screens/PhotoPlannerScreen.tsx",
+  // NOTE: PhotoPlannerScreen.tsx was intentionally gated in its own PR (#184), so it is no
+  // longer frozen relative to this base — asserting it here was an obsolete cross-feature check.
 ]) {
   const changed = execSync(`git diff --name-only ${base} -- ${f} || true`, { cwd: ROOT }).toString().trim();
   eq(`untouched: ${f}`, changed, "");
