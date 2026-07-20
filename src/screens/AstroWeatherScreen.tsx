@@ -11,6 +11,8 @@ import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 import { fetchAstroWeather, type AstroWeatherForecast, type AstroWeatherHour } from "@/services/AstroWeatherService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 interface Props {
   onClose: () => void;
@@ -23,6 +25,8 @@ const VERDICT_COLORS: Record<string, string> = {
 };
 
 export function AstroWeatherScreen({ onClose }: Props) {
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const { location, status } = useObserverLocation();
   const locationName = status === "fallback" ? "Default Location" : "Your Location";
   const [forecast, setForecast] = useState<AstroWeatherForecast | null>(null);
@@ -42,6 +46,32 @@ export function AstroWeatherScreen({ onClose }: Props) {
 
   const verdict = forecast?.tonightVerdict ?? "—";
   const verdictColor = VERDICT_COLORS[verdict] ?? AuraLunisColors.gold;
+
+  // Screen-level entitlement guard (defense-in-depth): Astro Weather is a premium feature. A
+  // non-entitled user must never see tonight's verdict or the hour-by-hour forecast, even if this
+  // screen is entered by any other path. Render a premium preview/gate; "Unlock Premium" opens
+  // the existing paywall.
+  if (!isPremium) {
+    return (
+      <ScreenShell title="Astro Weather" subtitle="Tonight" background={<Starfield />}>
+        <Pressable style={styles.backBtn} onPress={() => { tapLight(); onClose(); }} hitSlop={12}>
+          <Text style={styles.backText}>‹ Back</Text>
+        </Pressable>
+        <View style={styles.gateCard}>
+          <Text style={styles.gateIcon}>◈</Text>
+          <Text style={styles.gateTitle}>Astro Weather</Text>
+          <Text style={styles.gateBadge}>PREMIUM FEATURE</Text>
+          <Text style={styles.gateDesc}>
+            Know instantly whether tonight is worth going outside — a GO / MAYBE / STAY IN verdict,
+            your best clear window, and an hour-by-hour breakdown of cloud, seeing, and transparency.
+          </Text>
+          <Pressable style={styles.unlockBtn} onPress={() => { tapLight(); openPaywall(); }}>
+            <Text style={styles.unlockText}>✦ Unlock Premium</Text>
+          </Pressable>
+        </View>
+      </ScreenShell>
+    );
+  }
 
   return (
     <ScreenShell title="Astro Weather" subtitle="Tonight" background={<Starfield />}>
@@ -120,6 +150,13 @@ function scoreColor(s: number): string {
 }
 
 const styles = StyleSheet.create({
+  gateCard: { marginTop: 24, backgroundColor: "rgba(7,18,37,0.7)", borderRadius: 20, borderWidth: 1, borderColor: AuraLunisColors.gold, padding: 24, alignItems: "center" },
+  gateIcon: { fontSize: 32, color: AuraLunisColors.gold, marginBottom: 10 },
+  gateTitle: { color: AuraLunisColors.gold2, fontSize: 22, fontWeight: "900", textAlign: "center" },
+  gateBadge: { color: AuraLunisColors.gold, fontSize: 11, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase", marginTop: 4, marginBottom: 12 },
+  gateDesc: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 21, textAlign: "center", marginBottom: 20 },
+  unlockBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 28, alignItems: "center" },
+  unlockText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14 },
   backBtn: { marginBottom: 10 },
   backText: { color: AuraLunisColors.gold, fontSize: 14, fontWeight: "700" },
   loading: { alignItems: "center", paddingVertical: 60, gap: 14 },
