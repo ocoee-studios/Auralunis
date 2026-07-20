@@ -14,6 +14,8 @@ import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisSer
 import { computeTonightScore } from "@/services/TonightScoreService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 import { useAuraLunisSettings } from "@/state/AuraLunisSettingsContext";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 interface Props {
   onClose: () => void;
@@ -22,6 +24,8 @@ interface Props {
 export function SkyShareScreen({ onClose }: Props) {
   const { location, status } = useObserverLocation();
   const { settings } = useAuraLunisSettings();
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const locationName = status === "fallback" ? "Default Location" : "Your Location";
 
   const [note, setNote] = useState("");
@@ -67,6 +71,9 @@ export function SkyShareScreen({ onClose }: Props) {
 
   async function share() {
     tapLight();
+    // Building and previewing a share card is free; exporting/sharing it is premium.
+    // A non-entitled user gets the paywall instead of the native share sheet.
+    if (!isPremium) { openPaywall(); return; }
     const lines = [
       card.headline,
       card.subheadline,
@@ -135,7 +142,7 @@ export function SkyShareScreen({ onClose }: Props) {
       </View>
 
       <Pressable style={s.shareBtn} onPress={share}>
-        <Text style={s.shareText}>Share Card</Text>
+        <Text style={s.shareText}>{isPremium ? "Share Card" : "✦ Share Card · Premium"}</Text>
       </Pressable>
       <View style={{ height: 28 }} />
     </ScreenShell>
