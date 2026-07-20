@@ -10,6 +10,8 @@ import { ScreenShell } from "@/components/ScreenShell";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 import { useAuraLunisVault, type VaultItemType } from "@/state/AuraLunisVaultContext";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 // User-facing label for each stored item type.
 const TYPE_LABEL: Record<VaultItemType, string> = {
@@ -30,12 +32,36 @@ function formatDate(iso: string): string {
 export function VaultScreen() {
   const { items } = useAuraLunisVault();
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
 
   // Newest first — sort a copy so we never mutate context state.
   const sorted = useMemo(
     () => [...items].sort((a, b) => b.createdAtISO.localeCompare(a.createdAtISO)),
     [items]
   );
+
+  // Entitlement guard: the Encrypted Vault is an entirely premium feature. A non-entitled user
+  // must never read saved observations. This is a tab root (no caller to return to), so render a
+  // locked premium placeholder in place of the log; "Unlock Premium" opens the existing paywall.
+  if (!isPremium) {
+    return (
+      <ScreenShell title="Vault" subtitle="Your Sky Log">
+        <View style={styles.gateCard}>
+          <Text style={styles.gateIcon}>◈</Text>
+          <Text style={styles.gateTitle}>Encrypted Vault</Text>
+          <Text style={styles.gateBadge}>PREMIUM FEATURE</Text>
+          <Text style={styles.gateDesc}>
+            Your private, encrypted sky log — Cosmic Notes, saved objects, captures, and lesson
+            marks, all in one place. Unlock Premium to open your Vault.
+          </Text>
+          <Pressable style={styles.unlockBtn} onPress={() => { tapLight(); openPaywall(); }}>
+            <Text style={styles.unlockText}>✦ Unlock Premium</Text>
+          </Pressable>
+        </View>
+      </ScreenShell>
+    );
+  }
 
   return (
     <ScreenShell title="Vault" subtitle="Your Sky Log">
@@ -78,6 +104,13 @@ export function VaultScreen() {
 }
 
 const styles = StyleSheet.create({
+  gateCard: { marginTop: 24, backgroundColor: "rgba(7,18,37,0.7)", borderRadius: 20, borderWidth: 1, borderColor: AuraLunisColors.gold, padding: 24, alignItems: "center" },
+  gateIcon: { fontSize: 32, color: AuraLunisColors.gold, marginBottom: 10 },
+  gateTitle: { color: AuraLunisColors.gold2, fontSize: 22, fontWeight: "900", textAlign: "center" },
+  gateBadge: { color: AuraLunisColors.gold, fontSize: 11, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase", marginTop: 4, marginBottom: 12 },
+  gateDesc: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 21, textAlign: "center", marginBottom: 20 },
+  unlockBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 28, alignItems: "center" },
+  unlockText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14 },
   empty: { alignItems: "center", paddingTop: 60, paddingHorizontal: 24 },
   emptyIcon: { color: AuraLunisColors.gold2, fontSize: 34, marginBottom: 14 },
   emptyText: { color: "#FFF", fontSize: 16, fontWeight: "800", textAlign: "center", marginBottom: 8 },
