@@ -534,7 +534,7 @@ export function OrbitalAlignmentScreen() {
         )}
 
         {/* ── Sky Chain ── */}
-        {mode === "chain" && (
+        {mode === "chain" && (!isModeGated(mode) || isPremium) && (
           <View style={styles.card}>
             <Text style={styles.cardLabel}>Daily Chain · {chainProgress.chain.name}</Text>
             <Text style={[styles.cardVal, { fontSize: 11, marginBottom: 10 }]}>{chainProgress.chain.description}</Text>
@@ -562,7 +562,7 @@ export function OrbitalAlignmentScreen() {
         )}
 
         {/* ── Debris stats ── */}
-        {mode === "debris" && (
+        {mode === "debris" && (!isModeGated(mode) || isPremium) && (
           <View style={[styles.card, { borderColor: "#FF3B30" + "44" }]}>
             <Text style={styles.cardLabel}>Debris Mission</Text>
             <View style={styles.pills}>
