@@ -29,6 +29,7 @@ import { generateCelestialMood } from "@/services/CelestialMoodService";
 import { getTonightInsight } from "@/services/SkyIntelligenceService";
 import { tapLight } from "@/services/HapticService";
 import { scheduleSkyEventNotifications, scheduleCelestialEventNotifications } from "@/services/NotificationService";
+import { useEntitlement } from "@/hooks/useEntitlement";
 import { CELESTIAL_EVENTS } from "@/data/CelestialEvents";
 import { useNavigation } from "@react-navigation/native";
 
@@ -44,6 +45,7 @@ export function HomeScreen() {
   const { items, addNote } = useAuraLunisVault();
   const { settings } = useAuraLunisSettings();
   const { location, status } = useObserverLocation();
+  const { isPremium } = useEntitlement();
 
   // ── Sky data ──────────────────────────────────────────────────────────────
   const sky = useMemo(() => computeTonightSky(location), [location]);
@@ -59,11 +61,13 @@ export function HomeScreen() {
     if (settings.notificationsEnabled) {
       // Sky events cancel-all then reschedule; celestial events are additive and
       // must run AFTER so they survive the cancel (no duplicate stacking).
+      // Sunset/moonrise are basic (free) alerts; event/eclipse/meteor/conjunction reminders
+      // are premium — a non-entitled user never gets them scheduled.
       scheduleSkyEventNotifications(sky)
-        .then(() => scheduleCelestialEventNotifications(CELESTIAL_EVENTS))
+        .then(() => { if (isPremium) return scheduleCelestialEventNotifications(CELESTIAL_EVENTS); })
         .catch(() => {});
     }
-  }, [sky, settings.notificationsEnabled]);
+  }, [sky, settings.notificationsEnabled, isPremium]);
 
   const tonightScore = useMemo(
     () => computeTonightScore(sky, weather, settings.skyQuality),
