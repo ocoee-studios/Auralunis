@@ -6,8 +6,9 @@ Your Sky. Your Story. AuraLunis is a React Native (Expo) astronomy app that turn
 
 - **Celestial Dial** — all-sky dial plotting the Sun, Moon, and planets for
   your exact location and time, powered by `astronomy-engine`.
-- **Sky Lens AR** — camera overlay with tilt-compensated device orientation that
-  labels celestial bodies in frame and guides you toward off-screen targets.
+- **Sky Lens** — a fully rendered, sensor-aligned planetarium (no camera / no AR
+  overlay) that plots celestial bodies for your device orientation and guides you
+  toward off-screen targets.
 - **Satellite Tracker** — real SGP4 propagation of CelesTrak orbital elements
   via `satellite.js`, showing objects above your horizon.
 - **Tonight Score** — viewing-quality index from cloud cover, moon impact, sky
@@ -16,17 +17,16 @@ Your Sky. Your Story. AuraLunis is a React Native (Expo) astronomy app that turn
 - **Astro Weather** — observing forecasts for stargazing and sky photography.
 - **Learn** — animated lessons on the solar system, moon phases, constellations,
   and deep-sky objects.
-- **Watch Faces** — curated celestial designs and companion watch experiences.
 - **Encrypted Vault** — private saved observations protected on device.
 
 ## Navigation
 
-Home · Sky · Watch · Learn · Settings
+Home · Sky · Learn · Vault · Settings
 
 ## Pricing
 
-- Free: Celestial Dial, basic sky view, ISS tracking, Learn, Zodiac
-- Premium: Sky Lens AR, constellation figures, satellites, Birth Sky, Astro Weather, Photo Planner, Night Vision, Time Travel, encrypted vault, and future premium features
+- Free: Tonight Score, Manual Sky Map, Find Mode, basic Sky Lens planetarium, Learn starter lessons, basic Celestial Calendar browsing
+- Premium: full Sky Lens Pro tools & premium layers, constellation figures, satellites, Birth Sky, Astro Weather, Photo Planner, Night Vision, Time Travel, Encrypted Vault, and more
 
 See `docs/APP_STORE_CONNECT_FIELDS.md` for the canonical App Store pricing/product IDs.
 

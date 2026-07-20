@@ -16,11 +16,11 @@
 ## Billing
 - [ ] App Store Connect products created
 - [ ] RevenueCat configured
-- [ ] Horizon+ entitlement verified
-- [ ] monthly purchase verified
-- [ ] annual purchase verified
-- [ ] trial eligibility verified
-- [ ] founder-offer eligibility verified
+- [ ] `AuraLunis Premium` entitlement verified
+- [ ] monthly purchase verified ($9.99)
+- [ ] annual purchase verified ($49.99)
+- [ ] lifetime purchase verified ($129.99)
+- [ ] intro-trial eligibility verified (7-day trial shown on monthly/annual only when Apple confirms eligibility)
 - [ ] restore verified
 - [ ] cancellation and renewal copy verified
 - [ ] Manage Subscription verified
@@ -37,10 +37,8 @@
 
 ## Native extensions
 - [ ] WidgetKit target added
-- [ ] watchOS target added
-- [ ] approved Watch graphics merged
 - [ ] notifications tested
-- [ ] Chrono-Photography save flow tested
+- [ ] Sky Lens capture (screenshot of the rendered view) save flow tested
 
 ## Release
 - [ ] TestFlight internal test

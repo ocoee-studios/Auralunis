@@ -2,7 +2,7 @@
 
 ## Must Ship (v1.0 blockers)
 
-- [ ] **Sky Lens Phase 1** — Camera + Stars + Constellations + Planets + Grid + Layer bar + Info cards + Night Mode
+- [ ] **Sky Lens Phase 1** — Rendered sky (no camera) + Stars + Constellations + Planets + Grid + Layer bar + Info cards + Night Mode
 - [ ] **SDK 54 upgrade** — ✅ Done (Claude Code)
 - [ ] **RevenueCat live products** — Create in RC dashboard matching MonetizationCatalog.ts
 - [ ] **Apple Developer Account** — Activate and enroll

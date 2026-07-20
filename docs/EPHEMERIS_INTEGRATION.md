@@ -51,23 +51,24 @@ altitude maps top (overhead) to bottom (horizon). `npm run qa:satellite` guards
 the pipeline. Offline fixtures use bundled snapshot elements that drift with
 epoch age — the live feed replaces them with current elements.
 
-## Sky Lens AR alignment (implemented)
+## Sky Lens alignment (implemented)
 
-`src/features/sky-lens/ar/` contains the camera overlay pipeline:
+Sky Lens is a fully rendered, sensor-aligned planetarium — there is no camera or AR
+overlay. `src/features/sky-lens/ar/` contains the sensor-alignment pipeline:
 - `SkyLensOrientation.ts` — pure tilt-compensated orientation: accelerometer +
-  magnetometer → camera azimuth/altitude/roll.
+  magnetometer → device azimuth/altitude/roll.
 - `SkyLensProjection.ts` — pure projection: a body's (azimuth, altitude) →
   screen (x, y) given pointing, field of view, and box size; flags on-screen /
   behind and a guidance bearing for off-screen targets.
 - `useDevicePointing.ts` — streams the sensors into the orientation math.
-- The overlay (in `SkyLensPlaceholder.tsx`) renders `CameraView`, labels bodies
-  in frame, shows a heading HUD, and points toward the brightest off-screen body.
+- The rendered sky view labels bodies in view, shows a heading HUD, and points
+  toward the brightest off-screen body — all drawn, never a camera feed.
 
 Both pure modules are verified by `npm run qa:skylens`.
 
 ## Remaining: outdoor calibration
 
-The math is exact, but real-world accuracy needs an on-device session to tune
-per-device camera FOV, apply magnetic declination, smooth sensor noise, and
-confirm the device-frame axis conventions on hardware. This is the one Sky Lens
-step that cannot be done off-device.
+The math is exact, but real-world accuracy needs an on-device session to
+apply magnetic declination, smooth sensor noise, and confirm the device-frame
+axis conventions on hardware. This is the one Sky Lens step that cannot be done
+off-device.

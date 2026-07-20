@@ -4,7 +4,7 @@
 
 This phase closes the visual gap between the React Native scaffold and the approved AuraLunis mockups.
 
-The current app structure is correct. The next work is to merge the production brand illustration, add carefully sourced astronomy photography, validate the native iOS build on a real device, and create the watchOS companion target.
+The current app structure is correct. The next work is to merge the production brand illustration, add carefully sourced astronomy photography, and validate the native iOS build on a real device.
 
 ## 1. Production logo SVG
 
@@ -108,37 +108,7 @@ Validate:
 - Restore Purchases placeholder replacement
 - real-device contrast and spacing
 
-## 4. Watch face and watchOS target
-
-The Watch experience requires an Apple-native watchOS companion target.
-
-Create in Xcode:
-
-```text
-AuraLunisWatch
-```
-
-Use SwiftUI for the watchOS interface.
-
-Launch scope:
-
-- AuraLunis lockup
-- Midnight Gold face
-- Moon phase
-- Tonight Score
-- next celestial event
-- one-tap ritual handoff
-- restrained haptic cues
-- Smart Stack widget direction
-- complication direction
-
-Future-only:
-
-- Apple Watch Ultra Taptic Crown premium concepts
-- advanced tactile astrolabe scrubbing
-- Sovereign-only Watch treatments
-
-## 5. Completion criteria
+## 4. Completion criteria
 
 This phase is complete when:
 
@@ -147,5 +117,4 @@ This phase is complete when:
 - Learn thumbnails are imported with credits
 - native iOS development build runs on an iPhone
 - Liquid Glass and fallbacks are visually checked
-- watchOS target exists with first working face
 - all new assets are reflected in the asset manifest
