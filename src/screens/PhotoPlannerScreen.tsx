@@ -11,6 +11,8 @@ import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
 import { computePhotoplan, type PhotoTarget } from "@/services/AstroPhotographyService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 interface Props {
   onClose: () => void;
@@ -25,6 +27,8 @@ const DIFF_COLOR: Record<string, string> = {
 };
 
 export function PhotoPlannerScreen({ onClose }: Props) {
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const { location, status } = useObserverLocation();
   const [focalMm, setFocalMm] = useState(24);
   const [aperture, setAperture] = useState(2.8);
@@ -32,6 +36,34 @@ export function PhotoPlannerScreen({ onClose }: Props) {
   const plan = useMemo(() => computePhotoplan(location, focalMm, aperture), [location, focalMm, aperture]);
   const visibleTargets = plan.targets.filter((t) => t.visible);
   const otherTargets = plan.targets.filter((t) => !t.visible);
+
+  // Screen-level entitlement guard (defense-in-depth): Photo Planner is an ENTIRELY premium
+  // feature. A non-entitled user must never enter the planner or use any planner control — the
+  // verdict, gear/exposure settings, and target list must not render, even if this screen is
+  // opened through some other path. Render a premium preview/gate instead; "Unlock Premium"
+  // opens the existing paywall.
+  if (!isPremium) {
+    return (
+      <ScreenShell title="Photo Planner" subtitle="Astrophotography" background={<Starfield />}>
+        <Pressable style={styles.backBtn} onPress={() => { tapLight(); onClose(); }} hitSlop={12}>
+          <Text style={styles.backText}>‹ Back</Text>
+        </Pressable>
+        <View style={styles.gateCard}>
+          <Text style={styles.gateIcon}>◈</Text>
+          <Text style={styles.gateTitle}>Photo Planner</Text>
+          <Text style={styles.gateBadge}>PREMIUM FEATURE</Text>
+          <Text style={styles.gateDesc}>
+            Plan your astrophotography night — tonight's shooting verdict, exposure settings dialed
+            to your gear (500 & NPF rules, ISO, stacking), the Milky Way core window, golden and
+            blue hours, and a ranked list of the best targets above your horizon.
+          </Text>
+          <Pressable style={styles.unlockBtn} onPress={() => { tapLight(); openPaywall(); }}>
+            <Text style={styles.unlockText}>✦ Unlock Premium</Text>
+          </Pressable>
+        </View>
+      </ScreenShell>
+    );
+  }
 
   return (
     <ScreenShell title="Photo Planner" subtitle="Astrophotography" background={<Starfield />}>
@@ -134,6 +166,13 @@ function TargetRow({ t, dim }: { t: PhotoTarget; dim?: boolean }) {
 const styles = StyleSheet.create({
   backBtn: { marginBottom: 10 },
   backText: { color: AuraLunisColors.gold, fontSize: 14, fontWeight: "700" },
+  gateCard: { marginTop: 24, backgroundColor: "rgba(7,18,37,0.7)", borderRadius: 20, borderWidth: 1, borderColor: AuraLunisColors.gold, padding: 24, alignItems: "center" },
+  gateIcon: { fontSize: 32, color: AuraLunisColors.gold, marginBottom: 10 },
+  gateTitle: { color: AuraLunisColors.gold2, fontSize: 22, fontWeight: "900", textAlign: "center" },
+  gateBadge: { color: AuraLunisColors.gold, fontSize: 11, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase", marginTop: 4, marginBottom: 12 },
+  gateDesc: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 21, textAlign: "center", marginBottom: 20 },
+  unlockBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 28, alignItems: "center" },
+  unlockText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14 },
   verdictCard: {
     backgroundColor: "rgba(217,168,78,0.08)", borderRadius: 20, borderWidth: 1,
     borderColor: "rgba(217,168,78,0.22)", padding: 18, marginBottom: 18,
