@@ -30,6 +30,7 @@ import { getTonightInsight } from "@/services/SkyIntelligenceService";
 import { tapLight } from "@/services/HapticService";
 import { scheduleSkyEventNotifications, scheduleCelestialEventNotifications } from "@/services/NotificationService";
 import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { CELESTIAL_EVENTS } from "@/data/CelestialEvents";
 import { useNavigation } from "@react-navigation/native";
 
@@ -46,6 +47,7 @@ export function HomeScreen() {
   const { settings } = useAuraLunisSettings();
   const { location, status } = useObserverLocation();
   const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
 
   // ── Sky data ──────────────────────────────────────────────────────────────
   const sky = useMemo(() => computeTonightSky(location), [location]);
@@ -150,6 +152,8 @@ export function HomeScreen() {
     const trimmed = noteDraft.trim();
     if (!trimmed) return;
     tapLight();
+    // Cosmic Notes live in the (premium) Vault — free users get the paywall instead of saving.
+    if (!isPremium) { openPaywall(); return; }
     addNote(trimmed);
     setNoteDraft("");
     Alert.alert("Saved", "Note saved to your Cosmic Vault.");

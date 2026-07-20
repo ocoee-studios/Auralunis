@@ -598,6 +598,8 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
 
   const onSave = useCallback(
     (object: SelectedObject) => {
+      // Saving to the (premium) Vault requires entitlement — free users get the paywall.
+      if (!isPremium) { openPaywall(); return; }
       addItem({
         type: "archive",
         title: object.name,
@@ -605,7 +607,7 @@ export function SkyLensScreen({ onClose, focusTarget }: Props) {
       });
       setSavedIds((prev) => new Set(prev).add(object.id));
     },
-    [addItem]
+    [addItem, isPremium, openPaywall]
   );
 
   const hud = useMemo(
