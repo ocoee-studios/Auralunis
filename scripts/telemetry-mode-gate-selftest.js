@@ -29,5 +29,19 @@ has(oa, "isModeGated", "isModeGated gate helper still in use");
 console.log("\n── The paywall path for gated modes still exists (PremiumModeGate) ──");
 has(oa, "PremiumModeGate", "PremiumModeGate (paywall CTA) still rendered for gated modes");
 
+// Premium modes must not fire their NON-VISUAL side-effects (audio / haptics / vibration) for a
+// non-entitled user — only the upgrade gate shows. These are premium features in their own right.
+console.log("\n── Premium-mode side-effects (audio/haptics) are entitlement-gated ──");
+// Static = premium ionospheric audio: both audio effects bail when not static OR not premium.
+const staticAudioGates = (oa.match(/mode !== "static" \|\| !isPremium/g) || []).length;
+(staticAudioGates >= 2 ? ok : bad)(`Static ionospheric audio is gated on isPremium (${staticAudioGates}/2 audio effects)`);
+// Re-Entry = premium: the decay-tick + urgent vibration only run when premium.
+has(oa, 'mode !== "reentry" || !isPremium', "Re-Entry decay ticker + alert vibration are gated on isPremium");
+// Haptics: premium modes (debris/reentry/train) gated; free modes (fleet/deep-space/meteor) stay free.
+has(oa, '(mode === "debris" || mode === "reentry") && isPremium', "debris/reentry haptics gated on isPremium");
+has(oa, 'mode === "train" && !premiumModeBlocked', "train haptics gated for non-entitled users");
+// Free-mode haptics must remain ungated (no over-gating).
+has(oa, 'mode === "fleet" || mode === "deep-space" || mode === "meteor"', "free-mode haptics (fleet/deep-space/meteor) stay ungated");
+
 console.log(`\nTelemetry-mode premium-gate self-test: ${pass} passed, ${fail} failed.`);
 process.exit(fail === 0 ? 0 : 1);
