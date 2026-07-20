@@ -25,9 +25,10 @@ type SettingRowProps = {
   description: string;
   value: boolean;
   onValueChange: (value: boolean) => void;
+  disabled?: boolean;
 };
 
-function SettingRow({ title, description, value, onValueChange }: SettingRowProps) {
+function SettingRow({ title, description, value, onValueChange, disabled = false }: SettingRowProps) {
   return (
     <View style={styles.settingRow}>
       <View style={{ flex: 1 }}>
@@ -37,6 +38,7 @@ function SettingRow({ title, description, value, onValueChange }: SettingRowProp
       <Switch
         value={value}
         onValueChange={onValueChange}
+        disabled={disabled}
         trackColor={{ false: "rgba(255,255,255,0.14)", true: "rgba(217,168,78,0.42)" }}
         thumbColor={value ? AuraLunisColors.gold2 : AuraLunisColors.silver}
       />
@@ -95,17 +97,20 @@ export function SettingsScreen() {
 
   // Explicit, user-initiated notification permission request. This is the ONLY place the app
   // asks for notification authorization — turning the master Notifications switch on. Automatic
-  // paths (startup, onboarding, Home mount-time scheduling) never prompt. Denial still records
-  // the preference; scheduling simply no-ops until permission is granted.
+  // paths (startup, onboarding, Home mount-time scheduling) never prompt. The saved preference
+  // must reflect the real iOS authorization result so denial never appears enabled.
   async function handleNotificationsToggle(value: boolean) {
-    if (value) {
-      try {
-        await requestNotificationPermission();
-      } catch {
-        // Never block the toggle on a permission-API failure.
-      }
+    if (!value) {
+      updateSetting("notificationsEnabled", false);
+      return;
     }
-    updateSetting("notificationsEnabled", value);
+
+    try {
+      const granted = await requestNotificationPermission();
+      updateSetting("notificationsEnabled", granted);
+    } catch {
+      updateSetting("notificationsEnabled", false);
+    }
   }
 
   async function handleManageSubscription() {
@@ -217,9 +222,26 @@ export function SettingsScreen() {
       </SettingsSection>
 
       <SettingsSection title="Notifications + Alarms">
-        <SettingRow title="Notifications" description="Master switch for reminders and celestial alerts." value={settings.notificationsEnabled} onValueChange={handleNotificationsToggle} />
-        <SettingRow title="Celestial Alarms" description="Sunrise, moonrise, Venus visible, and stargazing-window alerts." value={settings.celestialAlarmsEnabled} onValueChange={(value) => updateSetting("celestialAlarmsEnabled", value)} />
-        <SettingRow title="Tonight’s Ritual Reminders" description="Gentle evening ritual reminders." value={settings.tonightRitualRemindersEnabled} onValueChange={(value) => updateSetting("tonightRitualRemindersEnabled", value)} />
+        <SettingRow
+          title="Notifications"
+          description="Master switch for reminders and celestial alerts."
+          value={settings.notificationsEnabled}
+          onValueChange={handleNotificationsToggle}
+        />
+        <SettingRow
+          title="Celestial Alarms"
+          description="Sunrise, moonrise, Venus visible, and stargazing-window alerts."
+          value={settings.notificationsEnabled && settings.celestialAlarmsEnabled}
+          onValueChange={(value) => updateSetting("celestialAlarmsEnabled", value)}
+          disabled={!settings.notificationsEnabled}
+        />
+        <SettingRow
+          title="Tonight’s Ritual Reminders"
+          description="Gentle evening ritual reminders."
+          value={settings.notificationsEnabled && settings.tonightRitualRemindersEnabled}
+          onValueChange={(value) => updateSetting("tonightRitualRemindersEnabled", value)}
+          disabled={!settings.notificationsEnabled}
+        />
       </SettingsSection>
 
       <SettingsSection title="Sky Lens">
