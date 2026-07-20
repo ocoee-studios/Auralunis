@@ -10,6 +10,8 @@ import { ScreenShell } from "@/components/ScreenShell";
 import { Starfield } from "@/components/Starfield";
 import { AuraLunisColors } from "@/theme/tokens";
 import { tapLight } from "@/services/HapticService";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { computeTonightSky } from "@/features/sky-lens/ephemeris/SkyEphemerisService";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
 import { CONSTELLATION_LINES } from "@/features/sky-lens/data/constellationLines";
@@ -31,6 +33,8 @@ type Section = {
 export function CelestialArchiveScreen({ onClose }: Props) {
   const navigation = useNavigation<any>();
   const { location } = useObserverLocation();
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
 
   const sections: Section[] = useMemo(() => {
     const sky = computeTonightSky(location);
@@ -52,6 +56,32 @@ export function CelestialArchiveScreen({ onClose }: Props) {
     onClose();
     if (section.category) navigation.navigate("Learn");
     else navigation.navigate("Sky");
+  }
+
+  // Screen-level entitlement guard (defense-in-depth): the full Celestial Archive is premium.
+  // A non-entitled user must never browse the reference library, even if this screen is entered
+  // by any other path. Render a premium preview/gate; "Unlock Premium" opens the existing paywall.
+  if (!isPremium) {
+    return (
+      <ScreenShell title="Celestial Archive" subtitle="Reference" background={<Starfield />}>
+        <Pressable style={styles.backBtn} onPress={() => { tapLight(); onClose(); }} hitSlop={12}>
+          <Text style={styles.backText}>‹ Back</Text>
+        </Pressable>
+        <View style={styles.gateCard}>
+          <Text style={styles.gateIcon}>◈</Text>
+          <Text style={styles.gateTitle}>Celestial Archive</Text>
+          <Text style={styles.gateBadge}>PREMIUM FEATURE</Text>
+          <Text style={styles.gateDesc}>
+            The full reference library — Solar System, Moon, Planets, Constellations, Stars, Deep
+            Sky, the Milky Way, and upcoming events, each with live counts and a jump straight to
+            the sky.
+          </Text>
+          <Pressable style={styles.unlockBtn} onPress={() => { tapLight(); openPaywall(); }}>
+            <Text style={styles.unlockText}>✦ Unlock Premium</Text>
+          </Pressable>
+        </View>
+      </ScreenShell>
+    );
   }
 
   return (
@@ -81,6 +111,13 @@ export function CelestialArchiveScreen({ onClose }: Props) {
 }
 
 const styles = StyleSheet.create({
+  gateCard: { marginTop: 24, backgroundColor: "rgba(7,18,37,0.7)", borderRadius: 20, borderWidth: 1, borderColor: AuraLunisColors.gold, padding: 24, alignItems: "center" },
+  gateIcon: { fontSize: 32, color: AuraLunisColors.gold, marginBottom: 10 },
+  gateTitle: { color: AuraLunisColors.gold2, fontSize: 22, fontWeight: "900", textAlign: "center" },
+  gateBadge: { color: AuraLunisColors.gold, fontSize: 11, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase", marginTop: 4, marginBottom: 12 },
+  gateDesc: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 21, textAlign: "center", marginBottom: 20 },
+  unlockBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 28, alignItems: "center" },
+  unlockText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14 },
   backBtn: { marginBottom: 10 },
   backText: { color: AuraLunisColors.gold, fontSize: 14, fontWeight: "700" },
   intro: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 21, marginBottom: 18 },

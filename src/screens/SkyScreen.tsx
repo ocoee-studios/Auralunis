@@ -280,7 +280,11 @@ export function SkyScreen() {
         title="Celestial Archive"
         description="The reference library — Solar System, Moon, Planets, Constellations, Stars, Deep Sky, Milky Way, and Events, each with live counts and a jump to learn it."
         actionLabel="Open Archive"
-        onPress={() => setArchiveOpen(true)}
+        onPress={() => {
+          // The full Celestial Archive is a premium feature: free users get the paywall.
+          if (!isPremium) { openPaywall(); return; }
+          setArchiveOpen(true);
+        }}
       />
     </ScreenShell>
   );
