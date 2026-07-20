@@ -229,7 +229,11 @@ export function SkyScreen() {
         title="Photo Planner"
         description="Astrophotography planner: tonight's verdict, exposure settings for your gear (500 & NPF rules, ISO, stacking), the Milky Way core window, golden/blue hours, and ranked targets."
         actionLabel="Plan a Shoot"
-        onPress={() => setPhotoPlannerOpen(true)}
+        onPress={() => {
+          // Photo Planner is an entirely premium feature: free users get the paywall, never the screen.
+          if (!isPremium) { openPaywall(); return; }
+          setPhotoPlannerOpen(true);
+        }}
       />
 
       <FeatureCard
