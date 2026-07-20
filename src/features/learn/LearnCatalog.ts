@@ -175,6 +175,18 @@ export const learnTopics: LearnTopic[] = [
   }
 ];
 
+// The first N lessons (by catalog order) are the free "starter section" of Learn; every lesson
+// beyond that is premium ("Advanced Learn content"). Single source of truth for the split.
+export const FREE_LEARN_LESSON_COUNT = 3;
+const freeLearnLessonIds = new Set(
+  learnTopics.slice(0, FREE_LEARN_LESSON_COUNT).map((t) => t.id)
+);
+
+// True for the free starter lessons; false for premium (advanced) lessons.
+export function isLearnLessonFree(topicId: string): boolean {
+  return freeLearnLessonIds.has(topicId);
+}
+
 export const learnCategories = [
   { id: "solar_system", title: "Solar System", icon: "☉", description: "Sun, planets, moons, orbits, asteroids, and comets." },
   { id: "moon", title: "Moon", icon: "☾", description: "Phases, moonrise, moonset, brightness, and lunar observations." },
