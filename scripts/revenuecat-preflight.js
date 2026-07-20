@@ -29,6 +29,12 @@ const paywall = fs.readFileSync(
   path.join(root, "src/features/paywall/ThreeTierPaywallModal.tsx"),
   "utf8"
 );
+// Paywall copy (trial gating, CTA, disclosure) lives in the pure, node-tested resolvePlanCopy
+// helper; the modal consumes it. Trial-gating assertions read the helper, not the modal.
+const copy = fs.readFileSync(
+  path.join(root, "src/features/paywall/paywallCopy.ts"),
+  "utf8"
+);
 
 check(
   "react-native-purchases dependency",
@@ -108,10 +114,11 @@ check(
   offersHook.includes('elig === "eligible" && pkg?.introOffer')
 );
 
-// 5. Trial copy is CONDITIONAL: every trial string in the paywall is gated on eligibility.
+// 5. Trial copy is CONDITIONAL: the pure copy helper produces trial wording ONLY for the
+//    store-confirmed eligible branch; the modal delegates every string to it (no re-derivation).
 check(
   "paywall trial copy is gated on confirmed eligibility",
-  paywall.includes("selectedEligible") && paywall.includes('trial.status === "eligible"')
+  copy.includes('trial.status === "eligible"') && paywall.includes("resolvePlanCopy")
 );
 
 // 6. Lifetime never shows trial wording.
@@ -138,11 +145,12 @@ check(
   service.includes("return {}") && offersHook.includes('status: "unavailable"')
 );
 
-// 9. Renewal / trial-renewal disclosure is present near the CTA.
+// 9. Renewal / trial-renewal disclosure is present (in the copy helper) and rendered by the modal.
 check(
   "renewal disclosure present",
-  paywall.includes("renews automatically") &&
-    paywall.includes("After the free trial")
+  copy.includes("renews automatically") &&
+    copy.includes("After the free trial") &&
+    paywall.includes("{disclosure}")
 );
 
 console.log("");

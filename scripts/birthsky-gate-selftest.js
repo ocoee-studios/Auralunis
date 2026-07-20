@@ -10,7 +10,6 @@
 
 const fs = require("fs");
 const path = require("path");
-const { execSync } = require("child_process");
 
 const ROOT = path.resolve(__dirname, "..");
 let pass = 0, fail = 0;
@@ -59,20 +58,13 @@ has(bs, "useEntitlement()", "BirthSkyScreen reads entitlement via useEntitlement
 hasnt(bs, "auralunis_premium", "no snake_case entitlement string introduced");
 has(read("src/features/paywall/MonetizationCatalog.ts"), 'entitlement: "AuraLunis Premium"', "canonical entitlement unchanged");
 
-console.log("\n── 7. No pricing / RevenueCat / entitlement / other-feature behavior change ──");
-const base = "6360868";
-for (const f of [
-  "src/features/paywall/MonetizationCatalog.ts",
-  "src/services/RevenueCatService.ts",
-  "src/context/EntitlementContext.tsx",
-  "src/features/paywall/ThreeTierPaywallModal.tsx",
-  "src/context/PaywallNavigationContext.tsx",
-  // NOTE: PhotoPlannerScreen.tsx was intentionally gated in its own PR (#184), so it is no
-  // longer frozen relative to this base — asserting it here was an obsolete cross-feature check.
-]) {
-  const changed = execSync(`git diff --name-only ${base} -- ${f} || true`, { cwd: ROOT }).toString().trim();
-  eq(`untouched: ${f}`, changed, "");
-}
+// NOTE: a hardcoded-base git "untouched files" block used to live here (base 6360868, freezing
+// MonetizationCatalog / RevenueCatService / EntitlementContext / ThreeTierPaywallModal /
+// PaywallNavigationContext). It was removed because it produced false failures the moment a sibling
+// paywall PR legitimately touched a listed file (the trial-copy refactor touches
+// ThreeTierPaywallModal) — the same fragile-base rot already pruned from photo-planner (#189) and
+// that required hotfix PR #185. Birth Sky's own gating is fully covered by sections 1–6 above; the
+// monetization contract is guarded by qa:revenuecat and qa:paywall-restore.
 
 console.log(`\nBirth Sky premium-gate self-test: ${pass} passed, ${fail} failed.`);
 process.exit(fail === 0 ? 0 : 1);

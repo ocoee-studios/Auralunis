@@ -21,7 +21,8 @@ import {
   lifetimeFeatures,
   type PlanOption,
 } from "./MonetizationCatalog";
-import { usePaywallOffers, type PlanOffer } from "./usePaywallOffers";
+import { usePaywallOffers, type PlanOffer, type TrialState } from "./usePaywallOffers";
+import { resolvePlanCopy } from "./paywallCopy";
 import { tapLight, tapSuccess } from "@/services/HapticService";
 import { Starfield } from "@/components/Starfield";
 import { TermsScreen } from "@/screens/TermsScreen";
@@ -34,42 +35,12 @@ type Props = {
   onRestore: () => void;
 };
 
-// "month" for a monthly plan, "year" for annual — the "/{period}" half of a price line.
-function periodWord(interval: PlanOption["interval"]): string {
-  return interval === "annual" ? "year" : "month";
-}
-
-// Localized price line, live store price preferred over the catalog fallback. Subscriptions
-// read "$9.99/month"; lifetime reads "$129.99 one-time".
-function priceLine(plan: PlanOption, offer?: PlanOffer): string {
-  if (plan.interval === "lifetime") {
-    return `${offer?.localizedPrice ?? plan.displayPrice} one-time`;
-  }
-  if (offer?.localizedPrice) return `${offer.localizedPrice}/${periodWord(plan.interval)}`;
-  return plan.displayPrice; // catalog fallback already includes the period, e.g. "$9.99/month"
-}
-
-// The line under each plan name. Trial framing only when the store confirms eligibility;
-// while loading or when unavailable, the plan's normal marketing subtitle / price shows —
-// so "free trial" never flashes before eligibility resolves.
-function detailLine(plan: PlanOption, offer?: PlanOffer): string {
-  if (plan.interval !== "lifetime" && offer?.trial.status === "eligible") {
-    return `${offer.trial.durationText} free, then ${priceLine(plan, offer)}`;
-  }
-  return plan.subtitle;
-}
-
-// "7 days" → "7-day"; "1 month" → "1-month".
-function trialAdjective(durationText: string): string {
-  return durationText.replace(/^(\d+)\s+(day|week|month|year)s?$/i, "$1-$2");
-}
-
-// "7-day" → "7-Day" (title-cased for the button label).
-function titleCaseAdjective(adjective: string): string {
-  return adjective
-    .split("-")
-    .map((word, i) => (i === 0 ? word : word.charAt(0).toUpperCase() + word.slice(1)))
-    .join("-");
+// All user-visible copy for a plan comes from the pure `resolvePlanCopy` helper — the modal
+// never re-derives eligibility or trial wording. A missing offer resolves as `loading`, which
+// fails closed to paid copy (no trial), so "free trial" can never flash before eligibility loads.
+function planCopy(plan: PlanOption, offer?: PlanOffer) {
+  const trial: TrialState = offer?.trial ?? { status: "loading" };
+  return resolvePlanCopy(plan.interval, plan.displayPrice, offer?.localizedPrice ?? null, trial);
 }
 
 export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore }: Props) {
@@ -95,32 +66,14 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
 
   const selectedPlan = plans.find(p => p.id === selected) ?? annual;
   const selectedOffer = offers[selected];
-  const selectedTrial = selectedOffer?.trial;
-  const selectedEligible = selectedTrial?.status === "eligible";
-  const trialAdj = selectedEligible ? trialAdjective(selectedTrial.durationText) : "";
 
-  // Headline follows the SELECTED plan: a confirmed trial leads with the offer.
-  const headline = selectedEligible
-    ? `Start your ${trialAdj} free trial`
-    : "Unlock the Living Universe";
-
-  // Primary button: trial → "Start 7-Day Free Trial"; lifetime → "Unlock Lifetime";
-  // ineligible / unavailable / still loading → "Continue".
-  const ctaLabel =
-    selectedPlan.interval === "lifetime"
-      ? "Unlock Lifetime"
-      : selectedEligible
-        ? `Start ${titleCaseAdjective(trialAdj)} Free Trial`
-        : "Continue";
-
-  // Renewal disclosure near the button. The "after the free trial" wording is used ONLY for
-  // a confirmed eligible offer; lifetime (one-time) shows none.
-  const disclosure =
-    selectedPlan.interval === "lifetime"
-      ? null
-      : selectedEligible
-        ? "After the free trial, your subscription renews automatically at the displayed price unless canceled at least 24 hours before the trial ends. Manage or cancel in your Apple ID subscription settings."
-        : "Your subscription renews automatically at the displayed price unless canceled at least 24 hours before the end of the period. Manage or cancel in your Apple ID subscription settings.";
+  // Every heading/CTA/detail/disclosure string for the SELECTED plan comes from the pure helper,
+  // which updates immediately when the selection changes (monthly ↔ annual ↔ lifetime) and
+  // strips all trial wording for any non-eligible or lifetime state.
+  const selectedCopy = planCopy(selectedPlan, selectedOffer);
+  const headline = selectedCopy.heading;
+  const ctaLabel = selectedCopy.ctaLabel;
+  const disclosure = selectedCopy.disclosure;
 
   return (
     <Modal visible={visible} animationType="slide" presentationStyle="fullScreen" onRequestClose={onClose}>
@@ -171,7 +124,7 @@ export function ThreeTierPaywallModal({ visible, onClose, onPurchase, onRestore 
               accessibilityLabel={ctaLabel}
             >
               <Text style={styles.ctaText}>{ctaLabel}</Text>
-              <Text style={styles.ctaSub}>{detailLine(selectedPlan, selectedOffer)}</Text>
+              <Text style={styles.ctaSub}>{selectedCopy.detailText}</Text>
             </TouchableOpacity>
 
             {/* Renewal disclosure — required near the purchase button. Trial wording only
@@ -226,7 +179,7 @@ function PlanCard({
   onPress: () => void;
   highlight?: boolean;
 }) {
-  const eligible = plan.interval !== "lifetime" && offer?.trial.status === "eligible";
+  const copy = planCopy(plan, offer);
   return (
     <TouchableOpacity
       style={[
@@ -242,16 +195,16 @@ function PlanCard({
           <Text style={[styles.planName, selected && { color: AuraLunisColors.gold2 }]}>
             {plan.name}
           </Text>
-          {/* Trial framing only for a store-confirmed eligible offer; otherwise the plan's
-              normal subtitle. Highlighted gold when a trial is active. */}
-          <Text style={[styles.planSubtitle, eligible && styles.planSubtitleTrial]}>
-            {detailLine(plan, offer)}
+          {/* Detail line comes from the pure helper: trial framing only for a store-confirmed
+              eligible offer (lifted to gold), otherwise plan-accurate paid copy. */}
+          <Text style={[styles.planSubtitle, copy.isTrial && styles.planSubtitleTrial]}>
+            {copy.detailText}
           </Text>
         </View>
       </View>
       <View style={styles.planRight}>
         <Text style={[styles.planPrice, selected && { color: AuraLunisColors.gold }]}>
-          {priceLine(plan, offer)}
+          {copy.priceText}
         </Text>
         {plan.badge && (
           <View style={styles.badge}>
