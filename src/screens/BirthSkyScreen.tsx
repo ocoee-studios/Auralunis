@@ -342,6 +342,33 @@ export function BirthSkyScreen({ onClose }: Props) {
   const visiblePlanets = profile ? profile.planets.filter((planet) => planet.visible) : [];
   const rare = visiblePlanets.length >= 3;
 
+  // Screen-level entitlement guard (defense-in-depth): Birth Sky is an ENTIRELY premium feature.
+  // A non-entitled user must never reach the input form, generate a chart, or see chart results,
+  // narratives, planet details, or sharing — even if this screen is opened through some other
+  // path. Render a premium preview/gate instead; "Unlock Premium" opens the existing paywall.
+  if (!isPremium) {
+    return (
+      <ScreenShell title="Your Birth Sky" subtitle="Birth Sky" background={<Starfield />}>
+        <Pressable style={styles.backBtn} onPress={() => { tapLight(); onClose(); }} hitSlop={12}>
+          <Text style={styles.backText}>‹ Back</Text>
+        </Pressable>
+        <View style={styles.gateCard}>
+          <Text style={styles.gateIcon}>◈</Text>
+          <Text style={styles.gateTitle}>Birth Sky</Text>
+          <Text style={styles.gateBadge}>PREMIUM FEATURE</Text>
+          <Text style={styles.gateDesc}>
+            Recreate the exact sky over your birthplace the moment you were born — your Sun and
+            rising signs, the planets above your horizon, the moon phase, and a personal cosmic
+            reading you can save and share.
+          </Text>
+          <Pressable style={styles.unlockBtn} onPress={() => { tapLight(); openPaywall(); }}>
+            <Text style={styles.unlockText}>✦ Unlock Premium</Text>
+          </Pressable>
+        </View>
+      </ScreenShell>
+    );
+  }
+
   return (
     <ScreenShell title="Your Birth Sky" subtitle="Birth Sky" background={<Starfield />}>
       <Pressable style={styles.backBtn} onPress={() => { tapLight(); onClose(); }} hitSlop={12}>
@@ -544,5 +571,10 @@ const styles = StyleSheet.create({
     backgroundColor: AuraLunisColors.gold
   },
   unlockText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14 },
+  gateCard: { marginTop: 24, backgroundColor: "rgba(7,18,37,0.7)", borderRadius: 20, borderWidth: 1, borderColor: AuraLunisColors.gold, padding: 24, alignItems: "center" },
+  gateIcon: { fontSize: 32, color: AuraLunisColors.gold, marginBottom: 10 },
+  gateTitle: { color: AuraLunisColors.gold2, fontSize: 22, fontWeight: "900", textAlign: "center" },
+  gateBadge: { color: AuraLunisColors.gold, fontSize: 11, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase", marginTop: 4, marginBottom: 12 },
+  gateDesc: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 21, textAlign: "center", marginBottom: 20 },
   watermark: { position: "absolute", bottom: 8, right: 12, fontSize: 8, color: AuraLunisColors.gold, opacity: 0.5 }
 });
