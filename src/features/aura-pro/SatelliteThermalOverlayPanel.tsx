@@ -11,6 +11,8 @@ import type {
   SatelliteOverlaySnapshot
 } from "@/features/aura-pro/AuraProUtilityTypes";
 import { useObserverLocation } from "@/features/sky-lens/ephemeris/useObserverLocation";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 const modes: Array<[SatelliteOverlayMode, string]> = [
   ["brightest", "Brightest"],
@@ -19,6 +21,8 @@ const modes: Array<[SatelliteOverlayMode, string]> = [
 ];
 
 export function SatelliteThermalOverlayPanel() {
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const [mode, setMode] = useState<SatelliteOverlayMode>("brightest");
   const [snapshot, setSnapshot] = useState<SatelliteOverlaySnapshot>(() =>
     getSatelliteFixture("brightest")
@@ -49,6 +53,25 @@ export function SatelliteThermalOverlayPanel() {
     } finally {
       setLoading(false);
     }
+  }
+
+  // Entitlement guard (defense-in-depth): this Aura Pro panel is premium. A non-entitled user
+  // sees a locked teaser (never the interactive thermal overlay / live feed); Unlock opens the paywall.
+  if (!isPremium) {
+    return (
+      <View style={styles.panel}>
+        <Text style={styles.eyebrow}>AURA PRO · ORBITAL OVERLAY</Text>
+        <Text style={styles.title}>Satellite + Space-Junk Thermal Layer</Text>
+        <Text style={styles.gateBadge}>PREMIUM FEATURE</Text>
+        <Text style={styles.copy}>
+          Explore bright satellites, stations, and potential-decay objects with a live thermal
+          attention map. Unlock Premium to open the overlay and refresh the live feed.
+        </Text>
+        <Pressable style={styles.unlockBtn} onPress={openPaywall}>
+          <Text style={styles.unlockText}>✦ Unlock Premium</Text>
+        </Pressable>
+      </View>
+    );
   }
 
   return (
@@ -170,6 +193,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(255,176,122,0.17)"
   },
+  gateBadge: { color: AuraLunisColors.gold, fontSize: 11, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase", marginTop: 8, marginBottom: 4 },
+  unlockBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 24, alignItems: "center", alignSelf: "flex-start", marginTop: 12 },
+  unlockText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14 },
   eyebrow: {
     color: AuraLunisColors.gold2,
     fontSize: 10,
