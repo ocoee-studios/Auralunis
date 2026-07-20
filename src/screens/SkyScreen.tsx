@@ -207,7 +207,11 @@ export function SkyScreen() {
         title="Your Birth Sky"
         description="What did the sky look like the night you were born? Moon phase, sun sign, rising constellation, visible planets, and a poetic cosmic signature you can share."
         actionLabel="Reveal My Birth Sky"
-        onPress={() => setBirthSkyOpen(true)}
+        onPress={() => {
+          // Birth Sky is an entirely premium feature: free users get the paywall, never the screen.
+          if (!isPremium) { openPaywall(); return; }
+          setBirthSkyOpen(true);
+        }}
       />
 
       <FeatureCard
