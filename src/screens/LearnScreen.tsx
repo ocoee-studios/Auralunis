@@ -5,16 +5,27 @@ import { ScreenShell } from "@/components/ScreenShell";
 import { FeatureCard } from "@/components/FeatureCard";
 import { AuraLunisColors } from "@/theme/tokens";
 import { TAB_BAR_STYLE } from "@/navigation/RootTabs";
-import { learnCategories, learnTopics } from "@/features/learn/LearnCatalog";
+import { learnCategories, learnTopics, isLearnLessonFree, FREE_LEARN_LESSON_COUNT } from "@/features/learn/LearnCatalog";
 import type { LearnCategoryId } from "@/features/learn/LearnTypes";
 import { LearnVisualForCategory } from "@/features/learn/LearnCategoryVisual";
 import { useLearnPreferences } from "@/features/learn/learnPreferences";
 import { LearnDetailScreen } from "@/screens/LearnDetailScreen";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 export function LearnScreen() {
   const navigation = useNavigation<any>();
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const [selectedCategory, setSelectedCategory] = useState<LearnCategoryId>("solar_system");
   const [openTopicId, setOpenTopicId] = useState<string | null>(null);
+
+  // Opening a lesson: the first FREE_LEARN_LESSON_COUNT lessons are free; advanced lessons are
+  // premium. A non-entitled tap on an advanced lesson opens the paywall instead of the lesson.
+  function openLesson(topicId: string) {
+    if (!isLearnLessonFree(topicId) && !isPremium) { openPaywall(); return; }
+    setOpenTopicId(topicId);
+  }
   // Which Deep Sky tab is active (Nebula/Galaxy/Cluster/Remnant) — drives which
   // deep_sky topic is shown beneath the live visual.
   const [deepSkyTabIndex, setDeepSkyTabIndex] = useState(0);
@@ -82,7 +93,7 @@ export function LearnScreen() {
           categoryTitle={categoryTitle}
           nextTopicTitle={next && next.id !== topic.id ? next.title : null}
           onBack={() => setOpenTopicId(null)}
-          onNext={() => setOpenTopicId(next.id)}
+          onNext={() => openLesson(next.id)}
           onOpenSkyLens={() => {
             setOpenTopicId(null);
             navigation.navigate("Sky", topic.skyTarget ? { focusTarget: topic.skyTarget } : undefined);
@@ -100,7 +111,11 @@ export function LearnScreen() {
           Learn planets, constellations, stars, the Moon, nebulae, galaxies, and the Milky Way
           through real live visuals instead of static blocks alone.
         </Text>
-        <Text style={styles.heroFree}>Every lesson is free.</Text>
+        <Text style={styles.heroFree}>
+          {isPremium
+            ? "All lessons unlocked."
+            : `${FREE_LEARN_LESSON_COUNT} free starter lessons · unlock the rest with Premium.`}
+        </Text>
       </View>
 
       <Text style={styles.sectionLabel}>Choose a learning path</Text>
@@ -133,9 +148,9 @@ export function LearnScreen() {
           key={topic.id}
           title={topic.title}
           description={`${topic.summary}\n\nKey facts:\n• ${topic.keyFacts.join("\n• ")}`}
-          actionLabel="Open Lesson"
-          onPress={() => setOpenTopicId(topic.id)}
-          status={topic.level}
+          actionLabel={isLearnLessonFree(topic.id) || isPremium ? "Open Lesson" : "✦ Unlock Lesson"}
+          onPress={() => openLesson(topic.id)}
+          status={isLearnLessonFree(topic.id) || isPremium ? topic.level : "premium"}
         />
       ))}
     </ScreenShell>

@@ -15,6 +15,7 @@ import { LearnVisualForCategory } from "@/features/learn/LearnCategoryVisual";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 import { useAuraLunisVault } from "@/state/AuraLunisVaultContext";
+import { isLearnLessonFree } from "@/features/learn/LearnCatalog";
 import type { LearnTopic } from "@/features/learn/LearnTypes";
 
 interface LearnDetailScreenProps {
@@ -44,6 +45,40 @@ export function LearnDetailScreen({
     setSaved(true);
   };
   const { openPaywall } = usePaywallNavigation();
+  const lessonIsFree = isLearnLessonFree(topic.id);
+
+  // Screen-level entitlement guard (defense-in-depth): advanced lessons are premium. A non-entitled
+  // user must never read a premium lesson body, even if this screen is reached by another path
+  // (e.g. "Next"). Render a premium preview/gate; "Unlock Premium" opens the existing paywall.
+  if (!lessonIsFree && !isPremium) {
+    return (
+      <ScreenShell title={topic.title} subtitle={categoryTitle} background={<Starfield />}>
+        <Pressable
+          style={({ pressed }) => [styles.backBtn, pressed && styles.backBtnPressed]}
+          onPress={() => { tapLight(); onBack(); }}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Back to Learn"
+        >
+          <Text style={styles.backArrow}>←</Text>
+          <Text style={styles.backText}>Back</Text>
+        </Pressable>
+        <View style={styles.gateCard}>
+          <Text style={styles.gateIcon}>◈</Text>
+          <Text style={styles.gateTitle}>{topic.title}</Text>
+          <Text style={styles.gateBadge}>PREMIUM LESSON</Text>
+          <Text style={styles.gateDesc}>{topic.summary}</Text>
+          <Text style={styles.gateDesc}>
+            The starter lessons are free — unlock the full Learn library with Premium.
+          </Text>
+          <Pressable style={styles.unlockBtn} onPress={() => { tapLight(); openPaywall(); }}>
+            <Text style={styles.unlockText}>✦ Unlock Premium</Text>
+          </Pressable>
+        </View>
+      </ScreenShell>
+    );
+  }
+
   return (
     <ScreenShell title={topic.title} subtitle={categoryTitle} background={<Starfield />}>
       {/* Top nav — large, high-contrast back control (>=44pt tap target) */}
@@ -59,7 +94,7 @@ export function LearnDetailScreen({
       </Pressable>
 
       <View style={styles.badgeRow}>
-        <Text style={styles.freeTag}>FREE LESSON</Text>
+        <Text style={styles.freeTag}>{lessonIsFree ? "FREE LESSON" : "PREMIUM LESSON"}</Text>
         <Text style={styles.levelTag}>{topic.level.toUpperCase()}</Text>
       </View>
 
@@ -110,13 +145,13 @@ export function LearnDetailScreen({
         </Pressable>
       )}
 
-      {/* Soft Premium nudge — every lesson stays free; this gently surfaces Premium
-          at the end for free users only (never blocks the content). */}
+      {/* Soft Premium nudge — surfaced at the end of the free starter lessons for free users
+          only (never blocks a free lesson's content). */}
       {!isPremium && (
         <View style={styles.nudge}>
           <Text style={styles.nudgeTitle}>✦  Go deeper with Premium</Text>
           <Text style={styles.nudgeBody}>
-            Every lesson is free. Premium adds the Sky Lens planetarium aligned to your sky, your Birth
+            Unlock the full Learn library plus the Sky Lens planetarium aligned to your sky, your Birth
             Sky chart, the major constellations with mythology, and the full deep-sky catalogue.
           </Text>
           <Pressable style={styles.nudgeBtn} onPress={() => { tapLight(); openPaywall(); }}>
@@ -129,6 +164,13 @@ export function LearnDetailScreen({
 }
 
 const styles = StyleSheet.create({
+  gateCard: { marginTop: 24, backgroundColor: "rgba(7,18,37,0.7)", borderRadius: 20, borderWidth: 1, borderColor: AuraLunisColors.gold, padding: 24, alignItems: "center" },
+  gateIcon: { fontSize: 32, color: AuraLunisColors.gold, marginBottom: 10 },
+  gateTitle: { color: AuraLunisColors.gold2, fontSize: 22, fontWeight: "900", textAlign: "center" },
+  gateBadge: { color: AuraLunisColors.gold, fontSize: 11, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase", marginTop: 4, marginBottom: 12 },
+  gateDesc: { color: AuraLunisColors.silver, fontSize: 14, lineHeight: 21, textAlign: "center", marginBottom: 14 },
+  unlockBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingVertical: 14, paddingHorizontal: 28, alignItems: "center", marginTop: 6 },
+  unlockText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14 },
   backBtn: {
     flexDirection: "row", alignItems: "center", gap: 3,
     alignSelf: "flex-start",
