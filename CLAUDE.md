@@ -21,90 +21,153 @@
 # CLAUDE.md — AuraLunis Project Context
 
 ## What this is
-AuraLunis is "The Interactive Astral Clock" — a React Native (Expo SDK 51) app
-for iOS that tracks the real sky (Sun, Moon, planets, satellites) through a
-camera-aligned AR overlay and a 9-mode orbital tracking radar, with watch
-faces, learn content, and an encrypted vault for sky notes.
+AuraLunis is "The Interactive Astral Clock" — a React Native (Expo SDK 54) app
+for iOS that tracks the real sky (Sun, Moon, planets, satellites). Its core
+experiences are **Sky Lens** (a sensor-aligned, fully-rendered planetarium — NOT
+a camera/AR pass-through), a 9-mode orbital tracking radar, an education library
+(Learn), a celestial calendar, and an encrypted vault for sky notes.
 
 ## Active codebase
 This React Native / Expo repo is the source of truth. Do not revive earlier
 HTML implementations. HTML files in the repo are visual references only.
 
 ## Navigation (locked — do not add tabs)
-Home · Sky · Watch · Learn · Settings
+Home · Sky · Learn · Vault · Settings
 
-## Pricing (locked — source of truth)
+There is **no "Watch" tab** and no watch-face feature — remove any such references.
+
+## Pricing (locked — source of truth: `src/features/paywall/MonetizationCatalog.ts`)
 - **Horizon Free** — always free
 - **AuraLunis Premium monthly** — $9.99/month
-- **AuraLunis Premium annual** — $49.99/year
-- **Founders Lifetime** — $129.99 one-time purchase
-- **Aura Pro** — Coming Later (do NOT enable purchase flows)
-- **Sovereign** — Waitlist, Coming Later (do NOT enable purchase flows)
+- **AuraLunis Premium annual** — $49.99/year ($4.17/mo, billed annually)
+- **Lifetime** — $129.99 one-time purchase
 
 A 7-day introductory free trial may be available to eligible new subscribers on the monthly and annual plans. Apple determines eligibility, so trial wording must appear only when StoreKit confirms both the introductory offer and the customer’s eligibility. Lifetime includes no trial.
 
-Bundle ID: `com.ocoeestudios.auralunis` (Ocoee Studios LLC). RevenueCat product IDs
-(must match App Store Connect exactly):
+Bundle ID: `com.ocoeestudios.auralunis` (Ocoee Studios LLC).
+
+RevenueCat **product IDs** (must match App Store Connect exactly — current source of truth):
 - `com.ocoeestudios.auralunis.premium.monthly`
 - `com.ocoeestudios.auralunis.premium.annual`
-- `com.ocoeestudios.auralunis.lifetime.founders`
+- `com.ocoeestudios.auralunis.lifetime`
 
-Entitlement: `auralunis_premium` (all three products unlock this)
+RevenueCat **package IDs** (offering): `premium_monthly`, `premium_annual`, `$rc_lifetime`.
 
-The first-open paywall (`ThreeTierPaywallModal`) shows these three options
-only — Monthly, Annual, and Lifetime Founders. It does NOT show Aura Pro
-or Sovereign. Annual is selected by default.
+**Entitlement identifier (exact): `AuraLunis Premium`** — all three products unlock this
+single entitlement. Do NOT use the old snake_case string `auralunis_premium`; it is not the
+entitlement identifier and must not appear in code or docs.
 
-## Feature gates (locked)
-Free modes: Fleet, Deep Space, Golden Hour, Meteor
-Premium modes: Train, Debris, Re-Entry, Chain, Static
-Cosmic Drift: 5 free lock events, unlimited with Premium
+The first-open paywall (`ThreeTierPaywallModal`) shows exactly these three options —
+Monthly, Annual, and Lifetime; Annual is selected by default. There is **no "Aura Pro" or
+"Sovereign" purchase tier**: the Sovereign tier was removed, and the Aura Pro panels are
+premium *features* under `AuraLunis Premium`, not a separate purchasable tier.
 
-Gate logic: `isModeGated()` in `src/features/paywall/MonetizationCatalog.ts`
-Entitlement check: `useEntitlement()` in `src/hooks/useEntitlement.ts`
+## Access model (Free vs Premium) — authoritative, matches the merged gating
+
+FREE (Horizon):
+- Tonight Score
+- Manual Sky Map
+- Find Mode
+- Basic Sky Lens planetarium
+- Fleet, Deep Space, Golden Hour, and Meteor telemetry modes
+- First 5 Cosmic Drift lock events
+- Limited starter Learn content (the first 3 lessons)
+- Basic Celestial Calendar browsing (event list, names, dates, ratings, descriptions)
+
+PREMIUM (AuraLunis Premium):
+- Birth Sky — entire feature
+- Photo Planner — entire feature
+- Astro Weather
+- Event, eclipse, meteor, and conjunction reminders
+- Full Sky Lens Pro tools and premium visual layers (night vision, cinematic mode, time
+  travel, photo capture, spectral visuals, satellites/ecliptic layers, etc.)
+- Train, Debris, Chain, Static, and Re-Entry telemetry modes
+- Encrypted Vault — **all read and write entry points** (Home Cosmic Notes, Sky "Save + Find",
+  Sky Lens object save, Learn lesson marks)
+- Advanced Learn content (every lesson beyond the free starter set)
+- Share Your Sky exports and premium sharing (creating/previewing a card is free; the
+  export/share action is premium)
+- Full Celestial Archive
+- Aura Pro Satellite Thermal
+- Aura Pro Astrophoto Predictor
+- Advanced Celestial Calendar details (best time, where to look, moon interference) and alerts
+
+## Feature gate mechanics (locked)
+- Premium telemetry modes: `PREMIUM_TRACKING_MODES` = train, debris, reentry, chain, static
+  (free: fleet, deep space, golden hour, meteor). Gate helper: `isModeGated()` in
+  `src/features/paywall/MonetizationCatalog.ts`.
+- Cosmic Drift: `FREE_DRIFT_EVENT_LIMIT = 5` free lock events; unlimited with Premium.
+- Entitlement check: **`useEntitlement()`** in `src/hooks/useEntitlement.ts` — the SHARED single
+  source of truth (backed by `EntitlementContext`, mounted once at the app root, fails closed to
+  non-premium). Every premium check MUST read `useEntitlement().isPremium`; never hardcode an
+  entitlement string or infer premium status any other way.
+- Paywall is opened via `usePaywallNavigation().openPaywall()`.
+
+## Required gating pattern (follow for every premium feature)
+1. **Gate the visible entry point** — e.g. a Sky FeatureCard onPress:
+   `if (!isPremium) { openPaywall(); return; }` before opening the feature.
+2. **Add a screen-level or capability-level entitlement guard** as defense-in-depth, so the
+   feature is unreachable even if entered by another path (the screen early-returns a premium
+   preview/gate; inline panels self-gate; per-action guards cover capabilities like export/save).
+3. **Non-entitled actions open the EXISTING paywall** (`openPaywall()`) — never a bespoke one.
+4. **Entitled users continue normally** — no behavior change for premium users.
+5. **Freemium features gate ONLY their approved premium capabilities.** Calendar keeps basic
+   browsing free and gates the advanced detail chips; Learn keeps the starter lessons free and
+   gates advanced ones; Share keeps card creation free and gates export. Never paywall the free tier.
+
+Each gated feature has a deterministic self-test at `scripts/*-gate-selftest.js`, wired into
+`npm run qa:all` (e.g. `qa:birthsky`, `qa:photo-planner`, `qa:astro-weather`, `qa:reminders`,
+`qa:archive`, `qa:telemetry-modes`, `qa:aura-pro-panels`, `qa:vault`, `qa:vault-write`, `qa:share`,
+`qa:calendar`, `qa:learn`). Self-tests assert the canonical entitlement string, never a literal.
 
 ## Before coding: run
 ```bash
 npm install
 npx expo install --fix
 npm run typecheck   # tsc --noEmit
-npm run qa:all      # full test suite
+npm run qa:all      # full test suite (includes the premium-gate self-tests)
 ```
 
 ## QA suite
-- `npm run qa:all` chains: static, sky, whole, native-device, revenuecat, aura-pro, fresh-bugs, ephemeris, satellite, skylens
-- `npm run qa:fresh-bugs` — 70+ regression guards
+- `npm run qa:all` — the full chain: static/sky/whole app checks, RevenueCat + Aura Pro preflights,
+  regression guards, ephemeris/satellite/sky-lens self-tests, and every premium-gate self-test.
+- `npm run qa:fresh-bugs` — 100+ regression guards
 - `tsc --noEmit` — must be 0 errors
 
 ## Key architecture
 - `astronomy-engine` — real ephemeris (Sun/Moon/planets)
 - `satellite.js` — SGP4 orbital propagation
 - `tweetnacl` — NaCl secretbox vault encryption
-- `expo-sensors` — magnetometer + accelerometer for AR pointing
+- `expo-sensors` — magnetometer + accelerometer for sensor-aligned pointing
 - `react-native-purchases` — RevenueCat subscriptions
 - `react-native-reanimated` — UI-thread animations for radar blips
-- `react-native-svg` — SVG radar scope, particle galaxy
-- `expo-av` — Ionospheric Static audio engine
-- `expo-notifications` — sunset/moonrise alerts
-- `CoreHaptics` — native Swift module via Expo Modules
+- `react-native-svg` — SVG radar scope, rendered sky
+- `expo-av` — audio engine
+- `expo-notifications` — sunset/moonrise alerts (basic, free) + premium celestial-event reminders
 
 ## Do NOT enable until genuinely ready
-- Aura Pro / Sovereign purchase flows
 - Vision Pro / spatial experiences
 - Community features
 - Hardware checkout flows
 
+(There is no separate Aura Pro / Sovereign *purchase* tier to enable — those tiers do not exist;
+the Aura Pro panels ship as premium features under `AuraLunis Premium`.)
+
 ## Key file map
 - `docs/CLAUDE_SESSION_NOTES.md` — full build history, all decisions
 - `GEMINI_HANDOFF.md` — orientation for external AI agents
+- `src/features/paywall/MonetizationCatalog.ts` — pricing, product IDs, entitlement, gates, features
+- `src/features/paywall/ThreeTierPaywallModal.tsx` — the three-plan paywall UI
+- `src/context/EntitlementContext.tsx` — shared entitlement provider (single source of truth)
+- `src/hooks/useEntitlement.ts` — `useEntitlement()` consumer hook
+- `src/context/PaywallNavigationContext.tsx` — `usePaywallNavigation().openPaywall()`
 - `src/screens/OrbitalAlignmentScreen.tsx` — 9-mode tracking hub
-- `src/features/paywall/MonetizationCatalog.ts` — pricing, gates, features
-- `src/features/paywall/ThreeTierPaywallModal.tsx` — paywall UI
-- `src/theme/tokens.ts` — AuraLunisColors, AuraLunisPricing
+- `src/screens/SkyScreen.tsx` — Sky tab (Sky Lens + gated feature cards)
+- `src/theme/tokens.ts` — AuraLunisColors
 
 ## Contact
 - admin@ocoeestudios.com
 - manager@ocoeestudios.com
 
 ## GitHub
-`jamiebzzz-stack/auralunis` (private)
+`ocoee-studios/Auralunis` (private)
