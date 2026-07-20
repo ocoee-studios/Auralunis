@@ -41,6 +41,8 @@ export function LearnDetailScreen({
 
   const saveToVault = () => {
     tapLight();
+    // Lesson marks are saved to the (premium) Vault — free users get the paywall instead.
+    if (!isPremium) { openPaywall(); return; }
     addItem({ type: "lesson", title: topic.title, detail: `Observed during "${topic.title}". ${topic.skyLensAction ?? ""}`.trim() });
     setSaved(true);
   };

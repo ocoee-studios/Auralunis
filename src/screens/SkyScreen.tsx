@@ -269,6 +269,8 @@ export function SkyScreen() {
           description={`${object.summary}\n\nLayer: ${object.skyLensLayer.replace("_", " ")} · Best season: ${displaySeasonLabel(object.bestSeason ?? "Varies", location?.latitudeDegrees)} · Naked-eye: ${object.visibleToNakedEye ? "sometimes" : "usually no"}`}
           actionLabel="Save + Find"
           onPress={() => {
+            // Saving to the (premium) Vault requires entitlement — free users get the paywall.
+            if (!isPremium) { openPaywall(); return; }
             addItem({ type: "archive", title: object.name, detail: object.summary });
             Alert.alert(object.name, "Saved to your Cosmic Vault.");
           }}
