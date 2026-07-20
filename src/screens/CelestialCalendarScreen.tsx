@@ -18,6 +18,8 @@ import {
   type CelestialEvent,
   type EventType,
 } from "@/data/CelestialEvents";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 interface Props {
   onClose: () => void;
@@ -41,7 +43,12 @@ function formatDate(iso: string): string {
   return formatWeekdayDay(new Date(`${iso}T12:00:00`));
 }
 
-function EventRow({ event, onSeeInSky }: { event: CelestialEvent; onSeeInSky?: (e: CelestialEvent) => void }) {
+function EventRow({ event, onSeeInSky, isPremium, onUpgrade }: {
+  event: CelestialEvent;
+  onSeeInSky?: (e: CelestialEvent) => void;
+  isPremium: boolean;
+  onUpgrade: () => void;
+}) {
   return (
     <View style={styles.eventCard}>
       <View style={styles.eventHead}>
@@ -58,13 +65,22 @@ function EventRow({ event, onSeeInSky }: { event: CelestialEvent; onSeeInSky?: (
 
       <Text style={styles.eventDesc}>{event.description}</Text>
 
-      <View style={styles.metaRow}>
-        <Text style={styles.metaChip}>🕐 {event.bestTime}</Text>
-        {event.direction ? <Text style={styles.metaChip}>🧭 {event.direction}</Text> : null}
-        {event.moonInterference ? (
-          <Text style={styles.metaChip}>🌙 {event.moonInterference} interference</Text>
-        ) : null}
-      </View>
+      {/* Basic browsing (name/date/rating/description) is free. The advanced details — best
+          time, where to look, and moon interference — are premium. Non-entitled users see a
+          locked pill that opens the paywall instead of the detail chips. */}
+      {isPremium ? (
+        <View style={styles.metaRow}>
+          <Text style={styles.metaChip}>🕐 {event.bestTime}</Text>
+          {event.direction ? <Text style={styles.metaChip}>🧭 {event.direction}</Text> : null}
+          {event.moonInterference ? (
+            <Text style={styles.metaChip}>🌙 {event.moonInterference} interference</Text>
+          ) : null}
+        </View>
+      ) : (
+        <Pressable style={styles.lockedMeta} onPress={() => { tapLight(); onUpgrade(); }} hitSlop={6}>
+          <Text style={styles.lockedMetaText}>🔒 Best time, where to look & moon details · Premium</Text>
+        </Pressable>
+      )}
 
       {onSeeInSky && (
         <Pressable
@@ -80,6 +96,8 @@ function EventRow({ event, onSeeInSky }: { event: CelestialEvent; onSeeInSky?: (
 }
 
 export function CelestialCalendarScreen({ onClose, onSeeInSky }: Props) {
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const thisWeek = useMemo(() => getThisWeekEvents(), []);
   const highlights = useMemo(() => getHighlightEvents(4).slice(0, 6), []);
   const upcoming = useMemo(() => getUpcomingEvents(40), []);
@@ -98,21 +116,21 @@ export function CelestialCalendarScreen({ onClose, onSeeInSky }: Props) {
       {thisWeek.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>THIS WEEK</Text>
-          {thisWeek.map((e) => <EventRow key={e.id} event={e} onSeeInSky={onSeeInSky} />)}
+          {thisWeek.map((e) => <EventRow key={e.id} event={e} onSeeInSky={onSeeInSky} isPremium={isPremium} onUpgrade={openPaywall} />)}
         </>
       )}
 
       {highlights.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>UPCOMING HIGHLIGHTS</Text>
-          {highlights.map((e) => <EventRow key={e.id} event={e} onSeeInSky={onSeeInSky} />)}
+          {highlights.map((e) => <EventRow key={e.id} event={e} onSeeInSky={onSeeInSky} isPremium={isPremium} onUpgrade={openPaywall} />)}
         </>
       )}
 
       {restUpcoming.length > 0 && (
         <>
           <Text style={styles.sectionTitle}>ALL UPCOMING</Text>
-          {restUpcoming.map((e) => <EventRow key={e.id} event={e} onSeeInSky={onSeeInSky} />)}
+          {restUpcoming.map((e) => <EventRow key={e.id} event={e} onSeeInSky={onSeeInSky} isPremium={isPremium} onUpgrade={openPaywall} />)}
         </>
       )}
 
@@ -149,6 +167,17 @@ const styles = StyleSheet.create({
   rating: { color: AuraLunisColors.gold, fontSize: 13, letterSpacing: 1 },
   eventDesc: { color: "rgba(233,236,245,0.82)", fontSize: 13.5, lineHeight: 19, marginTop: 12 },
   metaRow: { flexDirection: "row", flexWrap: "wrap", gap: 8, marginTop: 12 },
+  lockedMeta: {
+    marginTop: 12,
+    alignSelf: "flex-start",
+    backgroundColor: "rgba(217,168,78,0.10)",
+    borderWidth: 1,
+    borderColor: "rgba(217,168,78,0.35)",
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 7,
+  },
+  lockedMetaText: { color: AuraLunisColors.gold2, fontSize: 11.5, fontWeight: "700" },
   metaChip: {
     color: "rgba(233,236,245,0.78)",
     fontSize: 11.5,

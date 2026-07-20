@@ -17,7 +17,7 @@
     "qa:sky": "node ./qa/sky-lens-accuracy-check.js",
     "qa:whole": "node ./qa/whole-app-qa-check.js",
     "qa:native-device": "node ./scripts/native-device-preflight.js",
-    "qa:all": "npm run qa:static && npm run qa:sky && npm run qa:whole && npm run qa:native-device && npm run qa:revenuecat && npm run qa:aura-pro && npm run qa:fresh-bugs && npm run qa:ephemeris && npm run qa:satellite && npm run qa:skylens && npm run qa:labels && npm run qa:orion && npm run qa:planets && npm run qa:release-config && npm run qa:a11y && npm run qa:timezone && npm run qa:reduced-motion && npm run qa:release-cleanup && npm run qa:locale-seasons && npm run qa:paywall-restore && npm run qa:release-candidate && npm run qa:onboarding && npm run qa:notifications && npm run qa:location && npm run qa:paywall-reopen && npm run qa:birthsky && npm run qa:photo-planner && npm run qa:astro-weather && npm run qa:reminders && npm run qa:archive && npm run qa:telemetry-modes && npm run qa:aura-pro-panels && npm run qa:vault && npm run qa:share",
+    "qa:all": "npm run qa:static && npm run qa:sky && npm run qa:whole && npm run qa:native-device && npm run qa:revenuecat && npm run qa:aura-pro && npm run qa:fresh-bugs && npm run qa:ephemeris && npm run qa:satellite && npm run qa:skylens && npm run qa:labels && npm run qa:orion && npm run qa:planets && npm run qa:release-config && npm run qa:a11y && npm run qa:timezone && npm run qa:reduced-motion && npm run qa:release-cleanup && npm run qa:locale-seasons && npm run qa:paywall-restore && npm run qa:release-candidate && npm run qa:onboarding && npm run qa:notifications && npm run qa:location && npm run qa:paywall-reopen && npm run qa:birthsky && npm run qa:photo-planner && npm run qa:astro-weather && npm run qa:reminders && npm run qa:archive && npm run qa:telemetry-modes && npm run qa:aura-pro-panels && npm run qa:vault && npm run qa:share && npm run qa:calendar",
     "eas:dev:ios": "npx eas-cli@latest build --platform ios --profile development",
     "eas:sim:ios": "npx eas-cli@latest build --platform ios --profile development-simulator",
     "eas:preview:ios": "npx eas-cli@latest build --platform ios --profile preview",
@@ -50,7 +50,8 @@
     "qa:telemetry-modes": "node ./scripts/telemetry-mode-gate-selftest.js",
     "qa:aura-pro-panels": "node ./scripts/aura-pro-gate-selftest.js",
     "qa:vault": "node ./scripts/vault-gate-selftest.js",
-    "qa:share": "node ./scripts/share-export-gate-selftest.js"
+    "qa:share": "node ./scripts/share-export-gate-selftest.js",
+    "qa:calendar": "node ./scripts/calendar-advanced-gate-selftest.js"
   },
   "dependencies": {
     "@expo-google-fonts/cinzel": "^0.2.3",
