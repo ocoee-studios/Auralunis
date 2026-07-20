@@ -133,13 +133,11 @@ const readers = require("child_process")
   .filter((f) => !NON_CONSUMERS.has(f));
 eq("only App.tsx (PaywallBridge) reads isPaywallVisible", readers.join(","), "App.tsx");
 
-console.log("\n── 6. No pricing / entitlement / RevenueCat behavior change ──");
-const base = "6360868"; // branch base (fix/notification-denial-state)
-const { execSync } = require("child_process");
-for (const f of ["src/features/paywall/MonetizationCatalog.ts", "src/services/RevenueCatService.ts", "src/context/EntitlementContext.tsx", "src/features/paywall/ThreeTierPaywallModal.tsx"]) {
-  const changed = execSync(`git diff --name-only ${base} -- ${f} || true`, { cwd: ROOT }).toString().trim();
-  eq(`untouched: ${f}`, changed, "");
-}
+// NOTE: a hardcoded-base git "untouched files" block used to live here. It was removed because it
+// produced false failures the moment a sibling paywall PR legitimately touched a listed file (e.g.
+// ThreeTierPaywallModal for the trial-copy refactor) — the same rot that required hotfix PR #185.
+// Pricing/entitlement/RevenueCat behavior is guarded by qa:revenuecat, qa:paywall-restore, and the
+// behavioral qa:paywall-copy suite, plus qa:all + PR review.
 
 console.log(`\nPaywall re-open self-test: ${pass} passed, ${fail} failed.`);
 process.exit(fail === 0 ? 0 : 1);

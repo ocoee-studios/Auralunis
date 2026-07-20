@@ -99,7 +99,12 @@ const offers = read("src/features/paywall/usePaywallOffers.ts");
 has(offers, 'p.interval !== "lifetime"', "usePaywallOffers excludes lifetime from intro-offer eligibility");
 has(offers, 'status: "unavailable"', "usePaywallOffers marks lifetime trial unavailable");
 const modal = read("src/features/paywall/ThreeTierPaywallModal.tsx");
-has(modal, 'plan.interval !== "lifetime" && offer?.trial.status === "eligible"', "Paywall renders trial copy only for eligible non-lifetime plans");
+// Trial copy now lives in the pure resolvePlanCopy helper: lifetime is forced trial-free, and
+// trial wording is produced ONLY for the store-confirmed eligible branch. The modal delegates.
+const copyHelper = read("src/features/paywall/paywallCopy.ts");
+has(copyHelper, 'interval === "lifetime"', "resolvePlanCopy forces lifetime trial-free");
+has(copyHelper, 'trial.status === "eligible"', "resolvePlanCopy renders trial copy only for the eligible branch");
+has(modal, "resolvePlanCopy", "Paywall modal delegates all copy to the resolvePlanCopy helper");
 
 console.log("\n── Monetization contract unchanged ──");
 const catalog = read("src/features/paywall/MonetizationCatalog.ts");

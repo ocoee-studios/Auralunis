@@ -1,0 +1,145 @@
+// Paywall-copy deterministic self-test.
+//
+// Locks the fail-closed trial-copy behavior: free-trial wording is produced ONLY for a
+// store-confirmed eligible subscription offer. Every other state (ineligible / unavailable /
+// loading — and, upstream, unknown / no-offer / error, which usePaywallOffers folds into
+// "unavailable") and lifetime in ALL states resolve to plan-accurate PAID copy with no trial
+// wording. Part A executes the pure `resolvePlanCopy` helper across the full matrix; Part B is a
+// static guard that no trial string can leak from a non-eligible/lifetime state, plus source
+// invariants on the (unchanged) eligibility derivation and purchase/restore wiring.
+
+const fs = require("fs");
+const path = require("path");
+const ROOT = path.resolve(__dirname, "..");
+const SRC = path.join(ROOT, "src");
+
+// ── transpile-require: load node-safe .ts as CommonJS, resolve "@/…" → src/… ──
+const ts = require(path.join(ROOT, "node_modules/typescript"));
+const Module = require("module");
+require.extensions[".ts"] = function (module, filename) {
+  const src = fs.readFileSync(filename, "utf8");
+  const { outputText } = ts.transpileModule(src, {
+    compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2019 },
+    fileName: filename,
+  });
+  module._compile(outputText, filename);
+};
+const origResolve = Module._resolveFilename;
+Module._resolveFilename = function (request, ...rest) {
+  if (request.startsWith("@/")) {
+    const base = path.resolve(SRC, request.slice(2));
+    for (const cand of [base + ".ts", base + ".tsx", path.join(base, "index.ts")]) {
+      if (fs.existsSync(cand)) return cand;
+    }
+  }
+  return origResolve.call(this, request, ...rest);
+};
+
+const { resolvePlanCopy, DEFAULT_HEADLINE } = require(path.join(SRC, "features/paywall/paywallCopy.ts"));
+
+let pass = 0, fail = 0;
+const ok = (m) => { pass += 1; console.log("PASS " + m); };
+const bad = (m) => { fail += 1; console.log("FAIL " + m); };
+const eq = (n, a, b) => (a === b ? ok(n) : bad(`${n} — got ${JSON.stringify(a)} expected ${JSON.stringify(b)}`));
+const read = (rel) => fs.readFileSync(path.join(ROOT, rel), "utf8");
+const has = (hay, needle, n) => (hay.includes(needle) ? ok(n) : bad(`${n} — expected present: ${needle}`));
+const hasnt = (hay, needle, n) => (!hay.includes(needle) ? ok(n) : bad(`${n} — should be absent: ${needle}`));
+
+const MONTHLY = ["monthly", "$9.99/month", null];
+const ANNUAL = ["annual", "$49.99/year", null];
+const LIFETIME = ["lifetime", "$129.99", null];
+const eligible = { status: "eligible", durationText: "7 days" };
+const ineligible = { status: "ineligible" };
+const unavailable = { status: "unavailable" }; // also represents unknown / no-offer / error upstream
+const loading = { status: "loading" };
+const c = (plan, trial) => resolvePlanCopy(plan[0], plan[1], plan[2], trial);
+
+const TRIAL_RE = [/free trial/i, /7-day/i, /7 days free/i, /\bfree\b/i, /\btrial\b/i];
+const noTrial = (copy, label) => {
+  const blob = [copy.heading, copy.detailText, copy.ctaLabel, copy.disclosure ?? ""].join(" || ");
+  const hit = TRIAL_RE.find((re) => re.test(blob));
+  hit ? bad(`${label} — trial wording leaked: ${hit} in ${JSON.stringify(blob)}`) : ok(`${label} — no trial wording`);
+};
+
+console.log("── Part A: behavioral matrix (pure resolvePlanCopy) ──");
+
+// 1. Monthly eligible — trial copy PRESERVED exactly.
+{
+  const m = c(MONTHLY, eligible);
+  eq("1 monthly eligible: isTrial", m.isTrial, true);
+  eq("1 monthly eligible: heading", m.heading, "Start your 7-day free trial");
+  eq("1 monthly eligible: detail", m.detailText, "7 days free, then $9.99/month");
+  eq("1 monthly eligible: cta", m.ctaLabel, "Start 7-Day Free Trial");
+}
+// 2/3/4/5/6/7. Monthly ineligible / unknown(→unavailable) / loading / unavailable / no-offer(→unavailable) / error(→unavailable)
+for (const [label, st] of [["2 ineligible", ineligible], ["3 unknown→unavailable", unavailable], ["4 loading", loading], ["5 unavailable", unavailable], ["6 no-offer→unavailable", unavailable], ["7 error→unavailable", unavailable]]) {
+  const m = c(MONTHLY, st);
+  eq(`monthly ${label}: isTrial`, m.isTrial, false);
+  eq(`monthly ${label}: cta`, m.ctaLabel, "Subscribe Monthly");
+  eq(`monthly ${label}: detail`, m.detailText, "$9.99 per month");
+  eq(`monthly ${label}: heading`, m.heading, DEFAULT_HEADLINE);
+  noTrial(m, `monthly ${label}`);
+}
+// 8. Annual eligible.
+{
+  const a = c(ANNUAL, eligible);
+  eq("8 annual eligible: isTrial", a.isTrial, true);
+  eq("8 annual eligible: heading", a.heading, "Start your 7-day free trial");
+  eq("8 annual eligible: detail", a.detailText, "7 days free, then $49.99/year");
+  eq("8 annual eligible: cta", a.ctaLabel, "Start 7-Day Free Trial");
+}
+// 9/10/11. Annual ineligible / unknown(→unavailable) / loading.
+for (const [label, st] of [["9 ineligible", ineligible], ["10 unknown→unavailable", unavailable], ["11 loading", loading]]) {
+  const a = c(ANNUAL, st);
+  eq(`annual ${label}: cta`, a.ctaLabel, "Subscribe Annually");
+  eq(`annual ${label}: detail`, a.detailText, "$49.99 per year");
+  noTrial(a, `annual ${label}`);
+}
+// 12. Switch eligible monthly → ineligible annual (stateless: new inputs).
+{
+  const before = c(MONTHLY, eligible); const after = c(ANNUAL, ineligible);
+  eq("12 switch: before is trial", before.isTrial, true);
+  eq("12 switch: after annual cta", after.ctaLabel, "Subscribe Annually");
+  noTrial(after, "12 switch → ineligible annual");
+}
+// 13. Switch eligible annual → monthly unknown(→unavailable).
+{
+  const after = c(MONTHLY, unavailable);
+  eq("13 switch → monthly unknown cta", after.ctaLabel, "Subscribe Monthly");
+  noTrial(after, "13 switch → monthly unknown");
+}
+// 14/15. Switch eligible subscription → lifetime; lifetime never shows trial (even if an eligible trial state is passed).
+for (const [label, st] of [["14 lifetime (from eligible)", eligible], ["15 lifetime ineligible", ineligible], ["15 lifetime loading", loading], ["15 lifetime unavailable", unavailable]]) {
+  const l = c(LIFETIME, st);
+  eq(`${label}: cta`, l.ctaLabel, "Unlock Lifetime");
+  eq(`${label}: detail`, l.detailText, "One-time purchase · $129.99");
+  eq(`${label}: price`, l.priceText, "$129.99 one-time");
+  eq(`${label}: disclosure null`, l.disclosure, null);
+  eq(`${label}: isTrial`, l.isTrial, false);
+  noTrial(l, label);
+}
+// 18. Offering unavailable → live price null → catalog fallback, no trial.
+{
+  const m = c(MONTHLY, unavailable);
+  eq("18 offering unavailable: price falls back to catalog", m.priceText, "$9.99/month");
+  noTrial(m, "18 offering unavailable");
+}
+
+console.log("\n── Part B: static guards (derivation + wiring unchanged; no leak from the modal) ──");
+const offers = read("src/features/paywall/usePaywallOffers.ts");
+const modal = read("src/features/paywall/ThreeTierPaywallModal.tsx");
+// 16/17. Eligibility derivation still requires BOTH positive eligibility AND a real intro offer.
+has(offers, 'elig === "eligible" && pkg?.introOffer', "usePaywallOffers requires eligible AND an intro offer (offer≠eligibility)");
+has(offers, 'p.interval === "lifetime"', "usePaywallOffers forces lifetime to no-trial");
+has(offers, 'trial = { status: "unavailable" }', "unknown/no-offer/error fold to unavailable (no trial)");
+// 19/20. Purchase/restore wiring unchanged.
+has(modal, "onPurchase(selected)", "purchase handler still wired to the selected package");
+has(modal, "onRestore", "restore handler still wired");
+// The modal delegates ALL copy to the pure helper (behavioral leak-proofing is Part A, above —
+// no fragile source-text matching of rendered strings, which would false-match code comments).
+has(modal, "resolvePlanCopy", "modal consumes the pure resolvePlanCopy helper");
+has(modal, "selectedCopy.detailText", "CTA supporting line comes from the helper, not re-derived");
+has(modal, "copy.isTrial", "plan-card trial styling comes from the helper's resolved state");
+
+console.log(`\nPaywall-copy self-test: ${pass} passed, ${fail} failed.`);
+process.exit(fail === 0 ? 0 : 1);
