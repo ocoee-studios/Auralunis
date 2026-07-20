@@ -6,11 +6,34 @@ import {
   getAstroPhotoScenario
 } from "@/features/aura-pro/AstrophotographyPredictorService";
 import type { AstroPhotoScenario } from "@/features/aura-pro/AuraProUtilityTypes";
+import { useEntitlement } from "@/hooks/useEntitlement";
+import { usePaywallNavigation } from "@/context/PaywallNavigationContext";
 
 export function AstrophotographyPredictorPanel() {
+  const { isPremium } = useEntitlement();
+  const { openPaywall } = usePaywallNavigation();
   const [scenarioId, setScenarioId] =
     useState<AstroPhotoScenario["id"]>("suburban");
   const scenario = getAstroPhotoScenario(scenarioId);
+
+  // Entitlement guard (defense-in-depth): this Aura Pro panel is premium. A non-entitled user
+  // sees a locked teaser (never the predictor model / scenarios); Unlock opens the paywall.
+  if (!isPremium) {
+    return (
+      <View style={styles.panel}>
+        <Text style={styles.eyebrow}>AURA PRO · NIGHT PLANNER</Text>
+        <Text style={styles.title}>Light Pollution + AstroPhoto Predictor</Text>
+        <Text style={styles.gateBadge}>PREMIUM FEATURE</Text>
+        <Text style={styles.copy}>
+          A localized planning model for sky darkness, clouds, Moon brightness, visibility, and
+          recommended targets. Unlock Premium to run the predictor.
+        </Text>
+        <Pressable style={styles.unlockBtn} onPress={openPaywall}>
+          <Text style={styles.unlockText}>✦ Unlock Premium</Text>
+        </Pressable>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.panel}>
@@ -87,6 +110,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "rgba(98,207,255,0.18)"
   },
+  gateBadge: { color: AuraLunisColors.gold, fontSize: 11, fontWeight: "800", letterSpacing: 2, textTransform: "uppercase", marginTop: 8, marginBottom: 4 },
+  unlockBtn: { backgroundColor: AuraLunisColors.gold, borderRadius: 14, paddingVertical: 12, paddingHorizontal: 24, alignItems: "center", alignSelf: "flex-start", marginTop: 12 },
+  unlockText: { color: AuraLunisColors.cosmicBlack, fontWeight: "900", fontSize: 14 },
   eyebrow: {
     color: AuraLunisColors.gold2,
     fontSize: 10,
