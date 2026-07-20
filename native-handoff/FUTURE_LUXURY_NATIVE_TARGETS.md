@@ -1,3 +1,7 @@
+> ⚠️ Historical document
+>
+> This file is retained for historical context only. Product, pricing, navigation, entitlement, camera/AR, Watch/watchOS, and architecture details may be obsolete. Use `CLAUDE.md` and the current merged code as the active source of truth.
+
 # AuraLunis Future Luxury Native Targets
 
 ## Desk Obelisk

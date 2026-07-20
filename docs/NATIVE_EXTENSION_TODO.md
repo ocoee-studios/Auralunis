@@ -1,3 +1,7 @@
+> ⚠️ Historical document
+>
+> This file is retained for historical context only. Product, pricing, navigation, entitlement, camera/AR, Watch/watchOS, and architecture details may be obsolete. Use `CLAUDE.md` and the current merged code as the active source of truth.
+
 # Native Extension Targets TODO
 
 These are post-v1 targets. Swift scaffold files exist in the original handoff

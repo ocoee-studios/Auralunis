@@ -1,3 +1,7 @@
+> ⚠️ Historical document
+>
+> This file is retained for historical context only. Product, pricing, navigation, entitlement, camera/AR, Watch/watchOS, and architecture details may be obsolete. Use `CLAUDE.md` and the current merged code as the active source of truth.
+
 # AuraLunis — Claude Build Session Notes
 
 > **Purpose:** Running record of every feature, service, and architectural decision made during AI-assisted development sessions. Updated after each major session. Use this to orient any new AI agent or developer picking up the project.

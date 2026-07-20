@@ -1,3 +1,7 @@
+> ⚠️ Historical document
+>
+> This file is retained for historical context only. Product, pricing, navigation, entitlement, camera/AR, Watch/watchOS, and architecture details may be obsolete. Use `CLAUDE.md` and the current merged code as the active source of truth.
+
 > ## ⛔ BRANCH PROTOCOL — READ FIRST (every agent: Claude, Gemini, ChatGPT, all)
 >
 > **NEVER commit or push directly to `main`.** Multiple AIs edit this repo in
