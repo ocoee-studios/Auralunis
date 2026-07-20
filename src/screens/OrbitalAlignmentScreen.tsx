@@ -61,6 +61,7 @@ function modeTint(mode: TrackingMode): { color: string; opacity: number } | null
 import { RadarTutorial } from "@/features/onboarding/RadarTutorial";
 import { LockShareCard, type LockShareData } from "@/components/LockShareCard";
 import { isModeGated, FREE_DRIFT_EVENT_LIMIT, type TrackingMode } from "@/features/paywall/MonetizationCatalog";
+import { LOCK_SHARE_MODES, shouldPresentLockShareCard } from "@/screens/telemetryLockShare";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { PremiumModeGate } from "@/components/PremiumModeGate";
 
@@ -337,25 +338,30 @@ export function OrbitalAlignmentScreen() {
   // recorded target is current rather than a stale closure.
   useEffect(() => {
     const justLocked = isLocked && !wasLockedRef.current;
-    if (justLocked && ["fleet","deep-space","train","debris","reentry"].includes(mode)) {
+    if (justLocked && LOCK_SHARE_MODES.includes(mode)) {
       const type = mode === "fleet" ? "satellite" : mode === "deep-space" ? "planet" : "satellite";
       recordLock({ targetId: activeName, targetName: activeName, targetType: type, targetColor: activeColor, observerLat: location.latitudeDegrees, observerLon: location.longitudeDegrees, azimuth: activeAzimuth, elevation: activeElevation, altitudeKm: activeAltKm, isPremium })
         .then(() => setDriftRefresh(n => n + 1)).catch(() => {});
 
-      // Show share card on lock
-      setLockShareData({
-        targetName: activeName,
-        targetColor: activeColor,
-        targetType: type,
-        alignmentScore: activeScore,
-        azimuth: activeAzimuth,
-        elevation: activeElevation,
-        altitudeKm: activeAltKm,
-        observerLat: location.latitudeDegrees,
-        observerLon: location.longitudeDegrees,
-        locationLabel: simMode ? "Demo Location" : "Your Location",
-        timestamp: new Date().toISOString(),
-      });
+      // Show share card on lock — but NEVER during Simulation Mode. The demo sweep produces
+      // continuous automatic locks; each would mount the full-screen LockShareCard overlay,
+      // which intercepts every touch and traps the Telemetry controls (mode switch, Unlock
+      // Premium, Sim-exit). Real-device/non-simulation locks are unaffected.
+      if (shouldPresentLockShareCard(mode, simMode)) {
+        setLockShareData({
+          targetName: activeName,
+          targetColor: activeColor,
+          targetType: type,
+          alignmentScore: activeScore,
+          azimuth: activeAzimuth,
+          elevation: activeElevation,
+          altitudeKm: activeAltKm,
+          observerLat: location.latitudeDegrees,
+          observerLon: location.longitudeDegrees,
+          locationLabel: "Your Location",
+          timestamp: new Date().toISOString(),
+        });
+      }
     }
     if (justLocked && mode === "chain") {
       advanceChain();
