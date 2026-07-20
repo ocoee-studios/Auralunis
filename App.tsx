@@ -36,6 +36,7 @@ import { configureNotificationHandler } from "@/services/NotificationService";
 import { trackPaywallEvent } from "@/services/AnalyticsService";
 import { useAuraLunisFonts } from "@/theme/useFonts";
 import { PaywallNavigationProvider, usePaywallNavigation } from "@/context/PaywallNavigationContext";
+import { relayPaywallRequest } from "@/context/paywallRelay";
 import { EntitlementProvider, refreshEntitlement } from "@/context/EntitlementContext";
 import { recordSession } from "@/services/ReviewPromptService";
 
@@ -44,9 +45,15 @@ const ONBOARDING_SEEN_KEY = "auralunis.onboarding.seen";
 // Bridges the global PaywallNavigationContext to App.tsx's local paywallVisible state.
 // Mounted inside PaywallNavigationProvider so it can read the context.
 function PaywallBridge({ onOpen }: { onOpen: () => void }) {
-  const { isPaywallVisible } = usePaywallNavigation();
+  const { isPaywallVisible, closePaywall } = usePaywallNavigation();
   React.useEffect(() => {
-    if (isPaywallVisible) onOpen();
+    // Treat isPaywallVisible as a one-shot open REQUEST: open the modal, then immediately clear
+    // the request so a later openPaywall() from any caller re-fires (previously the flag stuck at
+    // true and only the first open per session worked). The `if (openModal)` guard means the
+    // clear (true→false) never re-opens. App's local `paywallVisible` remains the visibility source.
+    const { openModal, clearRequest } = relayPaywallRequest(isPaywallVisible);
+    if (openModal) onOpen();
+    if (clearRequest) closePaywall();
   }, [isPaywallVisible]);
   return null;
 }
