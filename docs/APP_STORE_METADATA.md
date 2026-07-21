@@ -89,7 +89,7 @@ Subscription: AuraLunis Premium (single entitlement)
 - Monthly: $9.99/month (com.ocoeestudios.auralunis.premium.monthly)
 - Annual:  $49.99/year (com.ocoeestudios.auralunis.premium.annual)
 - Lifetime: $129.99 one-time (com.ocoeestudios.auralunis.lifetime)
-- No free trial is offered on any plan.
+- Monthly and annual subscriptions may include a 7-day introductory free trial for eligible customers, as determined by Apple; ineligible customers see the standard price. Lifetime has no trial.
 
 No login required. Location permission is optional but recommended.
 Demo credentials: N/A (no account system).
