@@ -16,7 +16,7 @@
 ### Auto-renewable disclosures (required on paywall)
 The paywall must clearly state:
 - [x] Price per billing period ($9.99/month or $49.99/year)
-- [x] No free trial is offered on any plan
+- [x] Trial is eligibility-gated: monthly/annual may include a 7-day introductory free trial for eligible customers (Apple-determined); lifetime has no trial
 - [x] "Payment will be charged to your Apple ID account at the confirmation of purchase"
 - [x] "Subscription automatically renews unless cancelled at least 24 hours before the end of the current period"
 - [x] Links to Terms of Use and Privacy Policy
@@ -47,7 +47,7 @@ The paywall must clearly state:
 `default` — contains packages `premium_monthly`, `premium_annual`, and `$rc_lifetime`.
 
 ## Free trial
-None. No introductory free trial is offered on any plan.
+Monthly and annual subscriptions may include a 7-day introductory free trial for eligible customers only; eligibility is determined by Apple, so not every customer receives it. Lifetime is a one-time purchase with no trial.
 Configure in App Store Connect → In-App Purchases → each product → Introductory Offer.
 
 ## Sandbox testing

@@ -147,9 +147,11 @@ motion sensors (to determine which direction the phone is pointing).
 No account creation is required. No user data is transmitted to our
 servers. Subscription management is handled by RevenueCat/Apple.
 
-Premium features can be tested with a Sandbox Apple ID. No free trial
-is offered on any plan. Sky Lens includes a Simulation Mode for testing
-without live sensors (see public review notes).
+Premium features can be tested with a Sandbox Apple ID. Monthly and annual
+subscriptions may include a 7-day introductory free trial for eligible
+customers only; eligibility is determined by Apple, and ineligible customers
+see the standard subscription price. Lifetime has no trial. Sky Lens includes
+a Simulation Mode for testing without live sensors (see public review notes).
 
 Contact: admin@ocoeestudios.com
 ```
@@ -164,7 +166,7 @@ Contact: admin@ocoeestudios.com
 
 Subscription Group: `AuraLunis Premium`
 Entitlement identifier (RevenueCat): `AuraLunis Premium` (exact — space + capitals)
-Free trial: none (no introductory offer on any plan)
+Introductory offer: 7-day free trial on monthly and annual subscriptions for eligible customers only. Eligibility is determined by Apple. Lifetime is a one-time purchase with no trial.
 
 > The Lifetime product ID is `com.ocoeestudios.auralunis.lifetime` (the old
 > `...lifetime.founders` product was deleted in ASC and recreated without the
